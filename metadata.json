@@ -1,0 +1,12 @@
+{
+  "name": "Miriam Campos Photography",
+  "description": "An award-winning level portfolio and administrative suite for Miriam Campos Photography, featuring live booking systems, proofing galleries, and full CMS capabilities.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

@@ -1,0 +1,62 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Photographs
+    match /photographs/{photoId} {
+      allow read: if true;
+      allow write: if isValidId(photoId);
+    }
+
+    // Services
+    match /services/{serviceId} {
+      allow read: if true;
+      allow write: if isValidId(serviceId);
+    }
+
+    // Testimonials
+    match /testimonials/{testimonialId} {
+      allow read: if true;
+      allow write: if isValidId(testimonialId);
+    }
+
+    // Blog Posts
+    match /blogPosts/{postId} {
+      allow read: if true;
+      allow write: if isValidId(postId);
+    }
+
+    // FAQs
+    match /faqs/{faqId} {
+      allow read: if true;
+      allow write: if isValidId(faqId);
+    }
+
+    // Bookings
+    match /bookings/{bookingId} {
+      allow read: if true; // Allowed so both clients and admin dashboard can fetch bookings
+      allow write: if isValidId(bookingId);
+    }
+
+    // Contact Messages
+    match /messages/{messageId} {
+      allow read: if true; // Allowed so admin dashboard can review them
+      allow write: if isValidId(messageId);
+    }
+
+    // SEO Metadata
+    match /seo/{docId} {
+      allow read: if true;
+      allow write: if isValidId(docId);
+    }
+  }
+}
