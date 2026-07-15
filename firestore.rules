@@ -58,5 +58,41 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isValidId(docId);
     }
+
+    // Admin credentials (CMS login)
+    match /admin/{docId} {
+      allow read: if true;
+      allow write: if isValidId(docId);
+    }
+
+    // Analytics dashboard stats
+    match /analytics/{docId} {
+      allow read: if true;
+      allow write: if isValidId(docId);
+    }
+
+    // Photographer profile
+    match /profile/{docId} {
+      allow read: if true;
+      allow write: if isValidId(docId);
+    }
+
+    // Booking configuration
+    match /bookingConfig/{docId} {
+      allow read: if true;
+      allow write: if isValidId(docId);
+    }
+
+    // EmailJS configuration
+    match /emailConfig/{docId} {
+      allow read: if true;
+      allow write: if isValidId(docId);
+    }
+
+    // Client accounts (proofing portal)
+    match /clientAccounts/{clientId} {
+      allow read: if true;
+      allow write: if isValidId(clientId);
+    }
   }
 }
