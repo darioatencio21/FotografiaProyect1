@@ -53,9 +53,9 @@ El proyecto está diseñado para desplegarse en Firebase Hosting con Firestore c
 | Animaciones         | Motion (ex Framer Motion)           | 12      |
 | Iconos              | Lucide React                        | 0.546   |
 | Base de datos       | Firebase Firestore                  | —       |
-| Hosting             | Firebase Hosting                    | —       |
+| Hosting             | Vercel                              | —       |
 | Email               | EmailJS                             | —       |
-| CI/CD               | GitHub Actions                      | —       |
+| CI/CD               | Vercel (automatico desde GitHub)    | —       |
 
 ---
 
@@ -222,27 +222,40 @@ App.tsx State + localStorage (caché offline)
 
 ## Despliegue
 
-El proyecto está configurado para desplegarse en **Firebase Hosting** con **GitHub Actions** como CI/CD.
+El proyecto está configurado para desplegarse en **Vercel** con deploy automático desde GitHub.
 
-### Manual
+### Deploy automático
+
+Conectá el repositorio en [vercel.com/import](https://vercel.com/import). Vercel detecta automáticamente Vite y aplica la configuración de `vercel.json`:
+
+- **Build**: `npm run build`
+- **Output**: `dist/`
+- **SPA rewrites**: Todas las rutas redirigen a `index.html`
+
+Cada push a `main` dispara un deploy automático.
+
+### Variables de entorno en Vercel
+
+Agregá estas en el dashboard (Project Settings → Environment Variables):
+
+```
+VITE_FIREBASE_API_KEY
+VITE_FIREBASE_AUTH_DOMAIN
+VITE_FIREBASE_PROJECT_ID
+VITE_FIREBASE_STORAGE_BUCKET
+VITE_FIREBASE_MESSAGING_SENDER_ID
+VITE_FIREBASE_APP_ID
+VITE_FIREBASE_DATABASE_ID
+GEMINI_API_KEY (opcional)
+APP_URL=https://tu-app.vercel.app
+```
+
+### Deploy manual
 
 ```bash
 npm run build
-firebase deploy
+vercel --prod
 ```
-
-### Automático (CI/CD)
-
-- **Rama `main` / `master`**: Al hacer push, se ejecuta el workflow `firebase-hosting-merge.yml` que construye y despliega automáticamente a producción.
-- **Pull Requests**: Se despliega una preview del sitio para validación mediante `firebase-hosting-pull-request.yml`.
-
-### Infrastructure
-
-| Recurso            | ID / Configuración                        |
-| ------------------ | ----------------------------------------- |
-| Firebase Project   | `khaki-bedrock-r40ks`                     |
-| Firestore Database | `ai-studio-miriamcamposphot-f727aa8e-...` |
-| Hosting            | `dist/` con SPA rewrites a `index.html`   |
 
 ---
 
