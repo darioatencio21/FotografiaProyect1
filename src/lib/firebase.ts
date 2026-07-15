@@ -1,8 +1,4 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
+/// <reference types="vite/client" />
 import { initializeApp } from 'firebase/app';
 import { 
   getFirestore, 
@@ -14,23 +10,22 @@ import {
   deleteDoc,
   writeBatch
 } from 'firebase/firestore';
-import config from '../../firebase-applet-config.json';
 
 const firebaseConfig = {
-  apiKey: config.apiKey,
-  authDomain: config.authDomain,
-  projectId: config.projectId,
-  storageBucket: config.storageBucket,
-  messagingSenderId: config.messagingSenderId,
-  appId: config.appId
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-// Initialize Firebase App
 const app = initializeApp(firebaseConfig);
 
-// Initialize Firestore with custom databaseId if specified
-export const db = config.firestoreDatabaseId && config.firestoreDatabaseId !== '(default)'
-  ? getFirestore(app, config.firestoreDatabaseId)
+const dbId = import.meta.env.VITE_FIREBASE_DATABASE_ID;
+
+export const db = dbId && dbId !== '(default)'
+  ? getFirestore(app, dbId)
   : getFirestore(app);
 
 // Validate Connection to Firestore on boot as requested by skill

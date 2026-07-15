@@ -9,7 +9,6 @@ import {
   Calendar as CalendarIcon, 
   Clock, 
   Users, 
-  FileText, 
   CheckCircle2, 
   DollarSign, 
   Camera, 
@@ -21,6 +20,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { Service, ActiveLanguage, Booking, BookingConfig, EmailConfig } from '../types';
+import { sanitizeString, sanitizeEmail, sanitizePhone } from '../lib/sanitize';
 
 interface BookingCalendarProps {
   services: Service[];
@@ -179,25 +179,29 @@ export default function BookingCalendar({ services, lang, config, emailConfig, o
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!clientName || !clientEmail || !dateValue) return;
+    const safeName = sanitizeString(clientName);
+    const safeEmail = sanitizeEmail(clientEmail);
+    const safePhone = sanitizePhone(clientPhone);
+    const safeNotes = sanitizeString(creativeNotes);
+    const safeCustomService = sanitizeString(customServiceText);
+    const safeCustomTime = sanitizeString(customTimeframeText);
+
+    if (!safeName || !safeEmail || !dateValue) return;
 
     setIsSyncing(true);
 
-    // Build the finalized schedule text
     let finalSchedule = '';
     if (selectedTimeframe === 'morning') finalSchedule = t.morning;
     else if (selectedTimeframe === 'afternoon') finalSchedule = t.afternoon;
     else if (selectedTimeframe === 'goldenHour') finalSchedule = t.goldenHour;
-    else finalSchedule = customTimeframeText ? `Personalizado: ${customTimeframeText}` : t.otherSchedule;
+    else finalSchedule = safeCustomTime ? `Personalizado: ${safeCustomTime}` : t.otherSchedule;
 
-    // Build package name
     const serviceName = selectedServiceId === 'custom' 
-      ? `Personalizado (${customServiceText || 'General'})` 
+      ? `Personalizado (${safeCustomService || 'General'})` 
       : (selectedService?.title || 'Sesión Fotográfica');
 
-    // Build comprehensive notes
     const formattedDate = dateValue;
-    const notesText = creativeNotes + 
+    const notesText = safeNotes + 
            `\n\n[Respuestas del Cuestionario Creativo]` +
            `\n- Paquete elegido: ${serviceName}` +
            `\n- Fecha solicitada: ${formattedDate}` +
@@ -206,28 +210,24 @@ export default function BookingCalendar({ services, lang, config, emailConfig, o
            (expressRetouch ? '\n- Adición: Entrega Express en 48 Horas' : '') + 
            (makeupArtist ? '\n- Adición: Asistente Maquillaje y Estilismo' : '');
 
-    // Try sending EmailJS notification
     if (emailConfig && emailConfig.emailjsServiceId && emailConfig.emailjsTemplateId && emailConfig.emailjsPublicKey) {
       try {
         const emailjs = await import('@emailjs/browser');
 
-        // 1. Notify Photographer (Miriam)
         await emailjs.send(
           emailConfig.emailjsServiceId,
           emailConfig.emailjsTemplateId,
           {
             to_name: 'Miriam Campos',
-            to_email: emailConfig.receiverEmail || clientEmail,
-            from_name: clientName,
-            from_email: clientEmail,
+            to_email: emailConfig.receiverEmail || safeEmail,
+            from_name: safeName,
+            from_email: safeEmail,
             message: notesText,
             booking_details: `Servicio: ${serviceName} - Fecha: ${formattedDate} - Horario: ${finalSchedule} - Personas: ${peopleCount} - Total Estimado: $${totalPrice > 0 ? totalPrice : 'A Definir'}`
           },
           emailConfig.emailjsPublicKey
         );
-        console.log('Real notification email sent to admin successfully via EmailJS!');
 
-        // 2. Client Auto-Responder
         if (emailConfig.enableAutoResponse) {
           const autoTemplateId = emailConfig.emailjsAutoTemplateId || emailConfig.emailjsTemplateId;
           const autoSubject = emailConfig.autoReplySubject || '¡Tu solicitud ha sido recibida con éxito! - Aurea Studio';
@@ -237,13 +237,13 @@ export default function BookingCalendar({ services, lang, config, emailConfig, o
             emailConfig.emailjsServiceId,
             autoTemplateId,
             {
-              to_name: clientName,
-              to_email: clientEmail,
-              client_name: clientName,
-              client_email: clientEmail,
-              email: clientEmail,
-              recipient_email: clientEmail,
-              reply_to: clientEmail,
+              to_name: safeName,
+              to_email: safeEmail,
+              client_name: safeName,
+              client_email: safeEmail,
+              email: safeEmail,
+              recipient_email: safeEmail,
+              reply_to: safeEmail,
               from_name: 'Miriam Campos - Aurea Studio',
               from_email: emailConfig.receiverEmail,
               reply_subject: autoSubject,
@@ -256,7 +256,6 @@ export default function BookingCalendar({ services, lang, config, emailConfig, o
             },
             emailConfig.emailjsPublicKey
           );
-          console.log('Real auto-response email sent to client successfully via EmailJS!');
         }
       } catch (err) {
         console.error('Could not send email notifications via EmailJS:', err);
@@ -267,9 +266,9 @@ export default function BookingCalendar({ services, lang, config, emailConfig, o
     setIsSubmitted(true);
 
     onAddBooking({
-      clientName,
-      clientEmail,
-      clientPhone,
+      clientName: safeName,
+      clientEmail: safeEmail,
+      clientPhone: safePhone,
       date: formattedDate,
       timeSlot: finalSchedule,
       serviceId: selectedServiceId,

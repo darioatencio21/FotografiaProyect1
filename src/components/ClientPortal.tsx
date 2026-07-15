@@ -5,9 +5,10 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ShieldCheck, Heart, Trash2, Printer, Compass, Sparkles, Check, DollarSign, Loader2, ArrowRight, Download, Eye, EyeOff, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { ShieldCheck, Heart, ArrowRight, Download, Eye, EyeOff, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { ActiveLanguage, ClientAccount, ProofPhoto } from '../types';
 import { TRANSLATIONS } from '../data/mockData';
+import { sanitizeString } from '../lib/sanitize';
 
 interface ClientPortalProps {
   lang: ActiveLanguage;
@@ -23,68 +24,20 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
   const [showPasscode, setShowPasscode] = useState(false);
   const [authenticatedClientId, setAuthenticatedClientId] = useState<string | null>(null);
   
-  // Fallback simulated photo shoot data for Sarah Jenkins (Access code: SELECCION2026)
-  const [localProofPhotos, setLocalProofPhotos] = useState<ProofPhoto[]>([
-    {
-      id: 'proof-1',
-      url: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&q=85&w=600',
-      title: 'Pose Editorial Studio A',
-      sharpness: 98,
-      thirdsAlign: 95,
-      emotionScore: 84,
-      isFav: false,
-      printSize: ''
-    },
-    {
-      id: 'proof-2',
-      url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=85&w=600',
-      title: 'Cinematic Profile B',
-      sharpness: 96,
-      thirdsAlign: 88,
-      emotionScore: 92,
-      isFav: true,
-      printSize: ''
-    },
-    {
-      id: 'proof-3',
-      url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=85&w=600',
-      title: 'Candid Lighting Studio C',
-      sharpness: 91,
-      thirdsAlign: 92,
-      emotionScore: 78,
-      isFav: false,
-      printSize: ''
-    },
-    {
-      id: 'proof-4',
-      url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=85&w=600',
-      title: 'Golden Focus D',
-      sharpness: 99,
-      thirdsAlign: 96,
-      emotionScore: 91,
-      isFav: false,
-      printSize: ''
-    }
-  ]);
-
   const [activePhoto, setActivePhoto] = useState<ProofPhoto | null>(null);
-  const [isAIScanning, setIsAIScanning] = useState(false);
-  const [aiScanResult, setAiScanResult] = useState<boolean>(false);
   const [activeFilter, setActiveFilter] = useState<'all' | 'favorites'>('all');
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const t = TRANSLATIONS[lang];
 
-  // Dynamically resolve client account or fallback
   const currentAccount = clientAccounts.find(c => c.id === authenticatedClientId);
-  const proofPhotos = currentAccount ? (currentAccount.photos || []) : localProofPhotos;
+  const proofPhotos = currentAccount ? (currentAccount.photos || []) : [];
 
   const handleAuth = (e: React.FormEvent) => {
     e.preventDefault();
-    const cleanCode = passcode.trim().toUpperCase();
+    const cleanCode = sanitizeString(passcode).toUpperCase();
 
-    // Check custom client accounts from Firebase first
-    const matchedAccount = clientAccounts.find(c => c.passcode.trim().toUpperCase() === cleanCode);
+    const matchedAccount = clientAccounts.find(c => sanitizeString(c.passcode).toUpperCase() === cleanCode);
 
     if (matchedAccount) {
       setAuthenticatedClientId(matchedAccount.id);
@@ -95,11 +48,6 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
       } else {
         setActivePhoto(null);
       }
-    } else if (cleanCode === 'SELECCION2026') {
-      setAuthenticatedClientId(null);
-      setIsAuthenticated(true);
-      setErrorMsg('');
-      setActivePhoto(localProofPhotos[1]);
     } else {
       setErrorMsg(t.proofError);
     }
@@ -113,9 +61,6 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
         photos: updatedPhotos
       } : c);
       onUpdateClientAccounts(updatedAccounts);
-    } else {
-      const updatedPhotos = localProofPhotos.map(p => p.id === id ? { ...p, isFav: !p.isFav } : p);
-      setLocalProofPhotos(updatedPhotos);
     }
 
     if (activePhoto && activePhoto.id === id) {
@@ -131,25 +76,11 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
         photos: updatedPhotos
       } : c);
       onUpdateClientAccounts(updatedAccounts);
-    } else {
-      const updatedPhotos = localProofPhotos.map(p => p.id === id ? { ...p, printSize: size } : p);
-      setLocalProofPhotos(updatedPhotos);
     }
 
     if (activePhoto && activePhoto.id === id) {
       setActivePhoto(prev => prev ? { ...prev, printSize: size } : null);
     }
-  };
-
-  // Simulated AI Analyzer
-  const triggerAIScan = () => {
-    if (!activePhoto) return;
-    setIsAIScanning(true);
-    setAiScanResult(false);
-    setTimeout(() => {
-      setIsAIScanning(false);
-      setAiScanResult(true);
-    }, 2500);
   };
 
   // Pricing for prints
@@ -267,7 +198,7 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
             </form>
 
             <p className="text-[10px] font-mono text-white/65">
-              Access Code for Preview: <strong className="text-white/85">SELECCION2026</strong>
+              Your photographer will provide you with a personalized access code.
             </p>
           </motion.div>
         ) : (
@@ -285,12 +216,12 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                   {lang === 'en' ? 'Client Proof Session' : (lang === 'pt' ? 'Sessão de Provas de Cliente' : 'Sesión de Pruebas de Cliente')}
                 </span>
                 <h3 className="font-serif text-3xl text-white font-semibold mt-1">
-                  {currentAccount ? currentAccount.clientName : 'Sarah Jenkins'}
+                  {currentAccount ? currentAccount.clientName : 'Cliente Verificado'}
                 </h3>
                 <p className="text-xs text-white/75 mt-1 font-sans">
                   {currentAccount 
                     ? `${currentAccount.sessionTitle} • ${currentAccount.sessionDate}`
-                    : 'Gala Shoot • Milan Studio'}
+                    : 'Sesión Fotográfica'}
                 </p>
               </div>
 

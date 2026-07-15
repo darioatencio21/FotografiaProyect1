@@ -901,57 +901,5 @@ export const TRANSLATIONS = {
   }
 };
 
-export const INITIAL_CLIENT_ACCOUNTS: ClientAccount[] = [
-  {
-    id: 'client-sarah',
-    clientName: 'Sarah Jenkins',
-    clientEmail: 'sarah.j@luxurybrands.co',
-    passcode: 'SELECCION2026',
-    sessionDate: '2026-07-22',
-    sessionTitle: 'Sesión Editorial en Estudio A',
-    createdAt: '2026-07-10T12:00:00Z',
-    photos: [
-      {
-        id: 'proof-1',
-        url: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&q=85&w=600',
-        title: 'Pose Editorial Studio A',
-        sharpness: 98,
-        thirdsAlign: 95,
-        emotionScore: 84,
-        isFav: false,
-        printSize: ''
-      },
-      {
-        id: 'proof-2',
-        url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=85&w=600',
-        title: 'Cinematic Profile B',
-        sharpness: 96,
-        thirdsAlign: 88,
-        emotionScore: 92,
-        isFav: true,
-        printSize: ''
-      },
-      {
-        id: 'proof-3',
-        url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=85&w=600',
-        title: 'Candid Lighting Studio C',
-        sharpness: 91,
-        thirdsAlign: 92,
-        emotionScore: 78,
-        isFav: false,
-        printSize: ''
-      },
-      {
-        id: 'proof-4',
-        url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=85&w=600',
-        title: 'Golden Focus D',
-        sharpness: 99,
-        thirdsAlign: 96,
-        emotionScore: 91,
-        isFav: false,
-        printSize: ''
-      }
-    ]
-  }
-];
+export const INITIAL_CLIENT_ACCOUNTS: ClientAccount[] = [];
 

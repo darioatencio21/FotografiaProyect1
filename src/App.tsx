@@ -6,12 +6,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Heart, ArrowRight, Instagram, MessageSquare, MapPin, 
-  Mail, Phone, ShieldCheck, Sparkles, AlertCircle, ChevronDown, BookOpen,
+  Heart, ArrowRight, MessageSquare, MapPin, 
+  Mail, Phone, ShieldCheck, Sparkles, AlertCircle, ChevronDown,
   Eye, EyeOff
 } from 'lucide-react';
 
-// Data and Component Imports
 import { 
   INITIAL_PHOTOGRAPHS, INITIAL_SERVICES, INITIAL_TESTIMONIALS, 
   INITIAL_BLOG_POSTS, INITIAL_FAQS, INITIAL_BOOKINGS, 
@@ -19,7 +18,7 @@ import {
   INITIAL_PROFILE, INITIAL_BOOKING_CONFIG, INITIAL_EMAIL_CONFIG,
   INITIAL_CLIENT_ACCOUNTS
 } from './data/mockData';
-import { Photograph, Service, Testimonial, BlogPost, FAQ, Booking, Message, SEOMetadata, PhotographerProfile, BookingConfig, EmailConfig, ClientAccount } from './types';
+import { Photograph, Service, Testimonial, BlogPost, FAQ, Booking, Message, SEOMetadata, PhotographerProfile, BookingConfig, EmailConfig, ClientAccount, AnalyticsStats } from './types';
 
 import CustomCursor from './components/CustomCursor';
 import Lightbox from './components/Lightbox';
@@ -37,6 +36,7 @@ import {
   saveDocument, 
   deleteDocument 
 } from './lib/firebase';
+import { sanitizeString, sanitizeEmail } from './lib/sanitize';
 
 async function syncCollection<T extends { id: string }>(
   collectionPath: string,
@@ -84,40 +84,39 @@ export default function App() {
   const [currentView, setCurrentView] = useState<string>('home');
   const [lang, setLang] = useState<'es' | 'en' | 'pt'>('es');
   
-  // High-Fidelity Local Database (synced to LocalStorage for full persistence)
   const [photographs, setPhotographs] = useState<Photograph[]>(() => {
     const saved = localStorage.getItem('aurea_photos');
-    return saved ? JSON.parse(saved) : INITIAL_PHOTOGRAPHS;
+    return saved ? JSON.parse(saved) : [];
   });
   
   const [services, setServices] = useState<Service[]>(() => {
     const saved = localStorage.getItem('aurea_services');
-    return saved ? JSON.parse(saved) : INITIAL_SERVICES;
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [testimonials, setTestimonials] = useState<Testimonial[]>(() => {
     const saved = localStorage.getItem('aurea_testimonials');
-    return saved ? JSON.parse(saved) : INITIAL_TESTIMONIALS;
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>(() => {
     const saved = localStorage.getItem('aurea_blog');
-    return saved ? JSON.parse(saved) : INITIAL_BLOG_POSTS;
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [faqs, setFaqs] = useState<FAQ[]>(() => {
     const saved = localStorage.getItem('aurea_faqs');
-    return saved ? JSON.parse(saved) : INITIAL_FAQS;
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [bookings, setBookings] = useState<Booking[]>(() => {
     const saved = localStorage.getItem('aurea_bookings');
-    return saved ? JSON.parse(saved) : INITIAL_BOOKINGS;
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [messages, setMessages] = useState<Message[]>(() => {
     const saved = localStorage.getItem('aurea_messages');
-    return saved ? JSON.parse(saved) : INITIAL_MESSAGES;
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [seo, setSeo] = useState<SEOMetadata>(() => {
@@ -142,7 +141,7 @@ export default function App() {
 
   const [clientAccounts, setClientAccounts] = useState<ClientAccount[]>(() => {
     const saved = localStorage.getItem('aurea_client_accounts');
-    return saved ? JSON.parse(saved) : INITIAL_CLIENT_ACCOUNTS;
+    return saved ? JSON.parse(saved) : [];
   });
 
   // UI Interactive States
@@ -150,7 +149,7 @@ export default function App() {
   const [selectedPhotoForLightbox, setSelectedPhotoForLightbox] = useState<Photograph | null>(null);
   const [favorites, setFavorites] = useState<string[]>(() => {
     const saved = localStorage.getItem('aurea_favorites');
-    return saved ? JSON.parse(saved) : ['photo-1', 'photo-3', 'photo-5'];
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [activeBlogModal, setActiveBlogModal] = useState<BlogPost | null>(null);
@@ -165,6 +164,7 @@ export default function App() {
   const [adminPassword, setAdminPassword] = useState('');
   const [showAdminPassword, setShowAdminPassword] = useState(false);
   const [adminLoginError, setAdminLoginError] = useState('');
+  const [isAdminAuthLoading, setIsAdminAuthLoading] = useState(false);
 
   // Stripe Checkout Integrations
   const [checkoutOpen, setCheckoutOpen] = useState(false);
@@ -183,7 +183,7 @@ export default function App() {
 
   const t = TRANSLATIONS[lang];
 
-  // State to track if Firestore database has initialized and loaded
+  const [seoAnalytics, setSeoAnalytics] = useState<AnalyticsStats>(INITIAL_ANALYTICS);
   const [dbStatusMsg, setDbStatusMsg] = useState<string>('CONECTANDO...');
 
   useEffect(() => {
@@ -240,6 +240,20 @@ export default function App() {
         setProfile(fetchedProfile);
         setBookingConfig(fetchedBookingConfig);
         setEmailConfig(fetchedEmailConfig);
+
+        let fetchedAnalytics = await getSingleDocument<AnalyticsStats>('analytics', 'stats');
+        if (!fetchedAnalytics) {
+          fetchedAnalytics = INITIAL_ANALYTICS;
+          await saveDocument('analytics', 'stats', INITIAL_ANALYTICS);
+        }
+        setSeoAnalytics(fetchedAnalytics);
+
+        const adminDoc = await getSingleDocument<{ username: string }>('admin', 'config');
+        if (!adminDoc) {
+          await saveDocument('admin', 'config', { username: 'admin', password: 'admin123' });
+          console.log('Admin document created with default credentials (admin/admin123). Change the password in Firestore.');
+        }
+
         setDbStatusMsg('CONECTADO');
         localStorage.setItem('aurea_client_accounts', JSON.stringify(fetchedClientAccounts));
       } catch (err) {
@@ -379,17 +393,22 @@ export default function App() {
     }
   };
 
-  // Submit contact message
+  // Submit contact message (inputs sanitized)
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!contactName || !contactEmail || !contactMsg) return;
+    const safeName = sanitizeString(contactName);
+    const safeEmail = sanitizeEmail(contactEmail);
+    const safeSubject = sanitizeString(contactSubject);
+    const safeMsg = sanitizeString(contactMsg);
+
+    if (!safeName || !safeEmail || !safeMsg) return;
 
     const newMessage: Message = {
       id: `msg-${Date.now()}`,
-      name: contactName,
-      email: contactEmail,
-      subject: contactSubject || 'Direct Portfolio Query',
-      message: contactMsg,
+      name: safeName,
+      email: safeEmail,
+      subject: safeSubject || 'Direct Portfolio Query',
+      message: safeMsg,
       createdAt: new Date().toISOString(),
       isRead: false
     };
@@ -405,27 +424,23 @@ export default function App() {
       console.error('Could not save message directly to Firestore:', err);
     }
 
-    // Try to send a real email using EmailJS if configured
     if (emailConfig && emailConfig.emailjsServiceId && emailConfig.emailjsTemplateId && emailConfig.emailjsPublicKey) {
       try {
         const emailjs = await import('@emailjs/browser');
-        // 1. Admin Notification (Notify Miriam of new contact message)
         await emailjs.send(
           emailConfig.emailjsServiceId,
           emailConfig.emailjsTemplateId,
           {
-            to_name: profile.name || 'Miriam Campos',
-            to_email: emailConfig.receiverEmail || contactEmail,
-            from_name: contactName,
-            from_email: contactEmail,
-            message: contactMsg,
-            booking_details: `Mensaje de contacto - Asunto: ${contactSubject || 'Direct Portfolio Query'}`
+            to_name: sanitizeString(profile.name || 'Miriam Campos'),
+            to_email: emailConfig.receiverEmail || safeEmail,
+            from_name: safeName,
+            from_email: safeEmail,
+            message: safeMsg,
+            booking_details: `Mensaje de contacto - Asunto: ${safeSubject || 'Direct Portfolio Query'}`
           },
           emailConfig.emailjsPublicKey
         );
-        console.log('Real contact query email sent to admin successfully via EmailJS!');
 
-        // 2. Client Auto-Responder (Send confirmation reply to client)
         if (emailConfig.enableAutoResponse) {
           const autoTemplateId = emailConfig.emailjsAutoTemplateId || emailConfig.emailjsTemplateId;
           const autoSubject = emailConfig.autoReplySubject || '¡Tu mensaje ha sido recibido! - Aurea Studio';
@@ -435,33 +450,31 @@ export default function App() {
             emailConfig.emailjsServiceId,
             autoTemplateId,
             {
-              to_name: contactName,
-              to_email: contactEmail,
-              client_name: contactName,
-              client_email: contactEmail,
-              email: contactEmail,
-              recipient_email: contactEmail,
-              reply_to: contactEmail,
-              from_name: profile.name || 'Miriam Campos',
+              to_name: safeName,
+              to_email: safeEmail,
+              client_name: safeName,
+              client_email: safeEmail,
+              email: safeEmail,
+              recipient_email: safeEmail,
+              reply_to: safeEmail,
+              from_name: sanitizeString(profile.name || 'Miriam Campos'),
               from_email: emailConfig.receiverEmail,
               reply_subject: autoSubject,
               subject: autoSubject,
               autoReplySubject: autoSubject,
               reply_message: autoMessage,
-              message: autoMessage, // fallback parameter
+              message: autoMessage,
               autoReplyMessage: autoMessage,
-              booking_details: `Contacto recibido: "${contactSubject || 'Consulta General'}"`
+              booking_details: `Contacto recibido: "${safeSubject || 'Consulta General'}"`
             },
             emailConfig.emailjsPublicKey
           );
-          console.log('Real auto-response email sent to contact client successfully via EmailJS!');
         }
       } catch (err) {
         console.error('Could not send contact emails via EmailJS:', err);
       }
     }
 
-    // Reset fields
     setContactName('');
     setContactEmail('');
     setContactSubject('');
@@ -469,18 +482,27 @@ export default function App() {
     setTimeout(() => setContactSuccess(false), 4000);
   };
 
-  // Admin Authorization credentials
-  const handleAdminAuthSubmit = (e: React.FormEvent) => {
+  const handleAdminAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (adminUsername.toLowerCase() === 'admin' && adminPassword === 'admin123') {
-      setIsAdminLoggedIn(true);
-      localStorage.setItem('aurea_admin_logged', 'true');
-      setAdminLoginError('');
-      setShowAdminLogin(false);
-      setCurrentView('admin');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      setAdminLoginError('CREDENTIAL DECLINED. ACCESS PROTECTED.');
+    setIsAdminAuthLoading(true);
+    setAdminLoginError('');
+
+    try {
+      const adminDoc = await getSingleDocument<{ username: string; password: string }>('admin', 'config');
+      if (adminDoc && sanitizeString(adminUsername).toLowerCase() === adminDoc.username.toLowerCase() && adminPassword === adminDoc.password) {
+        setIsAdminLoggedIn(true);
+        localStorage.setItem('aurea_admin_logged', 'true');
+        setAdminLoginError('');
+        setShowAdminLogin(false);
+        setCurrentView('admin');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        setAdminLoginError(adminDoc ? 'CREDENTIAL DECLINED. ACCESS PROTECTED.' : 'ADMIN ACCOUNT NOT FOUND. RUN THE SEED SCRIPT.');
+      }
+    } catch {
+      setAdminLoginError('AUTH SYSTEM UNAVAILABLE. CHECK DATABASE CONNECTION.');
+    } finally {
+      setIsAdminAuthLoading(false);
     }
   };
 
@@ -1189,7 +1211,7 @@ export default function App() {
               profile={profile}
               bookingConfig={bookingConfig}
               emailConfig={emailConfig}
-              stats={INITIAL_ANALYTICS}
+              stats={seoAnalytics}
               lang={lang}
               onUpdatePhotographs={handleUpdatePhotographs}
               onUpdateServices={handleUpdateServices}
@@ -1280,7 +1302,7 @@ export default function App() {
                     value={adminUsername}
                     onChange={(e) => setAdminUsername(e.target.value)}
                     className="w-full bg-dark/60 border border-white/10 rounded p-2.5 text-xs text-white focus:outline-none focus:border-gold-400"
-                    placeholder="admin"
+                    placeholder="Username"
                   />
                 </div>
 
@@ -1293,7 +1315,7 @@ export default function App() {
                       value={adminPassword}
                       onChange={(e) => setAdminPassword(e.target.value)}
                       className="w-full bg-dark/60 border border-white/10 rounded p-2.5 pr-10 text-xs text-white focus:outline-none focus:border-gold-400 font-sans"
-                      placeholder="admin123"
+                      placeholder="••••••••"
                     />
                     <button
                       type="button"
@@ -1323,7 +1345,7 @@ export default function App() {
 
               <div className="text-center">
                 <span className="text-[9px] font-mono text-white/35">
-                  Development credentials: <strong className="text-white/60">admin / admin123</strong>
+                  Contact the studio administrator for credentials.
                 </span>
               </div>
             </motion.div>

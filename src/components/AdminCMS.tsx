@@ -16,6 +16,7 @@ import {
   Message, SEOMetadata, AnalyticsStats, ActiveLanguage, PhotographerProfile, BookingConfig, EmailConfig,
   ClientAccount, ProofPhoto
 } from '../types';
+import { sanitizeString, sanitizeEmail, sanitizeObject } from '../lib/sanitize';
 
 interface AdminCMSProps {
   photographs: Photograph[];
@@ -320,7 +321,8 @@ export default function AdminCMS({
 
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
-    onUpdateProfile(profileForm);
+    const safeProfile = sanitizeObject(profileForm as Record<string, unknown>) as unknown as PhotographerProfile;
+    onUpdateProfile(safeProfile);
     triggerAlert('✓ Biografía y datos de perfil guardados correctamente.');
   };
 
@@ -396,24 +398,27 @@ export default function AdminCMS({
 
   const handleSaveBlog = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!blogForm.title) return;
+    const safeTitle = sanitizeString(blogForm.title || '');
+    if (!safeTitle) return;
+
+    const safeForm = sanitizeObject(blogForm as Record<string, unknown>) as Partial<BlogPost>;
 
     if (blogEditItem) {
-      onUpdateBlogPosts(blogPosts.map(p => p.id === blogEditItem.id ? { ...p, ...blogForm } as BlogPost : p));
+      onUpdateBlogPosts(blogPosts.map(p => p.id === blogEditItem.id ? { ...p, ...safeForm } as BlogPost : p));
       triggerAlert('Journal post modified and updated');
     } else {
       const newPost: BlogPost = {
         id: `blog-${Date.now()}`,
-        title: blogForm.title,
-        excerpt: blogForm.excerpt || '',
-        content: blogForm.content || '',
-        category: blogForm.category || 'General',
-        tags: blogForm.tags || ['Inspiration'],
-        image: blogForm.image || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800',
+        title: safeTitle,
+        excerpt: sanitizeString(safeForm.excerpt || ''),
+        content: sanitizeString(safeForm.content || ''),
+        category: sanitizeString(safeForm.category || 'General'),
+        tags: ['Inspiration'],
+        image: safeForm.image || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800',
         date: new Date().toISOString().split('T')[0],
         readTime: '5 min read',
-        seoKeywords: blogForm.seoKeywords || '',
-        status: blogForm.status || 'draft'
+        seoKeywords: sanitizeString(safeForm.seoKeywords || ''),
+        status: safeForm.status || 'draft'
       };
       onUpdateBlogPosts([newPost, ...blogPosts]);
       triggerAlert('New Journal post created successfully');
@@ -433,6 +438,10 @@ export default function AdminCMS({
     e.preventDefault();
     if (!serviceEditItem || !serviceForm.title) return;
 
+    const safeForm = sanitizeObject(serviceForm as Record<string, unknown>) as Partial<Service>;
+    const safeTitle = sanitizeString(safeForm.title || '');
+    if (!safeTitle) return;
+
     const isExisting = services.some(s => s.id === serviceEditItem.id);
     let updated: Service[];
 
@@ -441,8 +450,9 @@ export default function AdminCMS({
         if (s.id === serviceEditItem.id) {
           return {
             ...s,
-            ...serviceForm,
-            price: Number(serviceForm.price) || 0,
+            ...safeForm,
+            title: safeTitle,
+            price: Number(safeForm.price) || 0,
           } as Service;
         }
         return s;
@@ -450,13 +460,13 @@ export default function AdminCMS({
     } else {
       const newService: Service = {
         id: serviceEditItem.id,
-        title: serviceForm.title,
-        description: serviceForm.description || '',
-        duration: serviceForm.duration || '',
-        includes: serviceForm.includes || [],
-        price: Number(serviceForm.price) || 0,
-        slug: serviceForm.slug || serviceForm.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
-        image: serviceForm.image || 'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?auto=format&fit=crop&q=80&w=800'
+        title: safeTitle,
+        description: sanitizeString(safeForm.description || ''),
+        duration: sanitizeString(safeForm.duration || ''),
+        includes: safeForm.includes || [],
+        price: Number(safeForm.price) || 0,
+        slug: safeForm.slug || safeTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+        image: safeForm.image || 'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?auto=format&fit=crop&q=80&w=800'
       };
       updated = [...services, newService];
     }
@@ -468,11 +478,12 @@ export default function AdminCMS({
   };
 
   const handleAddInclusion = () => {
-    if (!newInclusion.trim()) return;
+    const safeText = sanitizeString(newInclusion);
+    if (!safeText) return;
     const currentInclusions = serviceForm.includes || [];
     setServiceForm({
       ...serviceForm,
-      includes: [...currentInclusions, newInclusion.trim()]
+      includes: [...currentInclusions, safeText]
     });
     setNewInclusion('');
   };
@@ -485,19 +496,24 @@ export default function AdminCMS({
     });
   };
 
-  // Save SEO settings
   const handleSaveSEO = (e: React.FormEvent) => {
     e.preventDefault();
-    onUpdateSeo(seoForm);
+    const safeSeo = sanitizeObject(seoForm as Record<string, unknown>) as unknown as SEOMetadata;
+    onUpdateSeo(safeSeo);
     triggerAlert('SEO Schema, Meta tags and Robots.txt deployed to production');
   };
 
-  // Client Account handlers
   const handleSaveClientAccount = (e: React.FormEvent) => {
     e.preventDefault();
     if (!onUpdateClientAccounts) return;
     
-    if (!clientForm.clientName || !clientForm.clientEmail || !clientForm.passcode) {
+    const safeName = sanitizeString(clientForm.clientName || '');
+    const safeEmail = sanitizeEmail(clientForm.clientEmail || '');
+    const safePasscode = sanitizeString(clientForm.passcode || '');
+    const safeTitle = sanitizeString(clientForm.sessionTitle || '');
+    const safeDate = sanitizeString(clientForm.sessionDate || '');
+
+    if (!safeName || !safeEmail || !safePasscode) {
       triggerAlert(t('Por favor completa los campos requeridos', 'Please fill all required fields'));
       return;
     }
@@ -505,27 +521,25 @@ export default function AdminCMS({
     const currentPhotos = clientForm.photos || [];
 
     if (clientEditItem) {
-      // Edit existing
       const updated = (clientAccounts || []).map(c => c.id === clientEditItem.id ? {
         ...c,
-        clientName: clientForm.clientName,
-        clientEmail: clientForm.clientEmail,
-        passcode: clientForm.passcode,
-        sessionTitle: clientForm.sessionTitle || '',
-        sessionDate: clientForm.sessionDate || '',
+        clientName: safeName,
+        clientEmail: safeEmail,
+        passcode: safePasscode,
+        sessionTitle: safeTitle,
+        sessionDate: safeDate,
         photos: currentPhotos
       } as ClientAccount : c);
       onUpdateClientAccounts(updated);
       triggerAlert(t('✓ Cuenta de cliente actualizada correctamente', '✓ Client account updated successfully'));
     } else {
-      // Create new
       const newClient: ClientAccount = {
         id: `client-${Date.now()}`,
-        clientName: clientForm.clientName,
-        clientEmail: clientForm.clientEmail,
-        passcode: clientForm.passcode,
-        sessionDate: clientForm.sessionDate || new Date().toISOString().split('T')[0],
-        sessionTitle: clientForm.sessionTitle || 'Sesión Fotográfica Privada',
+        clientName: safeName,
+        clientEmail: safeEmail,
+        passcode: safePasscode,
+        sessionDate: safeDate || new Date().toISOString().split('T')[0],
+        sessionTitle: safeTitle || 'Sesión Fotográfica Privada',
         photos: currentPhotos,
         createdAt: new Date().toISOString()
       };
@@ -560,14 +574,16 @@ export default function AdminCMS({
   };
 
   const handleAddProofPhoto = () => {
-    if (!newProofPhotoUrl.trim() || !newProofPhotoTitle.trim()) {
+    const safeUrl = sanitizeString(newProofPhotoUrl);
+    const safeTitle = sanitizeString(newProofPhotoTitle);
+    if (!safeUrl || !safeTitle) {
       triggerAlert(t('Por favor ingresa URL y título de la foto', 'Please enter both photo URL and title'));
       return;
     }
     const newPhoto: ProofPhoto = {
       id: `proof-${Date.now()}`,
-      url: newProofPhotoUrl.trim(),
-      title: newProofPhotoTitle.trim(),
+      url: safeUrl,
+      title: safeTitle,
       sharpness: Number(newProofPhotoSharpness) || 95,
       thirdsAlign: Number(newProofPhotoComposition) || 90,
       emotionScore: Number(newProofPhotoEmotion) || 85,
@@ -2191,15 +2207,15 @@ export default function AdminCMS({
               <button
                 type="button"
                 onClick={async () => {
-                  const trimmedConfig = {
-                    emailjsServiceId: emailForm.emailjsServiceId.trim(),
-                    emailjsTemplateId: emailForm.emailjsTemplateId.trim(),
-                    emailjsPublicKey: emailForm.emailjsPublicKey.trim(),
-                    receiverEmail: emailForm.receiverEmail.trim(),
+                  const trimmedConfig: EmailConfig = {
+                    emailjsServiceId: sanitizeString(emailForm.emailjsServiceId),
+                    emailjsTemplateId: sanitizeString(emailForm.emailjsTemplateId),
+                    emailjsPublicKey: sanitizeString(emailForm.emailjsPublicKey),
+                    receiverEmail: sanitizeEmail(emailForm.receiverEmail),
                     enableAutoResponse: emailForm.enableAutoResponse || false,
-                    emailjsAutoTemplateId: (emailForm.emailjsAutoTemplateId || '').trim(),
-                    autoReplySubject: (emailForm.autoReplySubject || '').trim(),
-                    autoReplyMessage: (emailForm.autoReplyMessage || '')
+                    emailjsAutoTemplateId: sanitizeString(emailForm.emailjsAutoTemplateId || ''),
+                    autoReplySubject: sanitizeString(emailForm.autoReplySubject || ''),
+                    autoReplyMessage: sanitizeString(emailForm.autoReplyMessage || '')
                   };
                   setEmailForm(trimmedConfig);
                   onUpdateEmailConfig(trimmedConfig);
