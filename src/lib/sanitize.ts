@@ -30,6 +30,13 @@ export function sanitizeUrl(input: string): string {
 }
 
 export function sanitizeObject<T extends Record<string, unknown>>(obj: T): T {
+  if (Array.isArray(obj)) {
+    return obj.map(item => {
+      if (typeof item === 'string') return sanitizeString(item);
+      if (typeof item === 'object' && item !== null) return sanitizeObject(item as Record<string, unknown>);
+      return item;
+    }) as unknown as T;
+  }
   const sanitized: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(obj)) {
     if (typeof value === 'string') {
