@@ -117,7 +117,7 @@ export default function Header({
     <motion.header
       animate={{ y: isVisible ? 0 : -120 }}
       transition={{ duration: 0.35, ease: 'easeInOut' }}
-      className={`fixed top-0 inset-x-0 z-40 transition-colors duration-500 ${headerIsSolid ? 'bg-dark/85 backdrop-blur-lg border-b border-white/5' : 'bg-transparent border-b border-transparent'} py-4 px-6 lg:px-12 flex items-center justify-between lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-x-24`}>
+      className={`fixed top-0 inset-x-0 z-40 transition-colors duration-500 max-h-[70px] lg:max-h-none ${headerIsSolid ? 'bg-dark/85 backdrop-blur-lg border-b border-white/5' : 'bg-transparent border-b border-transparent'} py-2 lg:py-4 px-4 lg:px-12 flex items-center justify-between lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-x-24`}>
       {/* Desktop navigation link array - Left split (Home, About, Portfolio) */}
       <nav className="hidden lg:flex items-center space-x-8 z-10 justify-start">
         {menuItems.slice(0, 3).map(item => {
@@ -145,10 +145,10 @@ export default function Header({
       {/* Brand logo (Centered on desktop, naturally left-aligned on mobile) */}
       <div 
         onClick={() => handleNav('home')} 
-        className="flex items-center cursor-pointer group z-20 lg:flex lg:justify-center lg:items-center gap-3 py-1"
+        className="flex items-center cursor-pointer group z-20 lg:flex lg:justify-center lg:items-center gap-2 lg:gap-3 py-0.5 lg:py-1"
       >
-        <Logo size="xs" className="scale-110 lg:scale-125" />
-        <span id="header-logo" className="font-serif text-[10px] sm:text-[11px] lg:text-[13px] font-semibold tracking-[0.25em] text-white group-hover:text-gold-400 transition-colors duration-500 whitespace-nowrap uppercase">
+        <Logo size="xs" className="[&>svg]:h-8 [&>svg]:w-8 lg:[&>svg]:h-10 lg:[&>svg]:w-10" />
+        <span id="header-logo" className="font-serif text-clamp-sm lg:text-[13px] font-semibold tracking-[0.2em] lg:tracking-[0.25em] text-white group-hover:text-gold-400 transition-colors duration-500 whitespace-nowrap uppercase">
           Miriam Campos
         </span>
       </div>
@@ -254,25 +254,25 @@ export default function Header({
       </div>
 
       {/* Mobile Burger triggers */}
-      <div className="lg:hidden flex items-center space-x-4">
-        {/* Languages inline selector */}
-        <div className="flex space-x-2">
-          {languages.map(item => (
-            <button
-              key={item.code}
-              onClick={() => onSetLang(item.code)}
-              className={`text-[9px] font-mono p-1 rounded ${
-                lang === item.code ? 'text-gold-400 font-bold underline' : 'text-white/40'
-              }`}
-            >
-              {item.name}
-            </button>
-          ))}
-        </div>
+      <div className="lg:hidden flex items-center space-x-2">
+        <button
+          onClick={() => {
+            setIsMobileMenuOpen(false);
+            if (isAdminLoggedIn) {
+              onSetView('admin');
+            } else {
+              onOpenAdminLogin();
+            }
+          }}
+          className="px-3 py-1.5 border border-white/15 text-white/70 hover:text-gold-300 rounded-full text-[8px] font-mono tracking-widest uppercase transition-all"
+        >
+          <User size={10} className="inline-block mr-1" />
+          <span>{isAdminLoggedIn ? 'CMS' : 'Staff'}</span>
+        </button>
 
         <button 
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="text-white/80 p-1 hover:text-white"
+          className="text-white/80 p-1.5 hover:text-white"
         >
           {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
@@ -282,7 +282,7 @@ export default function Header({
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            className="fixed inset-0 top-[56px] bg-dark/95 backdrop-blur-md z-30 lg:hidden flex flex-col justify-between p-6 text-left"
+            className="fixed inset-0 top-[70px] bg-dark/95 backdrop-blur-md z-30 lg:hidden flex flex-col justify-between p-6 text-left"
             initial={{ opacity: 0, x: '100%' }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: '100%' }}
@@ -295,7 +295,7 @@ export default function Header({
                   <button
                     key={item.id}
                     onClick={() => handleNav(item.id)}
-                    className={`block w-full text-left font-serif text-2xl tracking-wide border-b border-white/5 pb-2 ${
+                    className={`block w-full text-left font-serif text-xl sm:text-2xl tracking-wide border-b border-white/5 pb-2 ${
                       isActive ? 'text-gold-400 font-bold' : 'text-white/95'
                     }`}
                   >
@@ -305,24 +305,22 @@ export default function Header({
               })}
             </div>
 
-            <div className="space-y-4 pb-12">
-              <button
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  if (isAdminLoggedIn) {
-                    onSetView('admin');
-                  } else {
-                    onOpenAdminLogin();
-                  }
-                }}
-                className="w-full py-3 border border-white/15 text-white/80 hover:text-gold-300 rounded-lg text-xs font-mono tracking-widest uppercase transition-all flex items-center justify-center space-x-1.5"
-              >
-                <User size={12} />
-                <span>{isAdminLoggedIn ? 'Backoffice CMS' : 'Staff Login'}</span>
-              </button>
-
+            <div className="space-y-4 pb-8">
+              <div className="flex items-center justify-center space-x-3 pb-4">
+                {languages.map(item => (
+                  <button
+                    key={item.code}
+                    onClick={() => onSetLang(item.code)}
+                    className={`text-[9px] font-mono px-2 py-1 rounded ${
+                      lang === item.code ? 'text-gold-400 font-bold underline' : 'text-white/40'
+                    }`}
+                  >
+                    {item.name}
+                  </button>
+                ))}
+              </div>
               <div className="text-center flex flex-col items-center justify-center pt-2">
-                <Logo size="xs" className="mb-2 opacity-60" />
+                <Logo size="xs" className="mb-2 opacity-60 [&>svg]:h-10 [&>svg]:w-10" />
                 <span className="font-serif text-[9px] font-bold tracking-[0.2em] text-white/30 uppercase">
                   Miriam Campos Photography
                 </span>

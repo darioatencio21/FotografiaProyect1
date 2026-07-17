@@ -693,7 +693,7 @@ export default function App() {
 
       {/* Full-width hero outside max-w-7xl container */}
       {currentView === 'home' && (
-        <section className="relative h-screen w-screen overflow-hidden">
+        <section className="relative h-dvh w-screen overflow-hidden">
           {/* Mobile: single image */}
           <div className="absolute inset-0 z-0 md:hidden overflow-hidden">
             <motion.div
@@ -752,13 +752,13 @@ export default function App() {
           <div className="absolute inset-y-[15%] left-1/2 w-px bg-white/10 z-20 hidden md:block" />
 
           {/* Central content overlay */}
-          <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
-            <div className="text-center max-w-2xl mx-auto px-6 pointer-events-auto">
+          <div className="absolute inset-0 z-20 flex flex-col justify-center pt-[70px] lg:pt-0 pointer-events-none">
+            <div className="text-center max-w-2xl mx-auto px-4 sm:px-6 pointer-events-auto">
               <motion.h1
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-                className="font-serif text-4xl sm:text-5xl md:text-7xl lg:text-8xl leading-[1.15] tracking-wide text-white"
+                className="font-serif text-[clamp(1.5rem,7.5vw,4rem)] sm:text-[clamp(1.75rem,6vw,4.5rem)] md:text-[clamp(2.5rem,5vw,5rem)] lg:text-[clamp(3rem,4.5vw,5.5rem)] leading-[1.15] tracking-wide text-white"
               >
                 <span className="italic">{t.heroTitle.split(',')[0]},</span>
                 <br />
@@ -772,7 +772,7 @@ export default function App() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-                className="text-[10px] sm:text-[11px] md:text-xs text-white/70 max-w-lg mx-auto leading-relaxed tracking-wider font-light mt-6 md:mt-10"
+                className="text-[clamp(8px,2.5vw,12px)] text-white/70 max-w-lg mx-auto leading-relaxed tracking-wider font-light mt-4 md:mt-10 px-2"
               >
                 {t.heroSubtitle}
               </motion.p>
@@ -781,11 +781,11 @@ export default function App() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.35 }}
-                className="flex flex-wrap items-center justify-center gap-3 md:gap-4 mt-8 md:mt-12"
+                className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-4 mt-5 md:mt-12"
               >
                 <button
                   onClick={() => setCurrentView('portfolio')}
-                  className="px-6 md:px-7 py-2.5 md:py-3 bg-white text-dark hover:bg-gold-400 font-mono text-[9px] md:text-[10px] tracking-widest uppercase font-semibold transition-all duration-300 cursor-pointer"
+                  className="px-4 sm:px-6 md:px-7 py-2 md:py-3 bg-white text-dark hover:bg-gold-400 font-mono text-[clamp(7px,2vw,10px)] tracking-widest uppercase font-semibold transition-all duration-300 cursor-pointer whitespace-nowrap"
                 >
                   {t.ctaPortfolio}
                 </button>
@@ -797,7 +797,7 @@ export default function App() {
                       if (element) element.scrollIntoView({ behavior: 'smooth' });
                     }, 200);
                   }}
-                  className="px-6 md:px-7 py-2.5 md:py-3 border border-white/40 text-white hover:border-white font-mono text-[9px] md:text-[10px] tracking-widest uppercase font-semibold transition-all duration-300 cursor-pointer bg-transparent"
+                  className="px-4 sm:px-6 md:px-7 py-2 md:py-3 border border-white/40 text-white hover:border-white font-mono text-[clamp(7px,2vw,10px)] tracking-widest uppercase font-semibold transition-all duration-300 cursor-pointer bg-transparent whitespace-nowrap"
                 >
                   {t.ctaBook}
                 </button>
@@ -810,13 +810,13 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.2 }}
-            className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center space-y-2"
+            className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center space-y-2"
           >
             <span className="text-[7px] font-mono tracking-[0.3em] text-white/30 uppercase">Scroll</span>
             <motion.div
               animate={{ y: [0, 6, 0] }}
               transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-              className="w-px h-8 bg-white/20"
+              className="w-px h-6 sm:h-8 bg-white/20"
             />
           </motion.div>
         </section>
@@ -829,15 +829,15 @@ export default function App() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -15 }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
-          className="pb-24 pt-20 px-6 lg:px-12 max-w-7xl mx-auto space-y-24">
+          className="pb-24 pt-[70px] px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto space-y-12 md:space-y-24">
 
           {/* ======================================================= */}
           {/* HOME SCREEN (content below hero) */}
           {/* ======================================================= */}
           {currentView === 'home' && (
-            <div className="space-y-24">
+            <div className="space-y-12 md:space-y-24">
               {/* Statistics Showcase Ribbon Banner */}
-              <section className="py-12 border-y border-white/10 bg-dark-gray rounded-2xl grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+              <section className="py-8 md:py-12 border-y border-white/10 bg-dark-gray rounded-2xl grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 text-center">
                 <div className="space-y-1">
                   <p className="text-[10px] font-mono tracking-widest text-gold-400 uppercase">{t.sessions}</p>
                   <p className="text-3xl font-mono font-bold text-white">500+</p>

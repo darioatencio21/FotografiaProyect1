@@ -25,14 +25,31 @@
   --color-white: #FAF4F3;
 }
 
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  overflow-x: hidden;
+  width: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
 @layer base {
   body {
     background-color: var(--color-dark);
     color: var(--color-white);
     font-family: var(--font-sans);
     overflow-x: hidden;
+    width: 100%;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
   }
 
   /* Custom high-end scrollbar */
@@ -57,6 +74,16 @@
     color: #FAF4F3;
   }
 }
+
+/* Responsive clamp-based font-size utilities for mobile-first scaling */
+.text-clamp-xs { font-size: clamp(0.5rem, 2.5vw, 0.75rem); }
+.text-clamp-sm { font-size: clamp(0.625rem, 3vw, 0.875rem); }
+.text-clamp-base { font-size: clamp(0.75rem, 3.5vw, 1rem); }
+.text-clamp-lg { font-size: clamp(0.875rem, 4vw, 1.25rem); }
+.text-clamp-xl { font-size: clamp(1rem, 5vw, 1.5rem); }
+
+/* Responsive spacing */
+.section-spacing { padding-top: clamp(2rem, 5vh, 4rem); padding-bottom: clamp(2rem, 5vh, 4rem); }
 
 /* Custom cinematic glow classes and utility animations */
 .text-stroke {
