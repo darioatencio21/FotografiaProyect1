@@ -7,7 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   BarChart3, Camera, Calendar, BookOpen, MessageSquare, HelpCircle, 
-  Settings, LogOut, Check, X, ShieldAlert, Edit, Trash2, Plus, 
+  Settings, LogOut, Check, X, ShieldAlert, Edit, Trash2, Plus, Menu,
   ArrowUpRight, Eye, RefreshCw, UploadCloud, Sliders, FileCode, CheckSquare,
   User, Mail, ChevronDown, ChevronUp, Phone, Users, FileText, ShoppingBag
 } from 'lucide-react';
@@ -61,6 +61,7 @@ export default function AdminCMS({
 }: AdminCMSProps) {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'photos' | 'bookings' | 'services' | 'messages' | 'seo' | 'profile' | 'email_settings' | 'clients' | 'packages'>('dashboard');
   const [expandedBookingId, setExpandedBookingId] = useState<string | null>(null);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   const t = (es: string, en: string, pt: string = en) => {
     if (lang === 'en') return en;
@@ -502,7 +503,7 @@ export default function AdminCMS({
   };
 
   return (
-    <div className="min-h-[85vh] bg-dark-gray rounded-3xl border border-white/5 overflow-hidden grid grid-cols-1 lg:grid-cols-12 text-left shadow-2xl relative">
+    <div className="min-h-dvh bg-dark-gray rounded-3xl border border-white/5 overflow-hidden grid grid-cols-1 lg:grid-cols-12 text-left shadow-2xl relative">
       
       {/* Toast Alert */}
       <AnimatePresence>
@@ -519,8 +520,8 @@ export default function AdminCMS({
         )}
       </AnimatePresence>
 
-      {/* ADMIN NAVIGATION RAIL (Cols 2) */}
-      <div className="lg:col-span-2 border-r border-white/5 bg-dark p-6 flex flex-col justify-between">
+      {/* ADMIN NAVIGATION RAIL (Cols 2) — Desktop only */}
+      <div className="hidden lg:flex lg:col-span-2 border-r border-white/5 bg-dark-gray p-6 flex-col justify-between">
         <div className="space-y-6">
           <div className="flex items-center space-x-2 px-2">
             <Settings className="text-gold-400" size={18} />
@@ -640,8 +641,22 @@ export default function AdminCMS({
       </div>
 
       {/* MAIN ADMIN WORKSPACE WORK AREA (Cols 10) */}
-      <div className="lg:col-span-10 p-6 md:p-8 overflow-y-auto max-h-[85vh]">
+      <div className="lg:col-span-10 lg:p-6 md:p-8 lg:overflow-y-auto lg:max-h-[85vh]">
         
+        {/* MOBILE HEADER — hamburger + title (visible only on < lg) */}
+        <div className="lg:hidden flex items-center justify-between border-b border-white/5 pb-4 mb-6">
+          <div className="flex items-center space-x-2">
+            <Settings className="text-gold-400" size={18} />
+            <span className="font-serif text-sm tracking-widest text-gold-50 font-bold">AUREA CMS</span>
+          </div>
+          <button
+            onClick={() => setMobileSidebarOpen(true)}
+            className="text-white/80 p-2 hover:text-white cursor-pointer"
+          >
+            <Menu size={22} />
+          </button>
+        </div>
+
         {/* DASHBOARD TAB */}
         {activeTab === 'dashboard' && (
           <div className="space-y-6">
@@ -657,7 +672,7 @@ export default function AdminCMS({
 
             {/* Micro Stats Grid */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-dark/40 border border-white/5 rounded-xl p-4 flex flex-col text-left">
+              <div className="bg-charcoal border border-white/5 rounded-xl p-4 flex flex-col text-left">
                 <span className="text-[9px] font-mono text-white/40 uppercase">{t('Ingresos Estimados', 'Estimated Revenue', 'Receita Estimada')}</span>
                 <span className="text-2xl font-mono font-bold text-gold-400 mt-1">${stats.totalRevenue.toLocaleString()}</span>
                 <span className="text-[10px] font-mono text-emerald-400 mt-2 flex items-center space-x-1">
@@ -666,7 +681,7 @@ export default function AdminCMS({
                 </span>
               </div>
 
-              <div className="bg-dark/40 border border-white/5 rounded-xl p-4 flex flex-col text-left">
+              <div className="bg-charcoal border border-white/5 rounded-xl p-4 flex flex-col text-left">
                 <span className="text-[9px] font-mono text-white/40 uppercase">{t('Tasa de Conversión', 'Conversion Rate', 'Taxa de Conversão')}</span>
                 <span className="text-2xl font-mono font-bold text-white mt-1">{stats.bookingConversionRate}%</span>
                 <span className="text-[10px] font-mono text-emerald-400 mt-2 flex items-center space-x-1">
@@ -675,13 +690,13 @@ export default function AdminCMS({
                 </span>
               </div>
 
-              <div className="bg-dark/40 border border-white/5 rounded-xl p-4 flex flex-col text-left">
+              <div className="bg-charcoal border border-white/5 rounded-xl p-4 flex flex-col text-left">
                 <span className="text-[9px] font-mono text-white/40 uppercase">{t('Sesiones Totales', 'Total Sessions', 'Sessões Totais')}</span>
                 <span className="text-2xl font-mono font-bold text-white mt-1">{stats.sessionsCount}</span>
                 <span className="text-[10px] font-mono text-gold-300 mt-2">{t('Capacidad alcanzada para Q3', 'Cap reached for Q3', 'Capacidade máxima atingida para Q3')}</span>
               </div>
 
-              <div className="bg-dark/40 border border-white/5 rounded-xl p-4 flex flex-col text-left">
+              <div className="bg-charcoal border border-white/5 rounded-xl p-4 flex flex-col text-left">
                 <span className="text-[9px] font-mono text-white/40 uppercase">{t('Visitantes Únicos', 'Page Visitors', 'Visitantes Únicos')}</span>
                 <span className="text-2xl font-mono font-bold text-white mt-1">{stats.totalVisits.toLocaleString()}</span>
                 <span className="text-[10px] font-mono text-emerald-400 mt-2 flex items-center space-x-1">
@@ -694,7 +709,7 @@ export default function AdminCMS({
             {/* Bespoke Custom SVG Visual Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Monthly Revenue Chart */}
-              <div className="bg-dark/40 border border-white/5 rounded-2xl p-4">
+              <div className="bg-charcoal border border-white/5 rounded-2xl p-4">
                 <h4 className="text-xs font-mono tracking-widest text-white/60 uppercase mb-4 text-left">Revenue Progression (Last 6 Months)</h4>
                 <div className="h-44 w-full flex items-end justify-between px-4 pb-2 relative">
                   {/* Grid Lines */}
@@ -723,7 +738,7 @@ export default function AdminCMS({
               </div>
 
               {/* Visitors Daily Activity Chart */}
-              <div className="bg-dark/40 border border-white/5 rounded-2xl p-4">
+              <div className="bg-charcoal border border-white/5 rounded-2xl p-4">
                 <h4 className="text-xs font-mono tracking-widest text-white/60 uppercase mb-4 text-left">Traffic Density (Weekly visits)</h4>
                 <div className="h-44 w-full flex items-end justify-between px-4 pb-2 relative">
                   {/* Grid Lines */}
@@ -773,7 +788,7 @@ export default function AdminCMS({
               className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all ${
                 dragActive 
                   ? 'border-gold-400 bg-gold-500/5' 
-                  : 'border-white/10 bg-dark/20 hover:border-white/20'
+                  : 'border-[#D8C0A8] bg-charcoal hover:border-white/20'
               }`}
             >
               <UploadCloud size={36} className="text-gold-400/80 mx-auto mb-3" />
@@ -824,7 +839,7 @@ export default function AdminCMS({
                   <div className="lg:col-span-4 space-y-4">
                     <div className="aspect-[3/2] rounded-xl overflow-hidden border border-white/10 relative">
                       <img src={photoEditItem.url} className="w-full h-full object-cover" />
-                      <span className="absolute bottom-2 left-2 bg-dark/70 border border-white/10 text-[9px] font-mono text-gold-400 px-2 py-0.5 rounded uppercase">
+                      <span className="absolute bottom-2 left-2 bg-overlay/70 border border-white/10 text-[9px] font-mono text-gold-400 px-2 py-0.5 rounded uppercase">
                         {photoEditItem.category}
                       </span>
                     </div>
@@ -851,7 +866,7 @@ export default function AdminCMS({
                           required
                           value={photoEditItem.title}
                           onChange={(e) => setPhotoEditItem({ ...photoEditItem, title: e.target.value })}
-                          className="w-full bg-dark/60 border border-white/10 rounded p-2.5 text-xs text-white focus:outline-none focus:border-gold-400"
+                          className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white focus:outline-none focus:border-gold-400"
                         />
                       </div>
 
@@ -860,7 +875,7 @@ export default function AdminCMS({
                         <select
                           value={photoEditItem.category}
                           onChange={(e) => setPhotoEditItem({ ...photoEditItem, category: e.target.value })}
-                          className="w-full bg-dark/60 border border-white/10 rounded p-2.5 text-xs text-white focus:outline-none focus:border-gold-400"
+                          className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white focus:outline-none focus:border-gold-400"
                         >
                           <option value="retrato">Retrato</option>
                           <option value="boda">Boda</option>
@@ -884,7 +899,7 @@ export default function AdminCMS({
                           ...photoEditItem, 
                           exif: { ...photoEditItem.exif, location: e.target.value } 
                         })}
-                        className="w-full bg-dark/60 border border-white/10 rounded p-2.5 text-xs text-white focus:outline-none focus:border-gold-400"
+                        className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white focus:outline-none focus:border-gold-400"
                       />
                     </div>
 
@@ -895,7 +910,7 @@ export default function AdminCMS({
                         placeholder="Escribe una breve descripción artística de la captura..."
                         value={photoEditItem.description || ''}
                         onChange={(e) => setPhotoEditItem({ ...photoEditItem, description: e.target.value })}
-                        className="w-full bg-dark/60 border border-white/10 rounded p-2.5 text-xs text-white focus:outline-none focus:border-gold-400 font-sans resize-none"
+                        className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white focus:outline-none focus:border-gold-400 font-sans resize-none"
                       />
                     </div>
 
@@ -933,7 +948,7 @@ export default function AdminCMS({
             {/* Photo List Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {photographs.map(photo => (
-                <div key={photo.id} className="bg-dark/40 border border-white/5 rounded-xl overflow-hidden flex flex-col justify-between animate-fadeIn">
+                <div key={photo.id} className="bg-charcoal border border-white/5 rounded-xl overflow-hidden flex flex-col justify-between animate-fadeIn">
                   <div className="relative aspect-[3/2] overflow-hidden">
                     <img src={photo.url} className="w-full h-full object-cover" />
                     <span className="absolute top-2 left-2 bg-dark/75 border border-white/10 px-1.5 py-0.5 text-[8px] font-mono text-gold-400 rounded uppercase tracking-wider">
@@ -994,11 +1009,12 @@ export default function AdminCMS({
               </div>
             </div>
 
-            <div className="border border-white/5 rounded-2xl overflow-hidden bg-dark/20">
+            {/* Desktop table */}
+            <div className="hidden md:block border border-white/5 rounded-2xl overflow-hidden bg-charcoal">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
-                    <tr className="border-b border-white/5 bg-dark/40 text-[10px] font-mono text-white/40 uppercase tracking-widest">
+                    <tr className="border-b border-white/5 bg-charcoal text-[10px] font-mono text-white/40 uppercase tracking-widest">
                       <th className="p-4">{t('Detalles del Cliente', 'Client Detail', 'Detalhes do Cliente')}</th>
                       <th className="p-4">{t('Fecha de Sesión', 'Shooting Date', 'Data da Sessão')}</th>
                       <th className="p-4">{t('Colección / Paquete', 'Package', 'Coleção')}</th>
@@ -1153,7 +1169,7 @@ export default function AdminCMS({
                                     </div>
 
                                     {/* Creative Questionnaire Details */}
-                                    <div className="space-y-3 bg-dark/40 border border-white/5 rounded-xl p-4 flex flex-col justify-between">
+                                    <div className="space-y-3 bg-charcoal border border-white/5 rounded-xl p-4 flex flex-col justify-between">
                                       <div className="space-y-2">
                                         <div className="flex items-center space-x-2 border-b border-white/5 pb-2">
                                           <FileText size={12} className="text-gold-400 shrink-0" />
@@ -1180,6 +1196,111 @@ export default function AdminCMS({
                   </tbody>
                 </table>
               </div>
+            </div>
+
+            {/* Mobile cards */}
+            <div className="block md:hidden space-y-3">
+              {bookings.map(b => {
+                const isExpanded = expandedBookingId === b.id;
+                return (
+                  <div key={b.id} className="border border-white/5 rounded-xl bg-dark-gray p-4 space-y-3">
+                    <div onClick={() => setExpandedBookingId(isExpanded ? null : b.id)} className="cursor-pointer">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2 min-w-0 flex-1">
+                          <span className="text-white/60 shrink-0">
+                            {isExpanded ? <ChevronUp size={16} className="text-gold-400" /> : <ChevronDown size={16} />}
+                          </span>
+                          <div className="min-w-0">
+                            <div className="font-semibold text-white/90 text-sm truncate">{b.clientName}</div>
+                            <div className="text-[10px] text-white/40 font-mono truncate">{b.clientEmail}</div>
+                          </div>
+                        </div>
+                        <span className={`shrink-0 ml-2 px-2 py-0.5 rounded text-[9px] font-mono font-semibold uppercase ${
+                          b.status === 'accepted' 
+                            ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-500/20' 
+                            : b.status === 'pending'
+                            ? 'bg-gold-950/40 text-gold-400 border border-gold-400/20'
+                            : 'bg-red-950/40 text-red-400 border border-red-500/20'
+                        }`}>
+                          {b.status}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 mt-3 text-xs">
+                        <div>
+                          <span className="text-white/40 block text-[9px] uppercase tracking-wider">{t('Fecha', 'Date', 'Data')}</span>
+                          <span className="text-white/90 font-mono">{b.date} · {b.timeSlot}</span>
+                        </div>
+                        <div>
+                          <span className="text-white/40 block text-[9px] uppercase tracking-wider">{t('Paquete', 'Package', 'Pacote')}</span>
+                          <span className="text-white/90 truncate block">{services.find(s=>s.id === b.serviceId)?.title || 'Custom Session'}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between mt-2">
+                        <span className="font-semibold text-gold-300 font-mono text-sm">${b.amount || 1800}</span>
+                      </div>
+                    </div>
+
+                    {/* Action buttons */}
+                    <div className="flex items-center space-x-2 pt-2 border-t border-white/5" onClick={(e) => e.stopPropagation()}>
+                      {b.status === 'pending' ? (
+                        <>
+                          <button
+                            onClick={() => handleBookingStatus(b.id, 'accepted')}
+                            className="flex-1 min-h-[44px] py-2.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-dark border border-emerald-500/20 transition-all cursor-pointer text-xs font-mono uppercase tracking-wider font-semibold flex items-center justify-center space-x-1.5"
+                          >
+                            <Check size={14} />
+                            <span>{t('Aceptar', 'Accept', 'Aceitar')}</span>
+                          </button>
+                          <button
+                            onClick={() => handleBookingStatus(b.id, 'rejected')}
+                            className="flex-1 min-h-[44px] py-2.5 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-dark border border-red-500/20 transition-all cursor-pointer text-xs font-mono uppercase tracking-wider font-semibold flex items-center justify-center space-x-1.5"
+                          >
+                            <X size={14} />
+                            <span>{t('Rechazar', 'Decline', 'Recusar')}</span>
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          onClick={() => handleBookingStatus(b.id, 'pending')}
+                          className="w-full min-h-[44px] py-2.5 rounded-lg bg-white/5 hover:bg-white/10 hover:text-white border border-white/10 text-white/60 transition-all cursor-pointer text-xs font-mono uppercase tracking-wider font-semibold flex items-center justify-center space-x-1.5"
+                        >
+                          <RefreshCw size={14} />
+                          <span>{t('Corregir', 'Correct', 'Corrigir')}</span>
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Expanded details */}
+                    {isExpanded && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="pt-3 border-t border-white/5 space-y-3 text-xs"
+                      >
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-0.5">
+                            <span className="text-white/40 block text-[9px] uppercase tracking-wider">{t('Teléfono:', 'Phone:', 'Telefone:')}</span>
+                            <span className="text-white/90">{b.clientPhone || t('No proporcionado', 'Not provided', 'Não fornecido')}</span>
+                          </div>
+                          <div className="space-y-0.5">
+                            <span className="text-white/40 block text-[9px] uppercase tracking-wider">{t('Personas:', 'People:', 'Pessoas:')}</span>
+                            <span className="text-white/90">{b.peopleCount || 1}</span>
+                          </div>
+                        </div>
+                        <div>
+                          <span className="text-white/40 block text-[9px] uppercase tracking-wider mb-1">{t('Notas:', 'Notes:', 'Notas:')}</span>
+                          <div className="text-white/80 whitespace-pre-wrap leading-relaxed bg-charcoal border border-white/5 rounded-lg p-3">
+                            {b.notes || t('Sin notas adicionales', 'No additional notes', 'Sem notas adicionais')}
+                          </div>
+                        </div>
+                        <div className="text-[10px] text-white/30 italic text-right">
+                          {t('Creada:', 'Created:', 'Criada:')} {b.createdAt ? new Date(b.createdAt).toLocaleString(lang === 'es' ? 'es-ES' : 'en-US') : 'N/A'}
+                        </div>
+                      </motion.div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -1220,7 +1341,7 @@ export default function AdminCMS({
                   key={msg.id} 
                   className={`border rounded-2xl p-5 space-y-3 transition-all text-left relative ${
                     msg.isRead 
-                      ? 'bg-dark/30 border-white/5 opacity-70' 
+                      ? 'bg-dark-gray border-white/5 opacity-70' 
                       : 'bg-gold-500/5 border-gold-400/25 shadow-[0_0_10px_rgba(180,142,67,0.05)]'
                   }`}
                 >
@@ -1243,7 +1364,7 @@ export default function AdminCMS({
                   </div>
 
                   {msg.replyText && (
-                    <div className="bg-white/[0.03] border border-white/5 rounded-xl p-4 space-y-2 text-left mt-2">
+                    <div className="bg-dark-gray border border-white/5 rounded-xl p-4 space-y-2 text-left mt-2">
                       <div className="flex justify-between items-center border-b border-white/5 pb-1.5">
                         <span className="text-[9px] font-mono text-gold-400 uppercase tracking-widest font-semibold flex items-center space-x-1">
                           <span>✓ Respuesta Enviada (Reply Sent)</span>
@@ -1257,7 +1378,7 @@ export default function AdminCMS({
                   )}
 
                   {replyingToId === msg.id && (
-                    <div className="bg-dark/40 border border-gold-400/20 rounded-xl p-4 space-y-3 mt-2 text-left">
+                    <div className="bg-charcoal border border-gold-400/20 rounded-xl p-4 space-y-3 mt-2 text-left">
                       <div className="flex justify-between items-center">
                         <span className="text-[9px] font-mono text-gold-400 uppercase tracking-widest font-semibold">
                           Compose Reply to {msg.name}
@@ -1277,7 +1398,7 @@ export default function AdminCMS({
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
                         placeholder="Escribe tu respuesta profesional aquí o usa la plantilla de arriba..."
-                        className="w-full bg-dark/80 border border-white/10 rounded-lg p-3 text-xs text-white placeholder-white/20 focus:outline-none focus:border-gold-400 font-sans resize-none leading-relaxed"
+                        className="w-full bg-dark-gray border-[#D8C0A8] rounded-lg p-3 text-xs text-white placeholder-white/20 focus:outline-none focus:border-gold-400 font-sans resize-none leading-relaxed"
                       />
                       <p className="text-[10px] font-mono text-white/40 leading-relaxed">
                         📧 <strong>Nota:</strong> Al hacer clic en "Send Reply", la respuesta se guardará en este panel de control y se abrirá tu gestor de correo predeterminado (Gmail, Outlook, Apple Mail, etc.) para que puedas pulsar "Enviar" y entregar el correo real a <strong>{msg.email}</strong>.
@@ -1289,7 +1410,7 @@ export default function AdminCMS({
                             setReplyingToId(null);
                             setReplyText('');
                           }}
-                          className="py-1 px-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded text-[9px] font-mono tracking-widest uppercase transition-all text-white/70"
+                          className="py-1 px-3 bg-charcoal hover:bg-white/10 border border-white/10 rounded text-[9px] font-mono tracking-widest uppercase transition-all text-white/70"
                         >
                           Cancel
                         </button>
@@ -1417,7 +1538,7 @@ export default function AdminCMS({
                         placeholder="Ej: service_xxxxxxx"
                         value={emailForm.emailjsServiceId}
                         onChange={(e) => setEmailForm({ ...emailForm, emailjsServiceId: e.target.value })}
-                        className="w-full bg-dark/60 border border-white/10 rounded p-2.5 text-xs text-white font-mono placeholder-white/20 focus:outline-none focus:border-gold-400"
+                        className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white font-mono placeholder-white/20 focus:outline-none focus:border-gold-400"
                       />
                     </div>
 
@@ -1428,7 +1549,7 @@ export default function AdminCMS({
                         placeholder="Ej: template_xxxxxxx"
                         value={emailForm.emailjsTemplateId}
                         onChange={(e) => setEmailForm({ ...emailForm, emailjsTemplateId: e.target.value })}
-                        className="w-full bg-dark/60 border border-white/10 rounded p-2.5 text-xs text-white font-mono placeholder-white/20 focus:outline-none focus:border-gold-400"
+                        className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white font-mono placeholder-white/20 focus:outline-none focus:border-gold-400"
                       />
                     </div>
 
@@ -1439,7 +1560,7 @@ export default function AdminCMS({
                         placeholder="Ej: xxxxxxxxxxxxxxx"
                         value={emailForm.emailjsPublicKey}
                         onChange={(e) => setEmailForm({ ...emailForm, emailjsPublicKey: e.target.value })}
-                        className="w-full bg-dark/60 border border-white/10 rounded p-2.5 text-xs text-white font-mono placeholder-white/20 focus:outline-none focus:border-gold-400"
+                        className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white font-mono placeholder-white/20 focus:outline-none focus:border-gold-400"
                       />
                     </div>
 
@@ -1450,7 +1571,7 @@ export default function AdminCMS({
                         placeholder="Ej: tu-email@gmail.com"
                         value={emailForm.receiverEmail}
                         onChange={(e) => setEmailForm({ ...emailForm, receiverEmail: e.target.value })}
-                        className="w-full bg-dark/60 border border-white/10 rounded p-2.5 text-xs text-white font-mono placeholder-white/20 focus:outline-none focus:border-gold-400"
+                        className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white font-mono placeholder-white/20 focus:outline-none focus:border-gold-400"
                       />
                     </div>
                   </div>
@@ -1512,7 +1633,7 @@ export default function AdminCMS({
                     </button>
                   </div>
                   
-                  <p className="text-[10px] text-white/50 leading-relaxed font-sans bg-white/[0.02] p-3 rounded-lg border border-white/5 mt-2">
+                  <p className="text-[10px] text-white/50 leading-relaxed font-sans bg-dark-gray p-3 rounded-lg border border-white/5 mt-2">
                     ℹ️ <strong>¿Cómo funciona el envío?</strong> EmailJS es una API invisible que procesa el correo de forma 100% silenciosa en segundo plano. <strong>No te redireccionará a Gmail</strong> ni te pedirá abrir aplicaciones de correo externas al hacer clic; el mensaje se envía directamente a tu casilla destinataria.
                   </p>
                 </div>
@@ -1548,7 +1669,7 @@ export default function AdminCMS({
                           placeholder="Ej: template_auto_reply (Dejar vacío para usar la misma plantilla)"
                           value={emailForm.emailjsAutoTemplateId || ''}
                           onChange={(e) => setEmailForm({ ...emailForm, emailjsAutoTemplateId: e.target.value })}
-                          className="w-full bg-dark/60 border border-white/10 rounded p-2.5 text-xs text-white font-mono placeholder-white/20 focus:outline-none focus:border-gold-400"
+                          className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white font-mono placeholder-white/20 focus:outline-none focus:border-gold-400"
                         />
                         <span className="text-[9px] text-white/30 block leading-tight">
                           Recomendamos usar una plantilla de EmailJS específica para el cliente, donde configures que el destinatario (To Email) sea <code>{"{{to_email}}"}</code> o <code>{"{{client_email}}"}</code>, y uses las variables <code>{"{{reply_subject}}"}</code> y <code>{"{{reply_message}}"}</code> en el cuerpo. Si dejas este campo vacío, se usará la misma plantilla principal de arriba.
@@ -1562,7 +1683,7 @@ export default function AdminCMS({
                           placeholder="Ej: ¡Tu reserva ha sido recibida con éxito! - Aurea Studio"
                           value={emailForm.autoReplySubject || ''}
                           onChange={(e) => setEmailForm({ ...emailForm, autoReplySubject: e.target.value })}
-                          className="w-full bg-dark/60 border border-white/10 rounded p-2.5 text-xs text-white placeholder-white/20 focus:outline-none focus:border-gold-400"
+                          className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white placeholder-white/20 focus:outline-none focus:border-gold-400"
                         />
                       </div>
 
@@ -1573,7 +1694,7 @@ export default function AdminCMS({
                           placeholder="Escribe el mensaje que recibirá el cliente..."
                           value={emailForm.autoReplyMessage || ''}
                           onChange={(e) => setEmailForm({ ...emailForm, autoReplyMessage: e.target.value })}
-                          className="w-full bg-dark/60 border border-white/10 rounded p-2.5 text-xs text-white placeholder-white/20 focus:outline-none focus:border-gold-400 font-sans resize-none"
+                          className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white placeholder-white/20 focus:outline-none focus:border-gold-400 font-sans resize-none"
                         />
                         <span className="text-[9px] text-white/30 block leading-tight">
                           Puedes usar texto plano. Este contenido se enviará en el campo <code>{"{{reply_message}}"}</code> a tu plantilla de EmailJS.
@@ -1762,7 +1883,7 @@ export default function AdminCMS({
 
             {/* Dashboard / Quick Stats Row */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-dark/40 border border-white/5 p-4 rounded-xl flex items-center space-x-4">
+              <div className="bg-charcoal border border-white/5 p-4 rounded-xl flex items-center space-x-4">
                 <div className="p-3 bg-gold-500/10 rounded-lg text-gold-400">
                   <Users size={20} />
                 </div>
@@ -1772,7 +1893,7 @@ export default function AdminCMS({
                 </div>
               </div>
 
-              <div className="bg-dark/40 border border-white/5 p-4 rounded-xl flex items-center space-x-4">
+              <div className="bg-charcoal border border-white/5 p-4 rounded-xl flex items-center space-x-4">
                 <div className="p-3 bg-gold-500/10 rounded-lg text-gold-400">
                   <Camera size={20} />
                 </div>
@@ -1784,7 +1905,7 @@ export default function AdminCMS({
                 </div>
               </div>
 
-              <div className="bg-dark/40 border border-white/5 p-4 rounded-xl flex items-center space-x-4">
+              <div className="bg-charcoal border border-white/5 p-4 rounded-xl flex items-center space-x-4">
                 <div className="p-3 bg-gold-500/10 rounded-lg text-gold-400">
                   <CheckSquare size={20} />
                 </div>
@@ -1826,7 +1947,7 @@ export default function AdminCMS({
                         placeholder={t('Ej: Clara & Mateo', 'E.g. Clara & Mateo')}
                         value={clientForm.clientName || ''}
                         onChange={(e) => setClientForm({ ...clientForm, clientName: e.target.value })}
-                        className="w-full bg-dark/60 border border-white/10 rounded p-2.5 text-xs text-white font-sans focus:outline-none focus:border-gold-400"
+                        className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white font-sans focus:outline-none focus:border-gold-400"
                       />
                     </div>
 
@@ -1838,7 +1959,7 @@ export default function AdminCMS({
                         placeholder="clara@example.com"
                         value={clientForm.clientEmail || ''}
                         onChange={(e) => setClientForm({ ...clientForm, clientEmail: e.target.value })}
-                        className="w-full bg-dark/60 border border-white/10 rounded p-2.5 text-xs text-white font-mono focus:outline-none focus:border-gold-400"
+                        className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white font-mono focus:outline-none focus:border-gold-400"
                       />
                     </div>
 
@@ -1850,7 +1971,7 @@ export default function AdminCMS({
                           placeholder={t('Ej: Boda Civil / Sesión Preboda', 'E.g. Pre-wedding session')}
                           value={clientForm.sessionTitle || ''}
                           onChange={(e) => setClientForm({ ...clientForm, sessionTitle: e.target.value })}
-                          className="w-full bg-dark/60 border border-white/10 rounded p-2.5 text-xs text-white font-sans focus:outline-none focus:border-gold-400"
+                          className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white font-sans focus:outline-none focus:border-gold-400"
                         />
                       </div>
 
@@ -1860,12 +1981,12 @@ export default function AdminCMS({
                           type="date"
                           value={clientForm.sessionDate || ''}
                           onChange={(e) => setClientForm({ ...clientForm, sessionDate: e.target.value })}
-                          className="w-full bg-dark/60 border border-white/10 rounded p-2.5 text-xs text-white font-mono focus:outline-none focus:border-gold-400"
+                          className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white font-mono focus:outline-none focus:border-gold-400"
                         />
                       </div>
                     </div>
 
-                    <div className="space-y-1.5 col-span-1 md:col-span-2 bg-white/5 p-4 rounded-xl border border-white/5 space-y-3">
+                    <div className="space-y-1.5 col-span-1 md:col-span-2 bg-dark-gray p-4 rounded-xl border border-white/5 space-y-3">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <label className="text-[10px] font-mono text-gold-300 uppercase tracking-wider flex items-center space-x-1.5">
                           <CheckSquare size={12} className="text-gold-400" />
@@ -1924,7 +2045,7 @@ export default function AdminCMS({
                           className={`border-2 border-dashed rounded-xl p-8 text-center transition-all flex flex-col items-center justify-center cursor-pointer ${
                             isDragOver 
                               ? 'border-gold-400 bg-gold-400/5 scale-[0.99]' 
-                              : 'border-white/10 bg-dark/40 hover:border-gold-400/55 hover:bg-white/5'
+                              : 'border-[#D8C0A8] bg-charcoal hover:border-gold-400/55 hover:bg-white/5'
                           }`}
                           onClick={() => document.getElementById('client-photo-file-input')?.click()}
                         >
@@ -1958,7 +2079,7 @@ export default function AdminCMS({
                                 placeholder="https://images.unsplash.com/..."
                                 value={newProofPhotoUrl}
                                 onChange={(e) => setNewProofPhotoUrl(e.target.value)}
-                                className="w-full bg-dark/60 border border-white/10 rounded p-2 text-xs text-white font-mono"
+                                className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2 text-xs text-white font-mono"
                               />
                             </div>
                             
@@ -1969,7 +2090,7 @@ export default function AdminCMS({
                                 placeholder="Ej: Retrato Novia"
                                 value={newProofPhotoTitle}
                                 onChange={(e) => setNewProofPhotoTitle(e.target.value)}
-                                className="w-full bg-dark/60 border border-white/10 rounded p-2 text-xs text-white font-sans"
+                                className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2 text-xs text-white font-sans"
                               />
                             </div>
 
@@ -2078,7 +2199,7 @@ export default function AdminCMS({
                                       );
                                       setClientForm({ ...clientForm, photos: updatedPhotos });
                                     }}
-                                    className="w-full bg-dark/60 border border-white/10 rounded p-2 text-xs text-white focus:outline-none focus:border-gold-400"
+                                    className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2 text-xs text-white focus:outline-none focus:border-gold-400"
                                   />
                                 </div>
 
@@ -2094,7 +2215,7 @@ export default function AdminCMS({
                                       );
                                       setClientForm({ ...clientForm, photos: updatedPhotos });
                                     }}
-                                    className="w-full bg-dark/60 border border-white/10 rounded p-2 text-xs text-white focus:outline-none focus:border-gold-400"
+                                    className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2 text-xs text-white focus:outline-none focus:border-gold-400"
                                   />
                                 </div>
 
@@ -2110,7 +2231,7 @@ export default function AdminCMS({
                                       );
                                       setClientForm({ ...clientForm, photos: updatedPhotos });
                                     }}
-                                    className="w-full bg-dark/60 border border-white/10 rounded p-2 text-xs text-white focus:outline-none focus:border-gold-400 resize-none font-sans"
+                                    className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2 text-xs text-white focus:outline-none focus:border-gold-400 resize-none font-sans"
                                   />
                                 </div>
                               </div>
@@ -2156,8 +2277,8 @@ export default function AdminCMS({
             )}
 
             {/* CLIENTS LIST / DIRECTORY */}
-            <div className="bg-dark/40 border border-white/5 rounded-xl overflow-hidden">
-              <div className="p-4 border-b border-white/5 bg-dark/40">
+            <div className="bg-charcoal border border-white/5 rounded-xl overflow-hidden">
+              <div className="p-4 border-b border-white/5 bg-dark-gray">
                 <h3 className="text-xs font-mono text-gold-400 uppercase tracking-wider">
                   {t('Listado de Clientes Activos', 'Active Client Directory')}
                 </h3>
@@ -2242,6 +2363,88 @@ export default function AdminCMS({
           </div>
         )}
       </div>
+
+      {/* MOBILE SIDEBAR DRAWER — slides from left on < lg */}
+      <AnimatePresence>
+        {mobileSidebarOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-overlay/60 z-40 lg:hidden"
+              onClick={() => setMobileSidebarOpen(false)}
+            />
+            <motion.div
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'tween', duration: 0.3 }}
+              className="fixed top-0 left-0 bottom-0 w-72 bg-dark-gray border-r border-white/5 z-50 lg:hidden flex flex-col p-6"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-2">
+                  <Settings className="text-gold-400" size={18} />
+                  <span className="font-serif text-sm tracking-widest text-gold-50 font-bold">AUREA CMS</span>
+                </div>
+                <button
+                  onClick={() => setMobileSidebarOpen(false)}
+                  className="text-white/60 p-1.5 hover:text-white cursor-pointer"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="flex flex-col flex-1 justify-between">
+                <div className="space-y-1.5">
+                  {([
+                    { id: 'dashboard', icon: BarChart3, label: t('Dashboard', 'Dashboard', 'Painel') },
+                    { id: 'photos', icon: Camera, label: t('Fotografías', 'Photographs', 'Fotografias') },
+                    { id: 'bookings', icon: Calendar, label: t('Cola de Reservas', 'Bookings Queue', 'Fila de Reservas') },
+                    { id: 'services', icon: Sliders, label: t('Paquetes Premium', 'Premium Packages', 'Pacotes Premium') },
+                    { id: 'packages', icon: ShoppingBag, label: t('Paquetes Fotográficos', 'Photography Packages', 'Pacotes Fotográficos') },
+                    { id: 'messages', icon: MessageSquare, label: `${t('Bandeja de Entrada', 'Inbox', 'Caixa de Entrada')} (${messages.filter(m=>!m.isRead).length})` },
+                    { id: 'seo', icon: FileCode, label: t('Configuración SEO', 'SEO Schema', 'Configuração SEO') },
+                    { id: 'profile', icon: User, label: t('Biografía y Perfil', 'Biography & Profile', 'Biografia e Perfil') },
+                    { id: 'clients', icon: Users, label: t('Clientes y Galerías', 'Clients & Galleries', 'Clientes e Galerias') },
+                    { id: 'email_settings', icon: Mail, label: t('Configuración de Correo', 'Email Configuration', 'Configuração de E-mail') },
+                  ] as const).map(tab => {
+                    const Icon = tab.icon;
+                    const isActive = activeTab === tab.id;
+                    return (
+                      <button
+                        key={tab.id}
+                        onClick={() => {
+                          setActiveTab(tab.id as typeof activeTab);
+                          setMobileSidebarOpen(false);
+                        }}
+                        className={`w-full text-left min-h-[48px] px-3 py-3 rounded-lg font-mono text-xs uppercase tracking-wider transition-all flex items-center space-x-3 cursor-pointer ${
+                          isActive ? 'bg-gold-500 text-dark font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
+                        }`}
+                      >
+                        <Icon size={16} />
+                        <span>{tab.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <button
+                  onClick={() => {
+                    setMobileSidebarOpen(false);
+                    onLogout();
+                  }}
+                  className="w-full text-left min-h-[48px] px-3 py-3 rounded-lg font-mono text-xs uppercase tracking-wider text-red-400 hover:bg-red-500/10 transition-all flex items-center space-x-3 cursor-pointer"
+                >
+                  <LogOut size={16} />
+                  <span>{t('Cerrar Sesión', 'Exit Workspace', 'Sair')}</span>
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }

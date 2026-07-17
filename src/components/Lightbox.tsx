@@ -35,6 +35,12 @@ export default function Lightbox({
 
   const t = TRANSLATIONS[lang];
 
+  function getPhotoDescription(photo: Photograph, l: ActiveLanguage) {
+    if (l === 'es') return photo.description_es || photo.description;
+    if (l === 'pt') return photo.description_pt || photo.description;
+    return photo.description;
+  }
+
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
     setShowShareToast(true);
@@ -83,7 +89,7 @@ export default function Lightbox({
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 z-50 flex flex-col justify-between bg-dark/95 backdrop-blur-md text-white p-4 lg:p-6 select-none"
+        className="fixed inset-0 z-50 flex flex-col justify-between bg-overlay/80 backdrop-blur-md text-white p-4 lg:p-6 select-none"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -104,8 +110,8 @@ export default function Lightbox({
           <div className="flex items-center space-x-3">
             <button
               onClick={onToggleFavorite}
-              className={`p-2.5 rounded-full border border-white/10 transition-all ${
-                isFavorite ? 'bg-gold-500 border-gold-500 text-dark' : 'bg-charcoal/40 hover:bg-white/10 text-white'
+              className={`p-2.5 rounded-full border border-[#D8C0A8] transition-all ${
+                isFavorite ? 'bg-gold-500 border-gold-500 text-dark' : 'bg-dark-gray/60 hover:bg-white/10 text-white'
               }`}
               title="Add to Favorites"
             >
@@ -113,21 +119,21 @@ export default function Lightbox({
             </button>
             <button
               onClick={handleDownload}
-              className="p-2.5 rounded-full border border-white/10 bg-charcoal/40 hover:bg-white/10 transition-all text-white"
+              className="p-2.5 rounded-full border border-[#D8C0A8] bg-dark-gray/60 hover:bg-white/10 transition-all text-white"
               title="Download High-Res"
             >
               <Download size={16} />
             </button>
             <button
               onClick={handleShare}
-              className="p-2.5 rounded-full border border-white/10 bg-charcoal/40 hover:bg-white/10 transition-all text-white"
+              className="p-2.5 rounded-full border border-[#D8C0A8] bg-dark-gray/60 hover:bg-white/10 transition-all text-white"
               title="Share Link"
             >
               <Share2 size={16} />
             </button>
             <button
               onClick={onClose}
-              className="p-2.5 rounded-full border border-white/10 bg-charcoal/40 hover:bg-gold-500 hover:text-dark transition-all text-white"
+              className="p-2.5 rounded-full border border-[#D8C0A8] bg-dark-gray/60 hover:bg-gold-500 hover:text-dark transition-all text-white"
               title="Close Gallery"
             >
               <X size={16} />
@@ -145,7 +151,7 @@ export default function Lightbox({
           {/* Previous Button */}
           <button
             onClick={(e) => { e.stopPropagation(); onPrev(); }}
-            className="absolute left-2 lg:left-6 p-4 rounded-full bg-dark-gray/60 hover:bg-gold-500 hover:text-dark border border-white/5 text-white/80 transition-all z-20"
+            className="absolute left-2 lg:left-6 p-4 rounded-full bg-dark-gray hover:bg-gold-500 hover:text-dark border border-[#D8C0A8]/30 text-white/80 transition-all z-20"
             title="Previous"
           >
             <ChevronLeft size={22} />
@@ -167,7 +173,7 @@ export default function Lightbox({
             ) : (
               /* High-End RAW vs Final grading comparison block */
               <div 
-                className="relative max-h-[60vh] aspect-[3/2] w-full max-w-2xl rounded-md overflow-hidden shadow-2xl border border-white/10"
+                className="relative max-h-[60vh] aspect-[3/2] w-full max-w-2xl rounded-md overflow-hidden shadow-2xl border border-[#D8C0A8]"
                 onClick={(e) => e.stopPropagation()}
               >
                 {/* Underlay RAW image (greyscale or desaturated slightly to replicate sensor RAW data) */}
@@ -177,7 +183,7 @@ export default function Lightbox({
                     alt="RAW"
                     className="w-full h-full object-cover filter saturate-[0.35] brightness-[0.75]"
                   />
-                  <div className="absolute top-3 left-3 bg-dark-gray/75 border border-white/10 px-2 py-1 text-[9px] font-mono tracking-widest text-white/75 rounded">
+                  <div className="absolute top-3 left-3 bg-dark-gray/75 border border-[#D8C0A8] px-2 py-1 text-[9px] font-mono tracking-widest text-white/75 rounded">
                     LEICA RAW DNG (14-BIT)
                   </div>
                 </div>
@@ -193,7 +199,7 @@ export default function Lightbox({
                     className="absolute inset-0 w-full h-full object-cover"
                     style={{ width: '100%', maxWidth: 'none' }}
                   />
-                  <div className="absolute top-3 right-3 bg-gold-600/90 border border-gold-400/20 px-2 py-1 text-[9px] font-mono tracking-widest text-dark font-semibold rounded">
+                  <div className="absolute top-3 right-3 bg-gold-600/90 border border-gold-400/30 px-2 py-1 text-[9px] font-mono tracking-widest text-dark font-semibold rounded">
                     AUREA MASTER WEB_RGB
                   </div>
                 </div>
@@ -224,7 +230,7 @@ export default function Lightbox({
           {/* Next Button */}
           <button
             onClick={(e) => { e.stopPropagation(); onNext(); }}
-            className="absolute right-2 lg:right-6 p-4 rounded-full bg-dark-gray/60 hover:bg-gold-500 hover:text-dark border border-white/5 text-white/80 transition-all z-20"
+            className="absolute right-2 lg:right-6 p-4 rounded-full bg-dark-gray hover:bg-gold-500 hover:text-dark border border-[#D8C0A8]/30 text-white/80 transition-all z-20"
             title="Next"
           >
             <ChevronRight size={22} />
@@ -238,7 +244,7 @@ export default function Lightbox({
         >
           {/* Controls tabs */}
           <div className="flex flex-col md:w-1/2 justify-between space-y-2">
-            <div className="flex border-b border-white/10 pb-2 space-x-6 mb-2">
+            <div className="flex border-b border-[#D8C0A8] pb-2 space-x-6 mb-2">
               <button
                 onClick={() => setActiveTab('info')}
                 className={`text-xs font-mono tracking-widest uppercase pb-1 border-b-2 transition-all ${
@@ -259,7 +265,7 @@ export default function Lightbox({
 
             <div className="h-16 overflow-y-auto pr-2 text-xs text-white/70">
               {activeTab === 'info' && (
-                <p className="leading-relaxed font-sans">{photo.description}</p>
+                <p className="leading-relaxed font-sans">{getPhotoDescription(photo, lang)}</p>
               )}
               {activeTab === 'compare' && (
                 <p className="leading-relaxed font-sans text-xs">

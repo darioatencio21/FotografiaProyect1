@@ -141,25 +141,27 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
           /* Authentication Screen */
           <motion.div
             key="auth-screen"
-            className="glass-premium rounded-2xl border border-white/5 p-8 max-w-md mx-auto text-center space-y-6 shadow-2xl"
+            className="glass-premium rounded-2xl border border-[#D8C0A8]/30 p-8 md:p-12 max-w-lg mx-auto"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
           >
-            <div className="w-14 h-14 bg-gold-400/10 border border-gold-400/30 rounded-full flex items-center justify-center mx-auto text-gold-400">
-              <ShieldCheck size={28} />
+            {/* Header — editorial focal point */}
+            <div className="text-center space-y-8 mb-10">
+              <div className="w-16 h-16 mx-auto rounded-full bg-gold-500/5 border border-[#D8C0A8]/20 flex items-center justify-center text-[#8B5E3C]">
+                <ShieldCheck size={30} />
+              </div>
+              <div className="space-y-3">
+                <h1 className="font-serif text-[clamp(2rem,5vw,3.2rem)] text-[#2B211A] font-semibold leading-tight">
+                  {t.proofTitle}
+                </h1>
+                <p className="font-sans text-sm text-[#6A5645] font-light leading-relaxed max-w-xs mx-auto">
+                  {t.proofSubtitle}
+                </p>
+              </div>
             </div>
 
-            <div className="space-y-1">
-              <h3 className="font-serif text-2xl text-gold-50 font-semibold tracking-wide">
-                {t.proofTitle}
-              </h3>
-              <p className="text-[10px] font-mono text-white/80 tracking-widest uppercase">
-                SECURE CREDENTIAL ENTRANCE
-              </p>
-            </div>
-
-            <form onSubmit={handleAuth} className="space-y-4">
+            <form onSubmit={handleAuth} className="space-y-5">
               <div className="space-y-1">
                 <div className="relative">
                   <input
@@ -168,7 +170,7 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                     value={passcode}
                     onChange={(e) => setPasscode(e.target.value)}
                     placeholder={t.proofPassPlaceholder}
-                    className={`w-full bg-dark/60 border border-white/10 rounded-lg pl-4 pr-12 py-3 text-center text-xs text-white/90 focus:outline-none focus:border-gold-400 ${
+                    className={`w-full bg-dark/60 border border-[#D8C0A8] rounded-lg pl-4 pr-12 py-3 text-center text-xs text-white/90 focus:outline-none focus:border-gold-400 ${
                       showPasscode ? 'font-sans font-medium tracking-normal' : 'font-mono tracking-widest'
                     }`}
                   />
@@ -210,7 +212,7 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
             animate={{ opacity: 1 }}
           >
             {/* Header info bar */}
-            <div className="flex flex-col md:flex-row md:items-end md:justify-between border-b border-white/10 pb-6 gap-4 text-left">
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between border-b border-[#D8C0A8] pb-6 gap-4 text-left">
               <div>
                 <span className="text-[10px] font-mono text-gold-400 tracking-widest uppercase">
                   {lang === 'en' ? 'Client Proof Session' : (lang === 'pt' ? 'Sessão de Provas de Cliente' : 'Sesión de Pruebas de Cliente')}
@@ -226,7 +228,7 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
               </div>
 
               {/* Filtering tabs */}
-              <div className="flex items-center space-x-2 bg-dark/60 border border-white/5 p-1 rounded-lg">
+              <div className="flex items-center space-x-2 bg-dark/60 border border-[#D8C0A8]/30 p-1 rounded-lg">
                 <button
                   onClick={() => setActiveFilter('all')}
                   className={`px-4 py-2 text-xs font-mono tracking-wider uppercase rounded-md transition-all cursor-pointer ${
@@ -261,11 +263,11 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                   return (
                     <div
                       key={photo.id}
-                      className="group relative rounded-xl overflow-hidden bg-charcoal/20 border border-white/5 shadow-md transition-all duration-300 hover:border-gold-400/40 text-left flex flex-col justify-between"
+                      className="group relative rounded-xl overflow-hidden bg-charcoal/20 border border-[#D8C0A8]/30 shadow-md transition-all duration-300 hover:border-gold-400/40 text-left flex flex-col justify-between"
                     >
                       {/* Photo Container */}
                       <div 
-                        className="relative aspect-[3/2] overflow-hidden bg-charcoal/40 cursor-zoom-in"
+                        className="relative aspect-[3/2] overflow-hidden bg-dark-gray/60 cursor-zoom-in"
                         onClick={() => setLightboxIndex(index)}
                       >
                         <img
@@ -285,7 +287,7 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                             className={`p-2 rounded-full backdrop-blur-md transition-all cursor-pointer ${
                               photo.isFav
                                 ? 'bg-gold-500 text-dark shadow-md scale-105'
-                                : 'bg-black/40 hover:bg-black/60 text-white border border-white/10'
+                                : 'bg-black/40 hover:bg-black/60 text-white border border-[#D8C0A8]'
                             }`}
                             title={photo.isFav ? 'Quitar de Favoritas' : 'Marcar como Favorita'}
                           >
@@ -295,7 +297,7 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                       </div>
 
                       {/* Photo Footer Details */}
-                      <div className="p-3 sm:p-4 flex flex-col border-t border-white/5 bg-dark-gray/10 gap-1.5 text-left">
+                      <div className="p-3 sm:p-4 flex flex-col border-t border-[#D8C0A8]/30 bg-dark-gray/10 gap-1.5 text-left">
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0 flex-1">
                             <h4 className="text-[10px] sm:text-xs font-semibold text-white/90 truncate">{photo.title}</h4>
@@ -319,7 +321,7 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                           </button>
                         </div>
                         {photo.description && (
-                          <p className="text-[9px] text-white/75 line-clamp-1 border-t border-white/5 pt-1 mt-0.5">{photo.description}</p>
+                          <p className="text-[9px] text-white/75 line-clamp-1 border-t border-[#D8C0A8]/30 pt-1 mt-0.5">{photo.description}</p>
                         )}
                       </div>
                     </div>
@@ -328,7 +330,7 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
               </div>
             ) : (
               /* No items fallback */
-              <div className="py-20 text-center text-white/40 space-y-3 glass-premium border border-white/5 rounded-2xl max-w-lg mx-auto">
+              <div className="py-20 text-center text-white/40 space-y-3 glass-premium border border-[#D8C0A8]/30 rounded-2xl max-w-lg mx-auto">
                 <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mx-auto text-white/30">
                   <Heart size={20} />
                 </div>
@@ -338,7 +340,7 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                 </p>
                 <button
                   onClick={() => setActiveFilter('all')}
-                  className="px-4 py-2 border border-white/10 hover:border-gold-400 text-gold-300 text-[10px] font-mono rounded-lg cursor-pointer transition-all uppercase tracking-widest"
+                  className="px-4 py-2 border border-[#D8C0A8] hover:border-gold-400 text-gold-300 text-[10px] font-mono rounded-lg cursor-pointer transition-all uppercase tracking-widest"
                 >
                   Ver Todas las Fotos
                 </button>
@@ -376,7 +378,7 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                     </div>
                     <button
                       onClick={() => setLightboxIndex(null)}
-                      className="p-2.5 rounded-full border border-white/10 bg-charcoal/40 hover:bg-gold-500 hover:text-dark transition-all text-white cursor-pointer shrink-0"
+                      className="p-2.5 rounded-full border border-[#D8C0A8] bg-dark-gray/60 hover:bg-gold-500 hover:text-dark transition-all text-white cursor-pointer shrink-0"
                     >
                       <X size={18} />
                     </button>
@@ -392,7 +394,7 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                           return prev === 0 ? proofPhotos.length - 1 : prev - 1;
                         });
                       }}
-                      className="hidden md:flex absolute left-6 p-3.5 rounded-full bg-dark-gray/60 hover:bg-gold-500 hover:text-dark border border-white/5 text-white/80 transition-all z-20 cursor-pointer animate-pulse [animation-duration:3s]"
+                      className="hidden md:flex absolute left-6 p-3.5 rounded-full bg-dark-gray hover:bg-gold-500 hover:text-dark border border-[#D8C0A8]/30 text-white/80 transition-all z-20 cursor-pointer animate-pulse [animation-duration:3s]"
                     >
                       <ChevronLeft size={20} />
                     </button>
@@ -400,7 +402,7 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                     <img
                       src={proofPhotos[lightboxIndex].url}
                       alt={proofPhotos[lightboxIndex].title}
-                      className="max-w-full max-h-[65vh] md:max-h-[68vh] object-contain rounded-lg shadow-2xl border border-white/5"
+                      className="max-w-full max-h-[65vh] md:max-h-[68vh] object-contain rounded-lg shadow-2xl border border-[#D8C0A8]/30"
                     />
 
                     <button
@@ -410,7 +412,7 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                           return prev === proofPhotos.length - 1 ? 0 : prev + 1;
                         });
                       }}
-                      className="hidden md:flex absolute right-6 p-3.5 rounded-full bg-dark-gray/60 hover:bg-gold-500 hover:text-dark border border-white/5 text-white/80 transition-all z-20 cursor-pointer animate-pulse [animation-duration:3s]"
+                      className="hidden md:flex absolute right-6 p-3.5 rounded-full bg-dark-gray hover:bg-gold-500 hover:text-dark border border-[#D8C0A8]/30 text-white/80 transition-all z-20 cursor-pointer animate-pulse [animation-duration:3s]"
                     >
                       <ChevronRight size={20} />
                     </button>
@@ -426,7 +428,7 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                           return prev === 0 ? proofPhotos.length - 1 : prev - 1;
                         });
                       }}
-                      className="p-3 rounded-full bg-white/5 hover:bg-white/10 active:scale-95 border border-white/10 text-white transition-all cursor-pointer flex items-center justify-center"
+                      className="p-3 rounded-full bg-white/5 hover:bg-white/10 active:scale-95 border border-[#D8C0A8] text-white transition-all cursor-pointer flex items-center justify-center"
                       title="Anterior"
                     >
                       <ChevronLeft size={20} />
@@ -437,8 +439,8 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                       onClick={() => handleToggleFav(proofPhotos[lightboxIndex!].id)}
                       className={`p-4 rounded-full border transition-all flex items-center justify-center cursor-pointer ${
                         proofPhotos[lightboxIndex!].isFav
-                          ? 'bg-gold-500 border-gold-500 text-dark font-semibold shadow-lg shadow-gold-500/20 scale-110'
-                          : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+                          ? 'bg-gold-500 border-gold-500 text-dark font-semibold scale-110'
+                          : 'bg-white/5 border-[#D8C0A8] text-white hover:bg-white/10'
                       }`}
                       title={proofPhotos[lightboxIndex!].isFav ? 'Quitar de Favoritas' : 'Marcar como Favorita'}
                     >
@@ -448,7 +450,7 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                     {/* Descargar Foto */}
                     <button
                       onClick={() => handleDownload(proofPhotos[lightboxIndex!])}
-                      className="p-4 bg-white text-dark hover:bg-gold-400 border border-white/10 rounded-full transition-all flex items-center justify-center cursor-pointer active:scale-95 shadow-xl"
+                      className="p-4 bg-white text-dark hover:bg-gold-400 border border-[#D8C0A8] rounded-full transition-all flex items-center justify-center cursor-pointer active:scale-95 shadow-xl"
                       title="Descargar Foto"
                     >
                       <Download size={20} />
@@ -462,7 +464,7 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                           return prev === proofPhotos.length - 1 ? 0 : prev + 1;
                         });
                       }}
-                      className="p-3 rounded-full bg-white/5 hover:bg-white/10 active:scale-95 border border-white/10 text-white transition-all cursor-pointer flex items-center justify-center"
+                      className="p-3 rounded-full bg-white/5 hover:bg-white/10 active:scale-95 border border-[#D8C0A8] text-white transition-all cursor-pointer flex items-center justify-center"
                       title="Siguiente"
                     >
                       <ChevronRight size={20} />

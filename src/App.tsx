@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence, useInView } from 'motion/react';
 import { 
    Heart, ArrowRight, MessageSquare, MapPin, 
    Mail, Phone, ShieldCheck, Sparkles, AlertCircle, ChevronDown,
@@ -82,6 +82,46 @@ export const getHeroScaleClass = (scale?: number) => {
   if (scale === 150) return 'scale-150';
   return 'scale-105'; // default
 };
+
+function getPhotoTitle(photo: Photograph, lang: string) {
+  if (lang === 'es') return photo.title_es || photo.title;
+  if (lang === 'pt') return photo.title_pt || photo.title;
+  return photo.title;
+}
+
+function getPhotoDescription(photo: Photograph, lang: string) {
+  if (lang === 'es') return photo.description_es || photo.description;
+  if (lang === 'pt') return photo.description_pt || photo.description;
+  return photo.description;
+}
+
+function CountUp({ end, suffix = '', duration = 2000, delay = 0 }: { end: number; suffix?: string; duration?: number; delay?: number }) {
+  const [count, setCount] = useState(0);
+  const ref = useRef<HTMLSpanElement>(null);
+  const isInView = useInView(ref, { once: true });
+  const hasAnimated = useRef(false);
+
+  useEffect(() => {
+    if (!isInView || hasAnimated.current) return;
+    hasAnimated.current = true;
+
+    const timeout = setTimeout(() => {
+      let startTime: number | null = null;
+      const animate = (timestamp: number) => {
+        if (!startTime) startTime = timestamp;
+        const progress = Math.min((timestamp - startTime) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        setCount(Math.floor(eased * end));
+        if (progress < 1) requestAnimationFrame(animate);
+      };
+      requestAnimationFrame(animate);
+    }, delay);
+
+    return () => clearTimeout(timeout);
+  }, [isInView, end, duration, delay]);
+
+  return <span ref={ref}>{count}{suffix}</span>;
+}
 
 export default function App() {
   // Navigation & Language Context
@@ -669,8 +709,8 @@ export default function App() {
     
     // Text search query by tag, metadata, location, colors
     const matchesSearch = !searchQuery ? true : (
-      photo.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      photo.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      getPhotoTitle(photo, lang).toLowerCase().includes(searchQuery.toLowerCase()) ||
+      getPhotoDescription(photo, lang).toLowerCase().includes(searchQuery.toLowerCase()) ||
       photo.exif.camera.toLowerCase().includes(searchQuery.toLowerCase()) ||
       photo.exif.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       photo.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -680,7 +720,7 @@ export default function App() {
   });
 
   return (
-    <div className="bg-dark text-white min-h-screen relative font-sans select-none selection:bg-gold-500 selection:text-dark">
+    <div className="bg-dark text-white min-h-screen relative w-full overflow-x-hidden font-sans select-none selection:bg-gold-500 selection:text-dark">
       {/* CORE HEADER */}
       <Header
         currentView={currentView}
@@ -693,72 +733,87 @@ export default function App() {
 
       {/* Full-width hero outside max-w-7xl container */}
       {currentView === 'home' && (
-        <section className="relative h-dvh w-screen overflow-hidden">
+        <section className="relative h-dvh w-full overflow-hidden">
           {/* Mobile: single image */}
           <div className="absolute inset-0 z-0 md:hidden overflow-hidden">
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 1.2, ease: 'easeOut' }}
+              initial={{ opacity: 0, scale: 1 }}
+              animate={{
+                opacity: 1,
+                scale: [1, 1.08, 1]
+              }}
+              transition={{
+                opacity: { duration: 1.2, ease: 'easeOut' },
+                scale: { duration: 18, ease: 'easeInOut', repeat: Infinity, repeatType: 'reverse' }
+              }}
               className="w-full h-full"
             >
-              <div className="absolute inset-0 bg-dark/20 z-10" />
               <img
                 src={seo.heroImageLeft || 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=85&w=1200'}
                 alt="Fine Art Photography"
                 className="w-full h-full object-cover object-center"
-                style={{ animation: 'heroZoom 22s ease-in-out infinite alternate' }}
               />
             </motion.div>
+            <div className="absolute inset-0 bg-gradient-to-b from-overlay/5 via-overlay/40 to-overlay/70 z-10 pointer-events-none" />
           </div>
 
           {/* Desktop: Left image */}
           <div className="hidden md:block absolute inset-y-0 left-0 w-1/2 z-0 overflow-hidden">
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 1.2, ease: 'easeOut' }}
+              initial={{ opacity: 0, scale: 1 }}
+              animate={{
+                opacity: 1,
+                scale: [1, 1.08, 1]
+              }}
+              transition={{
+                opacity: { duration: 1.2, ease: 'easeOut' },
+                scale: { duration: 18, ease: 'easeInOut', repeat: Infinity, repeatType: 'reverse' }
+              }}
               className="w-full h-full"
             >
-              <div className="absolute inset-0 bg-dark/[0.15] z-10" />
               <img
                 src={seo.heroImageLeft || 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=85&w=1600'}
                 alt="Fine Art Wedding"
                 className="w-full h-full object-cover object-center"
-                style={{ animation: 'heroZoom 22s ease-in-out infinite alternate' }}
               />
             </motion.div>
+            <div className="absolute inset-0 bg-gradient-to-b from-overlay/5 via-overlay/40 to-overlay/70 z-10 pointer-events-none" />
           </div>
 
           {/* Desktop: Right image */}
           <div className="hidden md:block absolute inset-y-0 right-0 w-1/2 z-0 overflow-hidden">
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 1.2, ease: 'easeOut', delay: 0.2 }}
+              initial={{ opacity: 0, scale: 1 }}
+              animate={{
+                opacity: 1,
+                scale: [1, 1.08, 1]
+              }}
+              transition={{
+                opacity: { duration: 1.2, ease: 'easeOut', delay: 0.2 },
+                scale: { duration: 18, ease: 'easeInOut', repeat: Infinity, repeatType: 'reverse' }
+              }}
               className="w-full h-full"
             >
-              <div className="absolute inset-0 bg-dark/[0.15] z-10" />
               <img
                 src={seo.heroImageRight || 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&q=85&w=1600'}
                 alt="Editorial Fashion"
                 className="w-full h-full object-cover object-center"
-                style={{ animation: 'heroZoom 22s ease-in-out infinite alternate' }}
               />
             </motion.div>
+            <div className="absolute inset-0 bg-gradient-to-b from-overlay/5 via-overlay/40 to-overlay/70 z-10 pointer-events-none" />
           </div>
 
           {/* Subtle divider line */}
-          <div className="absolute inset-y-[15%] left-1/2 w-px bg-white/10 z-20 hidden md:block" />
+          <div className="absolute inset-y-[15%] left-1/2 w-px bg-hero/20 z-20 hidden md:block" />
 
           {/* Central content overlay */}
-          <div className="absolute inset-0 z-20 flex flex-col justify-center pt-[70px] lg:pt-0 pointer-events-none">
+          <div className="absolute inset-0 z-20 flex flex-col justify-center pointer-events-none">
             <div className="text-center max-w-2xl mx-auto px-4 sm:px-6 pointer-events-auto">
               <motion.h1
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-                className="font-serif text-[clamp(1.5rem,7.5vw,4rem)] sm:text-[clamp(1.75rem,6vw,4.5rem)] md:text-[clamp(2.5rem,5vw,5rem)] lg:text-[clamp(3rem,4.5vw,5.5rem)] leading-[1.15] tracking-wide text-white"
+                className="font-serif text-[clamp(1.5rem,7.5vw,4rem)] sm:text-[clamp(1.75rem,6vw,4.5rem)] md:text-[clamp(2.5rem,5vw,5rem)] lg:text-[clamp(3rem,4.5vw,5.5rem)] leading-[1.15] tracking-wide text-hero drop-shadow-sm"
               >
                 <span className="italic">{t.heroTitle.split(',')[0]},</span>
                 <br />
@@ -772,7 +827,7 @@ export default function App() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-                className="text-[clamp(8px,2.5vw,12px)] text-white/70 max-w-lg mx-auto leading-relaxed tracking-wider font-light mt-4 md:mt-10 px-2"
+                className="text-[clamp(8px,2.5vw,12px)] text-hero/80 max-w-lg mx-auto leading-relaxed tracking-wider font-light mt-4 md:mt-10 px-2 drop-shadow-sm"
               >
                 {t.heroSubtitle}
               </motion.p>
@@ -785,7 +840,7 @@ export default function App() {
               >
                 <button
                   onClick={() => setCurrentView('portfolio')}
-                  className="px-4 sm:px-6 md:px-7 py-2 md:py-3 bg-white text-dark hover:bg-gold-400 font-mono text-[clamp(7px,2vw,10px)] tracking-widest uppercase font-semibold transition-all duration-300 cursor-pointer whitespace-nowrap"
+                  className="px-4 sm:px-6 md:px-7 py-2 md:py-3 bg-hero text-[#2B211A] hover:bg-hero/90 font-mono text-[clamp(7px,2vw,10px)] tracking-widest uppercase font-semibold transition-all duration-300 cursor-pointer whitespace-nowrap"
                 >
                   {t.ctaPortfolio}
                 </button>
@@ -797,7 +852,7 @@ export default function App() {
                       if (element) element.scrollIntoView({ behavior: 'smooth' });
                     }, 200);
                   }}
-                  className="px-4 sm:px-6 md:px-7 py-2 md:py-3 border border-white/40 text-white hover:border-white font-mono text-[clamp(7px,2vw,10px)] tracking-widest uppercase font-semibold transition-all duration-300 cursor-pointer bg-transparent whitespace-nowrap"
+                  className="px-4 sm:px-6 md:px-7 py-2 md:py-3 border border-hero/40 text-hero hover:border-hero font-mono text-[clamp(7px,2vw,10px)] tracking-widest uppercase font-semibold transition-all duration-300 cursor-pointer bg-transparent whitespace-nowrap drop-shadow-sm"
                 >
                   {t.ctaBook}
                 </button>
@@ -812,11 +867,11 @@ export default function App() {
             transition={{ delay: 1.2 }}
             className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center space-y-2"
           >
-            <span className="text-[7px] font-mono tracking-[0.3em] text-white/30 uppercase">Scroll</span>
+            <span className="text-[7px] font-mono tracking-[0.3em] text-hero/40 uppercase">Scroll</span>
             <motion.div
               animate={{ y: [0, 6, 0] }}
               transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-              className="w-px h-6 sm:h-8 bg-white/20"
+              className="w-px h-6 sm:h-8 bg-hero/30"
             />
           </motion.div>
         </section>
@@ -829,34 +884,131 @@ export default function App() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -15 }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
-          className="pb-24 pt-[70px] px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto space-y-12 md:space-y-24">
+          className="pb-24 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto space-y-12 md:space-y-24">
 
           {/* ======================================================= */}
           {/* HOME SCREEN (content below hero) */}
           {/* ======================================================= */}
           {currentView === 'home' && (
             <div className="space-y-12 md:space-y-24">
-              {/* Statistics Showcase Ribbon Banner */}
-              <section className="py-8 md:py-12 border-y border-white/10 bg-dark-gray rounded-2xl grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 text-center">
-                <div className="space-y-1">
-                  <p className="text-[10px] font-mono tracking-widest text-gold-400 uppercase">{t.sessions}</p>
-                  <p className="text-3xl font-mono font-bold text-white">500+</p>
-                  <p className="text-[9px] text-white/65 font-sans leading-normal">Editorial & weddings</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-[10px] font-mono tracking-widest text-gold-400 uppercase">{t.yearsExp}</p>
-                  <p className="text-3xl font-mono font-bold text-white">15+</p>
-                  <p className="text-[9px] text-white/65 font-sans leading-normal">Leica & Hasselblad systems</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-[10px] font-mono tracking-widest text-gold-400 uppercase">{t.satisfied}</p>
-                  <p className="text-3xl font-mono font-bold text-white">98%</p>
-                  <p className="text-[9px] text-white/65 font-sans leading-normal">Verified 5-Star Reviews</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-[10px] font-mono tracking-widest text-gold-400 uppercase">{t.awardCount}</p>
-                  <p className="text-3xl font-mono font-bold text-white">50+</p>
-                  <p className="text-[9px] text-white/65 font-sans leading-normal">Global Fine Art Prizes</p>
+              {/* Statistics — Editorial Craft Metrics */}
+              <section className="py-10 md:py-14">
+                {/* Eyebrow — refined, minimal */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6 }}
+                  className="flex items-center justify-center gap-2 mb-8"
+                >
+                  <span className="w-6 md:w-8 h-px bg-white/10" />
+                  <span className="text-[7px] font-mono tracking-[0.4em] text-white/30 uppercase select-none">
+                    {t.statsTitle}
+                  </span>
+                  <span className="w-6 md:w-8 h-px bg-white/10" />
+                </motion.div>
+
+                {/* Hero number — Count Up */}
+                <motion.div
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+                  className="text-center mb-6"
+                >
+                  <p className="font-serif text-[clamp(3rem,15vw,6.5rem)] text-white leading-[0.85] font-light tracking-tight">
+                    <CountUp end={2000} suffix="+" duration={2500} />
+                  </p>
+                  <div className="mt-3 space-y-1">
+                    <p className="text-[8px] md:text-[9px] font-mono tracking-[0.35em] text-gold-500/60 uppercase">
+                      {t.sessions}
+                    </p>
+                    <p className="text-[9px] md:text-[10px] text-white/35 max-w-xs mx-auto leading-relaxed font-light">
+                      {t.sessionsSub}
+                    </p>
+                  </div>
+                </motion.div>
+
+                {/* Decorative divider */}
+                <motion.div
+                  initial={{ opacity: 0, scaleX: 0 }}
+                  whileInView={{ opacity: 1, scaleX: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                  className="flex items-center justify-center gap-3 mb-6 md:mb-8"
+                >
+                  <span className="w-10 md:w-16 h-px bg-white/[0.06]" />
+                  <span className="w-[3px] h-[3px] rotate-45 bg-gold-500/20" />
+                  <span className="w-10 md:w-16 h-px bg-white/[0.06]" />
+                </motion.div>
+
+                {/* Stats grid — 3 visual columns */}
+                <div className="max-w-2xl mx-auto">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-0">
+                    {/* 15+ Years */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 16 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+                      className="text-center md:border-r border-white/[0.06] md:px-6"
+                    >
+                      <p className="font-serif text-3xl md:text-4xl text-white font-light leading-none">
+                        <CountUp end={15} suffix="+" duration={2000} />
+                      </p>
+                      <p className="text-[8px] font-mono tracking-[0.25em] text-white/20 uppercase mt-2.5">
+                        {t.yearsExp}
+                      </p>
+                      <p className="text-[8px] text-white/15 mt-1 leading-relaxed">
+                        {t.yearsExpSub}
+                      </p>
+                    </motion.div>
+
+                    {/* Decorative center — editorial breathing space */}
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      whileInView={{ opacity: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.6, delay: 0.35 }}
+                      className="hidden md:flex flex-col items-center justify-center md:px-6"
+                    >
+                      <span className="w-6 h-px bg-white/[0.04] mb-1.5" />
+                      <span className="w-[3px] h-[3px] rotate-45 bg-gold-500/15" />
+                      <span className="w-6 h-px bg-white/[0.04] mt-1.5" />
+                    </motion.div>
+
+                    {/* 98% Satisfied */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 16 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.4 }}
+                      className="text-center md:px-6"
+                    >
+                      <p className="font-serif text-3xl md:text-4xl text-white font-light leading-none">
+                        <CountUp end={98} suffix="%" duration={2000} />
+                      </p>
+                      <p className="text-[8px] font-mono tracking-[0.25em] text-white/20 uppercase mt-2.5">
+                        {t.satisfied}
+                      </p>
+                      <p className="text-[8px] text-white/15 mt-1 leading-relaxed">
+                        {t.satisfiedSub}
+                      </p>
+                    </motion.div>
+                  </div>
+
+                  {/* Mobile stacked layout: md:hidden decorative rule */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: 0.5 }}
+                    className="flex md:hidden items-center justify-center gap-3 mt-6"
+                  >
+                    <span className="w-8 h-px bg-white/[0.04]" />
+                    <span className="w-[2px] h-[2px] rotate-45 bg-gold-500/15" />
+                    <span className="w-8 h-px bg-white/[0.04]" />
+                  </motion.div>
                 </div>
               </section>
 
@@ -876,29 +1028,30 @@ export default function App() {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                   {photographs.slice(0, 3).map(photo => (
-                    <div 
+                    <div
                       key={photo.id}
                       onClick={() => setSelectedPhotoForLightbox(photo)}
-                      className="group relative rounded-xl overflow-hidden aspect-[3/4] cursor-pointer border border-white/5"
+                      className="group relative overflow-hidden cursor-pointer bg-dark-gray"
                     >
-                      {/* Premium internal mounting frame */}
-                      <div className="absolute inset-0 border-[0.5px] border-white/20 z-20 pointer-events-none rounded-xl" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-dark via-transparent to-transparent z-10 opacity-70 group-hover:opacity-90 transition-opacity" />
-                      <img 
-                        src={photo.url} 
-                        alt={photo.title} 
-                        className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 ease-in-out scale-102 group-hover:scale-105"
-                      />
-                      
-                      {/* Photo overlay description */}
-                      <div className="absolute inset-x-0 bottom-0 p-5 z-20 text-left space-y-2 transform translate-y-3 group-hover:translate-y-0 transition-transform duration-500">
-                        <span className="text-[9px] font-mono text-gold-400 uppercase tracking-widest">{photo.category}</span>
-                        <h4 className="font-serif text-lg text-white font-medium">{photo.title}</h4>
-                        <p className="text-[10px] text-white/80 line-clamp-2 leading-relaxed opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                          {photo.description}
-                        </p>
+                      <div className="aspect-[3/4]">
+                        <img
+                          src={photo.url}
+                          alt={getPhotoTitle(photo, lang)}
+                          className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-[800ms] ease-out group-hover:scale-[1.04]"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-overlay/8 via-overlay/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                        <div className="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-all duration-700 translate-y-1 group-hover:translate-y-0">
+                          <span className="text-[7px] font-mono tracking-[0.25em] text-hero/60 uppercase">
+                            {t[photo.category as keyof typeof t] || photo.category}
+                          </span>
+                        </div>
+                        <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-700 translate-y-2 group-hover:translate-y-0">
+                          <h3 className="font-serif text-sm md:text-base text-hero font-light leading-snug">
+                            {getPhotoTitle(photo, lang)}
+                          </h3>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -992,7 +1145,7 @@ export default function App() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder={t.searchPlaceholder}
-                    className="bg-dark-gray border border-white/10 rounded-lg px-4 py-2 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-mono w-full sm:w-64"
+                    className="bg-dark-gray border-[#D8C0A8] rounded-lg px-4 py-2 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-mono w-full sm:w-64"
                   />
                 </div>
               </div>
@@ -1020,8 +1173,8 @@ export default function App() {
                 })}
               </div>
 
-              {/* Pinterest Premium Masonry style layout */}
-              <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
+              {/* Editorial Masonry layout */}
+              <div className="columns-1 sm:columns-2 lg:columns-3 gap-5 space-y-5">
                 {filteredPhotographs.length > 0 ? (
                   filteredPhotographs.map(photo => {
                     const isFav = favorites.includes(photo.id);
@@ -1029,39 +1182,40 @@ export default function App() {
                       <div
                         key={photo.id}
                         onClick={() => setSelectedPhotoForLightbox(photo)}
-                        className="break-inside-avoid relative rounded-2xl overflow-hidden cursor-pointer border border-white/5 group bg-charcoal/20"
+                        className="break-inside-avoid relative overflow-hidden cursor-pointer group bg-dark-gray"
                       >
-                        {/* Premium internal mounting frame */}
-                        <div className="absolute inset-0 border-[0.5px] border-white/20 z-20 pointer-events-none rounded-2xl" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-dark/95 via-dark/20 to-transparent opacity-60 group-hover:opacity-90 transition-opacity z-10" />
                         <img
                           src={photo.url}
-                          alt={photo.title}
-                          className="w-full h-auto object-cover rounded-2xl grayscale group-hover:grayscale-0 transition-all duration-1000 ease-in-out scale-101 group-hover:scale-103"
+                          alt={getPhotoTitle(photo, lang)}
+                          className="w-full h-auto object-cover grayscale group-hover:grayscale-0 transition-all duration-[800ms] ease-out group-hover:scale-[1.04]"
                         />
+                        <div className="absolute inset-0 bg-gradient-to-t from-overlay/8 via-overlay/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
-                        {/* Top quick metrics floating indicators */}
-                        <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-20 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <span className="bg-dark/85 border border-white/10 px-1.5 py-0.5 text-[8px] font-mono text-gold-400 rounded uppercase tracking-wider">
-                            {photo.category}
+                        {/* Category — on hover, top left */}
+                        <div className="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-all duration-700 translate-y-1 group-hover:translate-y-0">
+                          <span className="text-[7px] font-mono tracking-[0.25em] text-hero/60 uppercase">
+                            {t[photo.category as keyof typeof t] || photo.category}
                           </span>
-                          
+                        </div>
+
+                        {/* Favorite — on hover, top right */}
+                        <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-700 translate-y-1 group-hover:translate-y-0">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               handleToggleFavorite(photo.id);
                             }}
-                            className={`p-1.5 rounded-full border ${
-                              isFav ? 'bg-gold-500 border-gold-500 text-dark' : 'bg-dark/80 border-white/10 text-white'
+                            className={`w-8 h-8 flex items-center justify-center rounded-full border ${
+                              isFav ? 'bg-gold-500 border-gold-500 text-dark' : 'border-hero/30 text-hero/70 hover:border-hero/60 hover:text-hero'
                             }`}
                           >
-                            <Heart size={10} className={isFav ? 'fill-dark' : ''} />
+                            <Heart size={11} className={isFav ? 'fill-dark' : ''} />
                           </button>
                         </div>
 
-                        {/* Bottom Metadata details */}
-                        <div className="absolute inset-x-0 bottom-0 p-5 z-20 text-left space-y-1.5 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-                          <h4 className="font-serif text-base text-gold-50 font-medium">{photo.title}</h4>
+                        {/* Title — on hover, bottom left */}
+                        <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-700 translate-y-2 group-hover:translate-y-0">
+                          <h3 className="font-serif text-sm md:text-base text-hero font-light leading-snug">{getPhotoTitle(photo, lang)}</h3>
                         </div>
                       </div>
                     );
@@ -1127,7 +1281,7 @@ export default function App() {
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true, margin: "-50px" }}
                       transition={{ duration: 0.5, delay: idx * 0.08 }}
-                      className={`group bg-dark-gray border border-white/5 rounded-2xl p-6 md:p-7 flex flex-col justify-between space-y-5 text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-dark/80 hover:border-gold-500/40 ${pkg.featured ? 'ring-1 ring-gold-500/30' : ''}`}
+                      className={`group bg-dark-gray border border-white/5 rounded-2xl p-6 md:p-7 flex flex-col justify-between space-y-5 text-left transition-all duration-300 hover:-translate-y-1 hover:border-gold-500/40 ${pkg.featured ? 'ring-1 ring-gold-500/30' : ''}`}
                     >
                       <div className="space-y-4">
                         <div className="flex items-center justify-between">
@@ -1267,7 +1421,7 @@ export default function App() {
                             exit={{ height: 0 }}
                             className="overflow-hidden"
                           >
-                            <div className="p-5 pt-0 text-xs text-white/60 leading-relaxed font-sans border-t border-white/5 bg-dark/20">
+                            <div className="p-5 pt-0 text-xs text-white/60 leading-relaxed font-sans border-t border-white/5 bg-charcoal">
                               {fAnswer}
                             </div>
                           </motion.div>
@@ -1305,7 +1459,7 @@ export default function App() {
                               required
                               value={contactName}
                               onChange={(e) => setContactName(e.target.value)}
-                              className="w-full bg-dark/60 border border-white/15 rounded p-2.5 text-xs text-white focus:outline-none focus:border-gold-400 font-sans"
+                              className="w-full bg-charcoal border-[#D8C0A8] rounded p-2.5 text-xs text-white focus:outline-none focus:border-gold-400 font-sans"
                             />
                           </div>
                           <div className="space-y-1">
@@ -1315,7 +1469,7 @@ export default function App() {
                               required
                               value={contactEmail}
                               onChange={(e) => setContactEmail(e.target.value)}
-                              className="w-full bg-dark/60 border border-white/15 rounded p-2.5 text-xs text-white focus:outline-none focus:border-gold-400 font-sans"
+                              className="w-full bg-charcoal border-[#D8C0A8] rounded p-2.5 text-xs text-white focus:outline-none focus:border-gold-400 font-sans"
                             />
                           </div>
                         </div>
@@ -1325,9 +1479,9 @@ export default function App() {
                           <input
                             type="text"
                             required
-                            value={contactSubject}
-                            onChange={(e) => setContactSubject(e.target.value)}
-                            className="w-full bg-dark/60 border border-white/15 rounded p-2.5 text-xs text-white focus:outline-none focus:border-gold-400 font-sans"
+                              value={contactSubject}
+                              onChange={(e) => setContactSubject(e.target.value)}
+                              className="w-full bg-charcoal border-[#D8C0A8] rounded p-2.5 text-xs text-white focus:outline-none focus:border-gold-400 font-sans"
                           />
                         </div>
 
@@ -1336,9 +1490,9 @@ export default function App() {
                           <textarea
                             rows={4}
                             required
-                            value={contactMsg}
-                            onChange={(e) => setContactMsg(e.target.value)}
-                            className="w-full bg-dark/60 border border-white/15 rounded p-3 text-xs text-white focus:outline-none focus:border-gold-400 font-sans resize-none"
+                              value={contactMsg}
+                              onChange={(e) => setContactMsg(e.target.value)}
+                              className="w-full bg-charcoal border-[#D8C0A8] rounded p-3 text-xs text-white focus:outline-none focus:border-gold-400 font-sans resize-none"
                           />
                         </div>
 
@@ -1400,7 +1554,7 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className="bg-dark/40 border border-white/5 rounded-xl p-4 space-y-2">
+                  <div className="bg-dark-gray border border-white/5 rounded-xl p-4 space-y-2">
                     <span className="text-[9px] font-mono text-white/40 uppercase">LIVE CALENDAR ASSISTANCE</span>
                     <p className="text-[11px] text-white/70 leading-normal">
                       For immediate booking validations or priority destination weddings, coordinate directly with our support desk via our linked WhatsApp.
@@ -1498,9 +1652,9 @@ export default function App() {
       {/* Secure Admin CMS Access login Dialog */}
       <AnimatePresence>
         {showAdminLogin && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark/90 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-overlay/80 backdrop-blur-sm">
             <motion.div
-              className="bg-charcoal border border-white/10 rounded-2xl p-6 max-w-sm w-full space-y-6 shadow-2xl relative"
+              className="bg-charcoal border border-white/10 rounded-2xl p-6 max-w-sm w-full space-y-6 shadow-lg relative"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
@@ -1528,7 +1682,7 @@ export default function App() {
                     required
                     value={adminUsername}
                     onChange={(e) => setAdminUsername(e.target.value)}
-                    className="w-full bg-dark/60 border border-white/10 rounded p-2.5 text-xs text-white focus:outline-none focus:border-gold-400"
+                    className="w-full bg-charcoal border-[#D8C0A8] rounded p-2.5 text-xs text-white focus:outline-none focus:border-gold-400"
                     placeholder="Username"
                   />
                 </div>
@@ -1541,8 +1695,8 @@ export default function App() {
                       required
                       value={adminPassword}
                       onChange={(e) => setAdminPassword(e.target.value)}
-                      className="w-full bg-dark/60 border border-white/10 rounded p-2.5 pr-10 text-xs text-white focus:outline-none focus:border-gold-400 font-sans"
-                      placeholder="••••••••"
+                    className="w-full bg-charcoal border-[#D8C0A8] rounded p-2.5 pr-10 text-xs text-white focus:outline-none focus:border-gold-400 font-sans"
+                    placeholder="••••••••"
                     />
                     <button
                       type="button"

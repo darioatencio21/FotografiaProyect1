@@ -75,15 +75,15 @@ function AdminSEOTab({ seo, onUpdateSeo, triggerAlert, lang }: AdminSEOTabProps)
         <div className="lg:col-span-7 space-y-4">
           <div className="space-y-1">
             <label className="text-[10px] font-mono text-white/50 uppercase">Homepage SEO Title</label>
-            <input type="text" required value={seoForm.title} onChange={(e) => setSeoForm(prev => ({ ...prev, title: e.target.value, ogTitle: e.target.value }))} className="w-full bg-dark/60 border border-white/10 rounded p-2.5 text-xs text-white" />
+            <input type="text" required value={seoForm.title} onChange={(e) => setSeoForm(prev => ({ ...prev, title: e.target.value, ogTitle: e.target.value }))} className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white" />
           </div>
 
           <div className="space-y-1">
             <label className="text-[10px] font-mono text-white/50 uppercase">Meta Description</label>
-            <textarea rows={3} required value={seoForm.description} onChange={(e) => setSeoForm(prev => ({ ...prev, description: e.target.value, ogDescription: e.target.value }))} className="w-full bg-dark/60 border border-white/10 rounded p-3 text-xs text-white resize-none" />
+            <textarea rows={3} required value={seoForm.description} onChange={(e) => setSeoForm(prev => ({ ...prev, description: e.target.value, ogDescription: e.target.value }))} className="w-full bg-charcoal border border-[#D8C0A8] rounded p-3 text-xs text-white resize-none" />
           </div>
 
-          <div className="bg-dark-gray/40 border border-white/5 p-4 rounded-xl space-y-4">
+          <div className="bg-dark-gray border border-white/5 p-4 rounded-xl space-y-4">
             <h3 className="text-[10px] font-mono text-gold-400 uppercase tracking-wider border-b border-white/5 pb-2">
               {lang === 'es' ? 'Hero Split — Imágenes' : 'Split Hero — Images'}
             </h3>
@@ -96,14 +96,14 @@ function AdminSEOTab({ seo, onUpdateSeo, triggerAlert, lang }: AdminSEOTabProps)
               <label className="text-[10px] font-mono text-white/50 uppercase block">{lang === 'es' ? 'Imagen Izquierda' : 'Left Image'}</label>
               <div className="flex items-center space-x-3">
                 <input type="file" id="hero-left-upload" className="hidden" accept="image/*" onChange={(e) => { if (e.target.files?.[0]) handleImageUpload('heroImageLeft')(e.target.files[0]); }} />
-                <label htmlFor="hero-left-upload" className="px-4 py-2 border border-white/10 hover:border-gold-400 hover:text-gold-300 bg-dark/60 text-white text-[10px] font-mono rounded-lg cursor-pointer transition-all uppercase tracking-widest flex items-center space-x-1.5 whitespace-nowrap">
+                <label htmlFor="hero-left-upload" className="px-4 py-2 border border-[#D8C0A8] hover:border-gold-400 hover:text-gold-300 bg-charcoal text-white text-[10px] font-mono rounded-lg cursor-pointer transition-all uppercase tracking-widest flex items-center space-x-1.5 whitespace-nowrap">
                   <UploadCloud size={12} />
                   <span>{lang === 'es' ? 'Subir' : 'Upload'}</span>
                 </label>
-                <input type="text" value={seoForm.heroImageLeft || ''} onChange={(e) => setSeoForm(prev => ({ ...prev, heroImageLeft: e.target.value || undefined }))} placeholder="https://..." className="flex-1 bg-dark/60 border border-white/10 rounded px-2.5 py-2 text-[10px] text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-mono" />
+                <input type="text" value={seoForm.heroImageLeft || ''} onChange={(e) => setSeoForm(prev => ({ ...prev, heroImageLeft: e.target.value || undefined }))} placeholder="https://..." className="flex-1 bg-charcoal border border-[#D8C0A8] rounded px-2.5 py-2 text-[10px] text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-mono" />
               </div>
               {seoForm.heroImageLeft && (
-                <div className="mt-1 aspect-[3/2] rounded-lg overflow-hidden border border-white/5 bg-dark">
+                <div className="mt-1 aspect-[3/2] rounded-lg overflow-hidden border border-white/5 bg-charcoal">
                   <img src={seoForm.heroImageLeft} alt="Left hero preview" className="w-full h-full object-cover" />
                 </div>
               )}
@@ -114,14 +114,14 @@ function AdminSEOTab({ seo, onUpdateSeo, triggerAlert, lang }: AdminSEOTabProps)
               <label className="text-[10px] font-mono text-white/50 uppercase block">{lang === 'es' ? 'Imagen Derecha' : 'Right Image'}</label>
               <div className="flex items-center space-x-3">
                 <input type="file" id="hero-right-upload" className="hidden" accept="image/*" onChange={(e) => { if (e.target.files?.[0]) handleImageUpload('heroImageRight')(e.target.files[0]); }} />
-                <label htmlFor="hero-right-upload" className="px-4 py-2 border border-white/10 hover:border-gold-400 hover:text-gold-300 bg-dark/60 text-white text-[10px] font-mono rounded-lg cursor-pointer transition-all uppercase tracking-widest flex items-center space-x-1.5 whitespace-nowrap">
+                <label htmlFor="hero-right-upload" className="px-4 py-2 border border-[#D8C0A8] hover:border-gold-400 hover:text-gold-300 bg-charcoal text-white text-[10px] font-mono rounded-lg cursor-pointer transition-all uppercase tracking-widest flex items-center space-x-1.5 whitespace-nowrap">
                   <UploadCloud size={12} />
                   <span>{lang === 'es' ? 'Subir' : 'Upload'}</span>
                 </label>
-                <input type="text" value={seoForm.heroImageRight || ''} onChange={(e) => setSeoForm(prev => ({ ...prev, heroImageRight: e.target.value || undefined }))} placeholder="https://..." className="flex-1 bg-dark/60 border border-white/10 rounded px-2.5 py-2 text-[10px] text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-mono" />
+                <input type="text" value={seoForm.heroImageRight || ''} onChange={(e) => setSeoForm(prev => ({ ...prev, heroImageRight: e.target.value || undefined }))} placeholder="https://..." className="flex-1 bg-charcoal border border-[#D8C0A8] rounded px-2.5 py-2 text-[10px] text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-mono" />
               </div>
               {seoForm.heroImageRight && (
-                <div className="mt-1 aspect-[3/2] rounded-lg overflow-hidden border border-white/5 bg-dark">
+                <div className="mt-1 aspect-[3/2] rounded-lg overflow-hidden border border-white/5 bg-charcoal">
                   <img src={seoForm.heroImageRight} alt="Right hero preview" className="w-full h-full object-cover" />
                 </div>
               )}
@@ -130,7 +130,7 @@ function AdminSEOTab({ seo, onUpdateSeo, triggerAlert, lang }: AdminSEOTabProps)
 
           <div className="space-y-1">
             <label className="text-[10px] font-mono text-white/50 uppercase">Robots.txt</label>
-            <textarea rows={3} value={seoForm.robotsText} onChange={(e) => setSeoForm(prev => ({ ...prev, robotsText: e.target.value }))} className="w-full bg-dark/60 border border-white/10 rounded p-3 text-xs text-white font-mono resize-none" />
+            <textarea rows={3} value={seoForm.robotsText} onChange={(e) => setSeoForm(prev => ({ ...prev, robotsText: e.target.value }))} className="w-full bg-charcoal border border-[#D8C0A8] rounded p-3 text-xs text-white font-mono resize-none" />
           </div>
         </div>
 
@@ -139,15 +139,15 @@ function AdminSEOTab({ seo, onUpdateSeo, triggerAlert, lang }: AdminSEOTabProps)
             <label className="text-[10px] font-mono text-white/50 uppercase block">Open Graph Image (Social Share)</label>
             <div className="flex items-center space-x-3">
               <input type="file" id="og-image-upload" className="hidden" accept="image/*" onChange={(e) => { if (e.target.files?.[0]) handleImageUpload('ogImage')(e.target.files[0]); }} />
-              <label htmlFor="og-image-upload" className="px-4 py-2 border border-white/10 hover:border-gold-400 hover:text-gold-300 bg-dark/60 text-white text-[10px] font-mono rounded-lg cursor-pointer transition-all uppercase tracking-widest flex items-center space-x-1.5 whitespace-nowrap">
+              <label htmlFor="og-image-upload" className="px-4 py-2 border border-[#D8C0A8] hover:border-gold-400 hover:text-gold-300 bg-charcoal text-white text-[10px] font-mono rounded-lg cursor-pointer transition-all uppercase tracking-widest flex items-center space-x-1.5 whitespace-nowrap">
                 <UploadCloud size={12} />
                 <span>{lang === 'es' ? 'Subir' : 'Upload'}</span>
               </label>
-              <input type="text" value={seoForm.ogImage} onChange={(e) => setSeoForm(prev => ({ ...prev, ogImage: e.target.value }))} placeholder="https://..." className="flex-1 bg-dark/60 border border-white/10 rounded px-2.5 py-2 text-[10px] text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-mono" />
+              <input type="text" value={seoForm.ogImage} onChange={(e) => setSeoForm(prev => ({ ...prev, ogImage: e.target.value }))} placeholder="https://..." className="flex-1 bg-charcoal border border-[#D8C0A8] rounded px-2.5 py-2 text-[10px] text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-mono" />
             </div>
           </div>
 
-          <div className="border border-white/10 bg-dark rounded-xl overflow-hidden shadow-2xl flex flex-col">
+          <div className="border border-[#D8C0A8] bg-charcoal rounded-xl overflow-hidden shadow-2xl flex flex-col">
             <div className="relative aspect-[1.91/1] overflow-hidden bg-charcoal">
               {seoForm.ogImage ? (
                 <img src={seoForm.ogImage} className="w-full h-full object-cover" alt="og preview" />
@@ -163,7 +163,7 @@ function AdminSEOTab({ seo, onUpdateSeo, triggerAlert, lang }: AdminSEOTabProps)
             </div>
           </div>
 
-          <div className="border border-white/5 bg-dark/20 rounded-xl p-4 space-y-1 text-left">
+          <div className="border border-white/5 bg-charcoal rounded-xl p-4 space-y-1 text-left">
             <span className="text-[9px] font-mono text-white/35 block">google.com/search</span>
             <span className="text-xs font-semibold text-[#8AB4F8] hover:underline cursor-pointer block">{seoForm.title}</span>
             <span className="text-[10px] text-[#A6C8FF] font-mono block">miriamcampos-photography.com</span>

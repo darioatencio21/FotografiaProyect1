@@ -170,7 +170,7 @@ export default function StripeCheckout({ isOpen, amount, description, onClose, o
 
                   <button
                     type="submit"
-                    className="w-full py-3 bg-gold-500 hover:bg-gold-400 text-dark font-mono text-xs tracking-widest uppercase font-semibold rounded-lg transition-all flex items-center justify-center space-x-1.5 shadow-xl cursor-pointer mt-4"
+                    className="w-full py-3 bg-gold-500 hover:bg-gold-400 text-dark font-mono text-xs tracking-widest uppercase font-semibold rounded-lg transition-all flex items-center justify-center space-x-1.5 cursor-pointer mt-4"
                   >
                     <span>Authorize & Pay ${amount}</span>
                   </button>

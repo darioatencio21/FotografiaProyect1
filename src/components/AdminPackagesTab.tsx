@@ -133,7 +133,7 @@ export default function AdminPackagesTab({ packages, onUpdatePackages, triggerAl
   }, []);
 
   const sorted = [...localPackages].sort((a, b) => a.sortOrder - b.sortOrder);
-  const inputClass = "w-full bg-dark/60 border border-white/10 rounded px-2.5 py-2 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans";
+  const inputClass = "w-full bg-charcoal border border-[#D8C0A8] rounded px-2.5 py-2 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans";
   const labelClass = "text-[9px] font-mono text-white/50 uppercase";
 
   return (
@@ -161,8 +161,8 @@ export default function AdminPackagesTab({ packages, onUpdatePackages, triggerAl
 
       {/* Edit/Create Modal */}
       {editingId && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center p-4 bg-dark/80 backdrop-blur-sm overflow-y-auto pt-12">
-          <div className="bg-charcoal border border-white/10 rounded-2xl p-6 max-w-3xl w-full space-y-5 shadow-2xl my-8">
+        <div className="fixed inset-0 z-50 flex items-start justify-center p-4 bg-overlay/80 backdrop-blur-sm overflow-y-auto pt-12">
+          <div className="bg-charcoal border border-[#D8C0A8] rounded-2xl p-6 max-w-3xl w-full space-y-5 shadow-2xl my-8">
             <div className="flex items-center justify-between border-b border-white/5 pb-3">
               <h3 className="font-serif text-lg text-white">
                 {isCreating ? t('Nuevo Paquete', 'New Package', 'Novo Pacote') : t('Editar Paquete', 'Edit Package', 'Editar Pacote')}
@@ -178,9 +178,9 @@ export default function AdminPackagesTab({ packages, onUpdatePackages, triggerAl
                 <div className="space-y-1">
                   <label className={labelClass}>{t('Icono', 'Icon')}</label>
                   <select value={editForm.icon} onChange={(e) => updateField('icon', e.target.value)}
-                    className="w-full bg-dark/60 border border-white/10 rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-gold-400">
+                    className="w-full bg-charcoal border border-[#D8C0A8] rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-gold-400">
                     {ICON_OPTIONS.map(ico => (
-                      <option key={ico} value={ico} className="bg-dark">{ico}</option>
+                      <option key={ico} value={ico} className="bg-charcoal">{ico}</option>
                     ))}
                   </select>
                 </div>
@@ -252,7 +252,7 @@ export default function AdminPackagesTab({ packages, onUpdatePackages, triggerAl
                 <div className="space-y-1">
                   <label className={labelClass}>{t('Color de tarjeta (opcional)', 'Card color (optional)')}</label>
                   <div className="flex items-center space-x-2">
-                    <input type="color" value={editForm.cardColor || '#461F1A'} onChange={(e) => updateField('cardColor', e.target.value)} className="w-8 h-8 rounded cursor-pointer border border-white/10" />
+                    <input type="color" value={editForm.cardColor || '#461F1A'} onChange={(e) => updateField('cardColor', e.target.value)} className="w-8 h-8 rounded cursor-pointer border border-[#D8C0A8]" />
                     <input value={editForm.cardColor || ''} onChange={(e) => updateField('cardColor', e.target.value || undefined)} placeholder="#461F1A" className={inputClass} />
                   </div>
                 </div>
@@ -294,7 +294,7 @@ export default function AdminPackagesTab({ packages, onUpdatePackages, triggerAl
             </div>
 
             <div className="flex justify-end space-x-3 pt-2 border-t border-white/5">
-              <button onClick={cancelEdit} className="px-4 py-2 border border-white/10 rounded-lg text-[10px] font-mono text-white/70 hover:text-white cursor-pointer transition-all">
+              <button onClick={cancelEdit} className="px-4 py-2 border border-[#D8C0A8] rounded-lg text-[10px] font-mono text-white/70 hover:text-white cursor-pointer transition-all">
                 {t('Cancelar', 'Cancel')}
               </button>
               <button onClick={saveEdit} className="px-4 py-2 bg-gold-500 text-dark font-mono text-[10px] tracking-widest uppercase font-bold rounded-lg hover:bg-gold-400 cursor-pointer transition-all">
@@ -315,7 +315,7 @@ export default function AdminPackagesTab({ packages, onUpdatePackages, triggerAl
         {sorted.map((pkg) => {
           const pName = lang === 'es' ? pkg.name_es : lang === 'pt' ? pkg.name_pt : pkg.name_en;
           return (
-            <div key={pkg.id} className={`flex items-center justify-between p-3 rounded-xl border transition-all ${pkg.active ? 'border-white/5 bg-dark-gray/40' : 'border-white/[0.02] bg-dark/30 opacity-60'}`}>
+            <div key={pkg.id} className={`flex items-center justify-between p-3 rounded-xl border transition-all ${pkg.active ? 'border-[#D8C0A8] bg-dark-gray' : 'border-[#D8C0A8]/30 bg-dark-gray opacity-60'}`}>
               <div className="flex items-center space-x-3 flex-1 min-w-0">
                 <span className="text-[10px] font-mono text-white/30 w-6 text-right">{pkg.sortOrder}</span>
                 <span className="text-xs text-white/50 font-mono w-20 truncate">{pkg.icon}</span>

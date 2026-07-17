@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Menu, X, Globe, User, ShieldAlert } from 'lucide-react';
 import { ActiveLanguage } from '../types';
@@ -29,64 +29,6 @@ export default function Header({
 }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isVisible, setIsVisible] = useState(true);
-
-  const lastScrollY = useRef(0);
-  const hideTimer = useRef<ReturnType<typeof setTimeout>>();
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentY = window.scrollY;
-
-      if (currentY <= 10) {
-        setIsVisible(true);
-        setIsScrolled(false);
-        lastScrollY.current = currentY;
-        return;
-      }
-
-      setIsScrolled(true);
-
-      if (currentY > lastScrollY.current && currentY > 80) {
-        setIsVisible(false);
-      } else if (currentY < lastScrollY.current) {
-        setIsVisible(true);
-      }
-
-      lastScrollY.current = currentY;
-    };
-
-    handleScroll();
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (e.clientY < 80) {
-        setIsVisible(true);
-        if (hideTimer.current) clearTimeout(hideTimer.current);
-        hideTimer.current = setTimeout(() => {
-          if (window.scrollY > 10) {
-            setIsVisible(false);
-          }
-        }, 3000);
-      }
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      if (hideTimer.current) clearTimeout(hideTimer.current);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (isMobileMenuOpen) {
-      setIsVisible(true);
-    }
-  }, [isMobileMenuOpen]);
 
   const t = TRANSLATIONS[lang];
 
@@ -111,13 +53,8 @@ export default function Header({
     { code: 'pt', name: 'POR' }
   ];
 
-  const headerIsSolid = isScrolled || currentView !== 'home';
-
   return (
-    <motion.header
-      animate={{ y: isVisible ? 0 : -120 }}
-      transition={{ duration: 0.35, ease: 'easeInOut' }}
-      className={`fixed top-0 inset-x-0 z-40 transition-colors duration-500 max-h-[70px] lg:max-h-none ${headerIsSolid ? 'bg-dark/85 backdrop-blur-lg border-b border-white/5' : 'bg-transparent border-b border-transparent'} py-2 lg:py-4 px-4 lg:px-12 flex items-center justify-between lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-x-24`}>
+    <header className="relative w-full max-h-[70px] lg:max-h-none bg-dark border-b border-white/5 py-2 lg:py-4 px-4 lg:px-12 flex items-center justify-between lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-x-24">
       {/* Desktop navigation link array - Left split (Home, About, Portfolio) */}
       <nav className="hidden lg:flex items-center space-x-8 z-10 justify-start">
         {menuItems.slice(0, 3).map(item => {
@@ -147,7 +84,7 @@ export default function Header({
         onClick={() => handleNav('home')} 
         className="flex items-center cursor-pointer group z-20 lg:flex lg:justify-center lg:items-center gap-2 lg:gap-3 py-0.5 lg:py-1"
       >
-        <Logo size="xs" className="[&>svg]:h-8 [&>svg]:w-8 lg:[&>svg]:h-10 lg:[&>svg]:w-10" />
+        <Logo size="xs" />
         <span id="header-logo" className="font-serif text-clamp-sm lg:text-[13px] font-semibold tracking-[0.2em] lg:tracking-[0.25em] text-white group-hover:text-gold-400 transition-colors duration-500 whitespace-nowrap uppercase">
           Miriam Campos
         </span>
@@ -282,10 +219,10 @@ export default function Header({
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            className="fixed inset-0 top-[70px] bg-dark-gray z-30 lg:hidden flex flex-col justify-between p-6 text-left"
-            initial={{ opacity: 0, x: '100%' }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: '100%' }}
+            className="fixed inset-0 top-[70px] bg-dark z-30 lg:hidden flex flex-col justify-between p-6 text-left overflow-y-auto border-l border-[#D8C0A8]"
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
             transition={{ type: 'tween', duration: 0.3 }}
           >
             <div className="space-y-6 pt-4">
@@ -329,6 +266,6 @@ export default function Header({
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.header>
+    </header>
   );
 }

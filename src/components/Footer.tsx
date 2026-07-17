@@ -131,12 +131,12 @@ export default function Footer({ onSetView, lang }: FooterProps) {
               placeholder="studio@client.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-dark-gray border border-white/10 rounded px-3.5 py-2.5 pr-10 text-xs text-white placeholder-white/20 focus:outline-none focus:border-gold-400"
+              className="w-full bg-charcoal border border-white/10 rounded px-3.5 py-2.5 pr-10 text-xs text-white placeholder-white/20 focus:outline-none focus:border-gold-400"
             />
             <button
               type="submit"
               disabled={isSubmitting || isSubscribed}
-              className="absolute right-1 top-1 bottom-1 px-2.5 bg-white hover:bg-gold-400 text-dark rounded transition-all flex items-center justify-center cursor-pointer disabled:opacity-50"
+              className="absolute right-1 top-1 bottom-1 px-2.5 bg-gold-500 hover:bg-gold-400 text-charcoal rounded transition-all flex items-center justify-center cursor-pointer disabled:opacity-50"
             >
               {isSubmitting ? (
                 <div className="w-3 h-3 border border-dark border-t-transparent rounded-full animate-spin" />

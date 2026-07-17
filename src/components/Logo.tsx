@@ -8,7 +8,7 @@ interface LogoProps {
 export const Logo: React.FC<LogoProps> = ({ className = '', size = 'md' }) => {
   // Determine dimensions based on size prop
   const dimensions = {
-    xs: 'h-10 w-10',
+    xs: 'h-8 w-8 sm:h-10 sm:w-10',
     sm: 'h-14 w-14',
     md: 'h-20 w-20 lg:h-24 lg:w-24',
     lg: 'h-28 w-28 lg:h-36 lg:w-36',

@@ -6,23 +6,26 @@
   --font-serif: "Playfair Display", "Cormorant Garamond", Georgia, serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   --font-script: "Alex Brush", cursive;
-  
-  --color-gold-50: #FAF4F3;
-  --color-gold-100: #F5E5E2;
-  --color-gold-200: #ECD1CC;
-  --color-gold-300: #DFBAB1;
-  --color-gold-400: #D0A196;
-  --color-gold-500: #BD857A;
-  --color-gold-600: #A1695F;
-  --color-gold-700: #834E45;
-  --color-gold-800: #64352D;
-  --color-gold-900: #461F1A;
-  --color-gold-950: #2C0F0A;
 
-  --color-dark: #2C0F0A;
-  --color-dark-gray: #461F1A;
-  --color-charcoal: #64352D;
-  --color-white: #FAF4F3;
+  --color-gold-50: #FDF8F3;
+  --color-gold-100: #F5E6D6;
+  --color-gold-200: #E8CCB5;
+  --color-gold-300: #D4A88A;
+  --color-gold-400: #B8835E;
+  --color-gold-500: #8B5E3C;
+  --color-gold-600: #6E4630;
+  --color-gold-700: #4E3322;
+  --color-gold-800: #3A2518;
+  --color-gold-900: #2C1A0F;
+  --color-gold-950: #1A0E08;
+
+  --color-dark: #EFD2B4;
+  --color-dark-gray: #F7E9DA;
+  --color-charcoal: #FAF4EE;
+  --color-white: #3A3028;
+  --color-overlay: #3A3028;
+  --color-border: #D8C0A8;
+  --color-hero: #F8F6F2;
 }
 
 *, *::before, *::after {
@@ -30,7 +33,6 @@
 }
 
 html {
-  overflow-x: hidden;
   width: 100%;
   -webkit-text-size-adjust: 100%;
 }
@@ -40,10 +42,16 @@ html {
     background-color: var(--color-dark);
     color: var(--color-white);
     font-family: var(--font-sans);
-    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
     width: 100%;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  #root {
+    width: 100%;
+    overflow-x: hidden;
   }
 
   img {
@@ -52,26 +60,24 @@ html {
     display: block;
   }
 
-  /* Custom high-end scrollbar */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: var(--color-dark);
+    background: var(--color-dark-gray);
   }
   ::-webkit-scrollbar-thumb {
-    background: var(--color-charcoal);
+    background: var(--color-gold-300);
     border-radius: 3px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #BD857A;
+    background: var(--color-gold-400);
   }
 
-  /* Selection styling */
   ::selection {
-    background-color: #BD857A;
-    color: #FAF4F3;
+    background-color: var(--color-gold-500);
+    color: var(--color-charcoal);
   }
 }
 
@@ -87,22 +93,22 @@ html {
 
 /* Custom cinematic glow classes and utility animations */
 .text-stroke {
-  -webkit-text-stroke: 1px rgba(44, 15, 10, 0.2);
+  -webkit-text-stroke: 1px rgba(58, 48, 40, 0.15);
   color: transparent;
 }
 
 .glass-premium {
-  background: rgba(44, 15, 10, 0.75);
+  background: rgba(250, 244, 238, 0.85);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(250, 244, 243, 0.08);
+  border: 1px solid rgba(216, 192, 168, 0.3);
 }
 
 .gold-gradient {
-  background: linear-gradient(135deg, #2C0F0A 0%, #BD857A 50%, #FAF4F3 100%);
+  background: linear-gradient(135deg, #EFD2B4 0%, #B8835E 50%, #3A3028 100%);
 }
 
 .gold-text-gradient {
-  background: linear-gradient(135deg, #BD857A 0%, #DFBAB1 50%, #FAF4F3 100%);
+  background: linear-gradient(135deg, #8B5E3C 0%, #D4A88A 50%, #3A3028 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -113,12 +119,6 @@ html {
 }
 .zoom-in-out:hover {
   transform: scale(1.03);
-}
-
-/* Ken Burns cinematic slow zoom for hero images */
-@keyframes heroZoom {
-  0% { transform: scale(1); }
-  100% { transform: scale(1.05); }
 }
 
 /* Ensure default cursor is always visible and interactive */

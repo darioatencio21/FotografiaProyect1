@@ -17,8 +17,14 @@ export interface Photograph {
   id: string;
   url: string;
   title: string;
+  title_es?: string;
+  title_en?: string;
+  title_pt?: string;
   category: string; // 'retrato' | 'boda' | 'moda' | 'drone' | 'viajes' | 'producto' | 'evento' | 'naturaleza'
   description: string;
+  description_es?: string;
+  description_en?: string;
+  description_pt?: string;
   exif: ExifData;
   tags: string[];
   colors: string[]; // dominant hex colors (e.g. ['#0B0B0B', '#C7A962'])

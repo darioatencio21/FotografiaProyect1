@@ -634,7 +634,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
               <button
                 type="submit"
                 disabled={isSyncing || !dateValue}
-                className="w-full py-3.5 bg-gold-500 hover:bg-gold-400 text-dark font-mono text-xs tracking-widest uppercase font-bold rounded-lg transition-all flex items-center justify-center space-x-2 shadow-xl cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-3.5 bg-gold-500 hover:bg-gold-400 text-dark font-mono text-xs tracking-widest uppercase font-bold rounded-lg transition-all flex items-center justify-center space-x-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSyncing ? (
                   <>

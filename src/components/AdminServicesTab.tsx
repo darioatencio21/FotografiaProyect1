@@ -120,7 +120,7 @@ function AdminServicesTab({ services, onUpdateServices, triggerAlert, lang }: Ad
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between border-b border-white/5 pb-4">
+      <div className="flex items-center justify-between border-b border-[#D8C0A8] pb-4">
         <div>
           <h2 className="font-serif text-2xl text-white">
             {lang === 'es' ? 'Tarifas de Servicios Premium' : lang === 'pt' ? 'Tarifas de Serviços Premium' : 'Premium Service Tiers'}
@@ -140,7 +140,7 @@ function AdminServicesTab({ services, onUpdateServices, triggerAlert, lang }: Ad
 
       {serviceEditItem && (
         <form onSubmit={handleSaveService} className="bg-dark border border-gold-400/20 rounded-2xl p-6 text-left space-y-4">
-          <div className="flex justify-between items-center border-b border-white/5 pb-3">
+          <div className="flex justify-between items-center border-b border-[#D8C0A8] pb-3">
             <h3 className="font-serif text-lg text-white">
               {services.some(s => s.id === serviceEditItem.id) ? (lang === 'es' ? 'Modificar Paquete' : 'Edit Package') : (lang === 'es' ? 'Crear Paquete' : 'Create Package')}
             </h3>
@@ -152,39 +152,39 @@ function AdminServicesTab({ services, onUpdateServices, triggerAlert, lang }: Ad
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1">
               <label className="text-[10px] font-mono text-white/50 uppercase">{lang === 'es' ? 'Título del Paquete' : 'Package Title'}</label>
-              <input type="text" required value={serviceForm.title || ''} onChange={(e) => setServiceForm(prev => ({ ...prev, title: e.target.value }))} className="w-full bg-dark/60 border border-white/10 rounded p-2.5 text-xs text-white focus:border-gold-400 focus:outline-none" />
+              <input type="text" required value={serviceForm.title || ''} onChange={(e) => setServiceForm(prev => ({ ...prev, title: e.target.value }))} className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white focus:border-gold-400 focus:outline-none" />
             </div>
             <div className="space-y-1">
               <label className="text-[10px] font-mono text-white/50 uppercase">Precio ($ USD)</label>
-              <input type="number" required min="0" value={serviceForm.price ?? ''} onChange={(e) => setServiceForm(prev => ({ ...prev, price: Number(e.target.value) }))} className="w-full bg-dark/60 border border-white/10 rounded p-2.5 text-xs text-white focus:border-gold-400 focus:outline-none" />
+              <input type="number" required min="0" value={serviceForm.price ?? ''} onChange={(e) => setServiceForm(prev => ({ ...prev, price: Number(e.target.value) }))} className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white focus:border-gold-400 focus:outline-none" />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1">
               <label className="text-[10px] font-mono text-white/50 uppercase">{lang === 'es' ? 'Duración' : 'Duration'}</label>
-              <input type="text" required value={serviceForm.duration || ''} onChange={(e) => setServiceForm(prev => ({ ...prev, duration: e.target.value }))} className="w-full bg-dark/60 border border-white/10 rounded p-2.5 text-xs text-white focus:border-gold-400 focus:outline-none" />
+              <input type="text" required value={serviceForm.duration || ''} onChange={(e) => setServiceForm(prev => ({ ...prev, duration: e.target.value }))} className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white focus:border-gold-400 focus:outline-none" />
             </div>
             <div className="space-y-1">
               <label className="text-[10px] font-mono text-white/50 uppercase">URL de Imagen</label>
-              <input type="text" value={serviceForm.image || ''} onChange={(e) => setServiceForm(prev => ({ ...prev, image: e.target.value }))} className="w-full bg-dark/60 border border-white/10 rounded p-2.5 text-xs text-white focus:border-gold-400 focus:outline-none" />
+              <input type="text" value={serviceForm.image || ''} onChange={(e) => setServiceForm(prev => ({ ...prev, image: e.target.value }))} className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white focus:border-gold-400 focus:outline-none" />
             </div>
           </div>
 
           <div className="space-y-1">
             <label className="text-[10px] font-mono text-white/50 uppercase">{lang === 'es' ? 'Descripción' : 'Description'}</label>
-            <textarea required rows={3} value={serviceForm.description || ''} onChange={(e) => setServiceForm(prev => ({ ...prev, description: e.target.value }))} className="w-full bg-dark/60 border border-white/10 rounded p-2.5 text-xs text-white focus:border-gold-400 focus:outline-none resize-none" />
+            <textarea required rows={3} value={serviceForm.description || ''} onChange={(e) => setServiceForm(prev => ({ ...prev, description: e.target.value }))} className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white focus:border-gold-400 focus:outline-none resize-none" />
           </div>
 
           <div className="space-y-2">
             <label className="text-[10px] font-mono text-white/50 uppercase block">{lang === 'es' ? 'Inclusiones' : 'Inclusions'}</label>
             <div className="flex gap-2">
-              <input type="text" value={newInclusion} onChange={(e) => setNewInclusion(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddInclusion(); } }} className="flex-1 bg-dark/60 border border-white/10 rounded p-2 text-xs text-white focus:border-gold-400 focus:outline-none" />
+              <input type="text" value={newInclusion} onChange={(e) => setNewInclusion(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddInclusion(); } }} className="flex-1 bg-charcoal border border-[#D8C0A8] rounded p-2 text-xs text-white focus:border-gold-400 focus:outline-none" />
               <button type="button" onClick={handleAddInclusion} className="px-3 bg-gold-500 hover:bg-gold-400 text-dark font-mono text-[10px] font-semibold uppercase tracking-wider rounded transition-all cursor-pointer">Añadir</button>
             </div>
-            <div className="flex flex-wrap gap-1.5 mt-2 max-h-36 overflow-y-auto p-1.5 bg-black/20 rounded border border-white/5">
+            <div className="flex flex-wrap gap-1.5 mt-2 max-h-36 overflow-y-auto p-1.5 bg-dark-gray rounded border border-[#D8C0A8]">
               {(Array.isArray(serviceForm.includes) ? serviceForm.includes : []).map((inc, idx) => (
-                <span key={idx} className="inline-flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded px-2.5 py-1 text-[10px] text-white/90">
+                <span key={idx} className="inline-flex items-center gap-1.5 bg-dark-gray hover:bg-white/10 border border-[#D8C0A8] rounded px-2.5 py-1 text-[10px] text-white/90">
                   <span>{inc}</span>
                   <button type="button" onClick={() => handleRemoveInclusion(idx)} className="text-white/45 hover:text-red-400 cursor-pointer transition-colors ml-1"><X size={10} /></button>
                 </span>
@@ -195,8 +195,8 @@ function AdminServicesTab({ services, onUpdateServices, triggerAlert, lang }: Ad
             </div>
           </div>
 
-          <div className="flex justify-end space-x-3 pt-3 border-t border-white/5">
-            <button type="button" onClick={handleCancelEdit} className="px-4 py-2 border border-white/15 hover:bg-white/5 text-white rounded text-xs font-mono uppercase tracking-wider transition-all cursor-pointer">Cancelar</button>
+          <div className="flex justify-end space-x-3 pt-3 border-t border-[#D8C0A8]">
+            <button type="button" onClick={handleCancelEdit} className="px-4 py-2 border border-[#D8C0A8] hover:bg-white/5 text-white rounded text-xs font-mono uppercase tracking-wider transition-all cursor-pointer">Cancelar</button>
             <button type="submit" className="px-4 py-2 bg-gold-500 hover:bg-gold-400 text-dark font-mono text-xs uppercase tracking-wider font-bold rounded shadow-lg shadow-gold-500/15 transition-all cursor-pointer">
               <Save size={12} className="inline mr-1" />
               {lang === 'es' ? 'Guardar Cambios' : 'Save Changes'}
@@ -207,7 +207,7 @@ function AdminServicesTab({ services, onUpdateServices, triggerAlert, lang }: Ad
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {services.map(service => (
-          <div key={service.id} className="bg-dark/40 border border-white/5 rounded-2xl p-5 space-y-4 flex flex-col justify-between">
+          <div key={service.id} className="bg-charcoal border border-[#D8C0A8] rounded-2xl p-5 space-y-4 flex flex-col justify-between">
             <div className="space-y-4">
               <div className="flex justify-between items-start">
                 <div className="space-y-1 text-left">
@@ -218,7 +218,7 @@ function AdminServicesTab({ services, onUpdateServices, triggerAlert, lang }: Ad
               </div>
               <p className="text-xs text-white/60 text-left line-clamp-3 leading-relaxed">{service.description}</p>
             </div>
-            <div className="border-t border-white/5 pt-3 flex justify-between items-center">
+            <div className="border-t border-[#D8C0A8] pt-3 flex justify-between items-center">
               <span className="text-[9px] font-mono text-white/35 uppercase">Inclusions: {service.includes.length} Modules</span>
               <div className="flex items-center space-x-3">
                 <button onClick={() => handleDeleteService(service.id)} className="text-xs font-mono text-red-400 hover:text-red-300 flex items-center space-x-1 cursor-pointer" title="Eliminar Paquete"><Trash2 size={10} /><span>Delete</span></button>
