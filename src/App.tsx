@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
    Heart, ArrowRight, MessageSquare, MapPin, 
@@ -87,6 +87,33 @@ export default function App() {
   // Navigation & Language Context
   const [currentView, setCurrentView] = useState<string>('home');
   const [lang, setLang] = useState<'es' | 'en' | 'pt'>('es');
+  const [headerHeight, setHeaderHeight] = useState(80);
+
+  useEffect(() => {
+    let observer: ResizeObserver;
+
+    const measure = () => {
+      const header = document.querySelector('header');
+      if (header) {
+        const h = header.getBoundingClientRect().height;
+        if (h > 0) setHeaderHeight(h);
+      }
+    };
+
+    measure();
+    window.addEventListener('resize', measure);
+
+    const header = document.querySelector('header');
+    if (header) {
+      observer = new ResizeObserver(measure);
+      observer.observe(header);
+    }
+
+    return () => {
+      window.removeEventListener('resize', measure);
+      observer?.disconnect();
+    };
+  }, []);
 
   const [photographs, setPhotographs] = useState<Photograph[]>(() => {
     const saved = localStorage.getItem('aurea_photos');
@@ -829,7 +856,8 @@ export default function App() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -15 }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
-          className="pb-24 px-6 lg:px-12 max-w-7xl mx-auto space-y-24">
+          className="pb-24 px-6 lg:px-12 max-w-7xl mx-auto space-y-24"
+          style={{ paddingTop: headerHeight }}>
 
           {/* ======================================================= */}
           {/* HOME SCREEN (content below hero) */}
