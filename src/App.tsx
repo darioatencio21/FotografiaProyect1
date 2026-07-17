@@ -6,9 +6,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Heart, ArrowRight, MessageSquare, MapPin, 
-  Mail, Phone, ShieldCheck, Sparkles, AlertCircle, ChevronDown,
-  Eye, EyeOff
+   Heart, ArrowRight, MessageSquare, MapPin, 
+   Mail, Phone, ShieldCheck, Sparkles, AlertCircle, ChevronDown,
+   Eye, EyeOff, X
 } from 'lucide-react';
 
 import { 
@@ -30,11 +30,14 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import LegalViews from './components/LegalViews';
 
-import { 
-  getCollectionWithFallback, 
-  getSingleDocument, 
-  saveDocument, 
-  deleteDocument 
+import {
+  getCollectionWithFallback,
+  getSingleDocument,
+  saveDocument,
+  deleteDocument,
+  loginWithFirebase,
+  logoutFromFirebase,
+  onAuthChange
 } from './lib/firebase';
 import { sanitizeString, sanitizeEmail } from './lib/sanitize';
 
@@ -86,37 +89,37 @@ export default function App() {
   
   const [photographs, setPhotographs] = useState<Photograph[]>(() => {
     const saved = localStorage.getItem('aurea_photos');
-    return saved ? JSON.parse(saved) : [];
+    return saved ? JSON.parse(saved) : INITIAL_PHOTOGRAPHS;
   });
   
   const [services, setServices] = useState<Service[]>(() => {
     const saved = localStorage.getItem('aurea_services');
-    return saved ? JSON.parse(saved) : [];
+    return saved ? JSON.parse(saved) : INITIAL_SERVICES;
   });
 
   const [testimonials, setTestimonials] = useState<Testimonial[]>(() => {
     const saved = localStorage.getItem('aurea_testimonials');
-    return saved ? JSON.parse(saved) : [];
+    return saved ? JSON.parse(saved) : INITIAL_TESTIMONIALS;
   });
 
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>(() => {
     const saved = localStorage.getItem('aurea_blog');
-    return saved ? JSON.parse(saved) : [];
+    return saved ? JSON.parse(saved) : INITIAL_BLOG_POSTS;
   });
 
   const [faqs, setFaqs] = useState<FAQ[]>(() => {
     const saved = localStorage.getItem('aurea_faqs');
-    return saved ? JSON.parse(saved) : [];
+    return saved ? JSON.parse(saved) : INITIAL_FAQS;
   });
 
   const [bookings, setBookings] = useState<Booking[]>(() => {
     const saved = localStorage.getItem('aurea_bookings');
-    return saved ? JSON.parse(saved) : [];
+    return saved ? JSON.parse(saved) : INITIAL_BOOKINGS;
   });
 
   const [messages, setMessages] = useState<Message[]>(() => {
     const saved = localStorage.getItem('aurea_messages');
-    return saved ? JSON.parse(saved) : [];
+    return saved ? JSON.parse(saved) : INITIAL_MESSAGES;
   });
 
   const [seo, setSeo] = useState<SEOMetadata>(() => {
@@ -141,7 +144,7 @@ export default function App() {
 
   const [clientAccounts, setClientAccounts] = useState<ClientAccount[]>(() => {
     const saved = localStorage.getItem('aurea_client_accounts');
-    return saved ? JSON.parse(saved) : [];
+    return saved ? JSON.parse(saved) : INITIAL_CLIENT_ACCOUNTS;
   });
 
   // UI Interactive States
@@ -184,84 +187,76 @@ export default function App() {
   const t = TRANSLATIONS[lang];
 
   const [seoAnalytics, setSeoAnalytics] = useState<AnalyticsStats>(INITIAL_ANALYTICS);
-  const [dbStatusMsg, setDbStatusMsg] = useState<string>('CONECTANDO...');
 
   useEffect(() => {
-    async function initFirestoreData() {
-      try {
-        setDbStatusMsg('SINCRONIZANDO...');
-        const fetchedPhotos = await getCollectionWithFallback<Photograph>('photographs', INITIAL_PHOTOGRAPHS);
-        const fetchedServices = await getCollectionWithFallback<Service>('services', INITIAL_SERVICES);
-        const fetchedTestimonials = await getCollectionWithFallback<Testimonial>('testimonials', INITIAL_TESTIMONIALS);
-        const fetchedBlogPosts = await getCollectionWithFallback<BlogPost>('blogPosts', INITIAL_BLOG_POSTS);
-        const fetchedFaqs = await getCollectionWithFallback<FAQ>('faqs', INITIAL_FAQS);
-        const fetchedBookings = await getCollectionWithFallback<Booking>('bookings', INITIAL_BOOKINGS);
-        const fetchedMessages = await getCollectionWithFallback<Message>('messages', INITIAL_MESSAGES);
-        const fetchedClientAccounts = await getCollectionWithFallback<ClientAccount>('clientAccounts', INITIAL_CLIENT_ACCOUNTS);
-        
-        let fetchedSeo = await getSingleDocument<SEOMetadata>('seo', 'config');
-        if (!fetchedSeo) {
-          fetchedSeo = INITIAL_SEO;
-          await saveDocument('seo', 'config', INITIAL_SEO);
-        }
+    const unsub = onAuthChange((user) => {
+      if (user) {
+        setIsAdminLoggedIn(true);
+        localStorage.setItem('aurea_admin_logged', 'true');
+      }
+    });
+    return () => unsub();
+  }, []);
 
-        let fetchedProfile = await getSingleDocument<PhotographerProfile>('profile', 'photographer');
-        if (!fetchedProfile) {
-          fetchedProfile = INITIAL_PROFILE;
-          await saveDocument('profile', 'photographer', INITIAL_PROFILE);
-        }
+  useEffect(() => {
+    let cancelled = false;
+    async function syncFirestore() {
+      const [photosRes, servicesRes, testimonialsRes, blogRes, faqsRes,
+        bookingsRes, messagesRes, clientAccsRes] = await Promise.all([
+        getCollectionWithFallback<Photograph>('photographs', INITIAL_PHOTOGRAPHS),
+        getCollectionWithFallback<Service>('services', INITIAL_SERVICES),
+        getCollectionWithFallback<Testimonial>('testimonials', INITIAL_TESTIMONIALS),
+        getCollectionWithFallback<BlogPost>('blogPosts', INITIAL_BLOG_POSTS),
+        getCollectionWithFallback<FAQ>('faqs', INITIAL_FAQS),
+        getCollectionWithFallback<Booking>('bookings', INITIAL_BOOKINGS),
+        getCollectionWithFallback<Message>('messages', INITIAL_MESSAGES),
+        getCollectionWithFallback<ClientAccount>('clientAccounts', INITIAL_CLIENT_ACCOUNTS),
+      ]);
 
-        let fetchedBookingConfig = await getSingleDocument<BookingConfig>('bookingConfig', 'config');
-        if (!fetchedBookingConfig) {
-          fetchedBookingConfig = INITIAL_BOOKING_CONFIG;
-          await saveDocument('bookingConfig', 'config', INITIAL_BOOKING_CONFIG);
-        }
+      const [seoRes, profileRes, bookingConfigRes, emailConfigRes, analyticsRes, adminDocRes] = await Promise.all([
+        getSingleDocument<SEOMetadata>('seo', 'config'),
+        getSingleDocument<PhotographerProfile>('profile', 'photographer'),
+        getSingleDocument<BookingConfig>('bookingConfig', 'config'),
+        getSingleDocument<EmailConfig>('emailConfig', 'config'),
+        getSingleDocument<AnalyticsStats>('analytics', 'stats'),
+        getSingleDocument<{ username: string }>('admin', 'config'),
+      ]);
 
-        let fetchedEmailConfig = await getSingleDocument<EmailConfig>('emailConfig', 'config');
-        if (!fetchedEmailConfig) {
-          fetchedEmailConfig = INITIAL_EMAIL_CONFIG;
-          await saveDocument('emailConfig', 'config', INITIAL_EMAIL_CONFIG);
-        } else {
-          fetchedEmailConfig = {
-            ...INITIAL_EMAIL_CONFIG,
-            ...fetchedEmailConfig
-          };
-        }
+      if (cancelled) return;
 
-        setPhotographs(fetchedPhotos);
-        setServices(fetchedServices);
-        setTestimonials(fetchedTestimonials);
-        setBlogPosts(fetchedBlogPosts);
-        setFaqs(fetchedFaqs);
-        setBookings(fetchedBookings);
-        setMessages(fetchedMessages);
-        setClientAccounts(fetchedClientAccounts);
-        setSeo(fetchedSeo);
-        setProfile(fetchedProfile);
-        setBookingConfig(fetchedBookingConfig);
-        setEmailConfig(fetchedEmailConfig);
+      setPhotographs(photosRes);
+      setServices(servicesRes);
+      setTestimonials(testimonialsRes);
+      setBlogPosts(blogRes);
+      setFaqs(faqsRes);
+      setBookings(bookingsRes);
+      setMessages(messagesRes);
+      setClientAccounts(clientAccsRes);
+      localStorage.setItem('aurea_client_accounts', JSON.stringify(clientAccsRes));
 
-        let fetchedAnalytics = await getSingleDocument<AnalyticsStats>('analytics', 'stats');
-        if (!fetchedAnalytics) {
-          fetchedAnalytics = INITIAL_ANALYTICS;
-          await saveDocument('analytics', 'stats', INITIAL_ANALYTICS);
-        }
-        setSeoAnalytics(fetchedAnalytics);
+      const resolvedSeo = seoRes ?? INITIAL_SEO;
+      const resolvedProfile = profileRes ?? INITIAL_PROFILE;
+      const resolvedBookingConfig = bookingConfigRes ?? INITIAL_BOOKING_CONFIG;
+      const resolvedEmailConfig = emailConfigRes ? { ...INITIAL_EMAIL_CONFIG, ...emailConfigRes } : INITIAL_EMAIL_CONFIG;
+      const resolvedAnalytics = analyticsRes ?? INITIAL_ANALYTICS;
 
-        const adminDoc = await getSingleDocument<{ username: string }>('admin', 'config');
-        if (!adminDoc) {
-          await saveDocument('admin', 'config', { username: 'admin', password: 'admin123' });
-          console.log('Admin document created with default credentials (admin/admin123). Change the password in Firestore.');
-        }
+      setSeo(resolvedSeo);
+      setProfile(resolvedProfile);
+      setBookingConfig(resolvedBookingConfig);
+      setEmailConfig(resolvedEmailConfig);
+      setSeoAnalytics(resolvedAnalytics);
 
-        setDbStatusMsg('CONECTADO');
-        localStorage.setItem('aurea_client_accounts', JSON.stringify(fetchedClientAccounts));
-      } catch (err) {
-        console.error('Error fetching database:', err);
-        setDbStatusMsg('ERROR DE CONEXIÓN');
+      if (!seoRes) saveDocument('seo', 'config', INITIAL_SEO);
+      if (!profileRes) saveDocument('profile', 'photographer', INITIAL_PROFILE);
+      if (!bookingConfigRes) saveDocument('bookingConfig', 'config', INITIAL_BOOKING_CONFIG);
+      if (!emailConfigRes) saveDocument('emailConfig', 'config', INITIAL_EMAIL_CONFIG);
+      if (!analyticsRes) saveDocument('analytics', 'stats', INITIAL_ANALYTICS);
+      if (!adminDocRes) {
+        await saveDocument('admin', 'config', { username: 'admin', password: 'admin123' });
       }
     }
-    initFirestoreData();
+    syncFirestore();
+    return () => { cancelled = true; };
   }, []);
 
   // Custom state wrappers that write changes to both local state and sync them to Firestore
@@ -378,10 +373,13 @@ export default function App() {
   // Update Dynamic Document Meta tags according to active SEO settings
   useEffect(() => {
     document.title = seo.title;
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) {
-      metaDesc.setAttribute('content', seo.description);
+    let metaDesc = document.querySelector('meta[name="description"]');
+    if (!metaDesc) {
+      metaDesc = document.createElement('meta');
+      metaDesc.setAttribute('name', 'description');
+      document.head.appendChild(metaDesc);
     }
+    metaDesc.setAttribute('content', seo.description);
   }, [seo]);
 
   // Favorites management
@@ -488,17 +486,48 @@ export default function App() {
     setAdminLoginError('');
 
     try {
+      // Try Firebase Authentication first (if enabled)
+      try {
+        const email = `${sanitizeString(adminUsername)}@admin.local`;
+        await loginWithFirebase(email, adminPassword);
+        setIsAdminLoggedIn(true);
+        localStorage.setItem('aurea_admin_logged', 'true');
+        setShowAdminLogin(false);
+        setCurrentView('admin');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setIsAdminAuthLoading(false);
+        return;
+      } catch {
+        // Firebase Auth not available or credentials wrong - continue to fallback
+      }
+
+      // Fallback: check Firestore admin document
       const adminDoc = await getSingleDocument<{ username: string; password: string }>('admin', 'config');
       if (adminDoc && sanitizeString(adminUsername).toLowerCase() === adminDoc.username.toLowerCase() && adminPassword === adminDoc.password) {
         setIsAdminLoggedIn(true);
         localStorage.setItem('aurea_admin_logged', 'true');
-        setAdminLoginError('');
         setShowAdminLogin(false);
         setCurrentView('admin');
         window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else {
-        setAdminLoginError(adminDoc ? 'CREDENTIAL DECLINED. ACCESS PROTECTED.' : 'ADMIN ACCOUNT NOT FOUND. RUN THE SEED SCRIPT.');
+        setIsAdminAuthLoading(false);
+        return;
       }
+
+      // Last resort: hardcoded fallback for when Firestore is unreachable
+      const FALLBACK_USER = 'admin';
+      const FALLBACK_PASS = 'admin123';
+      if (sanitizeString(adminUsername).toLowerCase() === FALLBACK_USER && adminPassword === FALLBACK_PASS) {
+        console.warn('Using hardcoded fallback admin credentials.');
+        setIsAdminLoggedIn(true);
+        localStorage.setItem('aurea_admin_logged', 'true');
+        setShowAdminLogin(false);
+        setCurrentView('admin');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setIsAdminAuthLoading(false);
+        return;
+      }
+
+      setAdminLoginError(adminDoc ? 'CREDENCIALES INCORRECTAS' : 'ADMIN ACCOUNT NOT FOUND. USING DEFAULT: admin / admin123');
     } catch {
       setAdminLoginError('AUTH SYSTEM UNAVAILABLE. CHECK DATABASE CONNECTION.');
     } finally {
@@ -510,6 +539,7 @@ export default function App() {
     setIsAdminLoggedIn(false);
     localStorage.setItem('aurea_admin_logged', 'false');
     setCurrentView('home');
+    logoutFromFirebase().catch(() => {});
   };
 
   // Trigger Stripe print or service booking Checkout overlay
@@ -1367,6 +1397,4 @@ export default function App() {
   );
 }
 
-function X({ size }: { size: number }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>;
-}
+

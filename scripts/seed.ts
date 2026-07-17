@@ -28,10 +28,8 @@ const firebaseConfig = {
   appId: process.env.VITE_FIREBASE_APP_ID
 };
 
-const dbId = process.env.VITE_FIREBASE_DATABASE_ID;
-
-const app = initializeApp(firebaseConfig);
-const db = dbId && dbId !== '(default)' ? getFirestore(app, dbId) : getFirestore(app);
+const seedApp = initializeApp(firebaseConfig);
+const db = getFirestore(seedApp);
 
 async function seed() {
   console.log('Seeding Firestore...\n');

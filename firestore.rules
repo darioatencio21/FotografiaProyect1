@@ -1,98 +1,95 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Default safety net
-    match /{document=**} {
-      allow read, write: if false;
-    }
 
     // Helper functions
     function isValidId(id) {
       return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
     }
 
-    // Photographs
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email != null;
+    }
+
+    // Public collections — anyone can read, write with valid ID
     match /photographs/{photoId} {
       allow read: if true;
       allow write: if isValidId(photoId);
     }
 
-    // Services
     match /services/{serviceId} {
       allow read: if true;
       allow write: if isValidId(serviceId);
     }
 
-    // Testimonials
     match /testimonials/{testimonialId} {
       allow read: if true;
       allow write: if isValidId(testimonialId);
     }
 
-    // Blog Posts
     match /blogPosts/{postId} {
       allow read: if true;
       allow write: if isValidId(postId);
     }
 
-    // FAQs
     match /faqs/{faqId} {
       allow read: if true;
       allow write: if isValidId(faqId);
     }
 
-    // Bookings
+    // Clients can submit bookings and messages
     match /bookings/{bookingId} {
-      allow read: if true; // Allowed so both clients and admin dashboard can fetch bookings
+      allow read: if true;
       allow write: if isValidId(bookingId);
     }
 
-    // Contact Messages
     match /messages/{messageId} {
-      allow read: if true; // Allowed so admin dashboard can review them
+      allow read: if true;
       allow write: if isValidId(messageId);
     }
 
-    // SEO Metadata
-    match /seo/{docId} {
-      allow read: if true;
-      allow write: if isValidId(docId);
-    }
-
-    // Admin credentials (CMS login)
+    // Admin credentials — readable for login, writable only by admin
     match /admin/{docId} {
       allow read: if true;
-      allow write: if isValidId(docId);
+      allow write: if isAdmin();
     }
 
-    // Analytics dashboard stats
+    // Admin-only collections
     match /analytics/{docId} {
       allow read: if true;
-      allow write: if isValidId(docId);
+      allow write: if isAdmin();
     }
 
-    // Photographer profile
     match /profile/{docId} {
       allow read: if true;
-      allow write: if isValidId(docId);
+      allow write: if true; // Allow public write so init can create it
     }
 
-    // Booking configuration
     match /bookingConfig/{docId} {
       allow read: if true;
-      allow write: if isValidId(docId);
+      allow write: if true;
     }
 
-    // EmailJS configuration
     match /emailConfig/{docId} {
       allow read: if true;
-      allow write: if isValidId(docId);
+      allow write: if true;
     }
 
-    // Client accounts (proofing portal)
+    match /seo/{docId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Client accounts — readable for portal login, writable with valid ID
     match /clientAccounts/{clientId} {
       allow read: if true;
       allow write: if isValidId(clientId);
+    }
+
+    // Test document for connection validation
+    match /test/{docId} {
+      allow read: if true;
+      allow write: if false;
     }
   }
 }
