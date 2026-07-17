@@ -589,7 +589,9 @@ export const INITIAL_SEO: SEOMetadata = {
   ogImage: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=90&w=1200',
   twitterCard: 'summary_large_image',
   keywords: 'luxury wedding photographer, fine art portraits, fashion editorial photography, Hasselblad portrait, Leica wedding, architectural photography, premium commercial, Awwwards portfolio',
-  robotsText: 'User-agent: *\nAllow: /\nSitemap: https://miriamcampos-photography.com/sitemap.xml'
+  robotsText: 'User-agent: *\nAllow: /\nSitemap: https://miriamcampos-photography.com/sitemap.xml',
+  heroImageLeft: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=85&w=1600',
+  heroImageRight: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&q=85&w=1600'
 };
 
 export const INITIAL_BOOKING_CONFIG: BookingConfig = {

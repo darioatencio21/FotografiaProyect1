@@ -132,8 +132,8 @@ export interface SEOMetadata {
   twitterCard: 'summary' | 'summary_large_image';
   keywords: string;
   robotsText: string;
-  heroPosition?: string; // e.g. 'center', 'top', 'bottom', 'left', 'right'
-  heroScale?: number;    // e.g. 100, 105, 110, 120, 135
+  heroImageLeft?: string;
+  heroImageRight?: string;
 }
 
 export interface AnalyticsStats {
