@@ -829,7 +829,7 @@ export default function App() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -15 }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
-          className="pb-24 pt-4 px-6 lg:px-12 max-w-7xl mx-auto space-y-24"
+          className="pb-24 pt-16 px-6 lg:px-12 max-w-7xl mx-auto space-y-24"
         >
           {/* ======================================================= */}
           {/* HOME SCREEN (content below hero) */}
