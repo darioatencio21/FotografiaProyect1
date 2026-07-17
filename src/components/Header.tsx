@@ -265,37 +265,52 @@ export default function Header({
         </button>
       </div>
 
-      {/* Drag handle — visible only on mobile, only when menu is closed */}
+      {/* Drag handle — visible only on mobile, only when menu is closed.
+          Outer button is an extended hit-target (44px+ tall for accessibility);
+          inner span is the visible gold pill. */}
       <AnimatePresence>
         {!isMobileMenuOpen && (
           <motion.button
             key="drag-handle"
             type="button"
             aria-label="Open menu"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            transition={{ duration: 0.25, ease: 'easeOut' }}
             drag="x"
-            dragConstraints={{ left: -200, right: 0 }}
+            dragConstraints={{ left: -240, right: 0 }}
             dragElastic={0.15}
             dragMomentum={false}
             onDragStart={() => isDragging.set(1)}
             onDragEnd={handleHandleDragEnd}
             style={{ x: drawerX, touchAction: 'pan-y' }}
-            className="fixed top-1/2 -translate-y-1/2 right-0 z-40 lg:hidden
-                       w-2.5 h-24 bg-gold-500/70 hover:bg-gold-400 active:bg-gold-300
-                       rounded-l-full cursor-grab active:cursor-grabbing
-                       flex items-center justify-center
-                       shadow-[-2px_0_8px_rgba(0,0,0,0.4)]
-                       transition-colors"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="fixed top-1/2 -translate-y-1/2 right-0 z-50 lg:hidden
+                       w-12 h-40 sm:w-14 sm:h-44
+                       flex items-center justify-end pr-1
+                       cursor-grab active:cursor-grabbing
+                       touch-none select-none
+                       bg-transparent"
           >
+            {/* Hint animation on first load of the session */}
             <motion.span
-              animate={{ x: [-1, -3, -1] }}
-              transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
-              className="flex items-center justify-center -ml-0.5"
+              aria-hidden="true"
+              initial={false}
+              animate={{ x: [-1, -8, -1, -5, -1] }}
+              transition={{ duration: 2.4, repeat: 2, ease: 'easeInOut' }}
+              className="block w-3.5 h-28 sm:w-4 sm:h-32
+                         bg-gold-500/70 hover:bg-gold-400 active:bg-gold-300
+                         rounded-l-full shadow-[-2px_0_8px_rgba(0,0,0,0.4)]
+                         transition-colors
+                         flex items-center justify-center"
             >
-              <ChevronLeft size={12} className="text-dark" strokeWidth={3} />
+              <motion.span
+                animate={{ scale: [1, 1.15, 1] }}
+                transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
+                className="flex items-center justify-center"
+              >
+                <ChevronLeft size={12} className="text-dark" strokeWidth={3} />
+              </motion.span>
             </motion.span>
           </motion.button>
         )}
@@ -339,7 +354,7 @@ export default function Header({
             transition={{ type: 'tween', duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
           >
             {/* Drag affordance at the top */}
-            <div className="w-12 h-1 bg-white/15 rounded-full mx-auto mb-4 opacity-60" aria-hidden="true" />
+            <div className="w-16 h-1.5 bg-white/25 rounded-full mx-auto mb-4 opacity-70" aria-hidden="true" />
 
             <div className="space-y-6 pt-2">
               {menuItems.map(item => {
