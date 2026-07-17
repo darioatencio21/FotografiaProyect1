@@ -9,18 +9,18 @@ import {
   BarChart3, Camera, Calendar, BookOpen, MessageSquare, HelpCircle, 
   Settings, LogOut, Check, X, ShieldAlert, Edit, Trash2, Plus, 
   ArrowUpRight, Eye, RefreshCw, UploadCloud, Sliders, FileCode, CheckSquare,
-  User, Mail, ChevronDown, ChevronUp, Phone, Users, FileText
+  User, Mail, ChevronDown, ChevronUp, Phone, Users, FileText, ShoppingBag
 } from 'lucide-react';
 import { 
   Photograph, Service, Testimonial, BlogPost, FAQ, Booking, 
   Message, SEOMetadata, AnalyticsStats, ActiveLanguage, PhotographerProfile, BookingConfig, EmailConfig,
-  ClientAccount, ProofPhoto, CommissionedServicesConfig
+  ClientAccount, ProofPhoto, PhotographyPackage
 } from '../types';
 import { sanitizeString, sanitizeEmail, sanitizeObject } from '../lib/sanitize';
 import AdminServicesTab from './AdminServicesTab';
 import AdminSEOTab from './AdminSEOTab';
 import AdminProfileTab from './AdminProfileTab';
-import AdminCommissionedTab from './AdminCommissionedTab';
+import AdminPackagesTab from './AdminPackagesTab';
 
 interface AdminCMSProps {
   photographs: Photograph[];
@@ -49,17 +49,17 @@ interface AdminCMSProps {
   onUpdateProfile: (profile: PhotographerProfile) => void;
   onUpdateBookingConfig: (config: BookingConfig) => void;
   onUpdateEmailConfig: (config: EmailConfig) => void;
-  commissionedConfig: CommissionedServicesConfig;
-  onUpdateCommissionedConfig: (config: CommissionedServicesConfig) => void;
+  packages: PhotographyPackage[];
+  onUpdatePackages: (packages: PhotographyPackage[]) => void;
   onLogout: () => void;
 }
 
 export default function AdminCMS({
   photographs, services, testimonials, blogPosts, faqs, bookings, messages, clientAccounts = [], seo, profile, bookingConfig, emailConfig, stats, lang,
   onUpdatePhotographs, onUpdateServices, onUpdateTestimonials, onUpdateBlogPosts,
-  onUpdateFaqs, onUpdateBookings, onUpdateMessages, onUpdateClientAccounts, onUpdateSeo, onUpdateProfile, onUpdateBookingConfig, onUpdateEmailConfig, commissionedConfig, onUpdateCommissionedConfig, onLogout
+  onUpdateFaqs, onUpdateBookings, onUpdateMessages, onUpdateClientAccounts, onUpdateSeo, onUpdateProfile, onUpdateBookingConfig, onUpdateEmailConfig, packages, onUpdatePackages, onLogout
 }: AdminCMSProps) {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'photos' | 'bookings' | 'services' | 'messages' | 'seo' | 'profile' | 'email_settings' | 'clients' | 'commissioned'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'photos' | 'bookings' | 'services' | 'messages' | 'seo' | 'profile' | 'email_settings' | 'clients' | 'packages'>('dashboard');
   const [expandedBookingId, setExpandedBookingId] = useState<string | null>(null);
 
   const t = (es: string, en: string, pt: string = en) => {
@@ -569,13 +569,13 @@ export default function AdminCMS({
             </button>
 
             <button
-              onClick={() => setActiveTab('commissioned')}
+              onClick={() => setActiveTab('packages')}
               className={`w-full text-left px-3 py-2 rounded-lg font-mono text-[10px] uppercase tracking-wider transition-all flex items-center space-x-2 ${
-                activeTab === 'commissioned' ? 'bg-gold-500 text-dark font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
+                activeTab === 'packages' ? 'bg-gold-500 text-dark font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
               }`}
             >
-              <FileText size={12} />
-              <span>{t('Servicios Comisionados', 'Commissioned Services', 'Serviços Comissionados')}</span>
+              <ShoppingBag size={12} />
+              <span>{t('Paquetes Fotográficos', 'Photography Packages', 'Pacotes Fotográficos')}</span>
             </button>
 
             <button
@@ -1194,11 +1194,11 @@ export default function AdminCMS({
           />
         )}
 
-        {/* COMMISSIONED SERVICES CONFIG */}
-        {activeTab === 'commissioned' && (
-          <AdminCommissionedTab
-            config={commissionedConfig}
-            onUpdateConfig={onUpdateCommissionedConfig}
+        {/* PHOTOGRAPHY PACKAGES */}
+        {activeTab === 'packages' && (
+          <AdminPackagesTab
+            packages={packages}
+            onUpdatePackages={onUpdatePackages}
             triggerAlert={triggerAlert}
             lang={lang}
           />

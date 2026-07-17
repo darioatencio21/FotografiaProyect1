@@ -180,26 +180,31 @@ export interface EmailConfig {
   autoReplyMessage?: string; // Auto-reply custom body message
 }
 
-export interface ServiceAddon {
+export interface PhotographyPackage {
   id: string;
+  icon: string;
+  image?: string;
   name_es: string;
   name_en: string;
   name_pt: string;
   price: number;
-  enabled: boolean;
-}
-
-export interface CommissionedServicesConfig {
-  sectionTitle_es: string;
-  sectionTitle_en: string;
-  sectionTitle_pt: string;
-  sectionSubtitle_es: string;
-  sectionSubtitle_en: string;
-  sectionSubtitle_pt: string;
-  addons: ServiceAddon[];
-  customServiceLabel_es: string;
-  customServiceLabel_en: string;
-  customServiceLabel_pt: string;
+  priceFromText_es: string;
+  priceFromText_en: string;
+  priceFromText_pt: string;
+  duration_es: string;
+  duration_en: string;
+  duration_pt: string;
+  description_es: string;
+  description_en: string;
+  description_pt: string;
+  benefits: string[];
+  buttonText_es: string;
+  buttonText_en: string;
+  buttonText_pt: string;
+  cardColor?: string;
+  sortOrder: number;
+  active: boolean;
+  featured: boolean;
 }
 
 export type ActiveLanguage = 'es' | 'en' | 'pt';

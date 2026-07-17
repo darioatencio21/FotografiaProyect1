@@ -8,7 +8,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
    Heart, ArrowRight, MessageSquare, MapPin, 
    Mail, Phone, ShieldCheck, Sparkles, AlertCircle, ChevronDown,
-   Eye, EyeOff, X
+   Eye, EyeOff, X, Camera, Users, Calendar, PartyPopper, 
+   CheckCircle2, ShoppingBag, Star, Baby, GraduationCap, Gift, Briefcase
 } from 'lucide-react';
 
 import { 
@@ -16,9 +17,9 @@ import {
   INITIAL_BLOG_POSTS, INITIAL_FAQS, INITIAL_BOOKINGS, 
   INITIAL_MESSAGES, INITIAL_SEO, INITIAL_ANALYTICS, TRANSLATIONS,
   INITIAL_PROFILE, INITIAL_BOOKING_CONFIG, INITIAL_EMAIL_CONFIG,
-  INITIAL_CLIENT_ACCOUNTS, INITIAL_COMMISSIONED_CONFIG
+   INITIAL_CLIENT_ACCOUNTS, INITIAL_PHOTOGRAPHY_PACKAGES
 } from './data/mockData';
-import { Photograph, Service, Testimonial, BlogPost, FAQ, Booking, Message, SEOMetadata, PhotographerProfile, BookingConfig, EmailConfig, ClientAccount, AnalyticsStats, CommissionedServicesConfig } from './types';
+import { Photograph, Service, Testimonial, BlogPost, FAQ, Booking, Message, SEOMetadata, PhotographerProfile, BookingConfig, EmailConfig, ClientAccount, AnalyticsStats, PhotographyPackage } from './types';
 
 import CustomCursor from './components/CustomCursor';
 import Lightbox from './components/Lightbox';
@@ -142,9 +143,9 @@ export default function App() {
     return saved ? JSON.parse(saved) : INITIAL_EMAIL_CONFIG;
   });
 
-  const [commissionedConfig, setCommissionedConfig] = useState<CommissionedServicesConfig>(() => {
-    const saved = localStorage.getItem('aurea_commissioned_config');
-    return saved ? JSON.parse(saved) : INITIAL_COMMISSIONED_CONFIG;
+  const [packages, setPackages] = useState<PhotographyPackage[]>(() => {
+    const saved = localStorage.getItem('aurea_packages');
+    return saved ? JSON.parse(saved) : INITIAL_PHOTOGRAPHY_PACKAGES;
   });
 
   const [clientAccounts, setClientAccounts] = useState<ClientAccount[]>(() => {
@@ -160,6 +161,7 @@ export default function App() {
     return saved ? JSON.parse(saved) : [];
   });
 
+  const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
   const [activeBlogModal, setActiveBlogModal] = useState<BlogPost | null>(null);
   const [activeFaqId, setActiveFaqId] = useState<string | null>(null);
 
@@ -218,14 +220,14 @@ export default function App() {
         getCollectionWithFallback<ClientAccount>('clientAccounts', INITIAL_CLIENT_ACCOUNTS),
       ]);
 
-      const [seoRes, profileRes, bookingConfigRes, emailConfigRes, analyticsRes, adminDocRes, commissionedRes] = await Promise.all([
+      const packagesRes = await getCollectionWithFallback<PhotographyPackage>('photography_packages', []);
+      const [seoRes, profileRes, bookingConfigRes, emailConfigRes, analyticsRes, adminDocRes] = await Promise.all([
         getSingleDocument<SEOMetadata>('seo', 'config'),
         getSingleDocument<PhotographerProfile>('profile', 'photographer'),
         getSingleDocument<BookingConfig>('bookingConfig', 'config'),
         getSingleDocument<EmailConfig>('emailConfig', 'config'),
         getSingleDocument<AnalyticsStats>('analytics', 'stats'),
         getSingleDocument<{ username: string }>('admin', 'config'),
-        getSingleDocument<CommissionedServicesConfig>('commissioned', 'config'),
       ]);
 
       if (cancelled) return;
@@ -258,8 +260,6 @@ export default function App() {
         const migratedSeo = seoRes ? migrateStrings(seoRes) : seoRes;
         const migratedProfile = profileRes ? migrateStrings(profileRes) : profileRes;
         const migratedEmailCfg = emailConfigRes ? migrateStrings(emailConfigRes) : emailConfigRes;
-        const migratedCommissioned = commissionedRes ? migrateStrings(commissionedRes) : commissionedRes;
-        // Save corrected data back to Firestore
         Promise.all([
           ...(migratedPhotos as Photograph[]).map((p, i) => p !== photosRes[i] ? saveDocument('photographs', p.id, p) : Promise.resolve()),
           ...(migratedServices as Service[]).map((s, i) => s !== servicesRes[i] ? saveDocument('services', s.id, s) : Promise.resolve()),
@@ -272,7 +272,6 @@ export default function App() {
           migratedSeo && migratedSeo !== seoRes ? saveDocument('seo', 'config', migratedSeo) : Promise.resolve(),
           migratedProfile && migratedProfile !== profileRes ? saveDocument('profile', 'photographer', migratedProfile) : Promise.resolve(),
           migratedEmailCfg && migratedEmailCfg !== emailConfigRes ? saveDocument('emailConfig', 'config', migratedEmailCfg) : Promise.resolve(),
-          migratedCommissioned && migratedCommissioned !== commissionedRes ? saveDocument('commissioned', 'config', migratedCommissioned) : Promise.resolve(),
         ]).then(() => {
           localStorage.setItem(MIGRATE_FLAG, 'true');
           console.log('Data migration complete: HTML entities unescaped in Firestore');
@@ -288,7 +287,6 @@ export default function App() {
         localStorage.setItem('aurea_client_accounts', JSON.stringify(migratedClients));
         setSeo(migratedSeo ?? INITIAL_SEO);
         setProfile(migratedProfile ?? INITIAL_PROFILE);
-        setCommissionedConfig(migratedCommissioned ?? INITIAL_COMMISSIONED_CONFIG);
       } else {
         setPhotographs(photosRes);
         setServices(servicesRes);
@@ -301,8 +299,9 @@ export default function App() {
         localStorage.setItem('aurea_client_accounts', JSON.stringify(clientAccsRes));
         setSeo(seoRes ?? INITIAL_SEO);
         setProfile(profileRes ?? INITIAL_PROFILE);
-        setCommissionedConfig(commissionedRes ?? INITIAL_COMMISSIONED_CONFIG);
       }
+
+      setPackages(packagesRes.length > 0 ? packagesRes : INITIAL_PHOTOGRAPHY_PACKAGES);
       setBookingConfig(bookingConfigRes ?? INITIAL_BOOKING_CONFIG);
       setEmailConfig(emailConfigRes ? { ...INITIAL_EMAIL_CONFIG, ...emailConfigRes } : INITIAL_EMAIL_CONFIG);
       setSeoAnalytics(analyticsRes ?? INITIAL_ANALYTICS);
@@ -312,7 +311,11 @@ export default function App() {
       if (!bookingConfigRes) saveDocument('bookingConfig', 'config', INITIAL_BOOKING_CONFIG);
       if (!emailConfigRes) saveDocument('emailConfig', 'config', INITIAL_EMAIL_CONFIG);
       if (!analyticsRes) saveDocument('analytics', 'stats', INITIAL_ANALYTICS);
-      if (!commissionedRes) saveDocument('commissioned', 'config', INITIAL_COMMISSIONED_CONFIG);
+      if (packagesRes.length === 0) {
+        for (const pkg of INITIAL_PHOTOGRAPHY_PACKAGES) {
+          await saveDocument('photography_packages', pkg.id, pkg);
+        }
+      }
       if (!adminDocRes) {
         await saveDocument('admin', 'config', { username: 'admin', password: 'admin123' });
       }
@@ -383,9 +386,9 @@ export default function App() {
     await saveDocument('emailConfig', 'config', newConfig);
   };
 
-  const handleUpdateCommissionedConfig = async (newConfig: CommissionedServicesConfig) => {
-    setCommissionedConfig(newConfig);
-    await saveDocument('commissioned', 'config', newConfig);
+  const handleUpdatePackages = async (newPackages: PhotographyPackage[]) => {
+    setPackages(newPackages);
+    await syncCollection('photography_packages', packages, newPackages);
   };
 
   // Sync to LocalStorage whenever DB collections update (for offline-fallback cache layer)
@@ -434,8 +437,8 @@ export default function App() {
   }, [emailConfig]);
 
   useEffect(() => {
-    localStorage.setItem('aurea_commissioned_config', JSON.stringify(commissionedConfig));
-  }, [commissionedConfig]);
+    localStorage.setItem('aurea_packages', JSON.stringify(packages));
+  }, [packages]);
 
   useEffect(() => {
     localStorage.setItem('aurea_favorites', JSON.stringify(favorites));
@@ -1001,66 +1004,103 @@ export default function App() {
           )}
 
           {/* ======================================================= */}
-          {/* SERVICES SCREEN */}
+          {/* SERVICES SCREEN — PHOTOGRAPHY PACKAGES */}
           {/* ======================================================= */}
           {currentView === 'services' && (
             <div className="space-y-24">
-              <section className="space-y-4 text-center max-w-2xl mx-auto">
-                <span className="text-[10px] font-mono text-gold-400 tracking-widest uppercase block">COMMISSIONED WORK</span>
+              <motion.section
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                className="space-y-4 text-center max-w-2xl mx-auto"
+              >
+                <span className="text-[10px] font-mono text-gold-400 tracking-widest uppercase block">PACKAGES</span>
                 <h2 className="font-serif text-3xl md:text-4xl text-white tracking-wide">{t.servicesTitle}</h2>
                 <p className="text-xs text-white/55 leading-relaxed">{t.servicesSubtitle}</p>
-              </section>
+              </motion.section>
 
-              {/* Commissioned Rate cards */}
-              <section className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
-                {services.map(service => {
-                  const sTitle = lang === 'es' ? (service.title_es || service.title) : lang === 'pt' ? (service.title_pt || service.title) : (service.title_en || service.title);
-                  const sDuration = lang === 'es' ? (service.duration_es || service.duration) : lang === 'pt' ? (service.duration_pt || service.duration) : (service.duration_en || service.duration);
-                  const sDesc = lang === 'es' ? (service.description_es || service.description) : lang === 'pt' ? (service.description_pt || service.description) : (service.description_en || service.description);
-                  const sIncludes = lang === 'es' ? (service.includes_es || service.includes) : lang === 'pt' ? (service.includes_pt || service.includes) : (service.includes_en || service.includes);
+              {/* Photography Package Cards */}
+              <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {packages.filter(p => p.active).sort((a, b) => a.sortOrder - b.sortOrder).map((pkg, idx) => {
+                  const pName = lang === 'es' ? pkg.name_es : lang === 'pt' ? pkg.name_pt : pkg.name_en;
+                  const pDesc = lang === 'es' ? pkg.description_es : lang === 'pt' ? pkg.description_pt : pkg.description_en;
+                  const pDuration = lang === 'es' ? pkg.duration_es : lang === 'pt' ? pkg.duration_pt : pkg.duration_en;
+                  const pPriceFrom = lang === 'es' ? pkg.priceFromText_es : lang === 'pt' ? pkg.priceFromText_pt : pkg.priceFromText_en;
+                  const pButton = lang === 'es' ? pkg.buttonText_es : lang === 'pt' ? pkg.buttonText_pt : pkg.buttonText_en;
+
+                  const iconMap: Record<string, React.ReactNode> = {
+                    Heart: <Heart size={28} className="text-gold-400" />,
+                    Camera: <Camera size={28} className="text-gold-400" />,
+                    Users: <Users size={28} className="text-gold-400" />,
+                    Calendar: <Calendar size={28} className="text-gold-400" />,
+                    PartyPopper: <PartyPopper size={28} className="text-gold-400" />,
+                    ShoppingBag: <ShoppingBag size={28} className="text-gold-400" />,
+                    Star: <Star size={28} className="text-gold-400" />,
+                    Baby: <Baby size={28} className="text-gold-400" />,
+                    GraduationCap: <GraduationCap size={28} className="text-gold-400" />,
+                    Gift: <Gift size={28} className="text-gold-400" />,
+                    Briefcase: <Briefcase size={28} className="text-gold-400" />,
+                  };
 
                   return (
-                    <div key={service.id} className="bg-dark-gray border border-white/5 rounded-3xl p-6 md:p-8 flex flex-col justify-between space-y-6 text-left hover:border-white/10 transition-all">
+                    <motion.div
+                      key={pkg.id}
+                      initial={{ opacity: 0, y: 40 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, margin: "-50px" }}
+                      transition={{ duration: 0.5, delay: idx * 0.08 }}
+                      className={`group bg-dark-gray border border-white/5 rounded-2xl p-6 md:p-7 flex flex-col justify-between space-y-5 text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-dark/80 hover:border-gold-500/40 ${pkg.featured ? 'ring-1 ring-gold-500/30' : ''}`}
+                    >
                       <div className="space-y-4">
-                        <div className="flex justify-between items-start border-b border-white/5 pb-4">
-                          <div className="space-y-1">
-                            <h3 className="font-serif text-xl text-white font-medium">{sTitle}</h3>
-                            <span className="text-[9px] font-mono text-gold-400 uppercase tracking-widest">{sDuration}</span>
+                        <div className="flex items-center justify-between">
+                          <div className="w-12 h-12 rounded-xl bg-gold-500/10 border border-gold-500/20 flex items-center justify-center">
+                            {iconMap[pkg.icon] || <Camera size={28} className="text-gold-400" />}
                           </div>
-                          <div className="text-right flex flex-col font-mono">
-                            <span className="text-[8px] text-white/35 uppercase">{t.priceFrom}</span>
-                            <span className="text-2xl font-bold text-gold-400">${service.price}</span>
+                          {pkg.featured && (
+                            <span className="text-[8px] font-mono text-gold-400 border border-gold-500/30 bg-gold-500/10 px-2 py-0.5 rounded-full uppercase tracking-widest">Featured</span>
+                          )}
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <h3 className="font-serif text-xl text-white font-medium">{pName}</h3>
+                          <div className="flex items-baseline justify-between">
+                            <span className="text-[10px] font-mono text-white/45">{pDuration}</span>
+                            <div className="text-right font-mono">
+                              <span className="text-[8px] text-white/35 block">{pPriceFrom}</span>
+                              <span className="text-xl font-bold text-gold-400">${pkg.price.toLocaleString()}</span>
+                            </div>
                           </div>
                         </div>
 
-                        <p className="text-xs text-white/60 leading-relaxed font-sans">{sDesc}</p>
+                        <p className="text-xs text-white/60 leading-relaxed font-sans">{pDesc}</p>
 
                         <div className="space-y-2.5">
                           <h5 className="text-[9px] font-mono tracking-widest text-white/40 uppercase font-bold">{t.includesLabel}:</h5>
-                          <ul className="space-y-2 text-xs">
-                            {sIncludes.map((incl, idx) => (
-                              <li key={idx} className="flex items-start space-x-2 text-white/70">
-                                <span className="w-1.5 h-1.5 rounded-full bg-gold-400 mt-1.5 shrink-0" />
-                                <span>{incl}</span>
+                          <ul className="space-y-2">
+                            {pkg.benefits.map((benefit, i) => (
+                              <li key={i} className="flex items-start space-x-2.5 text-xs text-white/70">
+                                <CheckCircle2 size={12} className="text-gold-400 mt-0.5 shrink-0" />
+                                <span>{benefit}</span>
                               </li>
                             ))}
                           </ul>
                         </div>
                       </div>
 
-                    <button
-                      onClick={() => {
-                        const targetCalendar = document.getElementById('booking-calendar');
-                        if (targetCalendar) {
-                          targetCalendar.scrollIntoView({ behavior: 'smooth' });
-                        }
-                      }}
-                      className="w-full py-3 bg-white hover:bg-gold-400 text-dark font-mono text-[10px] tracking-widest uppercase font-bold rounded transition-all flex items-center justify-center space-x-1 cursor-pointer"
-                    >
-                      <span>{t.bookNow}</span>
-                      <ArrowRight size={10} />
-                    </button>
-                  </div>
+                      <button
+                        onClick={() => {
+                          setSelectedPackageId(pkg.id);
+                          const targetCalendar = document.getElementById('booking-calendar');
+                          if (targetCalendar) {
+                            targetCalendar.scrollIntoView({ behavior: 'smooth' });
+                          }
+                        }}
+                        className="w-full py-3 bg-white hover:bg-gold-400 text-dark font-mono text-[10px] tracking-widest uppercase font-bold rounded-lg transition-all duration-300 flex items-center justify-center space-x-1.5 cursor-pointer group/btn"
+                      >
+                        <span>{pButton}</span>
+                        <ArrowRight size={10} className="transition-transform duration-300 group-hover/btn:translate-x-0.5" />
+                      </button>
+                    </motion.div>
                   );
                 })}
               </section>
@@ -1077,8 +1117,9 @@ export default function App() {
                   lang={lang}
                   config={bookingConfig}
                   emailConfig={emailConfig}
-                  commissionedConfig={commissionedConfig}
+                  preSelectedPackage={selectedPackageId ? packages.find(p => p.id === selectedPackageId) ?? null : null}
                   onAddBooking={(newBook) => {
+                    setSelectedPackageId(null);
                     const savedBook: Booking = {
                       id: `book-${Date.now()}`,
                       status: 'pending',
@@ -1331,8 +1372,8 @@ export default function App() {
               onUpdateProfile={handleUpdateProfile}
               onUpdateBookingConfig={handleUpdateBookingConfig}
               onUpdateEmailConfig={handleUpdateEmailConfig}
-              commissionedConfig={commissionedConfig}
-              onUpdateCommissionedConfig={handleUpdateCommissionedConfig}
+              packages={packages}
+              onUpdatePackages={handleUpdatePackages}
               onLogout={handleAdminLogout}
             />
           )}

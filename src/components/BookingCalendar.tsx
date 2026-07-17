@@ -19,7 +19,7 @@ import {
   Heart,
   ChevronRight
 } from 'lucide-react';
-import { Service, ActiveLanguage, Booking, BookingConfig, EmailConfig, CommissionedServicesConfig } from '../types';
+import { Service, ActiveLanguage, Booking, BookingConfig, EmailConfig, PhotographyPackage } from '../types';
 import { sanitizeString, sanitizeEmail, sanitizePhone } from '../lib/sanitize';
 
 interface BookingCalendarProps {
@@ -27,7 +27,7 @@ interface BookingCalendarProps {
   lang: ActiveLanguage;
   config?: BookingConfig;
   emailConfig?: EmailConfig;
-  commissionedConfig?: CommissionedServicesConfig;
+  preSelectedPackage?: PhotographyPackage | null;
   onAddBooking: (booking: Omit<Booking, 'id' | 'status' | 'createdAt'>) => void;
 }
 
@@ -130,7 +130,7 @@ const LOCAL_TRANSLATIONS = {
   }
 };
 
-export default function BookingCalendar({ services, lang, config, emailConfig, commissionedConfig, onAddBooking }: BookingCalendarProps) {
+export default function BookingCalendar({ services, lang, config, emailConfig, preSelectedPackage, onAddBooking }: BookingCalendarProps) {
   const t = LOCAL_TRANSLATIONS[lang] || LOCAL_TRANSLATIONS.es;
 
   // Form State
@@ -150,11 +150,6 @@ export default function BookingCalendar({ services, lang, config, emailConfig, c
   const [peopleCount, setPeopleCount] = useState<number>(1);
   const [creativeNotes, setCreativeNotes] = useState<string>('');
   
-  // Dynamic add-ons from commissioned config
-  const addonsConfig = commissionedConfig?.addons?.filter(a => a.enabled) || [];
-  const [selectedAddons, setSelectedAddons] = useState<Record<string, boolean>>({});
-  const toggleAddon = (id: string) => setSelectedAddons(prev => ({ ...prev, [id]: !prev[id] }));
-
   // Flow State
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
@@ -162,8 +157,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, c
   // Pricing Calculation
   const selectedService = services.find(s => s.id === selectedServiceId);
   const basePrice = selectedService ? selectedService.price : 0;
-  const addonsTotal = addonsConfig.reduce((sum, a) => sum + (selectedAddons[a.id] ? a.price : 0), 0);
-  const totalPrice = basePrice + addonsTotal;
+  const totalPrice = basePrice;
 
   // Handle Date Selection Input
   const handleDateChange = (val: string) => {
@@ -200,16 +194,15 @@ export default function BookingCalendar({ services, lang, config, emailConfig, c
       : (selectedService?.title || 'Sesión Fotográfica');
 
     const formattedDate = dateValue;
-    const addonLines = addonsConfig
-      .filter(a => selectedAddons[a.id])
-      .map(a => `\n- Adición: ${lang === 'es' ? a.name_es : lang === 'pt' ? a.name_pt : a.name_en} (+$${a.price})`)
-      .join('');
+    const packageLine = preSelectedPackage
+      ? `\n- Paquete destacado: ${lang === 'es' ? preSelectedPackage.name_es : lang === 'pt' ? preSelectedPackage.name_pt : preSelectedPackage.name_en}`
+      : '';
     const notesText = safeNotes + 
            `\n\n[Respuestas del Cuestionario Creativo]` +
            `\n- Paquete elegido: ${serviceName}` +
+           packageLine +
            `\n- Fecha solicitada: ${formattedDate}` +
-           `\n- Horario preferido: ${finalSchedule}` +
-           addonLines;
+           `\n- Horario preferido: ${finalSchedule}`;
 
     if (emailConfig && emailConfig.emailjsServiceId && emailConfig.emailjsTemplateId && emailConfig.emailjsPublicKey) {
       try {
@@ -368,7 +361,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, c
                         )}
                       </div>
                       <h4 className="text-xs font-semibold tracking-wide text-white group-hover:text-gold-100 transition-colors mt-1">
-                        {commissionedConfig ? (lang === 'es' ? commissionedConfig.customServiceLabel_es : lang === 'pt' ? commissionedConfig.customServiceLabel_pt : commissionedConfig.customServiceLabel_en) : t.customProject}
+                        {t.customProject}
                       </h4>
                       <p className="text-[10px] text-white/40 leading-snug line-clamp-2 mt-0.5 font-sans">
                         {lang === 'es' ? 'Cualquier otro proyecto editorial, de marca, moda o destino.' : lang === 'pt' ? 'Qualquer outro projeto editorial, de marca, moda ou destino.' : 'Any other editorial, branding, fashion or destination project.'}
@@ -516,39 +509,15 @@ export default function BookingCalendar({ services, lang, config, emailConfig, c
 
               </div>
 
-              {/* OPTIONAL: ADD-ONS SECTION (If not custom) */}
-              {selectedServiceId !== 'custom' && addonsConfig.length > 0 && (
-                <div className="space-y-3 pt-2">
-                  <label className="block text-xs font-mono tracking-widest text-gold-300 uppercase">
-                    {t.extrasTitle}
-                  </label>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    {addonsConfig.map(addon => {
-                      const selected = !!selectedAddons[addon.id];
-                      const name = lang === 'es' ? addon.name_es : lang === 'pt' ? addon.name_pt : addon.name_en;
-                      return (
-                        <label key={addon.id} className={`flex flex-col justify-between p-3.5 rounded-xl border cursor-pointer hover:border-gold-400/35 transition-all select-none ${
-                          selected ? 'bg-gold-500/5 border-gold-400/40' : 'bg-dark/20 border-white/5'
-                        }`}>
-                          <div className="text-left space-y-1">
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs font-semibold text-white">{name}</span>
-                              <input
-                                type="checkbox"
-                                checked={selected}
-                                onChange={() => toggleAddon(addon.id)}
-                                className="w-3.5 h-3.5 rounded border-white/10 accent-gold-500 cursor-pointer"
-                              />
-                            </div>
-                          </div>
-                          <div className="text-right pt-2 border-t border-white/5 mt-3 flex items-center justify-between">
-                            <span className="text-[8px] font-mono text-white/30 uppercase">Rate</span>
-                            <span className="text-[10px] font-mono font-bold text-gold-400">+${addon.price}</span>
-                          </div>
-                        </label>
-                      );
-                    })}
+              {/* Pre-selected package banner */}
+              {preSelectedPackage && (
+                <div className="bg-gold-500/10 border border-gold-400/30 rounded-xl p-4 flex items-center space-x-3">
+                  <CheckCircle2 size={18} className="text-gold-400 shrink-0" />
+                  <div>
+                    <span className="text-[9px] font-mono text-gold-400 uppercase tracking-widest block">Paquete elegido</span>
+                    <span className="text-sm font-serif text-white">
+                      {lang === 'es' ? preSelectedPackage.name_es : lang === 'pt' ? preSelectedPackage.name_pt : preSelectedPackage.name_en}
+                    </span>
                   </div>
                 </div>
               )}
@@ -719,7 +688,6 @@ export default function BookingCalendar({ services, lang, config, emailConfig, c
                   setCreativeNotes('');
                   setCustomServiceText('');
                   setCustomTimeframeText('');
-                  setSelectedAddons({});
                 }}
                 className="py-2.5 px-6 border border-white/15 hover:border-gold-400/50 hover:text-gold-300 text-white/80 rounded-lg font-mono text-[10px] tracking-widest uppercase transition-all"
               >
