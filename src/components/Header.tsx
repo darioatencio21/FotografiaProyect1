@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Menu, X, Globe, User, ShieldAlert } from 'lucide-react';
 import { ActiveLanguage } from '../types';
@@ -29,6 +29,50 @@ export default function Header({
 }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
+
+  const touchStart = useRef({ x: 0, y: 0 });
+  const isMenuOpenRef = useRef(isMobileMenuOpen);
+  isMenuOpenRef.current = isMobileMenuOpen;
+
+  useEffect(() => {
+    const onTouchStart = (e: TouchEvent) => {
+      touchStart.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+      };
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      if (isMenuOpenRef.current) return;
+
+      const { x: startX, y: startY } = touchStart.current;
+      if (!startX) return;
+
+      const endX = e.changedTouches[0].clientX;
+      const endY = e.changedTouches[0].clientY;
+
+      const deltaX = startX - endX;
+      const deltaY = Math.abs(startY - endY);
+
+      const screenWidth = window.innerWidth;
+      const isMobile = screenWidth < 1024;
+      const fromRightEdge = startX > screenWidth - 35;
+      const swipedLeft = deltaX > 50;
+      const isHorizontal = deltaY < deltaX * 0.6;
+
+      if (isMobile && fromRightEdge && swipedLeft && isHorizontal) {
+        setIsMobileMenuOpen(true);
+      }
+    };
+
+    document.addEventListener('touchstart', onTouchStart, { passive: true });
+    document.addEventListener('touchend', onTouchEnd, { passive: true });
+
+    return () => {
+      document.removeEventListener('touchstart', onTouchStart);
+      document.removeEventListener('touchend', onTouchEnd);
+    };
+  }, []);
 
   const t = TRANSLATIONS[lang];
 
