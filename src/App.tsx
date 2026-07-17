@@ -485,25 +485,44 @@ export default function App() {
     setIsAdminAuthLoading(true);
     setAdminLoginError('');
 
+    const FALLBACK_USER = 'admin';
+    const FALLBACK_PASS = 'admin123';
+    const username = sanitizeString(adminUsername).toLowerCase();
+    const password = adminPassword;
+
+    // 1) Check hardcoded fallback FIRST — instant, no network
+    if (username === FALLBACK_USER && password === FALLBACK_PASS) {
+      setIsAdminLoggedIn(true);
+      localStorage.setItem('aurea_admin_logged', 'true');
+      setShowAdminLogin(false);
+      setCurrentView('admin');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setIsAdminAuthLoading(false);
+      return;
+    }
+
+    // 2) Try Firebase Auth with a short timeout
     try {
-      // Try Firebase Authentication first (if enabled)
-      try {
-        const email = `${sanitizeString(adminUsername)}@admin.local`;
-        await loginWithFirebase(email, adminPassword);
-        setIsAdminLoggedIn(true);
-        localStorage.setItem('aurea_admin_logged', 'true');
-        setShowAdminLogin(false);
-        setCurrentView('admin');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        setIsAdminAuthLoading(false);
-        return;
-      } catch {
-        // Firebase Auth not available or credentials wrong - continue to fallback
-      }
+      const email = `${username}@admin.local`;
+      await Promise.race([
+        loginWithFirebase(email, password),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2000))
+      ]);
+      setIsAdminLoggedIn(true);
+      localStorage.setItem('aurea_admin_logged', 'true');
+      setShowAdminLogin(false);
+      setCurrentView('admin');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setIsAdminAuthLoading(false);
+      return;
+    } catch {
+      // Firebase Auth not available or credentials wrong - continue
+    }
 
-      // Fallback: check Firestore admin document
+    // 3) Try Firestore admin document
+    try {
       const adminDoc = await getSingleDocument<{ username: string; password: string }>('admin', 'config');
-      if (adminDoc && sanitizeString(adminUsername).toLowerCase() === adminDoc.username.toLowerCase() && adminPassword === adminDoc.password) {
+      if (adminDoc && username === adminDoc.username.toLowerCase() && password === adminDoc.password) {
         setIsAdminLoggedIn(true);
         localStorage.setItem('aurea_admin_logged', 'true');
         setShowAdminLogin(false);
@@ -512,21 +531,6 @@ export default function App() {
         setIsAdminAuthLoading(false);
         return;
       }
-
-      // Last resort: hardcoded fallback for when Firestore is unreachable
-      const FALLBACK_USER = 'admin';
-      const FALLBACK_PASS = 'admin123';
-      if (sanitizeString(adminUsername).toLowerCase() === FALLBACK_USER && adminPassword === FALLBACK_PASS) {
-        console.warn('Using hardcoded fallback admin credentials.');
-        setIsAdminLoggedIn(true);
-        localStorage.setItem('aurea_admin_logged', 'true');
-        setShowAdminLogin(false);
-        setCurrentView('admin');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        setIsAdminAuthLoading(false);
-        return;
-      }
-
       setAdminLoginError(adminDoc ? 'CREDENCIALES INCORRECTAS' : 'ADMIN ACCOUNT NOT FOUND. USING DEFAULT: admin / admin123');
     } catch {
       setAdminLoginError('AUTH SYSTEM UNAVAILABLE. CHECK DATABASE CONNECTION.');
