@@ -142,7 +142,10 @@ export default function App() {
     return saved ? JSON.parse(saved) : INITIAL_EMAIL_CONFIG;
   });
 
-  const [commissionedConfig, setCommissionedConfig] = useState<CommissionedServicesConfig>(INITIAL_COMMISSIONED_CONFIG);
+  const [commissionedConfig, setCommissionedConfig] = useState<CommissionedServicesConfig>(() => {
+    const saved = localStorage.getItem('aurea_commissioned_config');
+    return saved ? JSON.parse(saved) : INITIAL_COMMISSIONED_CONFIG;
+  });
 
   const [clientAccounts, setClientAccounts] = useState<ClientAccount[]>(() => {
     const saved = localStorage.getItem('aurea_client_accounts');
@@ -429,6 +432,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('aurea_email_config', JSON.stringify(emailConfig));
   }, [emailConfig]);
+
+  useEffect(() => {
+    localStorage.setItem('aurea_commissioned_config', JSON.stringify(commissionedConfig));
+  }, [commissionedConfig]);
 
   useEffect(() => {
     localStorage.setItem('aurea_favorites', JSON.stringify(favorites));
