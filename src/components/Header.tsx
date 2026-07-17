@@ -282,7 +282,7 @@ export default function Header({
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            className="fixed inset-0 top-[70px] bg-dark/95 backdrop-blur-md z-30 lg:hidden flex flex-col justify-between p-6 text-left"
+            className="fixed inset-0 top-[70px] bg-dark-gray z-30 lg:hidden flex flex-col justify-between p-6 text-left"
             initial={{ opacity: 0, x: '100%' }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: '100%' }}
