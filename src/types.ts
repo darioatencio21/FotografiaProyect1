@@ -180,6 +180,28 @@ export interface EmailConfig {
   autoReplyMessage?: string; // Auto-reply custom body message
 }
 
+export interface ServiceAddon {
+  id: string;
+  name_es: string;
+  name_en: string;
+  name_pt: string;
+  price: number;
+  enabled: boolean;
+}
+
+export interface CommissionedServicesConfig {
+  sectionTitle_es: string;
+  sectionTitle_en: string;
+  sectionTitle_pt: string;
+  sectionSubtitle_es: string;
+  sectionSubtitle_en: string;
+  sectionSubtitle_pt: string;
+  addons: ServiceAddon[];
+  customServiceLabel_es: string;
+  customServiceLabel_en: string;
+  customServiceLabel_pt: string;
+}
+
 export type ActiveLanguage = 'es' | 'en' | 'pt';
 
 export interface ProofPhoto {

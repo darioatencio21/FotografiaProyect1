@@ -14,12 +14,13 @@ import {
 import { 
   Photograph, Service, Testimonial, BlogPost, FAQ, Booking, 
   Message, SEOMetadata, AnalyticsStats, ActiveLanguage, PhotographerProfile, BookingConfig, EmailConfig,
-  ClientAccount, ProofPhoto
+  ClientAccount, ProofPhoto, CommissionedServicesConfig
 } from '../types';
 import { sanitizeString, sanitizeEmail, sanitizeObject } from '../lib/sanitize';
 import AdminServicesTab from './AdminServicesTab';
 import AdminSEOTab from './AdminSEOTab';
 import AdminProfileTab from './AdminProfileTab';
+import AdminCommissionedTab from './AdminCommissionedTab';
 
 interface AdminCMSProps {
   photographs: Photograph[];
@@ -48,15 +49,17 @@ interface AdminCMSProps {
   onUpdateProfile: (profile: PhotographerProfile) => void;
   onUpdateBookingConfig: (config: BookingConfig) => void;
   onUpdateEmailConfig: (config: EmailConfig) => void;
+  commissionedConfig: CommissionedServicesConfig;
+  onUpdateCommissionedConfig: (config: CommissionedServicesConfig) => void;
   onLogout: () => void;
 }
 
 export default function AdminCMS({
   photographs, services, testimonials, blogPosts, faqs, bookings, messages, clientAccounts = [], seo, profile, bookingConfig, emailConfig, stats, lang,
   onUpdatePhotographs, onUpdateServices, onUpdateTestimonials, onUpdateBlogPosts,
-  onUpdateFaqs, onUpdateBookings, onUpdateMessages, onUpdateClientAccounts, onUpdateSeo, onUpdateProfile, onUpdateBookingConfig, onUpdateEmailConfig, onLogout
+  onUpdateFaqs, onUpdateBookings, onUpdateMessages, onUpdateClientAccounts, onUpdateSeo, onUpdateProfile, onUpdateBookingConfig, onUpdateEmailConfig, commissionedConfig, onUpdateCommissionedConfig, onLogout
 }: AdminCMSProps) {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'photos' | 'bookings' | 'services' | 'messages' | 'seo' | 'profile' | 'email_settings' | 'clients'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'photos' | 'bookings' | 'services' | 'messages' | 'seo' | 'profile' | 'email_settings' | 'clients' | 'commissioned'>('dashboard');
   const [expandedBookingId, setExpandedBookingId] = useState<string | null>(null);
 
   const t = (es: string, en: string, pt: string = en) => {
@@ -562,7 +565,17 @@ export default function AdminCMS({
               }`}
             >
               <Sliders size={12} />
-              <span>{t('Servicios', 'Services', 'Serviços')}</span>
+              <span>{t('Paquetes Premium', 'Premium Packages', 'Pacotes Premium')}</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('commissioned')}
+              className={`w-full text-left px-3 py-2 rounded-lg font-mono text-[10px] uppercase tracking-wider transition-all flex items-center space-x-2 ${
+                activeTab === 'commissioned' ? 'bg-gold-500 text-dark font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <FileText size={12} />
+              <span>{t('Servicios Comisionados', 'Commissioned Services', 'Serviços Comissionados')}</span>
             </button>
 
             <button
@@ -1171,7 +1184,7 @@ export default function AdminCMS({
           </div>
         )}
 
-        {/* COMMISSIONED SERVICES CRUD */}
+        {/* PREMIUM PACKAGES CRUD */}
         {activeTab === 'services' && (
           <AdminServicesTab
             services={services}
@@ -1181,7 +1194,15 @@ export default function AdminCMS({
           />
         )}
 
-
+        {/* COMMISSIONED SERVICES CONFIG */}
+        {activeTab === 'commissioned' && (
+          <AdminCommissionedTab
+            config={commissionedConfig}
+            onUpdateConfig={onUpdateCommissionedConfig}
+            triggerAlert={triggerAlert}
+            lang={lang}
+          />
+        )}
 
         {/* INBOX MESSAGES */}
         {activeTab === 'messages' && (

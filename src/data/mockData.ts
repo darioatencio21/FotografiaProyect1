@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Photograph, Service, Testimonial, BlogPost, FAQ, Booking, Message, SEOMetadata, AnalyticsStats, PhotographerProfile, BookingConfig, EmailConfig, ClientAccount } from '../types';
+import { Photograph, Service, Testimonial, BlogPost, FAQ, Booking, Message, SEOMetadata, AnalyticsStats, PhotographerProfile, BookingConfig, EmailConfig, ClientAccount, CommissionedServicesConfig } from '../types';
 
 // Curated selection of ultra-high-resolution Unsplash photography matching Leica, Hasselblad tones
 export const INITIAL_PHOTOGRAPHS: Photograph[] = [
@@ -631,6 +631,23 @@ export const INITIAL_PROFILE: PhotographerProfile = {
   aboutText2_en: 'With over 15 years documenting haute-couture destination weddings, international commercial campaigns, and intimate editorial model books, my work strives for elegant minimalism, generous negative space, and absolute geometric structure.',
   aboutText1_pt: 'Sou Miriam Campos, fotógrafa de belas artes e diretora de arte, dedicada a eternizar o tempo sob o padrão Leica e Hasselblad. Compreendo a luz não como mera iluminação, mas como a ferramenta suprema para esculpir sentimentos e desenhar geometrias douradas.',
   aboutText2_pt: 'Com mais de 15 anos documentando casamentos de alta-costura, campanhas publicitárias mundiais e ensaios de moda, o meu trabalho foca no minimalismo luxuoso, espaço em branco e equilíbrio visual absoluto.'
+};
+
+export const INITIAL_COMMISSIONED_CONFIG: CommissionedServicesConfig = {
+  sectionTitle_es: 'SERVICIOS COMISIONADOS',
+  sectionTitle_en: 'COMMISSIONED SERVICES',
+  sectionTitle_pt: 'SERVIÇOS COMISSIONADOS',
+  sectionSubtitle_es: 'BODAS DESTINO, RETRATOS DE ARTE FINO Y CAMPAÑAS COMERCIALES',
+  sectionSubtitle_en: 'DESTINATION WEDDINGS, FINE ART PORTRAITS AND COMMERCIAL CAMPAIGNS',
+  sectionSubtitle_pt: 'CASAMENTOS DESTINO, RETRATOS DE BELAS ARTES E CAMPANHAS COMERCIAIS',
+  addons: [
+    { id: 'drone', name_es: 'Cinematografía con Drone', name_en: 'Drone Cinematography', name_pt: 'Cinematografia com Drone', price: 450, enabled: true },
+    { id: 'express', name_es: 'Entrega Exprés (48h)', name_en: 'Express Delivery (48h)', name_pt: 'Entrega Expressa (48h)', price: 300, enabled: true },
+    { id: 'makeup', name_es: 'Maquillaje y Estilismo Profesional', name_en: 'Professional Makeup & Styling', name_pt: 'Maquiagem e Styling Profissional', price: 250, enabled: true },
+  ],
+  customServiceLabel_es: 'Sesión Personalizada / Otro Proyecto',
+  customServiceLabel_en: 'Custom Session / Other Project',
+  customServiceLabel_pt: 'Sessão Personalizada / Outro Projeto',
 };
 
 export const INITIAL_ANALYTICS: AnalyticsStats = {

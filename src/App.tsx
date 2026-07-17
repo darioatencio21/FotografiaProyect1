@@ -16,9 +16,9 @@ import {
   INITIAL_BLOG_POSTS, INITIAL_FAQS, INITIAL_BOOKINGS, 
   INITIAL_MESSAGES, INITIAL_SEO, INITIAL_ANALYTICS, TRANSLATIONS,
   INITIAL_PROFILE, INITIAL_BOOKING_CONFIG, INITIAL_EMAIL_CONFIG,
-  INITIAL_CLIENT_ACCOUNTS
+  INITIAL_CLIENT_ACCOUNTS, INITIAL_COMMISSIONED_CONFIG
 } from './data/mockData';
-import { Photograph, Service, Testimonial, BlogPost, FAQ, Booking, Message, SEOMetadata, PhotographerProfile, BookingConfig, EmailConfig, ClientAccount, AnalyticsStats } from './types';
+import { Photograph, Service, Testimonial, BlogPost, FAQ, Booking, Message, SEOMetadata, PhotographerProfile, BookingConfig, EmailConfig, ClientAccount, AnalyticsStats, CommissionedServicesConfig } from './types';
 
 import CustomCursor from './components/CustomCursor';
 import Lightbox from './components/Lightbox';
@@ -142,6 +142,8 @@ export default function App() {
     return saved ? JSON.parse(saved) : INITIAL_EMAIL_CONFIG;
   });
 
+  const [commissionedConfig, setCommissionedConfig] = useState<CommissionedServicesConfig>(INITIAL_COMMISSIONED_CONFIG);
+
   const [clientAccounts, setClientAccounts] = useState<ClientAccount[]>(() => {
     const saved = localStorage.getItem('aurea_client_accounts');
     return saved ? JSON.parse(saved) : INITIAL_CLIENT_ACCOUNTS;
@@ -213,13 +215,14 @@ export default function App() {
         getCollectionWithFallback<ClientAccount>('clientAccounts', INITIAL_CLIENT_ACCOUNTS),
       ]);
 
-      const [seoRes, profileRes, bookingConfigRes, emailConfigRes, analyticsRes, adminDocRes] = await Promise.all([
+      const [seoRes, profileRes, bookingConfigRes, emailConfigRes, analyticsRes, adminDocRes, commissionedRes] = await Promise.all([
         getSingleDocument<SEOMetadata>('seo', 'config'),
         getSingleDocument<PhotographerProfile>('profile', 'photographer'),
         getSingleDocument<BookingConfig>('bookingConfig', 'config'),
         getSingleDocument<EmailConfig>('emailConfig', 'config'),
         getSingleDocument<AnalyticsStats>('analytics', 'stats'),
         getSingleDocument<{ username: string }>('admin', 'config'),
+        getSingleDocument<CommissionedServicesConfig>('commissioned', 'config'),
       ]);
 
       if (cancelled) return;
@@ -252,6 +255,7 @@ export default function App() {
         const migratedSeo = seoRes ? migrateStrings(seoRes) : seoRes;
         const migratedProfile = profileRes ? migrateStrings(profileRes) : profileRes;
         const migratedEmailCfg = emailConfigRes ? migrateStrings(emailConfigRes) : emailConfigRes;
+        const migratedCommissioned = commissionedRes ? migrateStrings(commissionedRes) : commissionedRes;
         // Save corrected data back to Firestore
         Promise.all([
           ...(migratedPhotos as Photograph[]).map((p, i) => p !== photosRes[i] ? saveDocument('photographs', p.id, p) : Promise.resolve()),
@@ -265,6 +269,7 @@ export default function App() {
           migratedSeo && migratedSeo !== seoRes ? saveDocument('seo', 'config', migratedSeo) : Promise.resolve(),
           migratedProfile && migratedProfile !== profileRes ? saveDocument('profile', 'photographer', migratedProfile) : Promise.resolve(),
           migratedEmailCfg && migratedEmailCfg !== emailConfigRes ? saveDocument('emailConfig', 'config', migratedEmailCfg) : Promise.resolve(),
+          migratedCommissioned && migratedCommissioned !== commissionedRes ? saveDocument('commissioned', 'config', migratedCommissioned) : Promise.resolve(),
         ]).then(() => {
           localStorage.setItem(MIGRATE_FLAG, 'true');
           console.log('Data migration complete: HTML entities unescaped in Firestore');
@@ -280,6 +285,7 @@ export default function App() {
         localStorage.setItem('aurea_client_accounts', JSON.stringify(migratedClients));
         setSeo(migratedSeo ?? INITIAL_SEO);
         setProfile(migratedProfile ?? INITIAL_PROFILE);
+        setCommissionedConfig(migratedCommissioned ?? INITIAL_COMMISSIONED_CONFIG);
       } else {
         setPhotographs(photosRes);
         setServices(servicesRes);
@@ -292,6 +298,7 @@ export default function App() {
         localStorage.setItem('aurea_client_accounts', JSON.stringify(clientAccsRes));
         setSeo(seoRes ?? INITIAL_SEO);
         setProfile(profileRes ?? INITIAL_PROFILE);
+        setCommissionedConfig(commissionedRes ?? INITIAL_COMMISSIONED_CONFIG);
       }
       setBookingConfig(bookingConfigRes ?? INITIAL_BOOKING_CONFIG);
       setEmailConfig(emailConfigRes ? { ...INITIAL_EMAIL_CONFIG, ...emailConfigRes } : INITIAL_EMAIL_CONFIG);
@@ -302,6 +309,7 @@ export default function App() {
       if (!bookingConfigRes) saveDocument('bookingConfig', 'config', INITIAL_BOOKING_CONFIG);
       if (!emailConfigRes) saveDocument('emailConfig', 'config', INITIAL_EMAIL_CONFIG);
       if (!analyticsRes) saveDocument('analytics', 'stats', INITIAL_ANALYTICS);
+      if (!commissionedRes) saveDocument('commissioned', 'config', INITIAL_COMMISSIONED_CONFIG);
       if (!adminDocRes) {
         await saveDocument('admin', 'config', { username: 'admin', password: 'admin123' });
       }
@@ -370,6 +378,11 @@ export default function App() {
   const handleUpdateEmailConfig = async (newConfig: EmailConfig) => {
     setEmailConfig(newConfig);
     await saveDocument('emailConfig', 'config', newConfig);
+  };
+
+  const handleUpdateCommissionedConfig = async (newConfig: CommissionedServicesConfig) => {
+    setCommissionedConfig(newConfig);
+    await saveDocument('commissioned', 'config', newConfig);
   };
 
   // Sync to LocalStorage whenever DB collections update (for offline-fallback cache layer)
@@ -1057,6 +1070,7 @@ export default function App() {
                   lang={lang}
                   config={bookingConfig}
                   emailConfig={emailConfig}
+                  commissionedConfig={commissionedConfig}
                   onAddBooking={(newBook) => {
                     const savedBook: Booking = {
                       id: `book-${Date.now()}`,
@@ -1310,6 +1324,8 @@ export default function App() {
               onUpdateProfile={handleUpdateProfile}
               onUpdateBookingConfig={handleUpdateBookingConfig}
               onUpdateEmailConfig={handleUpdateEmailConfig}
+              commissionedConfig={commissionedConfig}
+              onUpdateCommissionedConfig={handleUpdateCommissionedConfig}
               onLogout={handleAdminLogout}
             />
           )}

@@ -19,7 +19,7 @@ import {
   Heart,
   ChevronRight
 } from 'lucide-react';
-import { Service, ActiveLanguage, Booking, BookingConfig, EmailConfig } from '../types';
+import { Service, ActiveLanguage, Booking, BookingConfig, EmailConfig, CommissionedServicesConfig } from '../types';
 import { sanitizeString, sanitizeEmail, sanitizePhone } from '../lib/sanitize';
 
 interface BookingCalendarProps {
@@ -27,6 +27,7 @@ interface BookingCalendarProps {
   lang: ActiveLanguage;
   config?: BookingConfig;
   emailConfig?: EmailConfig;
+  commissionedConfig?: CommissionedServicesConfig;
   onAddBooking: (booking: Omit<Booking, 'id' | 'status' | 'createdAt'>) => void;
 }
 
@@ -129,7 +130,7 @@ const LOCAL_TRANSLATIONS = {
   }
 };
 
-export default function BookingCalendar({ services, lang, config, emailConfig, onAddBooking }: BookingCalendarProps) {
+export default function BookingCalendar({ services, lang, config, emailConfig, commissionedConfig, onAddBooking }: BookingCalendarProps) {
   const t = LOCAL_TRANSLATIONS[lang] || LOCAL_TRANSLATIONS.es;
 
   // Form State
@@ -149,10 +150,10 @@ export default function BookingCalendar({ services, lang, config, emailConfig, o
   const [peopleCount, setPeopleCount] = useState<number>(1);
   const [creativeNotes, setCreativeNotes] = useState<string>('');
   
-  // Luxury extras
-  const [includeDrone, setIncludeDrone] = useState<boolean>(false);
-  const [expressRetouch, setExpressRetouch] = useState<boolean>(false);
-  const [makeupArtist, setMakeupArtist] = useState<boolean>(false);
+  // Dynamic add-ons from commissioned config
+  const addonsConfig = commissionedConfig?.addons?.filter(a => a.enabled) || [];
+  const [selectedAddons, setSelectedAddons] = useState<Record<string, boolean>>({});
+  const toggleAddon = (id: string) => setSelectedAddons(prev => ({ ...prev, [id]: !prev[id] }));
 
   // Flow State
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
@@ -161,10 +162,8 @@ export default function BookingCalendar({ services, lang, config, emailConfig, o
   // Pricing Calculation
   const selectedService = services.find(s => s.id === selectedServiceId);
   const basePrice = selectedService ? selectedService.price : 0;
-  const dronePrice = includeDrone ? 450 : 0;
-  const expressPrice = expressRetouch ? 300 : 0;
-  const makeupPrice = makeupArtist ? 250 : 0;
-  const totalPrice = basePrice + dronePrice + expressPrice + makeupPrice;
+  const addonsTotal = addonsConfig.reduce((sum, a) => sum + (selectedAddons[a.id] ? a.price : 0), 0);
+  const totalPrice = basePrice + addonsTotal;
 
   // Handle Date Selection Input
   const handleDateChange = (val: string) => {
@@ -201,14 +200,16 @@ export default function BookingCalendar({ services, lang, config, emailConfig, o
       : (selectedService?.title || 'Sesión Fotográfica');
 
     const formattedDate = dateValue;
+    const addonLines = addonsConfig
+      .filter(a => selectedAddons[a.id])
+      .map(a => `\n- Adición: ${lang === 'es' ? a.name_es : lang === 'pt' ? a.name_pt : a.name_en} (+$${a.price})`)
+      .join('');
     const notesText = safeNotes + 
            `\n\n[Respuestas del Cuestionario Creativo]` +
            `\n- Paquete elegido: ${serviceName}` +
            `\n- Fecha solicitada: ${formattedDate}` +
            `\n- Horario preferido: ${finalSchedule}` +
-           (includeDrone ? '\n- Adición: Cinematografía Drone 4K' : '') + 
-           (expressRetouch ? '\n- Adición: Entrega Express en 48 Horas' : '') + 
-           (makeupArtist ? '\n- Adición: Asistente Maquillaje y Estilismo' : '');
+           addonLines;
 
     if (emailConfig && emailConfig.emailjsServiceId && emailConfig.emailjsTemplateId && emailConfig.emailjsPublicKey) {
       try {
@@ -367,10 +368,10 @@ export default function BookingCalendar({ services, lang, config, emailConfig, o
                         )}
                       </div>
                       <h4 className="text-xs font-semibold tracking-wide text-white group-hover:text-gold-100 transition-colors mt-1">
-                        {t.customProject}
+                        {commissionedConfig ? (lang === 'es' ? commissionedConfig.customServiceLabel_es : lang === 'pt' ? commissionedConfig.customServiceLabel_pt : commissionedConfig.customServiceLabel_en) : t.customProject}
                       </h4>
                       <p className="text-[10px] text-white/40 leading-snug line-clamp-2 mt-0.5 font-sans">
-                        Any other editorial, branding, fashion or destination project.
+                        {lang === 'es' ? 'Cualquier otro proyecto editorial, de marca, moda o destino.' : lang === 'pt' ? 'Qualquer outro projeto editorial, de marca, moda ou destino.' : 'Any other editorial, branding, fashion or destination project.'}
                       </p>
                     </div>
 
@@ -515,78 +516,39 @@ export default function BookingCalendar({ services, lang, config, emailConfig, o
 
               </div>
 
-              {/* OPTIONAL: FINE-ART ADDONS SECTION (If not custom) */}
-              {selectedServiceId !== 'custom' && (
+              {/* OPTIONAL: ADD-ONS SECTION (If not custom) */}
+              {selectedServiceId !== 'custom' && addonsConfig.length > 0 && (
                 <div className="space-y-3 pt-2">
                   <label className="block text-xs font-mono tracking-widest text-gold-300 uppercase">
                     {t.extrasTitle}
                   </label>
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    
-                    <label className={`flex flex-col justify-between p-3.5 rounded-xl border cursor-pointer hover:border-gold-400/35 transition-all select-none ${
-                      includeDrone ? 'bg-gold-500/5 border-gold-400/40' : 'bg-dark/20 border-white/5'
-                    }`}>
-                      <div className="text-left space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-semibold text-white">{t.droneLabel}</span>
-                          <input
-                            type="checkbox"
-                            checked={includeDrone}
-                            onChange={(e) => setIncludeDrone(e.target.checked)}
-                            className="w-3.5 h-3.5 rounded border-white/10 accent-gold-500 cursor-pointer"
-                          />
-                        </div>
-                        <p className="text-[9px] text-white/45 leading-relaxed font-sans">{t.droneSub}</p>
-                      </div>
-                      <div className="text-right pt-2 border-t border-white/5 mt-3 flex items-center justify-between">
-                        <span className="text-[8px] font-mono text-white/30 uppercase">Rate</span>
-                        <span className="text-[10px] font-mono font-bold text-gold-400">+$450</span>
-                      </div>
-                    </label>
-
-                    <label className={`flex flex-col justify-between p-3.5 rounded-xl border cursor-pointer hover:border-gold-400/35 transition-all select-none ${
-                      expressRetouch ? 'bg-gold-500/5 border-gold-400/40' : 'bg-dark/20 border-white/5'
-                    }`}>
-                      <div className="text-left space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-semibold text-white">{t.expressLabel}</span>
-                          <input
-                            type="checkbox"
-                            checked={expressRetouch}
-                            onChange={(e) => setExpressRetouch(e.target.checked)}
-                            className="w-3.5 h-3.5 rounded border-white/10 accent-gold-500 cursor-pointer"
-                          />
-                        </div>
-                        <p className="text-[9px] text-white/45 leading-relaxed font-sans">{t.expressSub}</p>
-                      </div>
-                      <div className="text-right pt-2 border-t border-white/5 mt-3 flex items-center justify-between">
-                        <span className="text-[8px] font-mono text-white/30 uppercase">Rate</span>
-                        <span className="text-[10px] font-mono font-bold text-gold-400">+$300</span>
-                      </div>
-                    </label>
-
-                    <label className={`flex flex-col justify-between p-3.5 rounded-xl border cursor-pointer hover:border-gold-400/35 transition-all select-none ${
-                      makeupArtist ? 'bg-gold-500/5 border-gold-400/40' : 'bg-dark/20 border-white/5'
-                    }`}>
-                      <div className="text-left space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-semibold text-white">{t.makeupLabel}</span>
-                          <input
-                            type="checkbox"
-                            checked={makeupArtist}
-                            onChange={(e) => setMakeupArtist(e.target.checked)}
-                            className="w-3.5 h-3.5 rounded border-white/10 accent-gold-500 cursor-pointer"
-                          />
-                        </div>
-                        <p className="text-[9px] text-white/45 leading-relaxed font-sans">{t.makeupSub}</p>
-                      </div>
-                      <div className="text-right pt-2 border-t border-white/5 mt-3 flex items-center justify-between">
-                        <span className="text-[8px] font-mono text-white/30 uppercase">Rate</span>
-                        <span className="text-[10px] font-mono font-bold text-gold-400">+$250</span>
-                      </div>
-                    </label>
-
+                    {addonsConfig.map(addon => {
+                      const selected = !!selectedAddons[addon.id];
+                      const name = lang === 'es' ? addon.name_es : lang === 'pt' ? addon.name_pt : addon.name_en;
+                      return (
+                        <label key={addon.id} className={`flex flex-col justify-between p-3.5 rounded-xl border cursor-pointer hover:border-gold-400/35 transition-all select-none ${
+                          selected ? 'bg-gold-500/5 border-gold-400/40' : 'bg-dark/20 border-white/5'
+                        }`}>
+                          <div className="text-left space-y-1">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-semibold text-white">{name}</span>
+                              <input
+                                type="checkbox"
+                                checked={selected}
+                                onChange={() => toggleAddon(addon.id)}
+                                className="w-3.5 h-3.5 rounded border-white/10 accent-gold-500 cursor-pointer"
+                              />
+                            </div>
+                          </div>
+                          <div className="text-right pt-2 border-t border-white/5 mt-3 flex items-center justify-between">
+                            <span className="text-[8px] font-mono text-white/30 uppercase">Rate</span>
+                            <span className="text-[10px] font-mono font-bold text-gold-400">+${addon.price}</span>
+                          </div>
+                        </label>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -757,9 +719,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, o
                   setCreativeNotes('');
                   setCustomServiceText('');
                   setCustomTimeframeText('');
-                  setIncludeDrone(false);
-                  setExpressRetouch(false);
-                  setMakeupArtist(false);
+                  setSelectedAddons({});
                 }}
                 className="py-2.5 px-6 border border-white/15 hover:border-gold-400/50 hover:text-gold-300 text-white/80 rounded-lg font-mono text-[10px] tracking-widest uppercase transition-all"
               >
