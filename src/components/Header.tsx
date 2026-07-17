@@ -30,7 +30,7 @@ export default function Header({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
 
   const lastScrollY = useRef(0);
   const hideTimer = useRef<ReturnType<typeof setTimeout>>();
@@ -38,20 +38,13 @@ export default function Header({
   useEffect(() => {
     const handleScroll = () => {
       const currentY = window.scrollY;
+      setIsScrolled(currentY > 60);
 
       if (currentY <= 10) {
         setIsVisible(true);
-        setIsScrolled(false);
-        lastScrollY.current = currentY;
-        return;
-      }
-
-      setIsScrolled(true);
-
-      if (currentY > lastScrollY.current && currentY > 80) {
+      } else if (currentY > lastScrollY.current) {
         setIsVisible(false);
-      } else if (currentY < lastScrollY.current) {
-        setIsVisible(true);
+        if (hideTimer.current) clearTimeout(hideTimer.current);
       }
 
       lastScrollY.current = currentY;
@@ -67,11 +60,13 @@ export default function Header({
       if (e.clientY < 80) {
         setIsVisible(true);
         if (hideTimer.current) clearTimeout(hideTimer.current);
-        hideTimer.current = setTimeout(() => {
-          if (window.scrollY > 10) {
+      } else if (window.scrollY > 10) {
+        if (!hideTimer.current) {
+          hideTimer.current = setTimeout(() => {
             setIsVisible(false);
-          }
-        }, 3000);
+            hideTimer.current = undefined;
+          }, 2000);
+        }
       }
     };
 
@@ -115,7 +110,7 @@ export default function Header({
 
   return (
     <motion.header
-      animate={{ y: isVisible ? 0 : -120 }}
+      animate={{ y: isVisible ? 0 : '-100%' }}
       transition={{ duration: 0.35, ease: 'easeInOut' }}
       className={`fixed top-0 inset-x-0 z-40 transition-colors duration-500 ${headerIsSolid ? 'bg-dark/85 backdrop-blur-lg border-b border-white/5' : 'bg-transparent border-b border-transparent'} py-4 px-6 lg:px-12 flex items-center justify-between lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-x-24`}>
       {/* Desktop navigation link array - Left split (Home, About, Portfolio) */}
