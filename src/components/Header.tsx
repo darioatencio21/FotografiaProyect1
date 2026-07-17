@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { Menu, X, Globe, User, ShieldAlert } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'motion/react';
+import { Menu, X, Globe, User, ShieldAlert, ChevronLeft } from 'lucide-react';
 import { ActiveLanguage } from '../types';
 import { TRANSLATIONS } from '../data/mockData';
 import { Logo } from './Logo';
@@ -19,6 +19,11 @@ interface HeaderProps {
   onOpenAdminLogin: () => void;
 }
 
+const DRAWER_WIDTH_VW = 85;
+const CLOSE_THRESHOLD_PX = 80;
+const CLOSE_VELOCITY = 400;
+const HANDLE_OPEN_THRESHOLD_PX = 40;
+
 export default function Header({
   currentView,
   onSetView,
@@ -29,50 +34,6 @@ export default function Header({
 }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
-
-  const touchStart = useRef({ x: 0, y: 0 });
-  const isMenuOpenRef = useRef(isMobileMenuOpen);
-  isMenuOpenRef.current = isMobileMenuOpen;
-
-  useEffect(() => {
-    const onTouchStart = (e: TouchEvent) => {
-      touchStart.current = {
-        x: e.touches[0].clientX,
-        y: e.touches[0].clientY,
-      };
-    };
-
-    const onTouchEnd = (e: TouchEvent) => {
-      if (isMenuOpenRef.current) return;
-
-      const { x: startX, y: startY } = touchStart.current;
-      if (!startX) return;
-
-      const endX = e.changedTouches[0].clientX;
-      const endY = e.changedTouches[0].clientY;
-
-      const deltaX = startX - endX;
-      const deltaY = Math.abs(startY - endY);
-
-      const screenWidth = window.innerWidth;
-      const isMobile = screenWidth < 1024;
-      const fromRightEdge = startX > screenWidth - 35;
-      const swipedLeft = deltaX > 50;
-      const isHorizontal = deltaY < deltaX * 0.6;
-
-      if (isMobile && fromRightEdge && swipedLeft && isHorizontal) {
-        setIsMobileMenuOpen(true);
-      }
-    };
-
-    document.addEventListener('touchstart', onTouchStart, { passive: true });
-    document.addEventListener('touchend', onTouchEnd, { passive: true });
-
-    return () => {
-      document.removeEventListener('touchstart', onTouchStart);
-      document.removeEventListener('touchend', onTouchEnd);
-    };
-  }, []);
 
   const t = TRANSLATIONS[lang];
 
@@ -97,6 +58,51 @@ export default function Header({
     { code: 'pt', name: 'POR' }
   ];
 
+  const drawerX = useMotionValue(0);
+  const isDragging = useMotionValue(0);
+
+  const overlayOpacity = useTransform(drawerX, [0, window.innerWidth * (DRAWER_WIDTH_VW / 100)], [1, 0]);
+
+  const closeDrawer = () => {
+    setIsMobileMenuOpen(false);
+    animate(drawerX, 0, { type: 'tween', duration: 0.3, ease: [0.32, 0.72, 0, 1] });
+  };
+
+  const openDrawer = () => {
+    setIsMobileMenuOpen(true);
+    animate(drawerX, 0, { type: 'tween', duration: 0.3, ease: [0.32, 0.72, 0, 1] });
+  };
+
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMobileMenuOpen]);
+
+  const handleDrawerDragEnd = (_: unknown, info: { offset: { x: number }; velocity: { x: number } }) => {
+    isDragging.set(0);
+    const shouldClose = info.offset.x > CLOSE_THRESHOLD_PX || info.velocity.x > CLOSE_VELOCITY;
+    if (shouldClose) {
+      closeDrawer();
+    } else {
+      animate(drawerX, 0, { type: 'spring', stiffness: 500, damping: 40 });
+    }
+  };
+
+  const handleHandleDragEnd = (_: unknown, info: { offset: { x: number }; velocity: { x: number } }) => {
+    const shouldOpen = info.offset.x < -HANDLE_OPEN_THRESHOLD_PX || info.velocity.x < -CLOSE_VELOCITY;
+    if (shouldOpen) {
+      openDrawer();
+    } else {
+      animate(drawerX, 0, { type: 'spring', stiffness: 500, damping: 40 });
+    }
+  };
+
   return (
     <header className="relative w-full max-h-[70px] lg:max-h-none bg-dark border-b border-white/5 py-2 lg:py-4 px-4 lg:px-12 flex items-center justify-between lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-x-24">
       {/* Desktop navigation link array - Left split (Home, About, Portfolio) */}
@@ -113,7 +119,7 @@ export default function Header({
             >
               <span>{item.label}</span>
               {isActive && (
-                <motion.div 
+                <motion.div
                   className="absolute bottom-0 left-0 right-0 h-px bg-gold-400"
                   layoutId="activeNavLine"
                 />
@@ -124,8 +130,8 @@ export default function Header({
       </nav>
 
       {/* Brand logo (Centered on desktop, naturally left-aligned on mobile) */}
-      <div 
-        onClick={() => handleNav('home')} 
+      <div
+        onClick={() => handleNav('home')}
         className="flex items-center cursor-pointer group z-20 lg:flex lg:justify-center lg:items-center gap-2 lg:gap-3 py-0.5 lg:py-1"
       >
         <Logo size="xs" />
@@ -149,7 +155,7 @@ export default function Header({
               >
                 <span>{item.label}</span>
                 {isActive && (
-                  <motion.div 
+                  <motion.div
                     className="absolute bottom-0 left-0 right-0 h-px bg-gold-400"
                     layoutId="activeNavLine"
                   />
@@ -190,8 +196,8 @@ export default function Header({
                           setShowLanguageDropdown(false);
                         }}
                         className={`w-full text-left px-3.5 py-2 text-[10px] font-mono transition-all ${
-                          lang === item.code 
-                            ? 'bg-gold-500 text-dark font-bold' 
+                          lang === item.code
+                            ? 'bg-gold-500 text-dark font-bold'
                             : 'text-white/75 hover:bg-white/5 hover:text-white'
                         }`}
                       >
@@ -251,25 +257,91 @@ export default function Header({
           <span>{isAdminLoggedIn ? 'CMS' : 'Staff'}</span>
         </button>
 
-        <button 
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        <button
+          onClick={() => (isMobileMenuOpen ? closeDrawer() : openDrawer())}
           className="text-white/80 p-1.5 hover:text-white"
         >
           {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
       </div>
 
-      {/* Mobile drawer slider overlay */}
+      {/* Drag handle — visible only on mobile, only when menu is closed */}
+      <AnimatePresence>
+        {!isMobileMenuOpen && (
+          <motion.button
+            key="drag-handle"
+            type="button"
+            aria-label="Open menu"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
+            drag="x"
+            dragConstraints={{ left: -200, right: 0 }}
+            dragElastic={0.15}
+            dragMomentum={false}
+            onDragStart={() => isDragging.set(1)}
+            onDragEnd={handleHandleDragEnd}
+            style={{ x: drawerX, touchAction: 'pan-y' }}
+            className="fixed top-1/2 -translate-y-1/2 right-0 z-40 lg:hidden
+                       w-2.5 h-24 bg-gold-500/70 hover:bg-gold-400 active:bg-gold-300
+                       rounded-l-full cursor-grab active:cursor-grabbing
+                       flex items-center justify-center
+                       shadow-[-2px_0_8px_rgba(0,0,0,0.4)]
+                       transition-colors"
+          >
+            <motion.span
+              animate={{ x: [-1, -3, -1] }}
+              transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+              className="flex items-center justify-center -ml-0.5"
+            >
+              <ChevronLeft size={12} className="text-dark" strokeWidth={3} />
+            </motion.span>
+          </motion.button>
+        )}
+      </AnimatePresence>
+
+      {/* Mobile drawer overlay (dark backdrop) */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            className="fixed inset-0 top-[70px] bg-dark z-30 lg:hidden flex flex-col justify-between p-6 text-left overflow-y-auto border-l border-[#D8C0A8]"
+            key="drawer-overlay"
+            className="fixed inset-0 z-30 lg:hidden bg-black/60 backdrop-blur-sm"
+            style={{ opacity: overlayOpacity }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            onClick={closeDrawer}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Mobile drawer (draggable) */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.aside
+            key="mobile-drawer"
+            className="fixed inset-y-0 right-0 w-[85vw] max-w-sm bg-dark z-40 lg:hidden
+                       flex flex-col justify-between p-6 pt-4 text-left overflow-y-auto
+                       border-l border-[#D8C0A8] shadow-[-8px_0_24px_rgba(0,0,0,0.5)]
+                       touch-pan-y"
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.05}
+            dragMomentum={false}
+            onDragStart={() => isDragging.set(1)}
+            onDragEnd={handleDrawerDragEnd}
+            style={{ x: drawerX, touchAction: 'pan-y' }}
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
-            transition={{ type: 'tween', duration: 0.3 }}
+            transition={{ type: 'tween', duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
           >
-            <div className="space-y-6 pt-4">
+            {/* Drag affordance at the top */}
+            <div className="w-12 h-1 bg-white/15 rounded-full mx-auto mb-4 opacity-60" aria-hidden="true" />
+
+            <div className="space-y-6 pt-2">
               {menuItems.map(item => {
                 const isActive = currentView === item.id;
                 return (
@@ -307,7 +379,7 @@ export default function Header({
                 </span>
               </div>
             </div>
-          </motion.div>
+          </motion.aside>
         )}
       </AnimatePresence>
     </header>
