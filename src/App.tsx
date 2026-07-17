@@ -39,7 +39,7 @@ import {
   logoutFromFirebase,
   onAuthChange
 } from './lib/firebase';
-import { sanitizeString, sanitizeEmail } from './lib/sanitize';
+import { sanitizeString, sanitizeEmail, unescapeHTMLEntities } from './lib/sanitize';
 
 async function syncCollection<T extends { id: string }>(
   collectionPath: string,
@@ -224,27 +224,78 @@ export default function App() {
 
       if (cancelled) return;
 
-      setPhotographs(photosRes);
-      setServices(servicesRes);
-      setTestimonials(testimonialsRes);
-      setBlogPosts(blogRes);
-      setFaqs(faqsRes);
-      setBookings(bookingsRes);
-      setMessages(messagesRes);
-      setClientAccounts(clientAccsRes);
-      localStorage.setItem('aurea_client_accounts', JSON.stringify(clientAccsRes));
+      // One-time migration: repair data corrupted by old sanitizeString HTML escaping
+      const MIGRATE_FLAG = 'aurea_html_entities_migrated_v2';
+      const needsMigration = !localStorage.getItem(MIGRATE_FLAG);
 
-      const resolvedSeo = seoRes ?? INITIAL_SEO;
-      const resolvedProfile = profileRes ?? INITIAL_PROFILE;
-      const resolvedBookingConfig = bookingConfigRes ?? INITIAL_BOOKING_CONFIG;
-      const resolvedEmailConfig = emailConfigRes ? { ...INITIAL_EMAIL_CONFIG, ...emailConfigRes } : INITIAL_EMAIL_CONFIG;
-      const resolvedAnalytics = analyticsRes ?? INITIAL_ANALYTICS;
-
-      setSeo(resolvedSeo);
-      setProfile(resolvedProfile);
-      setBookingConfig(resolvedBookingConfig);
-      setEmailConfig(resolvedEmailConfig);
-      setSeoAnalytics(resolvedAnalytics);
+      if (needsMigration) {
+        function migrateStrings(obj: unknown): unknown {
+          if (typeof obj === 'string') return unescapeHTMLEntities(obj);
+          if (Array.isArray(obj)) return obj.map(migrateStrings);
+          if (obj && typeof obj === 'object') {
+            const result: Record<string, unknown> = {};
+            for (const [k, v] of Object.entries(obj as Record<string, unknown>)) {
+              result[k] = migrateStrings(v);
+            }
+            return result;
+          }
+          return obj;
+        }
+        const migratedPhotos = photosRes.map(p => migrateStrings(p));
+        const migratedServices = servicesRes.map(s => migrateStrings(s));
+        const migratedTestimonials = testimonialsRes.map(t => migrateStrings(t));
+        const migratedBlogs = blogRes.map(b => migrateStrings(b));
+        const migratedFaqs = faqsRes.map(f => migrateStrings(f));
+        const migratedBookings = bookingsRes.map(b => migrateStrings(b));
+        const migratedMessages = messagesRes.map(m => migrateStrings(m));
+        const migratedClients = clientAccsRes.map(c => migrateStrings(c));
+        const migratedSeo = seoRes ? migrateStrings(seoRes) : seoRes;
+        const migratedProfile = profileRes ? migrateStrings(profileRes) : profileRes;
+        const migratedEmailCfg = emailConfigRes ? migrateStrings(emailConfigRes) : emailConfigRes;
+        // Save corrected data back to Firestore
+        Promise.all([
+          ...(migratedPhotos as Photograph[]).map((p, i) => p !== photosRes[i] ? saveDocument('photographs', p.id, p) : Promise.resolve()),
+          ...(migratedServices as Service[]).map((s, i) => s !== servicesRes[i] ? saveDocument('services', s.id, s) : Promise.resolve()),
+          ...(migratedTestimonials as Testimonial[]).map((t, i) => t !== testimonialsRes[i] ? saveDocument('testimonials', t.id, t) : Promise.resolve()),
+          ...(migratedBlogs as BlogPost[]).map((b, i) => b !== blogRes[i] ? saveDocument('blogPosts', b.id, b) : Promise.resolve()),
+          ...(migratedFaqs as FAQ[]).map((f, i) => f !== faqsRes[i] ? saveDocument('faqs', f.id, f) : Promise.resolve()),
+          ...(migratedBookings as Booking[]).map((b, i) => b !== bookingsRes[i] ? saveDocument('bookings', b.id, b) : Promise.resolve()),
+          ...(migratedMessages as Message[]).map((m, i) => m !== messagesRes[i] ? saveDocument('messages', m.id, m) : Promise.resolve()),
+          ...(migratedClients as ClientAccount[]).map((c, i) => c !== clientAccsRes[i] ? saveDocument('clientAccounts', c.id, c) : Promise.resolve()),
+          migratedSeo && migratedSeo !== seoRes ? saveDocument('seo', 'config', migratedSeo) : Promise.resolve(),
+          migratedProfile && migratedProfile !== profileRes ? saveDocument('profile', 'photographer', migratedProfile) : Promise.resolve(),
+          migratedEmailCfg && migratedEmailCfg !== emailConfigRes ? saveDocument('emailConfig', 'config', migratedEmailCfg) : Promise.resolve(),
+        ]).then(() => {
+          localStorage.setItem(MIGRATE_FLAG, 'true');
+          console.log('Data migration complete: HTML entities unescaped in Firestore');
+        }).catch(() => {});
+        setPhotographs(migratedPhotos);
+        setServices(migratedServices);
+        setTestimonials(migratedTestimonials);
+        setBlogPosts(migratedBlogs);
+        setFaqs(migratedFaqs);
+        setBookings(migratedBookings);
+        setMessages(migratedMessages);
+        setClientAccounts(migratedClients);
+        localStorage.setItem('aurea_client_accounts', JSON.stringify(migratedClients));
+        setSeo(migratedSeo ?? INITIAL_SEO);
+        setProfile(migratedProfile ?? INITIAL_PROFILE);
+      } else {
+        setPhotographs(photosRes);
+        setServices(servicesRes);
+        setTestimonials(testimonialsRes);
+        setBlogPosts(blogRes);
+        setFaqs(faqsRes);
+        setBookings(bookingsRes);
+        setMessages(messagesRes);
+        setClientAccounts(clientAccsRes);
+        localStorage.setItem('aurea_client_accounts', JSON.stringify(clientAccsRes));
+        setSeo(seoRes ?? INITIAL_SEO);
+        setProfile(profileRes ?? INITIAL_PROFILE);
+      }
+      setBookingConfig(bookingConfigRes ?? INITIAL_BOOKING_CONFIG);
+      setEmailConfig(emailConfigRes ? { ...INITIAL_EMAIL_CONFIG, ...emailConfigRes } : INITIAL_EMAIL_CONFIG);
+      setSeoAnalytics(analyticsRes ?? INITIAL_ANALYTICS);
 
       if (!seoRes) saveDocument('seo', 'config', INITIAL_SEO);
       if (!profileRes) saveDocument('profile', 'photographer', INITIAL_PROFILE);

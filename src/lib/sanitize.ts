@@ -1,15 +1,19 @@
 export function sanitizeString(input: string): string {
   if (typeof input !== 'string') return '';
+  return input.trim();
+}
+
+export function unescapeHTMLEntities(input: string): string {
+  if (typeof input !== 'string') return '';
   return input
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;')
-    .replace(/\//g, '&#x2F;')
-    .replace(/\\/g, '&#x5C;')
-    .replace(/`/g, '&#x60;')
-    .trim();
+    .replace(/&#x2F;/g, '/')
+    .replace(/&#x5C;/g, '\\')
+    .replace(/&#x60;/g, '`')
+    .replace(/&#x27;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&gt;/g, '>')
+    .replace(/&lt;/g, '<')
+    .replace(/&amp;/g, '&');
 }
 
 export function sanitizeEmail(input: string): string {

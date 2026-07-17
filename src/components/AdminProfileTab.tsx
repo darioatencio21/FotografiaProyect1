@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Check, UploadCloud } from 'lucide-react';
 import { PhotographerProfile, ActiveLanguage } from '../types';
 import { sanitizeObject } from '../lib/sanitize';
@@ -12,13 +12,9 @@ interface AdminProfileTabProps {
 
 function AdminProfileTab({ profile, onUpdateProfile, triggerAlert, lang }: AdminProfileTabProps) {
   const [profileForm, setProfileForm] = useState<PhotographerProfile>(profile);
-  const initialized = useRef(false);
 
   useEffect(() => {
-    if (!initialized.current) {
-      setProfileForm(profile);
-      initialized.current = true;
-    }
+    setProfileForm(profile);
   }, [profile]);
 
   const handleSaveProfile = useCallback((e: React.FormEvent) => {
@@ -32,6 +28,7 @@ function AdminProfileTab({ profile, onUpdateProfile, triggerAlert, lang }: Admin
     triggerAlert('Optimizando foto de perfil para el portafolio...');
     const reader = new FileReader();
     reader.onload = (event) => {
+      const rawUrl = event.target?.result as string;
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement('canvas');
@@ -51,9 +48,18 @@ function AdminProfileTab({ profile, onUpdateProfile, triggerAlert, lang }: Admin
           const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
           setProfileForm(prev => ({ ...prev, avatarUrl: dataUrl }));
           triggerAlert('✓ Foto de perfil optimizada con éxito! Presiona "Guardar Perfil" para persistir.');
+        } else {
+          setProfileForm(prev => ({ ...prev, avatarUrl: rawUrl }));
+          triggerAlert('✓ Foto cargada correctamente (sin optimización).');
         }
       };
-      img.src = event.target?.result as string;
+      img.onerror = () => {
+        triggerAlert('Error al cargar la imagen. Intenta con otro archivo.');
+      };
+      img.src = rawUrl;
+    };
+    reader.onerror = () => {
+      triggerAlert('Error al leer el archivo. Intenta de nuevo.');
     };
     reader.readAsDataURL(file);
   }, [triggerAlert]);

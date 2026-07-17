@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { RefreshCw, UploadCloud } from 'lucide-react';
 import { SEOMetadata, ActiveLanguage } from '../types';
 import { sanitizeObject } from '../lib/sanitize';
@@ -29,13 +29,9 @@ interface AdminSEOTabProps {
 
 function AdminSEOTab({ seo, onUpdateSeo, triggerAlert, lang }: AdminSEOTabProps) {
   const [seoForm, setSeoForm] = useState<SEOMetadata>(seo);
-  const initialized = useRef(false);
 
   useEffect(() => {
-    if (!initialized.current) {
-      setSeoForm(seo);
-      initialized.current = true;
-    }
+    setSeoForm(seo);
   }, [seo]);
 
   const handleSaveSEO = useCallback((e: React.FormEvent) => {
