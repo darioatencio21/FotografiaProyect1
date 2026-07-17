@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Menu, X, Globe, User, ShieldAlert } from 'lucide-react';
 import { ActiveLanguage } from '../types';
@@ -29,6 +29,16 @@ export default function Header({
 }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 60);
+    };
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const t = TRANSLATIONS[lang];
 
@@ -53,8 +63,10 @@ export default function Header({
     { code: 'pt', name: 'POR' }
   ];
 
+  const headerIsSolid = isScrolled || currentView !== 'home';
+
   return (
-    <header className="sticky top-0 z-40 bg-dark border-b border-white/10 py-5 px-6 lg:px-12 flex items-center justify-between lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-x-24">
+    <header className={`fixed top-0 inset-x-0 z-40 transition-all duration-500 ${headerIsSolid ? 'bg-dark/85 backdrop-blur-lg border-b border-white/5' : 'bg-transparent border-b border-transparent'} py-4 px-6 lg:px-12 flex items-center justify-between lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-x-24`}>
       {/* Desktop navigation link array - Left split (Home, About, Portfolio) */}
       <nav className="hidden lg:flex items-center space-x-8 z-10 justify-start">
         {menuItems.slice(0, 3).map(item => {
@@ -64,13 +76,13 @@ export default function Header({
               key={item.id}
               onClick={() => handleNav(item.id)}
               className={`text-[10px] font-mono tracking-widest uppercase transition-all relative pb-1 cursor-pointer ${
-                isActive ? 'text-gold-500 font-bold' : 'text-white/60 hover:text-gold-500'
+                isActive ? 'text-gold-400 font-bold' : 'text-white/70 hover:text-gold-400'
               }`}
             >
               <span>{item.label}</span>
               {isActive && (
                 <motion.div 
-                  className="absolute bottom-0 left-0 right-0 h-px bg-gold-500"
+                  className="absolute bottom-0 left-0 right-0 h-px bg-gold-400"
                   layoutId="activeNavLine"
                 />
               )}
@@ -85,7 +97,7 @@ export default function Header({
         className="flex items-center cursor-pointer group z-20 lg:flex lg:justify-center lg:items-center gap-3 py-1"
       >
         <Logo size="xs" className="scale-110 lg:scale-125" />
-        <span id="header-logo" className="font-serif text-[10px] sm:text-[11px] lg:text-[13px] font-semibold tracking-[0.25em] text-white group-hover:text-gold-500 transition-colors duration-500 whitespace-nowrap uppercase">
+        <span id="header-logo" className="font-serif text-[10px] sm:text-[11px] lg:text-[13px] font-semibold tracking-[0.25em] text-white group-hover:text-gold-400 transition-colors duration-500 whitespace-nowrap uppercase">
           Miriam Campos
         </span>
       </div>
@@ -100,13 +112,13 @@ export default function Header({
                 key={item.id}
                 onClick={() => handleNav(item.id)}
                 className={`text-[10px] font-mono tracking-widest uppercase transition-all relative pb-1 cursor-pointer ${
-                  isActive ? 'text-gold-500 font-bold' : 'text-white/60 hover:text-gold-500'
+                  isActive ? 'text-gold-400 font-bold' : 'text-white/70 hover:text-gold-400'
                 }`}
               >
                 <span>{item.label}</span>
                 {isActive && (
                   <motion.div 
-                    className="absolute bottom-0 left-0 right-0 h-px bg-gold-500"
+                    className="absolute bottom-0 left-0 right-0 h-px bg-gold-400"
                     layoutId="activeNavLine"
                   />
                 )}
@@ -122,9 +134,9 @@ export default function Header({
           <div className="relative">
             <button
               onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}
-              className="flex items-center space-x-1.5 text-white/70 hover:text-gold-500 text-[10px] font-mono tracking-widest uppercase cursor-pointer transition-colors"
+              className="flex items-center space-x-1.5 text-white/70 hover:text-gold-400 text-[10px] font-mono tracking-widest uppercase cursor-pointer transition-colors"
             >
-              <Globe size={12} className="text-gold-500" />
+              <Globe size={12} className="text-gold-400" />
               <span>{lang.toUpperCase()}</span>
             </button>
 
@@ -172,7 +184,7 @@ export default function Header({
             className={`px-4 py-2 border rounded-full text-[9px] font-mono tracking-widest uppercase transition-all flex items-center space-x-1 cursor-pointer ${
               currentView === 'admin'
                 ? 'bg-gold-500 border-gold-500 text-dark font-bold'
-                : 'border-white/15 text-white/70 hover:border-gold-500 hover:text-gold-400 hover:bg-white/5'
+                : 'border-white/15 text-white/70 hover:border-gold-400 hover:text-gold-400 hover:bg-white/5'
             }`}
           >
             {isAdminLoggedIn ? (
@@ -219,7 +231,7 @@ export default function Header({
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            className="fixed inset-0 top-[60px] bg-dark z-30 lg:hidden flex flex-col justify-between p-6 border-t border-white/5 text-left"
+            className="fixed inset-0 top-[56px] bg-dark/95 backdrop-blur-md z-30 lg:hidden flex flex-col justify-between p-6 text-left"
             initial={{ opacity: 0, x: '100%' }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: '100%' }}

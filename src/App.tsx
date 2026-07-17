@@ -705,57 +705,140 @@ export default function App() {
           {/* ======================================================= */}
           {currentView === 'home' && (
             <div className="space-y-24">
-              {/* Fullscreen Cinematic Hero Banner */}
-              <section className="relative min-h-[85vh] rounded-3xl overflow-hidden border border-white/5 flex flex-col justify-between p-8 md:p-12 lg:p-16">
+              {/* Split-Screen Editorial Hero */}
+              <section className="relative h-screen -mx-6 lg:-mx-12 -mt-4 overflow-hidden">
                 
-                {/* Hero underlay photography backdrop with parallax simulation */}
-                <div className="absolute inset-0 z-0">
-                  <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/45 to-transparent z-10" />
-                  <img
-                    src={seo.ogImage || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=90&w=1600"}
-                    alt="Hero Fine Art"
-                    className={`w-full h-full object-cover filter brightness-[0.7] animate-pulse [animation-duration:12s] transition-all duration-500 ${getHeroPositionClass(seo.heroPosition)} ${getHeroScaleClass(seo.heroScale)}`}
-                  />
+                {/* Mobile: single image */}
+                <div className="absolute inset-0 z-0 md:hidden overflow-hidden">
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 1.2, ease: 'easeOut' }}
+                    className="w-full h-full"
+                  >
+                    <div className="absolute inset-0 bg-dark/20 z-10" />
+                    <img
+                      src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=85&w=1200"
+                      alt="Fine Art Photography"
+                      className="w-full h-full object-cover object-center"
+                      style={{
+                        animation: 'heroZoom 20s ease-in-out infinite alternate'
+                      }}
+                    />
+                  </motion.div>
                 </div>
 
-
-
-                {/* Main center header content */}
-                <div className="z-10 text-center max-w-4xl mx-auto space-y-8 my-auto pt-20">
-                  <span className="text-[11px] font-mono tracking-[0.4em] text-gold-500 uppercase font-semibold block animate-pulse">
-                    MUSEUM-GRADE FINE ART PHOTOGRAPHY
-                  </span>
-                  <h1 className="font-serif text-5xl md:text-6xl lg:text-8xl italic font-normal tracking-normal text-white leading-[1.1] mix-blend-difference">
-                    {t.heroTitle}
-                  </h1>
-                  <p className="text-[10px] md:text-xs text-white/85 max-w-xl mx-auto leading-relaxed uppercase tracking-[0.2em] font-light">
-                    {t.heroSubtitle}
-                  </p>
-
-                  <div className="flex flex-wrap items-center justify-center gap-6 pt-4">
-                    <button
-                      onClick={() => setCurrentView('portfolio')}
-                      className="px-8 py-4 bg-white text-dark hover:bg-gold-500 hover:text-white font-mono text-[11px] tracking-widest uppercase font-bold transition-all duration-300 rounded-none flex items-center space-x-1.5 shadow-2xl cursor-pointer"
-                    >
-                      <span>{t.ctaPortfolio}</span>
-                      <ArrowRight size={12} />
-                    </button>
-                    <button
-                      onClick={() => {
-                        setCurrentView('services');
-                        setTimeout(() => {
-                          const element = document.getElementById('booking-calendar');
-                          if (element) element.scrollIntoView({ behavior: 'smooth' });
-                        }, 200);
+                {/* Desktop: Left image */}
+                <div className="hidden md:block absolute inset-y-0 left-0 w-1/2 z-0 overflow-hidden">
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 1.2, ease: 'easeOut' }}
+                    className="w-full h-full"
+                  >
+                    <div className="absolute inset-0 bg-dark/15 z-10" />
+                    <img
+                      src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=85&w=1600"
+                      alt="Fine Art Wedding"
+                      className="w-full h-full object-cover object-center"
+                      style={{
+                        animation: 'heroZoom 20s ease-in-out infinite alternate'
                       }}
-                      className="px-8 py-4 border border-white/30 hover:border-gold-500 text-white font-mono text-[11px] tracking-widest uppercase font-bold transition-all duration-300 rounded-none cursor-pointer hover:text-gold-300 bg-transparent"
+                    />
+                  </motion.div>
+                </div>
+
+                {/* Desktop: Right image */}
+                <div className="hidden md:block absolute inset-y-0 right-0 w-1/2 z-0 overflow-hidden">
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 1.2, ease: 'easeOut', delay: 0.2 }}
+                    className="w-full h-full"
+                  >
+                    <div className="absolute inset-0 bg-dark/15 z-10" />
+                    <img
+                      src="https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&q=85&w=1600"
+                      alt="Editorial Fashion"
+                      className="w-full h-full object-cover object-center"
+                      style={{
+                        animation: 'heroZoom 20s ease-in-out infinite alternate'
+                      }}
+                    />
+                  </motion.div>
+                </div>
+
+                {/* Subtle divider line */}
+                <div className="absolute inset-y-[15%] left-1/2 w-px bg-white/10 z-20 hidden md:block" />
+
+                {/* Central content overlay */}
+                <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
+                  <div className="text-center max-w-2xl mx-auto px-6 pointer-events-auto">
+                    <motion.h1
+                      initial={{ opacity: 0, y: 40 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+                      className="font-serif text-4xl sm:text-5xl md:text-7xl lg:text-8xl leading-[1.15] tracking-wide text-white"
                     >
-                      {t.ctaBook}
-                    </button>
+                      <span className="italic">{t.heroTitle.split(',')[0]},</span>
+                      <br />
+                      <span className="not-italic font-light">{t.heroTitle.split(',')[1] ? t.heroTitle.split(',')[1].trim().split('&')[0]?.trim() : 'EMOTIÓN'}</span>
+                      <br />
+                      <span className="italic font-medium">&</span>{' '}
+                      <span className="not-italic font-light">{t.heroTitle.split('&')[1]?.trim() || 'SIMETRÍA'}</span>
+                    </motion.h1>
+
+                    <motion.p
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+                      className="text-[10px] sm:text-[11px] md:text-xs text-white/70 max-w-lg mx-auto leading-relaxed tracking-wider font-light mt-6 md:mt-10"
+                    >
+                      {t.heroSubtitle}
+                    </motion.p>
+
+                    <motion.div
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.35 }}
+                      className="flex flex-wrap items-center justify-center gap-3 md:gap-4 mt-8 md:mt-12"
+                    >
+                      <button
+                        onClick={() => setCurrentView('portfolio')}
+                        className="px-6 md:px-7 py-2.5 md:py-3 bg-white text-dark hover:bg-gold-400 font-mono text-[9px] md:text-[10px] tracking-widest uppercase font-semibold transition-all duration-300 cursor-pointer"
+                      >
+                        {t.ctaPortfolio}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setCurrentView('services');
+                          setTimeout(() => {
+                            const element = document.getElementById('booking-calendar');
+                            if (element) element.scrollIntoView({ behavior: 'smooth' });
+                          }, 200);
+                        }}
+                        className="px-6 md:px-7 py-2.5 md:py-3 border border-white/40 text-white hover:border-white font-mono text-[9px] md:text-[10px] tracking-widest uppercase font-semibold transition-all duration-300 cursor-pointer bg-transparent"
+                      >
+                        {t.ctaBook}
+                      </button>
+                    </motion.div>
                   </div>
                 </div>
 
-
+                {/* Scroll indicator */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1.2 }}
+                  className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center space-y-2"
+                >
+                  <span className="text-[7px] font-mono tracking-[0.3em] text-white/30 uppercase">Scroll</span>
+                  <motion.div
+                    animate={{ y: [0, 6, 0] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                    className="w-px h-8 bg-white/20"
+                  />
+                </motion.div>
               </section>
 
               {/* Statistics Showcase Ribbon Banner */}

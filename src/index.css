@@ -88,6 +88,12 @@
   transform: scale(1.03);
 }
 
+/* Ken Burns cinematic slow zoom for hero images */
+@keyframes heroZoom {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.05); }
+}
+
 /* Ensure default cursor is always visible and interactive */
 @media (min-width: 1024px) {
   .custom-cursor-active {
