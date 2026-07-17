@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
    Heart, ArrowRight, MessageSquare, MapPin, 
@@ -28,7 +28,6 @@ import ClientPortal from './components/ClientPortal';
 import StripeCheckout from './components/StripeCheckout';
 import AdminCMS from './components/AdminCMS';
 import Header from './components/Header';
-import Layout from './components/Layout';
 import Footer from './components/Footer';
 import LegalViews from './components/LegalViews';
 
@@ -88,7 +87,34 @@ export default function App() {
   // Navigation & Language Context
   const [currentView, setCurrentView] = useState<string>('home');
   const [lang, setLang] = useState<'es' | 'en' | 'pt'>('es');
-  
+  const [headerHeight, setHeaderHeight] = useState(80);
+
+  useEffect(() => {
+    let observer: ResizeObserver;
+
+    const measure = () => {
+      const header = document.querySelector('header');
+      if (header) {
+        const h = header.getBoundingClientRect().height;
+        if (h > 0) setHeaderHeight(h);
+      }
+    };
+
+    measure();
+    window.addEventListener('resize', measure);
+
+    const header = document.querySelector('header');
+    if (header) {
+      observer = new ResizeObserver(measure);
+      observer.observe(header);
+    }
+
+    return () => {
+      window.removeEventListener('resize', measure);
+      observer?.disconnect();
+    };
+  }, []);
+
   const [photographs, setPhotographs] = useState<Photograph[]>(() => {
     const saved = localStorage.getItem('aurea_photos');
     return saved ? JSON.parse(saved) : INITIAL_PHOTOGRAPHS;
@@ -681,7 +707,7 @@ export default function App() {
   });
 
   return (
-    <Layout>
+    <div className="bg-dark text-white min-h-screen relative font-sans select-none selection:bg-gold-500 selection:text-dark">
       {/* CORE HEADER */}
       <Header
         currentView={currentView}
@@ -831,7 +857,7 @@ export default function App() {
           exit={{ opacity: 0, y: -15 }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
           className="pb-24 px-6 lg:px-12 max-w-7xl mx-auto space-y-24"
-          style={{ paddingTop: 'var(--header-height)' }}>
+          style={{ paddingTop: headerHeight }}>
 
           {/* ======================================================= */}
           {/* HOME SCREEN (content below hero) */}
@@ -1592,7 +1618,7 @@ export default function App() {
           // Success triggered
         }}
       />
-    </Layout>
+    </div>
   );
 }
 
