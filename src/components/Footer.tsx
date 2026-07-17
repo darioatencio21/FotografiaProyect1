@@ -22,6 +22,11 @@ export default function Footer({ onSetView, lang }: FooterProps) {
 
   const t = TRANSLATIONS[lang];
 
+  const handleNav = (viewId: string) => {
+    onSetView(viewId);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
@@ -72,22 +77,22 @@ export default function Footer({ onSetView, lang }: FooterProps) {
           <h5 className="text-[10px] font-mono tracking-widest text-gold-300 uppercase">EXPLORE</h5>
           <ul className="space-y-2 text-xs">
             <li>
-              <button onClick={() => onSetView('home')} className="text-white/70 hover:text-white transition-colors cursor-pointer">
+              <button onClick={() => handleNav('home')} className="text-white/70 hover:text-white transition-colors cursor-pointer">
                 {t.navHome}
               </button>
             </li>
             <li>
-              <button onClick={() => onSetView('about')} className="text-white/70 hover:text-white transition-colors cursor-pointer">
+              <button onClick={() => handleNav('about')} className="text-white/70 hover:text-white transition-colors cursor-pointer">
                 {t.navAbout}
               </button>
             </li>
             <li>
-              <button onClick={() => onSetView('portfolio')} className="text-white/70 hover:text-white transition-colors cursor-pointer">
+              <button onClick={() => handleNav('portfolio')} className="text-white/70 hover:text-white transition-colors cursor-pointer">
                 {t.navPortfolio}
               </button>
             </li>
             <li>
-              <button onClick={() => onSetView('services')} className="text-white/70 hover:text-white transition-colors cursor-pointer">
+              <button onClick={() => handleNav('services')} className="text-white/70 hover:text-white transition-colors cursor-pointer">
                 {t.navServices}
               </button>
             </li>
@@ -99,17 +104,17 @@ export default function Footer({ onSetView, lang }: FooterProps) {
           <h5 className="text-[10px] font-mono tracking-widest text-gold-300 uppercase">STUDIO</h5>
           <ul className="space-y-2 text-xs">
             <li>
-              <button onClick={() => onSetView('client-portal')} className="text-white/70 hover:text-white transition-colors cursor-pointer">
+              <button onClick={() => handleNav('client-portal')} className="text-white/70 hover:text-white transition-colors cursor-pointer">
                 {t.navClientPortal}
               </button>
             </li>
             <li>
-              <button onClick={() => onSetView('faq')} className="text-white/70 hover:text-white transition-colors cursor-pointer">
+              <button onClick={() => handleNav('faq')} className="text-white/70 hover:text-white transition-colors cursor-pointer">
                 {t.navFaq}
               </button>
             </li>
             <li>
-              <button onClick={() => onSetView('contact')} className="text-white/70 hover:text-white transition-colors cursor-pointer">
+              <button onClick={() => handleNav('contact')} className="text-white/70 hover:text-white transition-colors cursor-pointer">
                 {t.navContact}
               </button>
             </li>
@@ -167,8 +172,8 @@ export default function Footer({ onSetView, lang }: FooterProps) {
       <div className="max-w-7xl mx-auto pt-8 flex flex-col md:flex-row items-center justify-between text-xs text-white/65 space-y-4 md:space-y-0">
         <div className="flex flex-wrap justify-center md:justify-start gap-4">
           <span>&copy; {new Date().getFullYear()} Estudio Camaleón. {t.footerRights}</span>
-          <button onClick={() => { onSetView('privacy'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-white transition-colors cursor-pointer">{t.privacy}</button>
-          <button onClick={() => { onSetView('terms'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-white transition-colors cursor-pointer">{t.terms}</button>
+          <button onClick={() => handleNav('privacy')} className="hover:text-white transition-colors cursor-pointer">{t.privacy}</button>
+          <button onClick={() => handleNav('terms')} className="hover:text-white transition-colors cursor-pointer">{t.terms}</button>
         </div>
 
         <button
