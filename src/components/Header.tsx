@@ -104,7 +104,7 @@ export default function Header({
   };
 
   return (
-    <header className="relative w-full max-h-[70px] lg:max-h-none bg-dark border-b border-white/5 py-2 lg:py-4 px-4 lg:px-12 flex items-center justify-between lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-x-24">
+    <header className="relative w-full max-h-[70px] lg:max-h-none bg-dark border-b border-white/5 py-2 lg:py-4 px-4 lg:px-12 flex items-center justify-between lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-x-24 z-40">
       {/* Desktop navigation link array - Left split (Home, About, Portfolio) */}
       <nav className="hidden lg:flex items-center space-x-8 z-10 justify-start">
         {menuItems.slice(0, 3).map(item => {
@@ -241,7 +241,7 @@ export default function Header({
       </div>
 
       {/* Mobile Burger triggers */}
-      <div className="lg:hidden flex items-center space-x-2">
+      <div className="lg:hidden flex items-center space-x-2 z-10">
         <button
           onClick={() => {
             setIsMobileMenuOpen(false);
@@ -285,7 +285,7 @@ export default function Header({
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
             transition={{ duration: 0.3, ease: 'easeOut' }}
-            className="fixed top-1/2 -translate-y-1/2 right-0 z-50 lg:hidden
+            className="fixed top-1/2 -translate-y-1/2 right-0.5 z-30 lg:hidden
                        w-12 h-40 sm:w-14 sm:h-44
                        flex items-center justify-end pr-1
                        cursor-grab active:cursor-grabbing
