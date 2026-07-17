@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Menu, X, Globe, User, ShieldAlert } from 'lucide-react';
 import { ActiveLanguage } from '../types';
@@ -30,15 +30,63 @@ export default function Header({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+
+  const lastScrollY = useRef(0);
+  const hideTimer = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 60);
+      const currentY = window.scrollY;
+
+      if (currentY <= 10) {
+        setIsVisible(true);
+        setIsScrolled(false);
+        lastScrollY.current = currentY;
+        return;
+      }
+
+      setIsScrolled(true);
+
+      if (currentY > lastScrollY.current && currentY > 80) {
+        setIsVisible(false);
+      } else if (currentY < lastScrollY.current) {
+        setIsVisible(true);
+      }
+
+      lastScrollY.current = currentY;
     };
+
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (e.clientY < 80) {
+        setIsVisible(true);
+        if (hideTimer.current) clearTimeout(hideTimer.current);
+        hideTimer.current = setTimeout(() => {
+          if (window.scrollY > 10) {
+            setIsVisible(false);
+          }
+        }, 3000);
+      }
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (hideTimer.current) clearTimeout(hideTimer.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      setIsVisible(true);
+    }
+  }, [isMobileMenuOpen]);
 
   const t = TRANSLATIONS[lang];
 
@@ -66,7 +114,10 @@ export default function Header({
   const headerIsSolid = isScrolled || currentView !== 'home';
 
   return (
-    <header className={`fixed top-0 inset-x-0 z-40 transition-all duration-500 ${headerIsSolid ? 'bg-dark/85 backdrop-blur-lg border-b border-white/5' : 'bg-transparent border-b border-transparent'} py-4 px-6 lg:px-12 flex items-center justify-between lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-x-24`}>
+    <motion.header
+      animate={{ y: isVisible ? 0 : -120 }}
+      transition={{ duration: 0.35, ease: 'easeInOut' }}
+      className={`fixed top-0 inset-x-0 z-40 transition-colors duration-500 ${headerIsSolid ? 'bg-dark/85 backdrop-blur-lg border-b border-white/5' : 'bg-transparent border-b border-transparent'} py-4 px-6 lg:px-12 flex items-center justify-between lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-x-24`}>
       {/* Desktop navigation link array - Left split (Home, About, Portfolio) */}
       <nav className="hidden lg:flex items-center space-x-8 z-10 justify-start">
         {menuItems.slice(0, 3).map(item => {
@@ -280,6 +331,6 @@ export default function Header({
           </motion.div>
         )}
       </AnimatePresence>
-    </header>
+    </motion.header>
   );
 }
