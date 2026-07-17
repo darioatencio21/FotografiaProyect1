@@ -28,6 +28,7 @@ import ClientPortal from './components/ClientPortal';
 import StripeCheckout from './components/StripeCheckout';
 import AdminCMS from './components/AdminCMS';
 import Header from './components/Header';
+import Layout from './components/Layout';
 import Footer from './components/Footer';
 import LegalViews from './components/LegalViews';
 
@@ -680,7 +681,7 @@ export default function App() {
   });
 
   return (
-    <div className="bg-dark text-white min-h-screen relative font-sans select-none selection:bg-gold-500 selection:text-dark">
+    <Layout>
       {/* CORE HEADER */}
       <Header
         currentView={currentView}
@@ -829,8 +830,9 @@ export default function App() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -15 }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
-          className="pb-24 pt-16 px-6 lg:px-12 max-w-7xl mx-auto space-y-24"
-        >
+          className="pb-24 px-6 lg:px-12 max-w-7xl mx-auto space-y-24"
+          style={{ paddingTop: 'var(--header-height)' }}>
+
           {/* ======================================================= */}
           {/* HOME SCREEN (content below hero) */}
           {/* ======================================================= */}
@@ -1590,7 +1592,7 @@ export default function App() {
           // Success triggered
         }}
       />
-    </div>
+    </Layout>
   );
 }
 
