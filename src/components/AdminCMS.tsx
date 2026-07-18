@@ -52,12 +52,13 @@ interface AdminCMSProps {
   packages: PhotographyPackage[];
   onUpdatePackages: (packages: PhotographyPackage[]) => void;
   onLogout: () => void;
+  onBackToSite?: () => void;
 }
 
 export default function AdminCMS({
   photographs, services, testimonials, blogPosts, faqs, bookings, messages, clientAccounts = [], seo, profile, bookingConfig, emailConfig, stats, lang,
   onUpdatePhotographs, onUpdateServices, onUpdateTestimonials, onUpdateBlogPosts,
-  onUpdateFaqs, onUpdateBookings, onUpdateMessages, onUpdateClientAccounts, onUpdateSeo, onUpdateProfile, onUpdateBookingConfig, onUpdateEmailConfig, packages, onUpdatePackages, onLogout
+  onUpdateFaqs, onUpdateBookings, onUpdateMessages, onUpdateClientAccounts, onUpdateSeo, onUpdateProfile, onUpdateBookingConfig, onUpdateEmailConfig, packages, onUpdatePackages, onLogout, onBackToSite
 }: AdminCMSProps) {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'photos' | 'bookings' | 'services' | 'messages' | 'seo' | 'profile' | 'email_settings' | 'clients' | 'packages'>('dashboard');
   const [expandedBookingId, setExpandedBookingId] = useState<string | null>(null);
@@ -273,9 +274,7 @@ export default function AdminCMS({
       const body = encodeURIComponent(replyText.trim());
       const mailtoUrl = `mailto:${targetMsg.email}?subject=${subject}&body=${body}`;
       
-      setTimeout(() => {
-        window.location.href = mailtoUrl;
-      }, 300);
+      window.open(mailtoUrl, '_blank');
     }
     
     setReplyingToId(null);
@@ -631,13 +630,22 @@ export default function AdminCMS({
           </div>
         </div>
 
-        <button
-          onClick={onLogout}
-          className="w-full text-left px-3 py-2 rounded-lg font-mono text-[10px] uppercase tracking-wider text-red-400 hover:bg-red-500/10 transition-all flex items-center space-x-2 cursor-pointer"
-        >
-          <LogOut size={12} />
-          <span>{t('Cerrar Sesión', 'Exit Workspace', 'Sair')}</span>
-        </button>
+        <div className="space-y-1.5">
+          <button
+            onClick={onBackToSite}
+            className="w-full text-left px-3 py-2 rounded-lg font-mono text-[10px] uppercase tracking-wider text-white/60 hover:text-gold-400 hover:bg-white/5 transition-all flex items-center space-x-2 cursor-pointer"
+          >
+            <Eye size={12} />
+            <span>{t('Ver Sitio', 'View Site', 'Ver Site')}</span>
+          </button>
+          <button
+            onClick={onLogout}
+            className="w-full text-left px-3 py-2 rounded-lg font-mono text-[10px] uppercase tracking-wider text-red-400 hover:bg-red-500/10 transition-all flex items-center space-x-2 cursor-pointer"
+          >
+            <LogOut size={12} />
+            <span>{t('Cerrar Sesión', 'Exit Workspace', 'Sair')}</span>
+          </button>
+        </div>
       </div>
 
       {/* Floating hamburger — mobile only, centered on right edge */}
@@ -2424,16 +2432,28 @@ export default function AdminCMS({
                   })}
                 </div>
 
-                <button
-                  onClick={() => {
-                    setMobileSidebarOpen(false);
-                    onLogout();
-                  }}
-                  className="w-full text-left min-h-[48px] px-3 py-3 rounded-lg font-mono text-xs uppercase tracking-wider text-red-400 hover:bg-red-500/10 transition-all flex items-center space-x-3 cursor-pointer"
-                >
-                  <LogOut size={16} />
-                  <span>{t('Cerrar Sesión', 'Exit Workspace', 'Sair')}</span>
-                </button>
+                <div className="space-y-1.5">
+                  <button
+                    onClick={() => {
+                      setMobileSidebarOpen(false);
+                      onBackToSite?.();
+                    }}
+                    className="w-full text-left min-h-[48px] px-3 py-3 rounded-lg font-mono text-xs uppercase tracking-wider text-white/60 hover:text-gold-400 hover:bg-white/5 transition-all flex items-center space-x-3 cursor-pointer"
+                  >
+                    <Eye size={16} />
+                    <span>{t('Ver Sitio', 'View Site', 'Ver Site')}</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setMobileSidebarOpen(false);
+                      onLogout();
+                    }}
+                    className="w-full text-left min-h-[48px] px-3 py-3 rounded-lg font-mono text-xs uppercase tracking-wider text-red-400 hover:bg-red-500/10 transition-all flex items-center space-x-3 cursor-pointer"
+                  >
+                    <LogOut size={16} />
+                    <span>{t('Cerrar Sesión', 'Exit Workspace', 'Sair')}</span>
+                  </button>
+                </div>
               </div>
             </motion.div>
           </>

@@ -130,76 +130,62 @@ export default function App() {
   const [lang, setLang] = useState<'es' | 'en' | 'pt'>('es');
 
   const [photographs, setPhotographs] = useState<Photograph[]>(() => {
-    const saved = localStorage.getItem('aurea_photos');
-    return saved ? JSON.parse(saved) : INITIAL_PHOTOGRAPHS;
+    try { const saved = localStorage.getItem('aurea_photos'); return saved ? JSON.parse(saved) : INITIAL_PHOTOGRAPHS; } catch { return INITIAL_PHOTOGRAPHS; }
   });
   
   const [services, setServices] = useState<Service[]>(() => {
-    const saved = localStorage.getItem('aurea_services');
-    return saved ? JSON.parse(saved) : INITIAL_SERVICES;
+    try { const saved = localStorage.getItem('aurea_services'); return saved ? JSON.parse(saved) : INITIAL_SERVICES; } catch { return INITIAL_SERVICES; }
   });
 
   const [testimonials, setTestimonials] = useState<Testimonial[]>(() => {
-    const saved = localStorage.getItem('aurea_testimonials');
-    return saved ? JSON.parse(saved) : INITIAL_TESTIMONIALS;
+    try { const saved = localStorage.getItem('aurea_testimonials'); return saved ? JSON.parse(saved) : INITIAL_TESTIMONIALS; } catch { return INITIAL_TESTIMONIALS; }
   });
 
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>(() => {
-    const saved = localStorage.getItem('aurea_blog');
-    return saved ? JSON.parse(saved) : INITIAL_BLOG_POSTS;
+    try { const saved = localStorage.getItem('aurea_blog'); return saved ? JSON.parse(saved) : INITIAL_BLOG_POSTS; } catch { return INITIAL_BLOG_POSTS; }
   });
 
   const [faqs, setFaqs] = useState<FAQ[]>(() => {
-    const saved = localStorage.getItem('aurea_faqs');
-    return saved ? JSON.parse(saved) : INITIAL_FAQS;
+    try { const saved = localStorage.getItem('aurea_faqs'); return saved ? JSON.parse(saved) : INITIAL_FAQS; } catch { return INITIAL_FAQS; }
   });
 
   const [bookings, setBookings] = useState<Booking[]>(() => {
-    const saved = localStorage.getItem('aurea_bookings');
-    return saved ? JSON.parse(saved) : INITIAL_BOOKINGS;
+    try { const saved = localStorage.getItem('aurea_bookings'); return saved ? JSON.parse(saved) : INITIAL_BOOKINGS; } catch { return INITIAL_BOOKINGS; }
   });
 
   const [messages, setMessages] = useState<Message[]>(() => {
-    const saved = localStorage.getItem('aurea_messages');
-    return saved ? JSON.parse(saved) : INITIAL_MESSAGES;
+    try { const saved = localStorage.getItem('aurea_messages'); return saved ? JSON.parse(saved) : INITIAL_MESSAGES; } catch { return INITIAL_MESSAGES; }
   });
 
   const [seo, setSeo] = useState<SEOMetadata>(() => {
-    const saved = localStorage.getItem('aurea_seo');
-    return saved ? JSON.parse(saved) : INITIAL_SEO;
+    try { const saved = localStorage.getItem('aurea_seo'); return saved ? JSON.parse(saved) : INITIAL_SEO; } catch { return INITIAL_SEO; }
   });
 
   const [profile, setProfile] = useState<PhotographerProfile>(() => {
-    const saved = localStorage.getItem('aurea_profile');
-    return saved ? JSON.parse(saved) : INITIAL_PROFILE;
+    try { const saved = localStorage.getItem('aurea_profile'); return saved ? JSON.parse(saved) : INITIAL_PROFILE; } catch { return INITIAL_PROFILE; }
   });
 
   const [bookingConfig, setBookingConfig] = useState<BookingConfig>(() => {
-    const saved = localStorage.getItem('aurea_booking_config');
-    return saved ? JSON.parse(saved) : INITIAL_BOOKING_CONFIG;
+    try { const saved = localStorage.getItem('aurea_booking_config'); return saved ? JSON.parse(saved) : INITIAL_BOOKING_CONFIG; } catch { return INITIAL_BOOKING_CONFIG; }
   });
 
   const [emailConfig, setEmailConfig] = useState<EmailConfig>(() => {
-    const saved = localStorage.getItem('aurea_email_config');
-    return saved ? JSON.parse(saved) : INITIAL_EMAIL_CONFIG;
+    try { const saved = localStorage.getItem('aurea_email_config'); return saved ? JSON.parse(saved) : INITIAL_EMAIL_CONFIG; } catch { return INITIAL_EMAIL_CONFIG; }
   });
 
   const [packages, setPackages] = useState<PhotographyPackage[]>(() => {
-    const saved = localStorage.getItem('aurea_packages');
-    return saved ? JSON.parse(saved) : INITIAL_PHOTOGRAPHY_PACKAGES;
+    try { const saved = localStorage.getItem('aurea_packages'); return saved ? JSON.parse(saved) : INITIAL_PHOTOGRAPHY_PACKAGES; } catch { return INITIAL_PHOTOGRAPHY_PACKAGES; }
   });
 
   const [clientAccounts, setClientAccounts] = useState<ClientAccount[]>(() => {
-    const saved = localStorage.getItem('aurea_client_accounts');
-    return saved ? JSON.parse(saved) : INITIAL_CLIENT_ACCOUNTS;
+    try { const saved = localStorage.getItem('aurea_client_accounts'); return saved ? JSON.parse(saved) : INITIAL_CLIENT_ACCOUNTS; } catch { return INITIAL_CLIENT_ACCOUNTS; }
   });
 
   // UI Interactive States
   const [activeFilter, setActiveFilter] = useState<string>('all');
   const [selectedPhotoForLightbox, setSelectedPhotoForLightbox] = useState<Photograph | null>(null);
   const [favorites, setFavorites] = useState<string[]>(() => {
-    const saved = localStorage.getItem('aurea_favorites');
-    return saved ? JSON.parse(saved) : [];
+    try { const saved = localStorage.getItem('aurea_favorites'); return saved ? JSON.parse(saved) : []; } catch { return []; }
   });
 
   const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
@@ -316,7 +302,7 @@ export default function App() {
         ]).then(() => {
           localStorage.setItem(MIGRATE_FLAG, 'true');
           console.log('Data migration complete: HTML entities unescaped in Firestore');
-        }).catch(() => {});
+        }).catch(console.error);
         setPhotographs(migratedPhotos);
         setServices(migratedServices);
         setTestimonials(migratedTestimonials);
@@ -361,7 +347,7 @@ export default function App() {
         await saveDocument('admin', 'config', { username: 'admin', password: 'admin123' });
       }
     }
-    syncFirestore();
+    syncFirestore().catch(console.error);
     return () => { cancelled = true; };
   }, []);
 
@@ -646,7 +632,7 @@ export default function App() {
         setIsAdminAuthLoading(false);
         return;
       }
-      setAdminLoginError(adminDoc ? 'CREDENCIALES INCORRECTAS' : 'ADMIN ACCOUNT NOT FOUND. USING DEFAULT: admin / admin123');
+      setAdminLoginError(adminDoc ? 'CREDENCIALES INCORRECTAS' : 'CUENTA ADMIN NO ENCONTRADA. VERIFIQUE LA CONFIGURACIÓN.');
     } catch {
       setAdminLoginError('AUTH SYSTEM UNAVAILABLE. CHECK DATABASE CONNECTION.');
     } finally {
@@ -658,7 +644,12 @@ export default function App() {
     setIsAdminLoggedIn(false);
     localStorage.setItem('aurea_admin_logged', 'false');
     setCurrentView('home');
-    logoutFromFirebase().catch(() => {});
+    logoutFromFirebase().catch(console.error);
+  };
+
+  const handleBackToSite = () => {
+    setCurrentView('home');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Trigger Stripe print or service booking Checkout overlay
@@ -1549,6 +1540,7 @@ export default function App() {
               packages={packages}
               onUpdatePackages={handleUpdatePackages}
               onLogout={handleAdminLogout}
+              onBackToSite={handleBackToSite}
             />
           )}
 

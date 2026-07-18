@@ -280,7 +280,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
             
             {/* INTRO SPEECH */}
             <div className="text-center pb-2 border-b border-white/5 max-w-2xl mx-auto space-y-1.5">
-              <h3 className="font-serif text-xl md:text-2xl text-gold-100 uppercase tracking-wide">
+              <h3 className="font-serif text-xl md:text-2xl text-white/80">
                 {t.title}
               </h3>
               <p className="text-[11px] md:text-xs text-white/50 leading-relaxed font-sans">
