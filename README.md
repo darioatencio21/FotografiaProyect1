@@ -23,7 +23,7 @@
 
 ## Descripción
 
-Miriam Campos Photography es una aplicación web completa que funciona como **portafolio público interactivo** y como **suite de gestión empresarial** para un estudio fotográfico de alta gama con estética editorial premium. Permite a los visitantes explorar galerías de fotos en blanco y negro que revelan color al hover, reservar sesiones, contactar al estudio y acceder a un portal privado de pruebas. Del lado administrativo, incluye un CMS completo con dashboard de analytics, gestión de contenido, cola de reservas, bandeja de mensajes y administración de cuentas de clientes.
+Miriam Campos Photography es una aplicación web completa que funciona como **portafolio público interactivo** y como **suite de gestión empresarial** para un estudio fotográfico de alta gama con estética editorial premium. Permite a los visitantes explorar galerías de fotos, reservar sesiones en un flujo de 2 pasos (elegir tipo de sesión → ver paquetes), contactar al estudio y acceder a un portal privado de pruebas mediante links compartibles. Del lado administrativo, incluye un CMS completo con dashboard de analytics, gestión de contenido, cola de reservas, bandeja de mensajes con notificaciones en tiempo real, categorías de sesión, paquetes fotográficos configurables y administración de cuentas de clientes.
 
 El proyecto está diseñado para desplegarse en **Vercel** con Firestore como base de datos en tiempo real.
 
@@ -58,17 +58,18 @@ El proyecto está diseñado para desplegarse en **Vercel** con Firestore como ba
 
 ## Funcionalidades
 
-- **Portafolio interactivo** — Galería masonry con filtros por categoría, búsqueda multilingual, hover que revela color+título, y lightbox a pantalla completa con metadatos EXIF, descarga, share y comparación antes/después.
-- **Sistema de reservas multi-paso** — Selección de servicio, fecha, horario, datos de contacto y extras (drone, entrega express, maquillaje) con cálculo de presupuesto en tiempo real.
-- **Portal de cliente** — Área protegida por código de acceso donde los clientes pueden ver, seleccionar y descargar sus fotos, y solicitar impresiones.
-- **Sección Sobre mí editorial** — Diseño tipo revista con fotografía en columna, biografía fluida con tipografía serif/sans-serif, línea de tiempo vertical con hitos profesionales reales (2010–2025), y sección de filosofía con 3 pilares (Luz, Composición, Emoción). Animaciones sutiles con scroll sin tarjetas ni bordes.
-- **CMS administrativo** — Dashboard con gráficos de ingresos y tráfico, CRUD completo de fotografías (con drag & drop y compresión), servicios, testimonios, blog, FAQ, mensajería, SEO, perfil del fotógrafo y cuentas de clientes. Con padding responsive y botón flotante para navegación móvil.
+- **Portafolio interactivo** — Galería masonry con filtros por categoría (16 categorías), búsqueda multilingual y lightbox a pantalla completa con descarga.
+- **Sistema de reservas en 2 pasos** — Selección de tipo de sesión → paquetes por categoría, con nota de gastos de viaje por paquete. Formulario multi-paso con fecha, horario y datos de contacto.
+- **Portal de cliente con links compartibles** — Área protegida por código de acceso donde los clientes pueden ver, seleccionar y descargar sus fotos, y solicitar impresiones. Cada cliente tiene un link directo tipo `?gallery=PASSCODE` que puede compartirse por WhatsApp/email.
+- **Sección Sobre mí editorial** — Diseño tipo revista con fotografía en columna, biografía fluida, línea de tiempo vertical con hitos profesionales reales (2010–2025) y filosofía con 3 pilares.
+- **CMS administrativo** — Dashboard con analytics, CRUD completo de fotografías (con drag & drop y compresión), servicios, testimonios, blog, FAQ, mensajería, SEO, perfil del fotógrafo, categorías de sesión, paquetes fotográficos (agrupados por categoría con upload de imágenes), cuentas de clientes con fotos de prueba, editor de sesiones y notificaciones en tiempo real. Con sidebar responsive y botón flotante para navegación móvil.
+- **Notificaciones en tiempo real** — Badge con contador de no leídos en sidebar, toast dorado y notificación de escritorio (API Notification) para nuevas reservas y mensajes. Marcado automático como leído al hacer clic.
 - **Checkout simulado** — Modal de pago con Stripe simulado, con animación de procesamiento y comprobante de transacción.
-- **Notificaciones por email** — Integración con EmailJS para notificaciones al administrador y auto-respuestas al cliente desde el formulario de contacto y reservas.
-- **Multi-idioma** — Soporte completo para Español, English y Português con cambio en tiempo real en toda la interfaz, incluyendo títulos y descripciones de fotografías.
+- **Notificaciones por email** — Integración con EmailJS para notificaciones al administrador y auto-respuestas al cliente desde el formulario de contacto, reservas y envío de links de galería.
+- **Multi-idioma** — Soporte completo para Español, English y Português con cambio en tiempo real en toda la interfaz.
 - **Cursor personalizado** — Cursor animado con física Spring que cambia de estado sobre elementos interactivos.
-- **Navbar scrolleable** — Barra de navegación solid con fondo beige, sin ocultar al hacer scroll. Menú mobile tipo drawer con apertura mediante pastilla deslizable dorada y cierre con botón X. Oculto automáticamente en vista admin.
-- **Persistencia offline** — Datos cacheados en localStorage con prefijo `aurea_` para funcionamiento sin conexión. Firebase como fuente de verdad con sincronización en segundo plano.
+- **Navbar scrolleable** — Barra de navegación solid, menú mobile tipo drawer con apertura mediante pastilla deslizable dorada.
+- **Persistencia offline** — Datos cacheados en localStorage con prefijo `aurea_`. Firebase como fuente de verdad con sincronización en segundo plano y merge automático de campos nuevos.
 
 ---
 
@@ -226,6 +227,8 @@ App.tsx State + localStorage (caché offline, prefijo aurea_)
 | `bookings`           | Solicitudes de reserva          |
 | `messages`           | Mensajes de contacto            |
 | `clientAccounts`     | Cuentas de clientes             |
+| `photography_packages` | Paquetes fotográficos         |
+| `sessionCategories`  | Categorías de sesión            |
 | `seo/config`         | Metadatos SEO globales          |
 | `profile/photographer` | Perfil del fotógrafo          |
 | `bookingConfig/config` | Configuración de reservas     |
@@ -234,7 +237,7 @@ App.tsx State + localStorage (caché offline, prefijo aurea_)
 ### Autenticación
 
 - **Admin**: Tres niveles de fallback: hardcoded (`admin`/`admin123`) → Firebase Auth (con timeout de 2s) → Firestore `admin/config`. La sesión se guarda en `localStorage` como `aurea_admin_logged`.
-- **Client Portal**: Protegido por código de acceso validado contra la colección `clientAccounts`.
+- **Client Portal**: Protegido por código de acceso validado contra la colección `clientAccounts`. Acceso directo mediante link compartible con query param `?gallery=PASSCODE`.
 
 ---
 
@@ -245,8 +248,8 @@ App.tsx State + localStorage (caché offline, prefijo aurea_)
 | Inicio         | `home`         | Hero split-screen con Ken Burns, estadísticas con Count Up, 3 teasers |
 | Sobre mí       | `about`        | Diseño editorial con foto en columna, biografía fluida, línea de tiempo vertical con hitos profesionales (2010–2025) y 3 pilares de filosofía. Animaciones scroll. Sin tarjetas |
 | Portafolio     | `portfolio`    | Galería masonry con hover grayscale→color, filtros, búsqueda, lightbox |
-| Servicios      | `services`     | Tarjetas de paquetes + calendario de reservas multi-paso             |
-| Portal Cliente | `client-portal` | Galería privada protegida por código con selección y descarga        |
+| Servicios      | `services`     | Flujo 2 pasos: grid de categorías de sesión → paquetes por categoría con nota de viaje + calendario de reservas |
+| Portal Cliente | `client-portal` | Galería privada protegida por código con selección, descarga, link compartible y auto-login vía `?gallery=` |
 | FAQ            | `faq`          | Acordeón de preguntas frecuentes multi-idioma                        |
 | Contacto       | `contact`      | Formulario con EmailJS y datos del estudio                           |
 | Admin          | `admin`        | CMS completo con dashboard analytics, CRUD y configuración           |
@@ -270,7 +273,7 @@ Definidas en `TRANSLATIONS` dentro de `src/data/mockData.ts` con más de 100 cla
 | `Photograph`        | `title_es/pt`, `description_es/pt`   |
 | `Service`           | `title_es/pt`, `description_es/pt`, `duration_es/pt`, `includes_es/pt` |
 | `FAQ`               | `question_es/pt`, `answer_es/pt`     |
-| `PhotographyPackage` | `name_es/pt`, `description_es/pt`, `duration_es/pt`, `priceFromText_es/pt`, `buttonText_es/pt` |
+| `PhotographyPackage` | `name_es/pt`, `description_es/pt`, `duration_es/pt`, `priceFromText_es/pt`, `buttonText_es/pt`, `travelNote_es/pt`, `benefits_es/pt` |
 | `PhotographerProfile` | `aboutTitle_es/pt`, `aboutText1_es/pt`, `aboutText2_es/pt` |
 
 ### Funciones helper
