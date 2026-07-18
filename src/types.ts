@@ -107,6 +107,7 @@ export interface Booking {
   status: 'pending' | 'accepted' | 'rejected' | 'completed';
   createdAt: string;
   amount?: number;
+  isRead?: boolean;
 }
 
 export interface Message {

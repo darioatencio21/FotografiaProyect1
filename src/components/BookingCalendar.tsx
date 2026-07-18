@@ -561,13 +561,18 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                     <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-white/40">
                       <Phone size={12} />
                     </div>
+                    <div className="absolute inset-y-0 left-9 flex items-center pointer-events-none text-white/30 font-mono text-xs border-r border-white/10 pr-2">
+                      +1
+                    </div>
                     <input
                       type="tel"
                       required
                       value={clientPhone}
                       onChange={(e) => setClientPhone(e.target.value)}
-                      placeholder="Número de Teléfono *"
-                      className="w-full bg-dark/60 border border-white/10 rounded-lg pl-9 pr-3 py-3 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans"
+                      placeholder="(555) 123-4567 *"
+                      pattern="[\s\-\(\)0-9]{7,15}"
+                      title={lang === 'es' ? 'Ingresa un número de teléfono de EE.UU. (ej: 555-123-4567)' : 'Enter a US phone number (e.g. 555-123-4567)'}
+                      className="w-full bg-dark/60 border border-white/10 rounded-lg pl-[4.2rem] pr-3 py-3 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans"
                     />
                   </div>
                 </div>

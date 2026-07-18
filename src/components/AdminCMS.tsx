@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   BarChart3, Camera, Calendar, BookOpen, MessageSquare, HelpCircle, 
@@ -17,6 +17,8 @@ import {
   ClientAccount, ProofPhoto, SessionCategory, PhotographyPackage
 } from '../types';
 import { sanitizeString, sanitizeEmail, sanitizeObject } from '../lib/sanitize';
+import { db } from '../lib/firebase';
+import { onSnapshot, collection, query, orderBy } from 'firebase/firestore';
 
 import AdminSEOTab from './AdminSEOTab';
 import AdminProfileTab from './AdminProfileTab';
@@ -108,6 +110,71 @@ export default function AdminCMS({
     setCmsAlert(msg);
     setTimeout(() => setCmsAlert(null), 3000);
   };
+
+  // Real-time booking notification state
+  const [unseenBookings, setUnseenBookings] = useState(0);
+  const seenBookingIds = useRef<Set<string>>(new Set());
+
+  // Firestore real-time listener for new bookings
+  useEffect(() => {
+    const q = query(collection(db, 'bookings'), orderBy('createdAt', 'desc'));
+    const unsub = onSnapshot(q, (snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === 'added') {
+          const id = change.doc.id;
+          if (!seenBookingIds.current.has(id)) {
+            seenBookingIds.current.add(id);
+            setUnseenBookings(prev => prev + 1);
+            const data = change.doc.data() as Booking;
+            const cName = data.clientName || 'Alguien';
+            triggerAlert(`📅 ¡Nueva reserva de ${cName}!`);
+            // Browser Notification API
+            if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+              new Notification('Nueva Reserva - Aurea Studio', {
+                body: `${cName} ha solicitado una sesión. Revisa la cola de reservas.`,
+                icon: '/favicon.ico',
+              });
+            }
+          }
+        }
+      });
+    });
+    // Request notification permission on mount
+    if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+    return () => unsub();
+  }, []);
+
+  // Real-time message notification state
+  const [unseenMessages, setUnseenMessages] = useState(0);
+  const seenMessageIds = useRef<Set<string>>(new Set());
+
+  // Firestore real-time listener for new messages
+  useEffect(() => {
+    const q = query(collection(db, 'messages'), orderBy('createdAt', 'desc'));
+    const unsub = onSnapshot(q, (snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === 'added') {
+          const id = change.doc.id;
+          if (!seenMessageIds.current.has(id)) {
+            seenMessageIds.current.add(id);
+            setUnseenMessages(prev => prev + 1);
+            const data = change.doc.data() as Message;
+            const cName = data.name || 'Alguien';
+            triggerAlert(`✉️ ¡Nuevo mensaje de ${cName}!`);
+            if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+              new Notification('Nuevo Mensaje - Aurea Studio', {
+                body: `${cName} te ha escrito. Revisa la bandeja de entrada.`,
+                icon: '/favicon.ico',
+              });
+            }
+          }
+        }
+      });
+    });
+    return () => unsub();
+  }, []);
 
   // Client Account management state
   const [clientEditItem, setClientEditItem] = useState<ClientAccount | null>(null);
@@ -242,6 +309,10 @@ export default function AdminCMS({
   const handleBookingStatus = (id: string, newStatus: 'pending' | 'accepted' | 'rejected' | 'completed') => {
     onUpdateBookings(bookings.map(b => b.id === id ? { ...b, status: newStatus } : b));
     triggerAlert(`Booking status updated to ${newStatus.toUpperCase()}`);
+  };
+
+  const handleToggleBookingRead = (id: string) => {
+    onUpdateBookings(bookings.map(b => b.id === id ? { ...b, isRead: true } : b));
   };
 
   // Photo actions
@@ -558,13 +629,18 @@ export default function AdminCMS({
             </button>
 
             <button
-              onClick={() => setActiveTab('bookings')}
+              onClick={() => { setActiveTab('bookings'); setUnseenBookings(0); }}
               className={`w-full text-left px-3 py-2 rounded-lg font-mono text-[10px] uppercase tracking-wider transition-all flex items-center space-x-2 ${
                 activeTab === 'bookings' ? 'bg-gold-500 text-dark font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
               }`}
             >
               <Calendar size={12} />
-              <span>{t('Cola de Reservas', 'Bookings Queue', 'Fila de Reservas')}</span>
+              <span className="flex-1">{t('Cola de Reservas', 'Bookings Queue', 'Fila de Reservas')}</span>
+              {unseenBookings > 0 && (
+                <span className="bg-red-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
+                  {unseenBookings}
+                </span>
+              )}
             </button>
 
             <button
@@ -588,13 +664,18 @@ export default function AdminCMS({
             </button>
 
             <button
-              onClick={() => setActiveTab('messages')}
+              onClick={() => { setActiveTab('messages'); setUnseenMessages(0); }}
               className={`w-full text-left px-3 py-2 rounded-lg font-mono text-[10px] uppercase tracking-wider transition-all flex items-center space-x-2 ${
                 activeTab === 'messages' ? 'bg-gold-500 text-dark font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
               }`}
             >
               <MessageSquare size={12} />
-              <span>{t('Bandeja de Entrada', 'Inbox', 'Caixa de Entrada')} ({messages.filter(m=>!m.isRead).length})</span>
+              <span className="flex-1">{t('Bandeja de Entrada', 'Inbox', 'Caixa de Entrada')} ({messages.filter(m=>!m.isRead).length})</span>
+              {unseenMessages > 0 && (
+                <span className="bg-red-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
+                  {unseenMessages}
+                </span>
+              )}
             </button>
 
             <button
@@ -1049,14 +1130,15 @@ export default function AdminCMS({
                       return (
                         <React.Fragment key={b.id}>
                           <tr 
-                            className="hover:bg-white/5 transition-colors cursor-pointer"
-                            onClick={() => setExpandedBookingId(isExpanded ? null : b.id)}
+                            className={`hover:bg-white/5 transition-colors cursor-pointer ${!b.isRead ? 'bg-gold-500/5' : ''}`}
+                            onClick={() => { if (!b.isRead) handleToggleBookingRead(b.id); setExpandedBookingId(isExpanded ? null : b.id); }}
                           >
                             <td className="p-4">
                               <div className="flex items-center space-x-2">
                                 <span className="text-white/40 hover:text-white transition-colors mr-1 shrink-0">
                                   {isExpanded ? <ChevronUp size={14} className="text-gold-400" /> : <ChevronDown size={14} />}
                                 </span>
+                                {!b.isRead && <span className="w-1.5 h-1.5 rounded-full bg-gold-400 animate-pulse shrink-0" />}
                                 <div>
                                   <div className="font-semibold text-white/90">{b.clientName}</div>
                                   <div className="text-[10px] text-white/40 font-mono mt-0.5">{b.clientEmail}</div>
@@ -1223,13 +1305,14 @@ export default function AdminCMS({
               {bookings.map(b => {
                 const isExpanded = expandedBookingId === b.id;
                 return (
-                  <div key={b.id} className="border border-white/5 rounded-xl bg-dark-gray p-4 space-y-3">
-                    <div onClick={() => setExpandedBookingId(isExpanded ? null : b.id)} className="cursor-pointer">
+                  <div key={b.id} className={`border rounded-xl bg-dark-gray p-4 space-y-3 ${!b.isRead ? 'border-gold-400/25 bg-gold-500/5' : 'border-white/5'}`}>
+                    <div onClick={() => { if (!b.isRead) handleToggleBookingRead(b.id); setExpandedBookingId(isExpanded ? null : b.id); }} className="cursor-pointer">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2 min-w-0 flex-1">
                           <span className="text-white/60 shrink-0">
                             {isExpanded ? <ChevronUp size={16} className="text-gold-400" /> : <ChevronDown size={16} />}
                           </span>
+                          {!b.isRead && <span className="w-1.5 h-1.5 rounded-full bg-gold-400 animate-pulse shrink-0" />}
                           <div className="min-w-0">
                             <div className="font-semibold text-white/90 text-sm truncate">{b.clientName}</div>
                             <div className="text-[10px] text-white/40 font-mono truncate">{b.clientEmail}</div>
@@ -1360,7 +1443,8 @@ export default function AdminCMS({
               {messages.map(msg => (
                 <div 
                   key={msg.id} 
-                  className={`border rounded-2xl p-5 space-y-3 transition-all text-left relative ${
+                  onClick={() => { if (!msg.isRead) handleToggleMessageRead(msg.id); }}
+                  className={`border rounded-2xl p-5 space-y-3 transition-all text-left relative cursor-pointer ${
                     msg.isRead 
                       ? 'bg-dark-gray border-white/5 opacity-70' 
                       : 'bg-gold-500/5 border-gold-400/25 shadow-[0_0_10px_rgba(180,142,67,0.05)]'
@@ -1406,7 +1490,8 @@ export default function AdminCMS({
                         </span>
                         <button 
                           type="button"
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             setReplyText(`Estimado/a ${msg.name},\n\nMuchas gracias por contactar con Miriam Campos Photography. He recibido su consulta sobre "${msg.subject}" y estaré encantada de atenderle.\n\nMe pondré en contacto con usted muy pronto para detallarle las opciones y coordinar una llamada de asesoramiento creativo.\n\nAtentamente,\nMiriam Campos\nMiriam Campos Photography`);
                           }}
                           className="text-[9px] font-mono text-white/40 hover:text-gold-400 transition-all uppercase tracking-wider underline cursor-pointer"
@@ -1427,7 +1512,8 @@ export default function AdminCMS({
                       <div className="flex justify-end space-x-2">
                         <button
                           type="button"
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             setReplyingToId(null);
                             setReplyText('');
                           }}
@@ -1437,7 +1523,10 @@ export default function AdminCMS({
                         </button>
                         <button
                           type="button"
-                          onClick={() => handleSendReply(msg.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSendReply(msg.id);
+                          }}
                           className="py-1 px-3 bg-gold-500 text-dark hover:bg-gold-400 rounded text-[9px] font-mono tracking-widest uppercase transition-all font-semibold"
                         >
                           Send Reply
@@ -1448,7 +1537,8 @@ export default function AdminCMS({
 
                   <div className="border-t border-white/5 pt-3.5 flex justify-between items-center">
                     <button
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
                         handleToggleMessageRead(msg.id);
                         triggerAlert(msg.isRead ? 'Marked as unread' : 'Marked as read');
                       }}
@@ -1460,7 +1550,8 @@ export default function AdminCMS({
 
                     <div className="flex space-x-2">
                       <button
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           if (replyingToId === msg.id) {
                             setReplyingToId(null);
                             setReplyText('');
@@ -1478,7 +1569,10 @@ export default function AdminCMS({
                         {replyingToId === msg.id ? 'Cancel' : msg.replyText ? 'Edit Reply' : 'Reply'}
                       </button>
                       <button
-                        onClick={() => handleDeleteMessage(msg.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteMessage(msg.id);
+                        }}
                         className="p-1.5 rounded bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-dark border border-red-500/20 transition-all cursor-pointer"
                       >
                         <Trash2 size={11} />
@@ -2437,6 +2531,8 @@ export default function AdminCMS({
                         key={tab.id}
                         onClick={() => {
                           setActiveTab(tab.id as typeof activeTab);
+                          if (tab.id === 'bookings') setUnseenBookings(0);
+                          if (tab.id === 'messages') setUnseenMessages(0);
                           setMobileSidebarOpen(false);
                         }}
                         className={`w-full text-left min-h-[48px] px-3 py-3 rounded-lg font-mono text-xs uppercase tracking-wider transition-all flex items-center space-x-3 cursor-pointer ${
@@ -2444,7 +2540,17 @@ export default function AdminCMS({
                         }`}
                       >
                         <Icon size={16} />
-                        <span>{tab.label}</span>
+                        <span className="flex-1">{tab.label}</span>
+                        {tab.id === 'bookings' && unseenBookings > 0 && (
+                          <span className="bg-red-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
+                            {unseenBookings}
+                          </span>
+                        )}
+                        {tab.id === 'messages' && unseenMessages > 0 && (
+                          <span className="bg-red-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
+                            {unseenMessages}
+                          </span>
+                        )}
                       </button>
                     );
                   })}

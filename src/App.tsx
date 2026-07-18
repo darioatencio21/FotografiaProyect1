@@ -1277,7 +1277,7 @@ export default function App() {
                                 <h3 className="font-serif text-lg text-white font-medium leading-tight">{cName}</h3>
                                 <p className="text-[10px] text-white/90 leading-relaxed mt-0.5 line-clamp-2">{cDesc}</p>
                               </div>
-                              <div className="flex items-center space-x-1.5 text-[9px] font-mono text-white/70 uppercase tracking-wider">
+                              <div className="flex items-center space-x-1.5 text-[9px] font-mono text-white/80 uppercase tracking-wider">
                                 <span>{activePkgCount} {lang === 'es' ? 'paquetes' : 'packages'}</span>
                                 <ArrowRight size={9} className="transition-transform duration-300 group-hover:translate-x-0.5" />
                               </div>
@@ -1323,7 +1323,7 @@ export default function App() {
                         <div className="space-y-6">
                           <div className="text-center space-y-2">
                             <h3 className="font-serif text-2xl md:text-3xl text-white">{cName}</h3>
-                            <p className="text-xs text-white/55 max-w-lg mx-auto">{cDesc}</p>
+                            <p className="text-xs text-white/80 max-w-lg mx-auto">{cDesc}</p>
                           </div>
 
                           {/* Package cards grid */}
@@ -1360,7 +1360,7 @@ export default function App() {
                                         <span className="text-[8px] font-mono text-gold-400 border border-gold-500/30 bg-gold-500/10 px-2 py-0.5 rounded-full uppercase tracking-widest">
                                           {t.recommended}
                                         </span>
-                                        <span className="text-[8px] font-mono text-white/20 uppercase tracking-widest">{pName}</span>
+                                        <span className="text-[8px] font-mono text-white/50 uppercase tracking-widest">{pName}</span>
                                       </div>
                                     )}
 
@@ -1369,18 +1369,18 @@ export default function App() {
                                         <h3 className="font-serif text-xl text-white font-medium">{pName}</h3>
                                       )}
                                       <div className="flex items-baseline justify-between">
-                                        <span className="text-[10px] font-mono text-white/45">{pDuration}</span>
+                                        <span className="text-[10px] font-mono text-white/65">{pDuration}</span>
                                         <div className="text-right font-mono">
-                                          <span className="text-[8px] text-white/35 block">{pPriceFrom}</span>
+                                          <span className="text-[8px] text-white/60 block">{pPriceFrom}</span>
                                           <span className="text-xl font-bold text-gold-400">${pkg.price.toLocaleString()}</span>
                                         </div>
                                       </div>
                                     </div>
 
-                                    <p className="text-xs text-white/60 leading-relaxed font-sans">{pDesc}</p>
+                                    <p className="text-xs text-white/75 leading-relaxed font-sans">{pDesc}</p>
 
                                     <div className="space-y-2.5">
-                                      <h5 className="text-[9px] font-mono tracking-widest text-white/40 uppercase font-bold">{t.includesLabel}:</h5>
+                                      <h5 className="text-[9px] font-mono tracking-widest text-white/55 uppercase font-bold">{t.includesLabel}:</h5>
                                       <ul className="space-y-2">
                                         {(lang === 'es' ? (pkg.benefits_es || pkg.benefits) : (pkg.benefits_en || pkg.benefits)).map((benefit, i) => (
                                           <li key={i} className="flex items-start space-x-2.5 text-xs text-white/70">
@@ -1435,6 +1435,7 @@ export default function App() {
                     const savedBook: Booking = {
                       id: `book-${Date.now()}`,
                       status: 'pending',
+                      isRead: false,
                       createdAt: new Date().toISOString(),
                       ...newBook
                     };
