@@ -17,7 +17,8 @@ import {
   Mail,
   User,
   Heart,
-  ChevronRight
+  ChevronRight,
+  MapPin
 } from 'lucide-react';
 import { Service, ActiveLanguage, Booking, BookingConfig, EmailConfig, PhotographyPackage } from '../types';
 import { sanitizeString, sanitizeEmail, sanitizePhone } from '../lib/sanitize';
@@ -561,18 +562,13 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                     <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-white/40">
                       <Phone size={12} />
                     </div>
-                    <div className="absolute inset-y-0 left-9 flex items-center pointer-events-none text-white/30 font-mono text-xs border-r border-white/10 pr-2">
-                      +1
-                    </div>
                     <input
                       type="tel"
                       required
                       value={clientPhone}
                       onChange={(e) => setClientPhone(e.target.value)}
-                      placeholder="(555) 123-4567 *"
-                      pattern="[\s\-\(\)0-9]{7,15}"
-                      title={lang === 'es' ? 'Ingresa un número de teléfono de EE.UU. (ej: 555-123-4567)' : 'Enter a US phone number (e.g. 555-123-4567)'}
-                      className="w-full bg-dark/60 border border-white/10 rounded-lg pl-[4.2rem] pr-3 py-3 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans"
+                      placeholder={lang === 'es' ? 'Número de Teléfono *' : 'Phone Number *'}
+                      className="w-full bg-dark/60 border border-white/10 rounded-lg pl-9 pr-3 py-3 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans"
                     />
                   </div>
                 </div>
@@ -609,34 +605,42 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
               </div>
 
               {/* ESTIMATION & QUOTE SUMMARY */}
-              <div className="bg-dark-gray/60 border border-gold-400/10 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 mt-2">
-                <div className="text-center sm:text-left">
-                  <span className="text-[9px] font-mono text-white/40 uppercase tracking-wider block">Estudio de Presupuesto</span>
-                  <span className="text-xs text-white/80 font-sans font-medium mt-0.5 block">
-                    {preSelectedPackage
-                      ? `Paquete: ${lang === 'es' ? preSelectedPackage.name_es : preSelectedPackage.name_en}`
-                      : selectedServiceId === 'custom' 
-                        ? 'Se definirá un presupuesto a medida basado en tus requerimientos.' 
-                        : `Incluye el paquete seleccionado (${selectedService?.duration || '1-2 Horas'})`
-                    }
-                  </span>
+              <div className="bg-dark-gray/60 border border-gold-400/10 rounded-xl p-4 space-y-2 mt-2">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="text-center sm:text-left">
+                    <span className="text-[9px] font-mono text-white/40 uppercase tracking-wider block">Estudio de Presupuesto</span>
+                    <span className="text-xs text-white/80 font-sans font-medium mt-0.5 block">
+                      {preSelectedPackage
+                        ? `Paquete: ${lang === 'es' ? preSelectedPackage.name_es : preSelectedPackage.name_en}`
+                        : selectedServiceId === 'custom' 
+                          ? 'Se definirá un presupuesto a medida basado en tus requerimientos.' 
+                          : `Incluye el paquete seleccionado (${selectedService?.duration || '1-2 Horas'})`
+                      }
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center space-x-1 font-mono text-xl font-bold text-gold-400">
+                    {preSelectedPackage ? (
+                      <>
+                        <DollarSign size={18} className="-mr-1 text-gold-400" />
+                        <span>{totalPrice.toLocaleString()}</span>
+                      </>
+                    ) : selectedServiceId === 'custom' ? (
+                      <span className="text-sm tracking-wider uppercase bg-gold-400/10 px-3 py-1 rounded border border-gold-400/20">Por Definir</span>
+                    ) : (
+                      <>
+                        <DollarSign size={18} className="-mr-1 text-gold-400" />
+                        <span>{totalPrice.toLocaleString()}</span>
+                      </>
+                    )}
+                  </div>
                 </div>
-                
-                <div className="flex items-center space-x-1 font-mono text-xl font-bold text-gold-400">
-                  {preSelectedPackage ? (
-                    <>
-                      <DollarSign size={18} className="-mr-1 text-gold-400" />
-                      <span>{totalPrice.toLocaleString()}</span>
-                    </>
-                  ) : selectedServiceId === 'custom' ? (
-                    <span className="text-sm tracking-wider uppercase bg-gold-400/10 px-3 py-1 rounded border border-gold-400/20">Por Definir</span>
-                  ) : (
-                    <>
-                      <DollarSign size={18} className="-mr-1 text-gold-400" />
-                      <span>{totalPrice.toLocaleString()}</span>
-                    </>
-                  )}
-                </div>
+                {preSelectedPackage && (lang === 'es' ? preSelectedPackage.travelNote_es : preSelectedPackage.travelNote_en) && (
+                  <div className="flex items-start space-x-2 text-[10px] text-white/40 border-t border-white/5 pt-2">
+                    <MapPin size={11} className="text-white/30 mt-0.5 shrink-0" />
+                    <span className="font-sans">{lang === 'es' ? preSelectedPackage.travelNote_es : preSelectedPackage.travelNote_en}</span>
+                  </div>
+                )}
               </div>
 
               {/* SUBMIT BUTTON */}

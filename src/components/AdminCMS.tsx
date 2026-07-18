@@ -9,7 +9,7 @@ import {
   BarChart3, Camera, Calendar, BookOpen, MessageSquare, HelpCircle, 
   Settings, LogOut, Check, X, ShieldAlert, Edit, Edit3, Trash2, Plus, Menu, Save,
   ArrowUpRight, Eye, RefreshCw, Upload, Sliders, FileCode, CheckSquare,
-  User, Mail, ChevronDown, ChevronUp, Phone, Users, FileText, ShoppingBag
+  User, Mail, ChevronDown, ChevronUp, Phone, Users, FileText, ShoppingBag, Copy
 } from 'lucide-react';
 import { 
   Photograph, Service, Testimonial, BlogPost, FAQ, Booking, 
@@ -93,6 +93,11 @@ export default function AdminCMS({
   const [dragActive, setDragActive] = useState(false);
   const [photoEditItem, setPhotoEditItem] = useState<Photograph | null>(null);
   const [editingProofPhotoId, setEditingProofPhotoId] = useState<string | null>(null);
+  const [showSendEmailModal, setShowSendEmailModal] = useState(false);
+  const [sendingToClient, setSendingToClient] = useState<ClientAccount | null>(null);
+  const [sendEmailSubject, setSendEmailSubject] = useState('');
+  const [sendEmailMessage, setSendEmailMessage] = useState('');
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
 
   // Blog state
   const [blogEditItem, setBlogEditItem] = useState<BlogPost | null>(null);
@@ -2444,6 +2449,42 @@ export default function AdminCMS({
                           <button
                             type="button"
                             onClick={() => {
+                              const link = window.location.origin + window.location.pathname + '?gallery=' + account.passcode;
+                              navigator.clipboard.writeText(link).then(() => {
+                                triggerAlert(t('✓ Link copiado al portapapeles', '✓ Link copied to clipboard'));
+                              }).catch(() => {
+                                const textArea = document.createElement('textarea');
+                                textArea.value = link;
+                                document.body.appendChild(textArea);
+                                textArea.select();
+                                document.execCommand('copy');
+                                document.body.removeChild(textArea);
+                                triggerAlert(t('✓ Link copiado al portapapeles', '✓ Link copied to clipboard'));
+                              });
+                            }}
+                            className="py-1.5 px-3 bg-gold-400/10 hover:bg-gold-400/20 text-gold-300 rounded text-[9px] font-mono uppercase tracking-wider flex items-center space-x-1 cursor-pointer border border-gold-400/20 transition-all"
+                          >
+                            <Copy size={10} />
+                            <span>{t('Copiar Link', 'Copy Link')}</span>
+                          </button>
+                          
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSendingToClient(account);
+                              setSendEmailSubject(t('Tu galería fotográfica está lista', 'Your photo gallery is ready'));
+                              setSendEmailMessage(t('Hola {name},\n\nTu galería personal ya está disponible. Podés ver y descargar tus fotos en el siguiente enlace:\n\n{link}\n\nCualquier consulta no dudes en escribirme.\n\nSaludos,\nMiriam Campos', 'Hi {name},\n\nYour personal gallery is ready. You can view and download your photos at the following link:\n\n{link}\n\nIf you have any questions, feel free to reach out.\n\nBest regards,\nMiriam Campos'));
+                              setShowSendEmailModal(true);
+                            }}
+                            className="py-1.5 px-3 bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 rounded text-[9px] font-mono uppercase tracking-wider flex items-center space-x-1 cursor-pointer border border-blue-500/20 transition-all"
+                          >
+                            <Mail size={10} />
+                            <span>{t('Enviar por Email', 'Send via Email')}</span>
+                          </button>
+                          
+                          <button
+                            type="button"
+                            onClick={() => {
                               setClientEditItem(account);
                               setClientForm({ ...account });
                               setTimeout(() => {
@@ -2475,6 +2516,134 @@ export default function AdminCMS({
                 </div>
               )}
             </div>
+
+            {/* Send Email Modal */}
+            <AnimatePresence>
+              {showSendEmailModal && sendingToClient && (
+                <motion.div
+                  className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <motion.div
+                    className="bg-dark border border-gold-400/20 rounded-2xl p-6 w-full max-w-lg space-y-4 text-left shadow-2xl"
+                    initial={{ scale: 0.95 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0.95 }}
+                  >
+                    <div className="flex items-center justify-between border-b border-white/5 pb-3">
+                      <div className="space-y-0.5">
+                        <h3 className="font-serif text-base text-gold-300 font-semibold">
+                          {t('Enviar Link de Galería por Email', 'Send Gallery Link via Email')}
+                        </h3>
+                        <p className="text-[10px] text-white/50 font-sans">
+                          {t('Se enviará a: {email}', 'Will be sent to: {email}').replace('{email}', sendingToClient.clientEmail)}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowSendEmailModal(false)}
+                        className="p-1 hover:bg-white/5 rounded text-white/50 hover:text-white cursor-pointer"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="space-y-1">
+                        <label className="text-[9px] font-mono text-white/40 uppercase tracking-wider">{t('Asunto', 'Subject')}</label>
+                        <input
+                          type="text"
+                          value={sendEmailSubject}
+                          onChange={(e) => setSendEmailSubject(e.target.value)}
+                          className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white focus:outline-none focus:border-gold-400 font-sans"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[9px] font-mono text-white/40 uppercase tracking-wider">{t('Mensaje', 'Message')}</label>
+                        <textarea
+                          rows={6}
+                          value={sendEmailMessage}
+                          onChange={(e) => setSendEmailMessage(e.target.value)}
+                          className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white focus:outline-none focus:border-gold-400 font-sans resize-none"
+                        />
+                        <p className="text-[8px] text-white/40 font-mono">
+                          {t('Podés usar {name} y {link} como marcadores.', 'You can use {name} and {link} as placeholders.')}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-end space-x-3 pt-2 border-t border-white/5">
+                      <button
+                        type="button"
+                        onClick={() => setShowSendEmailModal(false)}
+                        className="py-2 px-4 border border-white/10 text-white/70 hover:text-white rounded-lg text-[9px] font-mono tracking-widest uppercase cursor-pointer"
+                      >
+                        {t('Cancelar', 'Cancel')}
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isSendingEmail}
+                        onClick={async () => {
+                          if (!sendingToClient || !emailConfig.emailjsServiceId || !emailConfig.emailjsTemplateId || !emailConfig.emailjsPublicKey) {
+                            triggerAlert(t('⚠️ Configurá EmailJS primero en Ajustes de Email', '⚠️ Configure EmailJS first in Email Settings'));
+                            return;
+                          }
+                          setIsSendingEmail(true);
+                          try {
+                            const emailjs = await import('@emailjs/browser');
+                            const link = window.location.origin + window.location.pathname + '?gallery=' + sendingToClient.passcode;
+                            const message = sendEmailMessage
+                              .replace(/\{name\}/g, sendingToClient.clientName)
+                              .replace(/\{link\}/g, link);
+                            await emailjs.send(
+                              emailConfig.emailjsServiceId,
+                              emailConfig.emailjsAutoTemplateId || emailConfig.emailjsTemplateId,
+                              {
+                                to_name: sendingToClient.clientName,
+                                to_email: sendingToClient.clientEmail,
+                                client_name: sendingToClient.clientName,
+                                client_email: sendingToClient.clientEmail,
+                                from_name: profile.name || 'Miriam Campos',
+                                from_email: emailConfig.receiverEmail,
+                                reply_subject: sendEmailSubject,
+                                subject: sendEmailSubject,
+                                reply_message: message,
+                                message: message,
+                                gallery_link: link,
+                                booking_details: `Galería compartida con ${sendingToClient.clientName}`,
+                              },
+                              emailConfig.emailjsPublicKey
+                            );
+                            triggerAlert(t('✓ Email enviado correctamente a {email}', '✓ Email sent successfully to {email}').replace('{email}', sendingToClient.clientEmail));
+                            setShowSendEmailModal(false);
+                          } catch (err) {
+                            console.error('Error sending gallery link email:', err);
+                            triggerAlert(t('✗ Error al enviar el email. Verificá la consola.', '✗ Error sending email. Check the console.'));
+                          } finally {
+                            setIsSendingEmail(false);
+                          }
+                        }}
+                        className="py-2 px-5 bg-gold-500 text-dark hover:bg-gold-400 rounded-lg text-[9px] font-mono tracking-widest uppercase font-bold flex items-center space-x-1.5 cursor-pointer disabled:opacity-50"
+                      >
+                        {isSendingEmail ? (
+                          <>
+                            <div className="w-3 h-3 border-2 border-dark border-t-transparent rounded-full animate-spin" />
+                            <span>{t('Enviando...', 'Sending...')}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Mail size={12} />
+                            <span>{t('Enviar Email', 'Send Email')}</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         )}
       </div>

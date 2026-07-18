@@ -211,6 +211,9 @@ export interface PhotographyPackage {
   buttonText_es: string;
   buttonText_en: string;
 
+  travelNote_es?: string;
+  travelNote_en?: string;
+
   sortOrder: number;
   active: boolean;
   featured: boolean;

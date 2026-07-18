@@ -26,6 +26,8 @@ function emptyPackage(categories: SessionCategory[]): PhotographyPackage {
     benefits_en: [''],
     buttonText_es: 'Contratar paquete',
     buttonText_en: 'Book this package',
+    travelNote_es: 'Gastos de viaje y movilidad no incluidos',
+    travelNote_en: 'Travel and mobility expenses not included',
     sortOrder: 0,
     active: true,
     featured: false,
@@ -275,6 +277,14 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
                   <div className="grid grid-cols-2 gap-2">
                     <input value={editForm.buttonText_es} onChange={(e) => updateField('buttonText_es', e.target.value)} placeholder="Español" className={inputClass} />
                     <input value={editForm.buttonText_en} onChange={(e) => updateField('buttonText_en', e.target.value)} placeholder="English" className={inputClass} />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className={labelClass}>{t('Nota de viaje', 'Travel Note')}</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <input value={editForm.travelNote_es || ''} onChange={(e) => updateField('travelNote_es', e.target.value || undefined)} placeholder="Español" className={inputClass} />
+                    <input value={editForm.travelNote_en || ''} onChange={(e) => updateField('travelNote_en', e.target.value || undefined)} placeholder="English" className={inputClass} />
                   </div>
                 </div>
 

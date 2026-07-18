@@ -181,7 +181,7 @@ export default function Lightbox({
                   <img
                     src={photo.url}
                     alt="RAW"
-                    className="w-full h-full object-cover filter saturate-[0.35] brightness-[0.75]"
+                    className="w-full h-full object-cover"
                   />
                   <div className="absolute top-3 left-3 bg-dark-gray/75 border border-[#D8C0A8] px-2 py-1 text-[9px] font-mono tracking-widest text-white/75 rounded">
                     LEICA RAW DNG (14-BIT)

@@ -125,7 +125,14 @@ function CountUp({ end, suffix = '', duration = 2000, delay = 0 }: { end: number
 
 export default function App() {
   // Navigation & Language Context
-  const [currentView, setCurrentView] = useState<string>('home');
+  const [currentView, setCurrentView] = useState<string>(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.has('gallery') ? 'client-portal' : 'home';
+  });
+  const [galleryPasscode, setGalleryPasscode] = useState<string>(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('gallery') || '';
+  });
   const [lang, setLang] = useState<'es' | 'en'>('es');
 
   const [photographs, setPhotographs] = useState<Photograph[]>(() => {
@@ -1053,7 +1060,7 @@ export default function App() {
                         <img
                           src={photo.url}
                           alt={getPhotoTitle(photo, lang)}
-                          className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-[800ms] ease-out group-hover:scale-[1.04]"
+                          className="w-full h-full object-cover transition-all duration-[800ms] ease-out group-hover:scale-[1.04]"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-overlay/8 via-overlay/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                         <div className="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-all duration-700 translate-y-1 group-hover:translate-y-0">
@@ -1142,7 +1149,7 @@ export default function App() {
                         <img
                           src={photo.url}
                           alt={getPhotoTitle(photo, lang)}
-                          className="w-full h-auto object-cover grayscale group-hover:grayscale-0 transition-all duration-[800ms] ease-out group-hover:scale-[1.04]"
+                          className="w-full h-auto object-cover transition-all duration-[800ms] ease-out group-hover:scale-[1.04]"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-overlay/8 via-overlay/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
@@ -1390,6 +1397,13 @@ export default function App() {
                                         ))}
                                       </ul>
                                     </div>
+
+                                    {(lang === 'es' ? pkg.travelNote_es : pkg.travelNote_en) && (
+                                      <div className="flex items-start space-x-2.5 text-[10px] text-white/50">
+                                        <MapPin size={11} className="text-white/40 mt-0.5 shrink-0" />
+                                        <span className="font-sans">{lang === 'es' ? pkg.travelNote_es : pkg.travelNote_en}</span>
+                                      </div>
+                                    )}
                                   </div>
 
                                   <button
@@ -1456,6 +1470,7 @@ export default function App() {
                 onOpenCheckout={handleOpenStripeCheckout}
                 clientAccounts={clientAccounts}
                 onUpdateClientAccounts={handleUpdateClientAccounts}
+                autoPasscode={galleryPasscode}
               />
             </div>
           )}

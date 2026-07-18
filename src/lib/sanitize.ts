@@ -23,12 +23,7 @@ export function sanitizeEmail(input: string): string {
 
 export function sanitizePhone(input: string): string {
   if (typeof input !== 'string') return '';
-  let cleaned = input.trim().replace(/[^0-9+()\-\s]/g, '');
-  if (cleaned.startsWith('+1')) cleaned = cleaned.substring(2);
-  cleaned = cleaned.replace(/[\s()\-]/g, '');
-  if (cleaned.length === 10) cleaned = '+1' + cleaned;
-  else if (!cleaned.startsWith('+')) cleaned = '+1' + cleaned;
-  return cleaned;
+  return input.trim().replace(/[^0-9+()\-\s]/g, '');
 }
 
 export function sanitizeUrl(input: string): string {

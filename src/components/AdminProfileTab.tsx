@@ -182,7 +182,7 @@ function AdminProfileTab({ profile, onUpdateProfile, triggerAlert, lang }: Admin
             <div className="border border-[#D8C0A8] bg-charcoal rounded-xl p-4 text-left space-y-4">
               <div className="aspect-[4/5] rounded-lg overflow-hidden relative border border-white/5">
                 {profileForm.avatarUrl ? (
-                  <img src={profileForm.avatarUrl} className="w-full h-full object-cover grayscale" alt="preview" />
+                  <img src={profileForm.avatarUrl} className="w-full h-full object-cover" alt="preview" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-white/30 text-[10px] font-mono">Sin foto</div>
                 )}

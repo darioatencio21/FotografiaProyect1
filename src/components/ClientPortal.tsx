@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ShieldCheck, Heart, ArrowRight, Download, Eye, EyeOff, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { ShieldCheck, Heart, ArrowRight, Download, Eye, EyeOff, ChevronLeft, ChevronRight, X, Copy, Check as CheckIcon, Mail, MapPin } from 'lucide-react';
 import { ActiveLanguage, ClientAccount, ProofPhoto } from '../types';
 import { TRANSLATIONS } from '../data/mockData';
 import { sanitizeString } from '../lib/sanitize';
@@ -15,9 +15,10 @@ interface ClientPortalProps {
   onOpenCheckout: (amount: number, description: string) => void;
   clientAccounts?: ClientAccount[];
   onUpdateClientAccounts?: (accounts: ClientAccount[]) => void;
+  autoPasscode?: string;
 }
 
-export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = [], onUpdateClientAccounts }: ClientPortalProps) {
+export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = [], onUpdateClientAccounts, autoPasscode }: ClientPortalProps) {
   const [passcode, setPasscode] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -29,6 +30,23 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const t = TRANSLATIONS[lang];
+
+  useEffect(() => {
+    if (autoPasscode) {
+      const cleanCode = sanitizeString(autoPasscode).toUpperCase();
+      const matchedAccount = clientAccounts.find(c => sanitizeString(c.passcode).toUpperCase() === cleanCode);
+      if (matchedAccount) {
+        setAuthenticatedClientId(matchedAccount.id);
+        setIsAuthenticated(true);
+        setErrorMsg('');
+        if (matchedAccount.photos && matchedAccount.photos.length > 0) {
+          setActivePhoto(matchedAccount.photos[0]);
+        } else {
+          setActivePhoto(null);
+        }
+      }
+    }
+  }, [autoPasscode, clientAccounts]);
 
   const currentAccount = clientAccounts.find(c => c.id === authenticatedClientId);
   const proofPhotos = currentAccount ? (currentAccount.photos || []) : [];
@@ -226,6 +244,43 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                     : 'Sesión Fotográfica'}
                 </p>
               </div>
+
+              {/* Shareable Link Banner */}
+              {currentAccount && (
+                <div className="bg-dark-gray/40 border border-gold-400/15 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center space-x-2 text-left">
+                    <MapPin size={12} className="text-gold-400 shrink-0" />
+                    <span className="text-[10px] text-white/60 font-sans">
+                      {lang === 'en' ? 'Share your gallery:' : 'Compartí tu galería:'}
+                    </span>
+                    <code className="text-[9px] font-mono text-gold-300/80 bg-dark/40 px-2 py-0.5 rounded border border-white/5 truncate max-w-[200px] sm:max-w-xs">
+                      {window.location.origin + window.location.pathname + '?gallery=' + currentAccount.passcode}
+                    </code>
+                  </div>
+                  <div className="flex items-center space-x-1.5 shrink-0">
+                    <button
+                      onClick={() => {
+                        const link = window.location.origin + window.location.pathname + '?gallery=' + currentAccount.passcode;
+                        navigator.clipboard.writeText(link).then(() => {
+                          alert(lang === 'en' ? 'Link copied!' : '¡Link copiado!');
+                        }).catch(() => {
+                          const textArea = document.createElement('textarea');
+                          textArea.value = link;
+                          document.body.appendChild(textArea);
+                          textArea.select();
+                          document.execCommand('copy');
+                          document.body.removeChild(textArea);
+                          alert(lang === 'en' ? 'Link copied!' : '¡Link copiado!');
+                        });
+                      }}
+                      className="py-1.5 px-3 bg-gold-500/20 hover:bg-gold-500/30 text-gold-300 border border-gold-500/30 rounded-lg text-[9px] font-mono tracking-widest uppercase font-semibold flex items-center space-x-1 cursor-pointer transition-all"
+                    >
+                      <Copy size={11} />
+                      <span>{lang === 'en' ? 'Copy Link' : 'Copiar Link'}</span>
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Filtering tabs */}
               <div className="flex items-center space-x-2 bg-dark/60 border border-[#D8C0A8]/30 p-1 rounded-lg">
