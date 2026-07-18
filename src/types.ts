@@ -19,12 +19,10 @@ export interface Photograph {
   title: string;
   title_es?: string;
   title_en?: string;
-  title_pt?: string;
   category: string; // 'retrato' | 'boda' | 'moda' | 'drone' | 'viajes' | 'producto' | 'evento' | 'naturaleza'
   description: string;
   description_es?: string;
   description_en?: string;
-  description_pt?: string;
   exif: ExifData;
   tags: string[];
   colors: string[]; // dominant hex colors (e.g. ['#0B0B0B', '#C7A962'])
@@ -56,10 +54,6 @@ export interface Service {
   description_es?: string;
   duration_es?: string;
   includes_es?: string[];
-  title_pt?: string;
-  description_pt?: string;
-  duration_pt?: string;
-  includes_pt?: string[];
   title_en?: string;
   description_en?: string;
   duration_en?: string;
@@ -96,8 +90,6 @@ export interface FAQ {
   category: string;
   question_es?: string;
   answer_es?: string;
-  question_pt?: string;
-  answer_pt?: string;
   question_en?: string;
   answer_en?: string;
 }
@@ -160,13 +152,10 @@ export interface PhotographerProfile {
   preferredLens: string;
   aboutTitle_es: string;
   aboutTitle_en: string;
-  aboutTitle_pt: string;
   aboutText1_es: string;
   aboutText2_es: string;
   aboutText1_en: string;
   aboutText2_en: string;
-  aboutText1_pt: string;
-  aboutText2_pt: string;
 }
 
 export interface BookingConfig {
@@ -186,28 +175,41 @@ export interface EmailConfig {
   autoReplyMessage?: string; // Auto-reply custom body message
 }
 
-export interface PhotographyPackage {
+export interface SessionCategory {
   id: string;
   icon: string;
-  image?: string;
   name_es: string;
   name_en: string;
-  name_pt: string;
+  description_es: string;
+  description_en: string;
+  image: string;
+  sortOrder: number;
+  active: boolean;
+}
+
+export interface PhotographyPackage {
+  id: string;
+  category: string;
+  name_es: string;
+  name_en: string;
+  image?: string;
+
   price: number;
   priceFromText_es: string;
   priceFromText_en: string;
-  priceFromText_pt: string;
+
   duration_es: string;
   duration_en: string;
-  duration_pt: string;
+
   description_es: string;
   description_en: string;
-  description_pt: string;
   benefits: string[];
+  benefits_es?: string[];
+  benefits_en?: string[];
+
   buttonText_es: string;
   buttonText_en: string;
-  buttonText_pt: string;
-  cardColor?: string;
+
   sortOrder: number;
   active: boolean;
   featured: boolean;
@@ -217,13 +219,12 @@ export interface Milestone {
   year: string;
   title_es: string;
   title_en: string;
-  title_pt: string;
+
   description_es: string;
   description_en: string;
-  description_pt: string;
 }
 
-export type ActiveLanguage = 'es' | 'en' | 'pt';
+export type ActiveLanguage = 'es' | 'en';
 
 export interface ProofPhoto {
   id: string;

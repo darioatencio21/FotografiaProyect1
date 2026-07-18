@@ -37,7 +37,7 @@ export default function Lightbox({
 
   function getPhotoDescription(photo: Photograph, l: ActiveLanguage) {
     if (l === 'es') return photo.description_es || photo.description;
-    if (l === 'pt') return photo.description_pt || photo.description;
+
     return photo.description;
   }
 

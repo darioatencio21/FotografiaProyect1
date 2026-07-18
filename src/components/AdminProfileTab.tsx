@@ -69,7 +69,7 @@ function AdminProfileTab({ profile, onUpdateProfile, triggerAlert, lang }: Admin
       <div className="flex items-center justify-between border-b border-white/5 pb-4">
         <div>
           <h2 className="font-serif text-2xl text-white">
-            {lang === 'es' ? 'Biografía y Perfil Profesional' : lang === 'pt' ? 'Biografia e Perfil Profissional' : 'Biography & Professional Profile'}
+            {lang === 'es' ? 'Biografía y Perfil Profesional' : 'Biography & Professional Profile'}
           </h2>
           <p className="text-xs text-white/50">
             {lang === 'es' ? 'Edita tu información de marca personal, foto de perfil y biografías multilingües.' : 'Edit your personal branding, profile photograph, and multilingual bios.'}
@@ -77,7 +77,7 @@ function AdminProfileTab({ profile, onUpdateProfile, triggerAlert, lang }: Admin
         </div>
         <button type="submit" className="py-1.5 px-4 bg-gold-500 text-dark hover:bg-gold-400 rounded-lg text-[10px] font-mono tracking-widest uppercase font-semibold flex items-center space-x-1 cursor-pointer">
           <Check size={11} />
-          <span>{lang === 'es' ? 'Guardar Perfil' : lang === 'pt' ? 'Salvar Perfil' : 'Save Profile'}</span>
+          <span>{lang === 'es' ? 'Guardar Perfil' : 'Save Profile'}</span>
         </button>
       </div>
 
@@ -148,22 +148,7 @@ function AdminProfileTab({ profile, onUpdateProfile, triggerAlert, lang }: Admin
               </div>
             </div>
 
-            {/* Portuguese */}
-            <div className="space-y-4 border-l-2 border-green-500/30 pl-4 pt-4 border-t border-white/5">
-              <span className="text-[9px] font-mono bg-green-500/10 text-green-300 px-2 py-0.5 rounded uppercase font-semibold">Português</span>
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono text-white/50 uppercase">Título</label>
-                <input type="text" value={profileForm.aboutTitle_pt} onChange={(e) => setProfileForm(prev => ({ ...prev, aboutTitle_pt: e.target.value }))} className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white font-serif" />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono text-white/50 uppercase">Parágrafo 1</label>
-                <textarea rows={3} value={profileForm.aboutText1_pt} onChange={(e) => setProfileForm(prev => ({ ...prev, aboutText1_pt: e.target.value }))} className="w-full bg-charcoal border border-[#D8C0A8] rounded p-3 text-xs text-white resize-none font-sans leading-relaxed" />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono text-white/50 uppercase">Parágrafo 2</label>
-                <textarea rows={3} value={profileForm.aboutText2_pt} onChange={(e) => setProfileForm(prev => ({ ...prev, aboutText2_pt: e.target.value }))} className="w-full bg-charcoal border border-[#D8C0A8] rounded p-3 text-xs text-white resize-none font-sans leading-relaxed" />
-              </div>
-            </div>
+
           </div>
         </div>
 
@@ -208,10 +193,10 @@ function AdminProfileTab({ profile, onUpdateProfile, triggerAlert, lang }: Admin
               <div className="space-y-2">
                 <span className="text-[8px] font-mono text-gold-400 tracking-widest uppercase block">BIOGRAPHY</span>
                 <h4 className="font-serif text-sm text-white font-semibold">
-                  {lang === 'es' ? profileForm.aboutTitle_es : lang === 'pt' ? profileForm.aboutTitle_pt : profileForm.aboutTitle_en}
+                  {lang === 'es' ? profileForm.aboutTitle_es : profileForm.aboutTitle_en}
                 </h4>
                 <p className="text-[10px] text-white/80 leading-relaxed font-sans line-clamp-3">
-                  {lang === 'es' ? profileForm.aboutText1_es : lang === 'pt' ? profileForm.aboutText1_pt : profileForm.aboutText1_en}
+                  {lang === 'es' ? profileForm.aboutText1_es : profileForm.aboutText1_en}
                 </p>
                 <div className="grid grid-cols-2 gap-2 border-t border-white/5 pt-2 mt-2 font-mono">
                   <div>

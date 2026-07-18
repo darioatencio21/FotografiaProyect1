@@ -1,64 +1,69 @@
 ﻿import React, { useState, useCallback, useEffect } from 'react';
-import { Save, Plus, Trash2, Edit3, X } from 'lucide-react';
-import { PhotographyPackage, ActiveLanguage } from '../types';
+import { Save, Plus, Trash2, Edit3, X, Upload } from 'lucide-react';
+import { PhotographyPackage, ActiveLanguage, SessionCategory } from '../types';
 
 interface AdminPackagesTabProps {
+  sessionCategories: SessionCategory[];
   packages: PhotographyPackage[];
   onUpdatePackages: (packages: PhotographyPackage[]) => void;
   triggerAlert: (msg: string) => void;
   lang: ActiveLanguage;
 }
 
-const ICON_OPTIONS = [
-  'Heart', 'Camera', 'Users', 'Calendar', 'PartyPopper',
-  'ShoppingBag', 'Star', 'Baby', 'GraduationCap', 'Gift', 'Briefcase',
-  'Sparkles', 'Sun', 'Moon', 'Palette', 'Music', 'Coffee', 'Globe'
-];
-
-function emptyPackage(): PhotographyPackage {
+function emptyPackage(categories: SessionCategory[]): PhotographyPackage {
+  const firstCat = categories.find(c => c.active);
   return {
     id: 'pkg-' + Date.now(),
-    icon: 'Camera',
-    name_es: '', name_en: '', name_pt: '',
+    category: firstCat?.id || '',
+    name_es: '', name_en: '',
     price: 0,
     priceFromText_es: 'Desde',
     priceFromText_en: 'Starting from',
-    priceFromText_pt: 'A partir de',
-    duration_es: '', duration_en: '', duration_pt: '',
-    description_es: '', description_en: '', description_pt: '',
+    duration_es: '', duration_en: '',
+    description_es: '', description_en: '',
     benefits: [''],
+    benefits_es: [''],
+    benefits_en: [''],
     buttonText_es: 'Contratar paquete',
     buttonText_en: 'Book this package',
-    buttonText_pt: 'Contratar pacote',
     sortOrder: 0,
     active: true,
     featured: false,
   };
 }
 
-export default function AdminPackagesTab({ packages, onUpdatePackages, triggerAlert, lang }: AdminPackagesTabProps) {
+export default function AdminPackagesTab({ sessionCategories, packages, onUpdatePackages, triggerAlert, lang }: AdminPackagesTabProps) {
   const [localPackages, setLocalPackages] = useState<PhotographyPackage[]>(packages);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<PhotographyPackage>(emptyPackage());
+  const [editForm, setEditForm] = useState<PhotographyPackage>(emptyPackage(sessionCategories));
   const [isCreating, setIsCreating] = useState(false);
+
+  const activeCategories = sessionCategories.filter(c => c.active).sort((a, b) => a.sortOrder - b.sortOrder);
 
   useEffect(() => {
     setLocalPackages(packages);
   }, [packages]);
 
-  const t = (es: string, en: string, pt?: string) => {
+  const t = (es: string, en: string) => {
     if (lang === 'en') return en;
-    if (lang === 'pt') return pt || en;
     return es;
+  };
+
+  const catName = (catId: string) => {
+    const cat = sessionCategories.find(c => c.id === catId);
+    if (!cat) return catId;
+    return lang === 'es' ? cat.name_es : cat.name_en;
   };
 
   const handleSaveAll = useCallback(() => {
     const cleaned = localPackages.map(p => ({
       ...p,
       benefits: p.benefits.filter(b => b.trim() !== ''),
+      benefits_es: p.benefits_es?.filter(b => b.trim() !== ''),
+      benefits_en: p.benefits_en?.filter(b => b.trim() !== ''),
     }));
     onUpdatePackages(cleaned);
-    triggerAlert(t('✓ Paquetes guardados.', '✓ Packages saved.', '✓ Pacotes salvos.'));
+    triggerAlert(t('✓ Paquetes guardados.', '✓ Packages saved.'));
   }, [localPackages, onUpdatePackages, triggerAlert, t]);
 
   const toggleActive = useCallback((id: string) => {
@@ -74,7 +79,7 @@ export default function AdminPackagesTab({ packages, onUpdatePackages, triggerAl
   }, []);
 
   const startCreate = useCallback(() => {
-    const newPkg = emptyPackage();
+    const newPkg = emptyPackage(sessionCategories);
     newPkg.sortOrder = localPackages.length + 1;
     setEditForm(newPkg);
     setIsCreating(true);
@@ -82,7 +87,12 @@ export default function AdminPackagesTab({ packages, onUpdatePackages, triggerAl
   }, [localPackages]);
 
   const startEdit = useCallback((pkg: PhotographyPackage) => {
-    setEditForm({ ...pkg, benefits: pkg.benefits.length > 0 ? [...pkg.benefits] : [''] });
+    setEditForm({
+      ...pkg,
+      benefits: pkg.benefits.length > 0 ? [...pkg.benefits] : [''],
+      benefits_es: pkg.benefits_es?.length ? [...pkg.benefits_es] : [''],
+      benefits_en: pkg.benefits_en?.length ? [...pkg.benefits_en] : [''],
+    });
     setIsCreating(false);
     setEditingId(pkg.id);
   }, []);
@@ -96,6 +106,8 @@ export default function AdminPackagesTab({ packages, onUpdatePackages, triggerAl
     const cleaned = {
       ...editForm,
       benefits: editForm.benefits.filter(b => b.trim() !== ''),
+      benefits_es: editForm.benefits_es?.filter(b => b.trim() !== ''),
+      benefits_en: editForm.benefits_en?.filter(b => b.trim() !== ''),
     };
     if (isCreating) {
       setLocalPackages(prev => [...prev, cleaned]);
@@ -103,8 +115,8 @@ export default function AdminPackagesTab({ packages, onUpdatePackages, triggerAl
       setLocalPackages(prev => prev.map(p => p.id === cleaned.id ? cleaned : p));
     }
     triggerAlert(isCreating
-      ? t('✓ Paquete creado.', '✓ Package created.', '✓ Pacote criado.')
-      : t('✓ Paquete actualizado.', '✓ Package updated.', '✓ Pacote atualizado.'));
+      ? t('✓ Paquete creado.', '✓ Package created.')
+      : t('✓ Paquete actualizado.', '✓ Package updated.'));
     setEditingId(null);
     setIsCreating(false);
   }, [editForm, isCreating, triggerAlert, t]);
@@ -113,26 +125,50 @@ export default function AdminPackagesTab({ packages, onUpdatePackages, triggerAl
     setEditForm(prev => ({ ...prev, [field]: value }));
   }, []);
 
+  const benefitRowCount = Math.max(
+    editForm.benefits?.length || 0,
+    editForm.benefits_es?.length || 0,
+    editForm.benefits_en?.length || 0,
+    1
+  );
+
   const addBenefit = useCallback(() => {
-    setEditForm(prev => ({ ...prev, benefits: [...prev.benefits, ''] }));
+    setEditForm(prev => ({
+      ...prev,
+      benefits: [...(prev.benefits || []), ''],
+      benefits_es: [...(prev.benefits_es || []), ''],
+      benefits_en: [...(prev.benefits_en || []), ''],
+    }));
   }, []);
 
-  const updateBenefit = useCallback((index: number, value: string) => {
+  const updateBenefit = useCallback((index: number, field: 'benefits' | 'benefits_es' | 'benefits_en', value: string) => {
     setEditForm(prev => {
-      const benefits = [...prev.benefits];
-      benefits[index] = value;
-      return { ...prev, benefits };
+      const arr = [...(prev[field] || [])];
+      while (arr.length <= index) arr.push('');
+      arr[index] = value;
+      return { ...prev, [field]: arr };
     });
   }, []);
 
   const removeBenefit = useCallback((index: number) => {
     setEditForm(prev => ({
       ...prev,
-      benefits: prev.benefits.filter((_, i) => i !== index),
+      benefits: (prev.benefits || []).filter((_, i) => i !== index),
+      benefits_es: (prev.benefits_es || []).filter((_, i) => i !== index),
+      benefits_en: (prev.benefits_en || []).filter((_, i) => i !== index),
     }));
   }, []);
 
-  const sorted = [...localPackages].sort((a, b) => a.sortOrder - b.sortOrder);
+  // Group packages by category
+  const grouped = activeCategories.map(cat => ({
+    category: cat,
+    packages: localPackages
+      .filter(p => p.category === cat.id)
+      .sort((a, b) => a.sortOrder - b.sortOrder),
+  }));
+
+  const uncategorized = localPackages.filter(p => !p.category || !sessionCategories.some(c => c.id === p.category));
+
   const inputClass = "w-full bg-charcoal border border-[#D8C0A8] rounded px-2.5 py-2 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans";
   const labelClass = "text-[9px] font-mono text-white/50 uppercase";
 
@@ -141,20 +177,20 @@ export default function AdminPackagesTab({ packages, onUpdatePackages, triggerAl
       <div className="flex items-center justify-between border-b border-white/5 pb-4">
         <div>
           <h2 className="font-serif text-2xl text-white">
-            {t('Paquetes Fotográficos', 'Photography Packages', 'Pacotes Fotográficos')}
+            {t('Paquetes Fotográficos', 'Photography Packages')}
           </h2>
           <p className="text-xs text-white/50">
-            {t('Gestiona los paquetes que se muestran en la sección pública.', 'Manage packages shown in the public section.', 'Gerencie os pacotes mostrados na seção pública.')}
+            {t('Gestiona los paquetes por tipo de sesión.', 'Manage packages by session type.')}
           </p>
         </div>
         <div className="flex items-center space-x-2">
           <button onClick={startCreate} className="py-1.5 px-3 bg-gold-500/20 hover:bg-gold-500/30 text-gold-300 border border-gold-500/30 rounded-lg text-[10px] font-mono tracking-widest uppercase font-semibold flex items-center space-x-1 cursor-pointer transition-all">
             <Plus size={11} />
-            <span>{t('Nuevo', 'New', 'Novo')}</span>
+            <span>{t('Nuevo', 'New')}</span>
           </button>
           <button onClick={handleSaveAll} className="py-1.5 px-4 bg-gold-500 text-dark hover:bg-gold-400 rounded-lg text-[10px] font-mono tracking-widest uppercase font-semibold flex items-center space-x-1 cursor-pointer transition-all">
             <Save size={11} />
-            <span>{t('Guardar Todo', 'Save All', 'Salvar Tudo')}</span>
+            <span>{t('Guardar Todo', 'Save All')}</span>
           </button>
         </div>
       </div>
@@ -165,7 +201,7 @@ export default function AdminPackagesTab({ packages, onUpdatePackages, triggerAl
           <div className="bg-charcoal border border-[#D8C0A8] rounded-2xl p-6 max-w-3xl w-full space-y-5 shadow-2xl my-8">
             <div className="flex items-center justify-between border-b border-white/5 pb-3">
               <h3 className="font-serif text-lg text-white">
-                {isCreating ? t('Nuevo Paquete', 'New Package', 'Novo Pacote') : t('Editar Paquete', 'Edit Package', 'Editar Pacote')}
+                {isCreating ? t('Nuevo Paquete', 'New Package') : t('Editar Paquete', 'Edit Package')}
               </h3>
               <button onClick={cancelEdit} className="text-white/50 hover:text-white cursor-pointer p-1">
                 <X size={16} />
@@ -176,45 +212,45 @@ export default function AdminPackagesTab({ packages, onUpdatePackages, triggerAl
               {/* Left column */}
               <div className="space-y-4">
                 <div className="space-y-1">
-                  <label className={labelClass}>{t('Icono', 'Icon')}</label>
-                  <select value={editForm.icon} onChange={(e) => updateField('icon', e.target.value)}
+                  <label className={labelClass}>{t('Categoría', 'Category')}</label>
+                  <select value={editForm.category} onChange={(e) => updateField('category', e.target.value)}
                     className="w-full bg-charcoal border border-[#D8C0A8] rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-gold-400">
-                    {ICON_OPTIONS.map(ico => (
-                      <option key={ico} value={ico} className="bg-charcoal">{ico}</option>
+                    <option value="" className="bg-charcoal text-white/50">{t('Seleccionar categoría...', 'Select category...')}</option>
+                    {activeCategories.map(cat => (
+                      <option key={cat.id} value={cat.id} className="bg-charcoal">
+                        {lang === 'es' ? cat.name_es : cat.name_en}
+                      </option>
                     ))}
                   </select>
                 </div>
 
                 <div className="space-y-1">
-                  <label className={labelClass}>Nombre / Name / Nome</label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <label className={labelClass}>Nombre / Name</label>
+                  <div className="grid grid-cols-2 gap-2">
                     <input value={editForm.name_es} onChange={(e) => updateField('name_es', e.target.value)} placeholder="Español" className={inputClass} />
                     <input value={editForm.name_en} onChange={(e) => updateField('name_en', e.target.value)} placeholder="English" className={inputClass} />
-                    <input value={editForm.name_pt} onChange={(e) => updateField('name_pt', e.target.value)} placeholder="Português" className={inputClass} />
                   </div>
                 </div>
 
                 <div className="space-y-1">
                   <label className={labelClass}>{t('Duración', 'Duration')}</label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     <input value={editForm.duration_es} onChange={(e) => updateField('duration_es', e.target.value)} placeholder="Español" className={inputClass} />
                     <input value={editForm.duration_en} onChange={(e) => updateField('duration_en', e.target.value)} placeholder="English" className={inputClass} />
-                    <input value={editForm.duration_pt} onChange={(e) => updateField('duration_pt', e.target.value)} placeholder="Português" className={inputClass} />
                   </div>
                 </div>
 
                 <div className="space-y-1">
                   <label className={labelClass}>{t('Descripción', 'Description')}</label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     <textarea rows={2} value={editForm.description_es} onChange={(e) => updateField('description_es', e.target.value)} placeholder="Español" className={inputClass + " resize-none"} />
                     <textarea rows={2} value={editForm.description_en} onChange={(e) => updateField('description_en', e.target.value)} placeholder="English" className={inputClass + " resize-none"} />
-                    <textarea rows={2} value={editForm.description_pt} onChange={(e) => updateField('description_pt', e.target.value)} placeholder="Português" className={inputClass + " resize-none"} />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className={labelClass}>{t('Precio (USD)', 'Price (USD)')}</label>
+                    <label className={labelClass}>{t('Precio ($)', 'Price ($)')}</label>
                     <input type="number" min="0" value={editForm.price} onChange={(e) => updateField('price', Number(e.target.value))} className={inputClass} />
                   </div>
                   <div className="space-y-1">
@@ -228,33 +264,44 @@ export default function AdminPackagesTab({ packages, onUpdatePackages, triggerAl
               <div className="space-y-4">
                 <div className="space-y-1">
                   <label className={labelClass}>{t('Texto "Desde"', '"From" text')}</label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     <input value={editForm.priceFromText_es} onChange={(e) => updateField('priceFromText_es', e.target.value)} placeholder="Desde" className={inputClass} />
                     <input value={editForm.priceFromText_en} onChange={(e) => updateField('priceFromText_en', e.target.value)} placeholder="Starting from" className={inputClass} />
-                    <input value={editForm.priceFromText_pt} onChange={(e) => updateField('priceFromText_pt', e.target.value)} placeholder="A partir de" className={inputClass} />
                   </div>
                 </div>
 
                 <div className="space-y-1">
                   <label className={labelClass}>{t('Texto del Botón', 'Button Text')}</label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     <input value={editForm.buttonText_es} onChange={(e) => updateField('buttonText_es', e.target.value)} placeholder="Español" className={inputClass} />
                     <input value={editForm.buttonText_en} onChange={(e) => updateField('buttonText_en', e.target.value)} placeholder="English" className={inputClass} />
-                    <input value={editForm.buttonText_pt} onChange={(e) => updateField('buttonText_pt', e.target.value)} placeholder="Português" className={inputClass} />
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <label className={labelClass}>{t('Imagen URL (opcional)', 'Image URL (optional)')}</label>
-                  <input value={editForm.image || ''} onChange={(e) => updateField('image', e.target.value || undefined)} placeholder="https://..." className={inputClass} />
-                </div>
-
-                <div className="space-y-1">
-                  <label className={labelClass}>{t('Color de tarjeta (opcional)', 'Card color (optional)')}</label>
+                  <label className={labelClass}>{t('Imagen del paquete', 'Package Image')}</label>
                   <div className="flex items-center space-x-2">
-                    <input type="color" value={editForm.cardColor || '#461F1A'} onChange={(e) => updateField('cardColor', e.target.value)} className="w-8 h-8 rounded cursor-pointer border border-[#D8C0A8]" />
-                    <input value={editForm.cardColor || ''} onChange={(e) => updateField('cardColor', e.target.value || undefined)} placeholder="#461F1A" className={inputClass} />
+                    <input value={editForm.image || ''} onChange={(e) => updateField('image', e.target.value || undefined)} placeholder="https://..." className={inputClass} />
+                    <label className="shrink-0 py-2 px-3 bg-white/10 hover:bg-white/20 border border-[#D8C0A8] rounded text-[9px] font-mono text-white/70 hover:text-white uppercase tracking-widest cursor-pointer transition-all whitespace-nowrap">
+                      {t('Subir', 'Upload')}
+                      <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                          const dataUrl = ev.target?.result as string;
+                          updateField('image', dataUrl);
+                        };
+                        reader.readAsDataURL(file);
+                        e.target.value = '';
+                      }} />
+                    </label>
                   </div>
+                  {editForm.image && (
+                    <div className="rounded-lg overflow-hidden border border-white/10 mt-1">
+                      <img src={editForm.image} alt="Preview" className="w-full h-20 object-cover" />
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex items-center space-x-4 pt-2">
@@ -279,15 +326,24 @@ export default function AdminPackagesTab({ packages, onUpdatePackages, triggerAl
                   <span>{t('Añadir beneficio', 'Add benefit')}</span>
                 </button>
               </div>
+              <div className="grid grid-cols-2 gap-1 text-[8px] font-mono text-white/30 uppercase px-1">
+                <span>Español</span>
+                <span>English</span>
+              </div>
               <div className="space-y-1.5 max-h-48 overflow-y-auto">
-                {editForm.benefits.map((b, i) => (
-                  <div key={i} className="flex items-center space-x-2">
-                    <input value={b} onChange={(e) => updateBenefit(i, e.target.value)}
-                      placeholder={t('Escribe un beneficio...', 'Write a benefit...')}
-                      className={"flex-1 " + inputClass} />
-                    <button type="button" onClick={() => removeBenefit(i)} className="text-red-400/60 hover:text-red-400 cursor-pointer p-1">
-                      <X size={12} />
-                    </button>
+                {Array.from({ length: benefitRowCount }).map((_, i) => (
+                  <div key={i} className="grid grid-cols-2 gap-2 items-start">
+                    <input value={(editForm.benefits_es || [])[i] || ''} onChange={(e) => updateBenefit(i, 'benefits_es', e.target.value)}
+                      placeholder={t('Beneficio...', 'Benefit...')}
+                      className={inputClass} />
+                    <div className="flex items-center space-x-1">
+                      <input value={(editForm.benefits_en || [])[i] || ''} onChange={(e) => updateBenefit(i, 'benefits_en', e.target.value)}
+                        placeholder="Benefit..."
+                        className={"flex-1 " + inputClass} />
+                      <button type="button" onClick={() => removeBenefit(i)} className="text-red-400/60 hover:text-red-400 cursor-pointer p-1 shrink-0">
+                        <X size={12} />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -305,41 +361,100 @@ export default function AdminPackagesTab({ packages, onUpdatePackages, triggerAl
         </div>
       )}
 
-      {/* Packages List */}
-      <div className="space-y-2">
-        {sorted.length === 0 && (
-          <div className="text-center py-12 text-white/40 text-xs">
-            {t('No hay paquetes todavía. Crea uno nuevo.', 'No packages yet. Create a new one.', 'Nenhum pacote ainda. Crie um novo.')}
-          </div>
-        )}
-        {sorted.map((pkg) => {
-          const pName = lang === 'es' ? pkg.name_es : lang === 'pt' ? pkg.name_pt : pkg.name_en;
+      {/* Packages List — Grouped by Category */}
+      <div className="space-y-6">
+        {grouped.map(({ category: cat, packages: catPkgs }) => {
+          if (catPkgs.length === 0) return null;
           return (
-            <div key={pkg.id} className={`flex items-center justify-between p-3 rounded-xl border transition-all ${pkg.active ? 'border-[#D8C0A8] bg-dark-gray' : 'border-[#D8C0A8]/30 bg-dark-gray opacity-60'}`}>
-              <div className="flex items-center space-x-3 flex-1 min-w-0">
-                <span className="text-[10px] font-mono text-white/30 w-6 text-right">{pkg.sortOrder}</span>
-                <span className="text-xs text-white/50 font-mono w-20 truncate">{pkg.icon}</span>
-                <span className="text-sm font-serif text-white truncate">{pName || '(sin nombre)'}</span>
-                <span className="text-[10px] font-mono text-gold-400 font-bold">${pkg.price.toLocaleString()}</span>
-                {pkg.featured && (
-                  <span className="text-[8px] font-mono text-gold-400 border border-gold-500/30 bg-gold-500/10 px-1.5 py-0.5 rounded uppercase">Featured</span>
-                )}
+            <div key={cat.id} className="space-y-2">
+              <div className="flex items-center space-x-2 border-b border-white/5 pb-2 mb-2">
+                <span className="text-[10px] font-mono text-gold-400 uppercase tracking-widest font-semibold">
+                  {lang === 'es' ? cat.name_es : cat.name_en}
+                </span>
+                <span className="text-[9px] font-mono text-white/30">({catPkgs.length})</span>
               </div>
-              <div className="flex items-center space-x-1.5 shrink-0">
-                <label className="flex items-center space-x-1 cursor-pointer">
-                  <input type="checkbox" checked={pkg.active} onChange={() => toggleActive(pkg.id)} className="accent-gold-500 w-3 h-3" />
-                  <span className="text-[8px] font-mono text-white/40">{t('ON', 'ON')}</span>
-                </label>
-                <button onClick={() => startEdit(pkg)} className="p-1.5 text-white/40 hover:text-gold-400 cursor-pointer transition-colors" title={t('Editar', 'Edit')}>
-                  <Edit3 size={12} />
-                </button>
-                <button onClick={() => removePackage(pkg.id)} className="p-1.5 text-white/40 hover:text-red-400 cursor-pointer transition-colors" title={t('Eliminar', 'Delete')}>
-                  <Trash2 size={12} />
-                </button>
-              </div>
+              {catPkgs.map((pkg) => {
+                const pName = lang === 'es' ? pkg.name_es : pkg.name_en;
+                return (
+                  <div key={pkg.id} className={`flex items-center justify-between p-3 rounded-xl border transition-all ${pkg.active ? 'border-[#D8C0A8] bg-dark-gray' : 'border-[#D8C0A8]/30 bg-dark-gray opacity-60'}`}>
+                    <div className="flex items-center space-x-3 flex-1 min-w-0">
+                      <span className="text-[10px] font-mono text-white/30 w-6 text-right">{pkg.sortOrder}</span>
+                      {pkg.image && (
+                        <div className="w-8 h-8 rounded overflow-hidden shrink-0 bg-charcoal border border-white/5">
+                          <img src={pkg.image} alt="" className="w-full h-full object-cover" />
+                        </div>
+                      )}
+                      <span className="text-sm font-serif text-white truncate">{pName || '(sin nombre)'}</span>
+                      <span className="text-[10px] font-mono text-gold-400 font-bold">${pkg.price.toLocaleString()}</span>
+                      {pkg.featured && (
+                        <span className="text-[8px] font-mono text-gold-400 border border-gold-500/30 bg-gold-500/10 px-1.5 py-0.5 rounded uppercase">Featured</span>
+                      )}
+                    </div>
+                    <div className="flex items-center space-x-1.5 shrink-0">
+                      <label className="flex items-center space-x-1 cursor-pointer">
+                        <input type="checkbox" checked={pkg.active} onChange={() => toggleActive(pkg.id)} className="accent-gold-500 w-3 h-3" />
+                        <span className="text-[8px] font-mono text-white/40">{t('ON', 'ON')}</span>
+                      </label>
+                      <label className="p-1.5 text-white/40 hover:text-gold-400 cursor-pointer transition-colors" title={t('Subir imagen', 'Upload image')}>
+                        <Upload size={12} />
+                        <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          const reader = new FileReader();
+                          reader.onload = (ev) => {
+                            const dataUrl = ev.target?.result as string;
+                            setLocalPackages(prev => prev.map(p => p.id === pkg.id ? { ...p, image: dataUrl } : p));
+                          };
+                          reader.readAsDataURL(file);
+                          e.target.value = '';
+                        }} />
+                      </label>
+                      <button onClick={() => startEdit(pkg)} className="p-1.5 text-white/40 hover:text-gold-400 cursor-pointer transition-colors" title={t('Editar', 'Edit')}>
+                        <Edit3 size={12} />
+                      </button>
+                      <button onClick={() => removePackage(pkg.id)} className="p-1.5 text-white/40 hover:text-red-400 cursor-pointer transition-colors" title={t('Eliminar', 'Delete')}>
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           );
         })}
+
+        {/* Uncategorized packages */}
+        {uncategorized.length > 0 && (
+          <div className="space-y-2">
+            <div className="flex items-center space-x-2 border-b border-white/5 pb-2 mb-2">
+              <span className="text-[10px] font-mono text-white/30 uppercase tracking-widest">
+                {t('Sin categoría', 'Uncategorized')}
+              </span>
+            </div>
+            {uncategorized.map((pkg) => (
+              <div key={pkg.id} className={`flex items-center justify-between p-3 rounded-xl border transition-all ${pkg.active ? 'border-[#D8C0A8] bg-dark-gray' : 'border-[#D8C0A8]/30 bg-dark-gray opacity-60'}`}>
+                <div className="flex items-center space-x-3 flex-1 min-w-0">
+                  <span className="text-sm font-serif text-white truncate">{pkg.name_es || pkg.name_en || '(sin nombre)'}</span>
+                  <span className="text-[10px] font-mono text-gold-400 font-bold">${pkg.price.toLocaleString()}</span>
+                </div>
+                <div className="flex items-center space-x-1.5 shrink-0">
+                  <button onClick={() => startEdit(pkg)} className="p-1.5 text-white/40 hover:text-gold-400 cursor-pointer transition-colors" title={t('Editar', 'Edit')}>
+                    <Edit3 size={12} />
+                  </button>
+                  <button onClick={() => removePackage(pkg.id)} className="p-1.5 text-white/40 hover:text-red-400 cursor-pointer transition-colors" title={t('Eliminar', 'Delete')}>
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {grouped.every(g => g.packages.length === 0) && uncategorized.length === 0 && (
+          <div className="text-center py-12 text-white/40 text-xs">
+            {t('No hay paquetes todavía. Crea uno nuevo.', 'No packages yet. Create a new one.')}
+          </div>
+        )}
       </div>
     </div>
   );

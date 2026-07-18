@@ -9,7 +9,8 @@ import {
    Heart, ArrowRight, MessageSquare, MapPin, 
    Mail, Phone, ShieldCheck, Sparkles, AlertCircle, ChevronDown,
    Eye, EyeOff, X, Camera, Users, Calendar, PartyPopper, 
-   CheckCircle2, ShoppingBag, Star, Baby, GraduationCap, Gift, Briefcase
+   CheckCircle2, ShoppingBag, Star, Baby, GraduationCap, Gift, Briefcase,
+   Gem, Utensils, Package
 } from 'lucide-react';
 
 import { 
@@ -17,9 +18,9 @@ import {
   INITIAL_BLOG_POSTS, INITIAL_FAQS, INITIAL_BOOKINGS, 
   INITIAL_MESSAGES, INITIAL_SEO, INITIAL_ANALYTICS, TRANSLATIONS,
   INITIAL_PROFILE, INITIAL_BOOKING_CONFIG, INITIAL_EMAIL_CONFIG,
-   INITIAL_CLIENT_ACCOUNTS, INITIAL_PHOTOGRAPHY_PACKAGES
+   INITIAL_CLIENT_ACCOUNTS, INITIAL_PHOTOGRAPHY_PACKAGES, INITIAL_SESSION_CATEGORIES
 } from './data/mockData';
-import { Photograph, Service, Testimonial, BlogPost, FAQ, Booking, Message, SEOMetadata, PhotographerProfile, BookingConfig, EmailConfig, ClientAccount, AnalyticsStats, PhotographyPackage } from './types';
+import { Photograph, Service, Testimonial, BlogPost, FAQ, Booking, Message, SEOMetadata, PhotographerProfile, BookingConfig, EmailConfig, ClientAccount, AnalyticsStats, SessionCategory, PhotographyPackage } from './types';
 
 import CustomCursor from './components/CustomCursor';
 import Lightbox from './components/Lightbox';
@@ -86,13 +87,11 @@ export const getHeroScaleClass = (scale?: number) => {
 
 function getPhotoTitle(photo: Photograph, lang: string) {
   if (lang === 'es') return photo.title_es || photo.title;
-  if (lang === 'pt') return photo.title_pt || photo.title;
   return photo.title;
 }
 
 function getPhotoDescription(photo: Photograph, lang: string) {
   if (lang === 'es') return photo.description_es || photo.description;
-  if (lang === 'pt') return photo.description_pt || photo.description;
   return photo.description;
 }
 
@@ -127,7 +126,7 @@ function CountUp({ end, suffix = '', duration = 2000, delay = 0 }: { end: number
 export default function App() {
   // Navigation & Language Context
   const [currentView, setCurrentView] = useState<string>('home');
-  const [lang, setLang] = useState<'es' | 'en' | 'pt'>('es');
+  const [lang, setLang] = useState<'es' | 'en'>('es');
 
   const [photographs, setPhotographs] = useState<Photograph[]>(() => {
     try { const saved = localStorage.getItem('aurea_photos'); return saved ? JSON.parse(saved) : INITIAL_PHOTOGRAPHS; } catch { return INITIAL_PHOTOGRAPHS; }
@@ -173,6 +172,10 @@ export default function App() {
     try { const saved = localStorage.getItem('aurea_email_config'); return saved ? JSON.parse(saved) : INITIAL_EMAIL_CONFIG; } catch { return INITIAL_EMAIL_CONFIG; }
   });
 
+  const [sessionCategories, setSessionCategories] = useState<SessionCategory[]>(() => {
+    try { const saved = localStorage.getItem('aurea_session_categories'); return saved ? JSON.parse(saved) : INITIAL_SESSION_CATEGORIES; } catch { return INITIAL_SESSION_CATEGORIES; }
+  });
+
   const [packages, setPackages] = useState<PhotographyPackage[]>(() => {
     try { const saved = localStorage.getItem('aurea_packages'); return saved ? JSON.parse(saved) : INITIAL_PHOTOGRAPHY_PACKAGES; } catch { return INITIAL_PHOTOGRAPHY_PACKAGES; }
   });
@@ -188,6 +191,7 @@ export default function App() {
     try { const saved = localStorage.getItem('aurea_favorites'); return saved ? JSON.parse(saved) : []; } catch { return []; }
   });
 
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
   const [activeBlogModal, setActiveBlogModal] = useState<BlogPost | null>(null);
   const [activeFaqId, setActiveFaqId] = useState<string | null>(null);
@@ -418,6 +422,12 @@ export default function App() {
     await syncCollection('photography_packages', packages, newPackages);
   };
 
+  const handleUpdateSessionCategories = async (newCategories: SessionCategory[]) => {
+    setSessionCategories(newCategories);
+    localStorage.setItem('aurea_session_categories', JSON.stringify(newCategories));
+    await syncCollection('session_categories', sessionCategories, newCategories);
+  };
+
   // Sync to LocalStorage whenever DB collections update (for offline-fallback cache layer)
   useEffect(() => {
     localStorage.setItem('aurea_photos', JSON.stringify(photographs));
@@ -462,6 +472,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('aurea_email_config', JSON.stringify(emailConfig));
   }, [emailConfig]);
+
+  useEffect(() => {
+    localStorage.setItem('aurea_session_categories', JSON.stringify(sessionCategories));
+  }, [sessionCategories]);
 
   useEffect(() => {
     localStorage.setItem('aurea_packages', JSON.stringify(packages));
@@ -692,7 +706,15 @@ export default function App() {
     { value: 'producto', label: t.producto },
     { value: 'viajes', label: t.viajes },
     { value: 'evento', label: t.evento },
-    { value: 'naturaleza', label: t.naturaleza }
+    { value: 'naturaleza', label: t.naturaleza },
+    { value: 'compromiso', label: t.compromiso },
+    { value: 'familia', label: t.familia },
+    { value: 'infantil', label: t.infantil },
+    { value: 'maternidad', label: t.maternidad },
+    { value: 'cumpleanos', label: t.cumpleanos },
+    { value: 'graduacion', label: t.graduacion },
+    { value: 'corporativo', label: t.corporativo },
+    { value: 'gastronomia', label: t.gastronomia }
   ];
 
   // Filtered photograph collection
@@ -1173,6 +1195,7 @@ export default function App() {
           {/* ======================================================= */}
           {currentView === 'services' && (
             <div className="space-y-24">
+              {/* Header */}
               <motion.section
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -1184,91 +1207,214 @@ export default function App() {
                 <p className="text-xs text-white/55 leading-relaxed">{t.servicesSubtitle}</p>
               </motion.section>
 
-              {/* Photography Package Cards */}
-              <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {packages.filter(p => p.active).sort((a, b) => a.sortOrder - b.sortOrder).map((pkg, idx) => {
-                  const pName = lang === 'es' ? pkg.name_es : lang === 'pt' ? pkg.name_pt : pkg.name_en;
-                  const pDesc = lang === 'es' ? pkg.description_es : lang === 'pt' ? pkg.description_pt : pkg.description_en;
-                  const pDuration = lang === 'es' ? pkg.duration_es : lang === 'pt' ? pkg.duration_pt : pkg.duration_en;
-                  const pPriceFrom = lang === 'es' ? pkg.priceFromText_es : lang === 'pt' ? pkg.priceFromText_pt : pkg.priceFromText_en;
-                  const pButton = lang === 'es' ? pkg.buttonText_es : lang === 'pt' ? pkg.buttonText_pt : pkg.buttonText_en;
+              {/* Step 1: Category Grid OR Step 2: Packages by Category */}
+              <AnimatePresence mode="wait">
+                {selectedCategory === null ? (
+                  /* ─── STEP 1: SESSION CATEGORY GRID ─── */
+                  <motion.section
+                    key="category-grid"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.4, ease: 'easeOut' }}
+                    className="space-y-6"
+                  >
+                    <div className="text-center space-y-2 mb-2">
+                      <span className="text-[9px] font-mono text-white/40 tracking-widest uppercase block">{t.categorySectionTitle}</span>
+                      <p className="text-xs text-white/50">{t.categorySectionSubtitle}</p>
+                    </div>
 
-                  const iconMap: Record<string, React.ReactNode> = {
-                    Heart: <Heart size={28} className="text-gold-400" />,
-                    Camera: <Camera size={28} className="text-gold-400" />,
-                    Users: <Users size={28} className="text-gold-400" />,
-                    Calendar: <Calendar size={28} className="text-gold-400" />,
-                    PartyPopper: <PartyPopper size={28} className="text-gold-400" />,
-                    ShoppingBag: <ShoppingBag size={28} className="text-gold-400" />,
-                    Star: <Star size={28} className="text-gold-400" />,
-                    Baby: <Baby size={28} className="text-gold-400" />,
-                    GraduationCap: <GraduationCap size={28} className="text-gold-400" />,
-                    Gift: <Gift size={28} className="text-gold-400" />,
-                    Briefcase: <Briefcase size={28} className="text-gold-400" />,
-                  };
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                      {sessionCategories.filter(c => c.active).sort((a, b) => a.sortOrder - b.sortOrder).map((cat, idx) => {
+                        const cName = lang === 'es' ? cat.name_es : cat.name_en;
+                        const cDesc = lang === 'es' ? cat.description_es : cat.description_en;
 
-                  return (
-                    <motion.div
-                      key={pkg.id}
-                      initial={{ opacity: 0, y: 40 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true, margin: "-50px" }}
-                      transition={{ duration: 0.5, delay: idx * 0.08 }}
-                      className={`group bg-dark-gray border border-white/5 rounded-2xl p-6 md:p-7 flex flex-col justify-between space-y-5 text-left transition-all duration-300 hover:-translate-y-1 hover:border-gold-500/40 ${pkg.featured ? 'ring-1 ring-gold-500/30' : ''}`}
-                    >
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <div className="w-12 h-12 rounded-xl bg-gold-500/10 border border-gold-500/20 flex items-center justify-center">
-                            {iconMap[pkg.icon] || <Camera size={28} className="text-gold-400" />}
-                          </div>
-                          {pkg.featured && (
-                            <span className="text-[8px] font-mono text-gold-400 border border-gold-500/30 bg-gold-500/10 px-2 py-0.5 rounded-full uppercase tracking-widest">Featured</span>
-                          )}
-                        </div>
+                        const categoryIconMap: Record<string, React.ReactNode> = {
+                          Heart: <Heart size={22} className="text-white" />,
+                          Gem: <Gem size={22} className="text-white" />,
+                          Camera: <Camera size={22} className="text-white" />,
+                          Users: <Users size={22} className="text-white" />,
+                          Baby: <Baby size={22} className="text-white" />,
+                          Sparkles: <Sparkles size={22} className="text-white" />,
+                          PartyPopper: <PartyPopper size={22} className="text-white" />,
+                          GraduationCap: <GraduationCap size={22} className="text-white" />,
+                          Briefcase: <Briefcase size={22} className="text-white" />,
+                          Utensils: <Utensils size={22} className="text-white" />,
+                          Package: <Package size={22} className="text-white" />,
+                          Calendar: <Calendar size={22} className="text-white" />,
+                        };
 
-                        <div className="space-y-1.5">
-                          <h3 className="font-serif text-xl text-white font-medium">{pName}</h3>
-                          <div className="flex items-baseline justify-between">
-                            <span className="text-[10px] font-mono text-white/45">{pDuration}</span>
-                            <div className="text-right font-mono">
-                              <span className="text-[8px] text-white/35 block">{pPriceFrom}</span>
-                              <span className="text-xl font-bold text-gold-400">${pkg.price.toLocaleString()}</span>
+                        const activePkgCount = packages.filter(p => p.category === cat.id && p.active).length;
+
+                        return (
+                          <motion.button
+                            key={cat.id}
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true, margin: "-30px" }}
+                            transition={{ duration: 0.4, delay: idx * 0.05 }}
+                            onClick={() => setSelectedCategory(cat.id)}
+                            className="group relative overflow-hidden rounded-2xl aspect-[4/5] text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
+                          >
+                            {/* Background image */}
+                            <div className="absolute inset-0">
+                              <img
+                                src={cat.image}
+                                alt={cName}
+                                className="w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-105"
+                              />
                             </div>
+
+                            {/* Overlay fade at top, solid panel at bottom */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+
+                            {/* Content with solid dark base */}
+                            <div className="absolute bottom-0 left-0 right-0 p-5 space-y-2.5 z-10 bg-black/70 backdrop-blur-sm rounded-b-2xl">
+                              <div className="w-10 h-10 rounded-xl bg-white/15 backdrop-blur-sm border border-white/30 flex items-center justify-center transition-transform duration-500 group-hover:scale-110 group-hover:bg-gold-500/30 group-hover:border-gold-400/50">
+                                {categoryIconMap[cat.icon] || <Camera size={22} className="text-white" />}
+                              </div>
+                              <div>
+                                <h3 className="font-serif text-lg text-white font-medium leading-tight">{cName}</h3>
+                                <p className="text-[10px] text-white/90 leading-relaxed mt-0.5 line-clamp-2">{cDesc}</p>
+                              </div>
+                              <div className="flex items-center space-x-1.5 text-[9px] font-mono text-white/70 uppercase tracking-wider">
+                                <span>{activePkgCount} {lang === 'es' ? 'paquetes' : 'packages'}</span>
+                                <ArrowRight size={9} className="transition-transform duration-300 group-hover:translate-x-0.5" />
+                              </div>
+                            </div>
+                          </motion.button>
+                        );
+                      })}
+                    </div>
+                  </motion.section>
+                ) : (
+                  /* ─── STEP 2: PACKAGES FOR SELECTED CATEGORY ─── */
+                  <motion.section
+                    key={selectedCategory}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.4, ease: 'easeOut' }}
+                    className="space-y-8"
+                  >
+                    {/* Back button */}
+                    <button
+                      onClick={() => {
+                        setSelectedCategory(null);
+                        setSelectedPackageId(null);
+                      }}
+                      className="inline-flex items-center space-x-1.5 text-[10px] font-mono text-gold-400 hover:text-gold-300 uppercase tracking-widest transition-colors cursor-pointer"
+                    >
+                      <ArrowRight size={10} className="rotate-180" />
+                      <span>{t.backToCategories}</span>
+                    </button>
+
+                    {/* Category info */}
+                    {(() => {
+                      const cat = sessionCategories.find(c => c.id === selectedCategory);
+                      if (!cat) return null;
+                      const cName = lang === 'es' ? cat.name_es : cat.name_en;
+                      const cDesc = lang === 'es' ? cat.description_es : cat.description_en;
+                      const categoryPkgs = packages
+                        .filter(p => p.category === selectedCategory && p.active)
+                        .sort((a, b) => a.sortOrder - b.sortOrder);
+
+                      return (
+                        <div className="space-y-6">
+                          <div className="text-center space-y-2">
+                            <h3 className="font-serif text-2xl md:text-3xl text-white">{cName}</h3>
+                            <p className="text-xs text-white/55 max-w-lg mx-auto">{cDesc}</p>
+                          </div>
+
+                          {/* Package cards grid */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {categoryPkgs.map((pkg, idx) => {
+                              const pName = lang === 'es' ? pkg.name_es : pkg.name_en;
+                              const pDesc = lang === 'es' ? pkg.description_es : pkg.description_en;
+                              const pDuration = lang === 'es' ? pkg.duration_es : pkg.duration_en;
+                              const pPriceFrom = lang === 'es' ? pkg.priceFromText_es : pkg.priceFromText_en;
+                              const pButton = lang === 'es' ? pkg.buttonText_es : pkg.buttonText_en;
+
+                              return (
+                                <motion.div
+                                  key={pkg.id}
+                                  initial={{ opacity: 0, y: 30 }}
+                                  whileInView={{ opacity: 1, y: 0 }}
+                                  viewport={{ once: true, margin: "-40px" }}
+                                  transition={{ duration: 0.4, delay: idx * 0.08 }}
+                                  className={`group bg-dark-gray border rounded-2xl p-6 md:p-7 flex flex-col justify-between space-y-5 text-left transition-all duration-300 hover:-translate-y-1 ${
+                                    pkg.featured
+                                      ? 'border-gold-500/40 ring-1 ring-gold-500/30 shadow-lg shadow-gold-500/5'
+                                      : 'border-white/5 hover:border-white/20'
+                                  }`}
+                                >
+                                  <div className="space-y-4">
+                                    {pkg.image && (
+                                      <div className="rounded-xl overflow-hidden -mx-1 -mt-1">
+                                        <img src={pkg.image} alt={pName} className="w-full h-36 object-cover" />
+                                      </div>
+                                    )}
+                                    {/* Featured badge */}
+                                    {pkg.featured && (
+                                      <div className="flex items-center justify-between mb-1">
+                                        <span className="text-[8px] font-mono text-gold-400 border border-gold-500/30 bg-gold-500/10 px-2 py-0.5 rounded-full uppercase tracking-widest">
+                                          {t.recommended}
+                                        </span>
+                                        <span className="text-[8px] font-mono text-white/20 uppercase tracking-widest">{pName}</span>
+                                      </div>
+                                    )}
+
+                                    <div className="space-y-1.5">
+                                      {!pkg.featured && (
+                                        <h3 className="font-serif text-xl text-white font-medium">{pName}</h3>
+                                      )}
+                                      <div className="flex items-baseline justify-between">
+                                        <span className="text-[10px] font-mono text-white/45">{pDuration}</span>
+                                        <div className="text-right font-mono">
+                                          <span className="text-[8px] text-white/35 block">{pPriceFrom}</span>
+                                          <span className="text-xl font-bold text-gold-400">${pkg.price.toLocaleString()}</span>
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    <p className="text-xs text-white/60 leading-relaxed font-sans">{pDesc}</p>
+
+                                    <div className="space-y-2.5">
+                                      <h5 className="text-[9px] font-mono tracking-widest text-white/40 uppercase font-bold">{t.includesLabel}:</h5>
+                                      <ul className="space-y-2">
+                                        {(lang === 'es' ? (pkg.benefits_es || pkg.benefits) : (pkg.benefits_en || pkg.benefits)).map((benefit, i) => (
+                                          <li key={i} className="flex items-start space-x-2.5 text-xs text-white/70">
+                                            <CheckCircle2 size={12} className="text-gold-400 mt-0.5 shrink-0" />
+                                            <span>{benefit}</span>
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  </div>
+
+                                  <button
+                                    onClick={() => {
+                                      setSelectedPackageId(pkg.id);
+                                      const targetCalendar = document.getElementById('booking-calendar');
+                                      if (targetCalendar) {
+                                        targetCalendar.scrollIntoView({ behavior: 'smooth' });
+                                      }
+                                    }}
+                                    className="w-full py-3 bg-white hover:bg-gold-400 text-dark font-mono text-[10px] tracking-widest uppercase font-bold rounded-lg transition-all duration-300 flex items-center justify-center space-x-1.5 cursor-pointer group/btn"
+                                  >
+                                    <span>{pButton}</span>
+                                    <ArrowRight size={10} className="transition-transform duration-300 group-hover/btn:translate-x-0.5" />
+                                  </button>
+                                </motion.div>
+                              );
+                            })}
                           </div>
                         </div>
-
-                        <p className="text-xs text-white/60 leading-relaxed font-sans">{pDesc}</p>
-
-                        <div className="space-y-2.5">
-                          <h5 className="text-[9px] font-mono tracking-widest text-white/40 uppercase font-bold">{t.includesLabel}:</h5>
-                          <ul className="space-y-2">
-                            {pkg.benefits.map((benefit, i) => (
-                              <li key={i} className="flex items-start space-x-2.5 text-xs text-white/70">
-                                <CheckCircle2 size={12} className="text-gold-400 mt-0.5 shrink-0" />
-                                <span>{benefit}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-
-                      <button
-                        onClick={() => {
-                          setSelectedPackageId(pkg.id);
-                          const targetCalendar = document.getElementById('booking-calendar');
-                          if (targetCalendar) {
-                            targetCalendar.scrollIntoView({ behavior: 'smooth' });
-                          }
-                        }}
-                        className="w-full py-3 bg-white hover:bg-gold-400 text-dark font-mono text-[10px] tracking-widest uppercase font-bold rounded-lg transition-all duration-300 flex items-center justify-center space-x-1.5 cursor-pointer group/btn"
-                      >
-                        <span>{pButton}</span>
-                        <ArrowRight size={10} className="transition-transform duration-300 group-hover/btn:translate-x-0.5" />
-                      </button>
-                    </motion.div>
-                  );
-                })}
-              </section>
+                      );
+                    })()}
+                  </motion.section>
+                )}
+              </AnimatePresence>
 
               {/* Inline interactive Booking Calendar module */}
               <section id="booking-calendar" className="pt-12 border-t border-white/5 space-y-8">
@@ -1283,6 +1429,7 @@ export default function App() {
                   config={bookingConfig}
                   emailConfig={emailConfig}
                   preSelectedPackage={selectedPackageId ? packages.find(p => p.id === selectedPackageId) ?? null : null}
+                  onClearPackage={() => setSelectedPackageId(null)}
                   onAddBooking={(newBook) => {
                     setSelectedPackageId(null);
                     const savedBook: Booking = {
@@ -1327,8 +1474,8 @@ export default function App() {
               <section className="space-y-3">
                 {faqs.map(faq => {
                   const isOpen = activeFaqId === faq.id;
-                  const fQuestion = lang === 'es' ? (faq.question_es || faq.question) : lang === 'pt' ? (faq.question_pt || faq.question) : (faq.question_en || faq.question);
-                  const fAnswer = lang === 'es' ? (faq.answer_es || faq.answer) : lang === 'pt' ? (faq.answer_pt || faq.answer) : (faq.answer_en || faq.answer);
+                  const fQuestion = lang === 'es' ? (faq.question_es || faq.question) : (faq.question_en || faq.question);
+                  const fAnswer = lang === 'es' ? (faq.answer_es || faq.answer) : (faq.answer_en || faq.answer);
 
                   return (
                     <div 
@@ -1526,7 +1673,6 @@ export default function App() {
               stats={seoAnalytics}
               lang={lang}
               onUpdatePhotographs={handleUpdatePhotographs}
-              onUpdateServices={handleUpdateServices}
               onUpdateTestimonials={handleUpdateTestimonials}
               onUpdateBlogPosts={handleUpdateBlogPosts}
               onUpdateFaqs={handleUpdateFaqs}
@@ -1537,6 +1683,8 @@ export default function App() {
               onUpdateProfile={handleUpdateProfile}
               onUpdateBookingConfig={handleUpdateBookingConfig}
               onUpdateEmailConfig={handleUpdateEmailConfig}
+              sessionCategories={sessionCategories}
+              onUpdateSessionCategories={handleUpdateSessionCategories}
               packages={packages}
               onUpdatePackages={handleUpdatePackages}
               onLogout={handleAdminLogout}

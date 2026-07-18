@@ -28,6 +28,7 @@ interface BookingCalendarProps {
   config?: BookingConfig;
   emailConfig?: EmailConfig;
   preSelectedPackage?: PhotographyPackage | null;
+  onClearPackage?: () => void;
   onAddBooking: (booking: Omit<Booking, 'id' | 'status' | 'createdAt'>) => void;
 }
 
@@ -96,41 +97,9 @@ const LOCAL_TRANSLATIONS = {
     makeupLabel: 'Professional Makeup & Styling',
     makeupSub: 'On-set luxury stylist and professional editorial cosmetics'
   },
-  pt: {
-    title: 'DESENHE SUA SESSÃO FOTOGRÁFICA',
-    subtitle: 'Responda a este breve questionário e enviaremos uma proposta artística adaptada aos seus desejos.',
-    step1: '1. Que tipo de sessão ou pacote você gostaria?',
-    step2: '2. Que dia você gostaria de agendar?',
-    step3: '3. Em qual horário prefere a sessão?',
-    step4: '4. Seus dados de contato',
-    customProject: 'Sessão Personalizada / Outro projeto',
-    customProjectPlaceholder: 'Descreva brevemente o tipo de sessão que deseja realizar (ex: editorial de moda, marca pessoal, casamento)...',
-    dateLabel: 'Selecione a data pretendida',
-    scheduleLabel: 'Horário de preferência',
-    morning: 'Manhã (08:00 - 12:00)',
-    afternoon: 'Tarde (12:00 - 17:00)',
-    goldenHour: 'Entardecer / Golden Hour (17:00 - 19:30) - Recomendado ✨',
-    otherSchedule: 'Outro horário (especificar abaixo)',
-    otherSchedulePlaceholder: 'Ex: 11:30 AM ou sessão noturna...',
-    customScheduleLabel: 'Especifique seu horário preferido',
-    successTitle: 'Questionário Enviado!',
-    successDesc: 'Recebemos suas preferências com sucesso. Em breve Miriam entrará em contato para coordenar o design final e o orçamento da sua sessão.',
-    submit: 'Enviar Questionário Criativo',
-    submitting: 'PROCESSANDO SUA PROPOSTA...',
-    backToGallery: 'Agendar Outra Sessão',
-    peopleLabel: 'Quantidade de Pessoas',
-    notesLabel: 'Ideias, Localização ou Notas Criativas',
-    extrasTitle: 'Serviços e Adições Exclusivas',
-    droneLabel: 'Cinematografia com Drone 4K',
-    droneSub: 'Tomadas aéreas artísticas e mapeamento de paisagens',
-    expressLabel: 'Entrega Express (48 Horas)',
-    expressSub: 'Prioridade na curadoria e revelação digital de alta costura',
-    makeupLabel: 'Maquiagem & Estilo de Luxo',
-    makeupSub: 'Assistente de maquiagem editorial profissional no set'
-  }
 };
 
-export default function BookingCalendar({ services, lang, config, emailConfig, preSelectedPackage, onAddBooking }: BookingCalendarProps) {
+export default function BookingCalendar({ services, lang, config, emailConfig, preSelectedPackage, onClearPackage, onAddBooking }: BookingCalendarProps) {
   const t = LOCAL_TRANSLATIONS[lang] || LOCAL_TRANSLATIONS.es;
 
   // Form State
@@ -156,7 +125,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
 
   // Pricing Calculation
   const selectedService = services.find(s => s.id === selectedServiceId);
-  const basePrice = selectedService ? selectedService.price : 0;
+  const basePrice = preSelectedPackage ? preSelectedPackage.price : (selectedService ? selectedService.price : 0);
   const totalPrice = basePrice;
 
   // Handle Date Selection Input
@@ -179,7 +148,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
     const safeCustomService = sanitizeString(customServiceText);
     const safeCustomTime = sanitizeString(customTimeframeText);
 
-    if (!safeName || !safeEmail || !dateValue) return;
+    if (!safeName || !safeEmail || !safePhone || !dateValue) return;
 
     setIsSyncing(true);
 
@@ -189,18 +158,16 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
     else if (selectedTimeframe === 'goldenHour') finalSchedule = t.goldenHour;
     else finalSchedule = safeCustomTime ? `Personalizado: ${safeCustomTime}` : t.otherSchedule;
 
-    const serviceName = selectedServiceId === 'custom' 
-      ? `Personalizado (${safeCustomService || 'General'})` 
-      : (selectedService?.title || 'Sesión Fotográfica');
+    const serviceName = preSelectedPackage
+      ? (lang === 'es' ? preSelectedPackage.name_es : preSelectedPackage.name_en)
+      : selectedServiceId === 'custom' 
+        ? `Personalizado (${safeCustomService || 'General'})` 
+        : (selectedService?.title || 'Sesión Fotográfica');
 
     const formattedDate = dateValue;
-    const packageLine = preSelectedPackage
-      ? `\n- Paquete destacado: ${lang === 'es' ? preSelectedPackage.name_es : lang === 'pt' ? preSelectedPackage.name_pt : preSelectedPackage.name_en}`
-      : '';
     const notesText = safeNotes + 
            `\n\n[Respuestas del Cuestionario Creativo]` +
            `\n- Paquete elegido: ${serviceName}` +
-           packageLine +
            `\n- Fecha solicitada: ${formattedDate}` +
            `\n- Horario preferido: ${finalSchedule}`;
 
@@ -290,114 +257,157 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
 
             <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
               
-              {/* QUESTION 1: CHOOSE PACKAGE / SESSION TYPE */}
-              <div className="space-y-3">
-                <label className="block text-xs font-mono tracking-widest text-gold-300 uppercase">
-                  {t.step1}
-                </label>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                  {services.map((service) => {
-                    const isSelected = selectedServiceId === service.id;
-                    return (
-                      <button
-                        key={service.id}
-                        type="button"
-                        onClick={() => setSelectedServiceId(service.id)}
-                        className={`text-left p-4 rounded-xl border transition-all duration-300 relative group flex flex-col justify-between h-36 ${
-                          isSelected 
-                            ? 'bg-gold-500/10 border-gold-400 text-white shadow-lg' 
-                            : 'bg-dark/40 border-white/5 text-white/70 hover:border-white/20'
-                        }`}
-                      >
-                        <div className="space-y-1">
-                          <div className="flex items-center justify-between">
-                            <span className="text-[10px] font-mono tracking-wider text-gold-400 uppercase font-semibold">
-                              {service.duration || 'Colección'}
-                            </span>
-                            {isSelected ? (
-                              <CheckCircle2 size={14} className="text-gold-400 shrink-0" />
-                            ) : (
-                              <Camera size={14} className="text-white/20 group-hover:text-white/40 transition-colors shrink-0" />
-                            )}
+              {/* QUESTION 1: CHOOSE PACKAGE / SESSION TYPE — OR SHOW PRE-SELECTED */}
+              {!preSelectedPackage ? (
+                <div className="space-y-3">
+                  <label className="block text-xs font-mono tracking-widest text-gold-300 uppercase">
+                    {t.step1}
+                  </label>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                    {services.map((service) => {
+                      const isSelected = selectedServiceId === service.id;
+                      return (
+                        <button
+                          key={service.id}
+                          type="button"
+                          onClick={() => setSelectedServiceId(service.id)}
+                          className={`text-left p-4 rounded-xl border transition-all duration-300 relative group flex flex-col justify-between h-36 ${
+                            isSelected 
+                              ? 'bg-gold-500/10 border-gold-400 text-white shadow-lg' 
+                              : 'bg-dark/40 border-white/5 text-white/70 hover:border-white/20'
+                          }`}
+                        >
+                          <div className="space-y-1">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-mono tracking-wider text-gold-400 uppercase font-semibold">
+                                {service.duration || 'Colección'}
+                              </span>
+                              {isSelected ? (
+                                <CheckCircle2 size={14} className="text-gold-400 shrink-0" />
+                              ) : (
+                                <Camera size={14} className="text-white/20 group-hover:text-white/40 transition-colors shrink-0" />
+                              )}
+                            </div>
+                            <h4 className="text-xs font-semibold tracking-wide text-white group-hover:text-gold-100 transition-colors mt-1 line-clamp-1">
+                              {service.title}
+                            </h4>
+                            <p className="text-[10px] text-white/40 leading-snug line-clamp-2 mt-0.5 font-sans">
+                              {service.description || 'Exclusive curated photographic session'}
+                            </p>
                           </div>
-                          <h4 className="text-xs font-semibold tracking-wide text-white group-hover:text-gold-100 transition-colors mt-1 line-clamp-1">
-                            {service.title}
-                          </h4>
-                          <p className="text-[10px] text-white/40 leading-snug line-clamp-2 mt-0.5 font-sans">
-                            {service.description || 'Exclusive curated photographic session'}
-                          </p>
-                        </div>
 
-                        <div className="pt-2 border-t border-white/5 mt-2 flex items-center justify-between">
-                          <span className="text-[9px] font-mono text-white/40 uppercase">Base Rate</span>
-                          <span className="text-xs font-mono font-bold text-gold-400">
-                            ${service.price.toLocaleString()}
+                          <div className="pt-2 border-t border-white/5 mt-2 flex items-center justify-between">
+                            <span className="text-[9px] font-mono text-white/40 uppercase">Base Rate</span>
+                            <span className="text-xs font-mono font-bold text-gold-400">
+                              ${service.price.toLocaleString()}
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })}
+
+                    {/* CUSTOM SESSION CARD */}
+                    <button
+                      type="button"
+                      onClick={() => setSelectedServiceId('custom')}
+                      className={`text-left p-4 rounded-xl border transition-all duration-300 relative group flex flex-col justify-between h-36 ${
+                        selectedServiceId === 'custom' 
+                          ? 'bg-gold-500/10 border-gold-400 text-white shadow-lg' 
+                          : 'bg-dark/40 border-white/5 text-white/70 hover:border-white/20'
+                      }`}
+                    >
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-mono tracking-wider text-gold-400 uppercase font-semibold">
+                            Custom Art
                           </span>
+                          {selectedServiceId === 'custom' ? (
+                            <CheckCircle2 size={14} className="text-gold-400 shrink-0" />
+                          ) : (
+                            <Sparkles size={14} className="text-white/20 group-hover:text-white/40 transition-colors shrink-0" />
+                          )}
                         </div>
-                      </button>
-                    );
-                  })}
-
-                  {/* CUSTOM SESSION CARD */}
-                  <button
-                    type="button"
-                    onClick={() => setSelectedServiceId('custom')}
-                    className={`text-left p-4 rounded-xl border transition-all duration-300 relative group flex flex-col justify-between h-36 ${
-                      selectedServiceId === 'custom' 
-                        ? 'bg-gold-500/10 border-gold-400 text-white shadow-lg' 
-                        : 'bg-dark/40 border-white/5 text-white/70 hover:border-white/20'
-                    }`}
-                  >
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-mono tracking-wider text-gold-400 uppercase font-semibold">
-                          Custom Art
-                        </span>
-                        {selectedServiceId === 'custom' ? (
-                          <CheckCircle2 size={14} className="text-gold-400 shrink-0" />
-                        ) : (
-                          <Sparkles size={14} className="text-white/20 group-hover:text-white/40 transition-colors shrink-0" />
-                        )}
+                        <h4 className="text-xs font-semibold tracking-wide text-white group-hover:text-gold-100 transition-colors mt-1">
+                          {t.customProject}
+                        </h4>
+                        <p className="text-[10px] text-white/40 leading-snug line-clamp-2 mt-0.5 font-sans">
+                          {lang === 'es' ? 'Cualquier otro proyecto editorial, de marca, moda o destino.' : 'Any other editorial, branding, fashion or destination project.'}
+                        </p>
                       </div>
-                      <h4 className="text-xs font-semibold tracking-wide text-white group-hover:text-gold-100 transition-colors mt-1">
-                        {t.customProject}
+
+                      <div className="pt-2 border-t border-white/5 mt-2 flex items-center justify-between">
+                        <span className="text-[9px] font-mono text-white/40 uppercase">Rate</span>
+                        <span className="text-xs font-mono font-bold text-gold-400 uppercase">
+                          Bespoke
+                        </span>
+                      </div>
+                    </button>
+                  </div>
+
+                  {/* Show details input if Custom Session is selected */}
+                  <AnimatePresence>
+                    {selectedServiceId === 'custom' && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden pt-1"
+                      >
+                        <textarea
+                          required
+                          rows={2}
+                          value={customServiceText}
+                          onChange={(e) => setCustomServiceText(e.target.value)}
+                          placeholder={t.customProjectPlaceholder}
+                          className="w-full bg-dark/60 border border-gold-400/20 rounded-lg p-3 text-xs text-white/90 placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans resize-none"
+                        />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ) : (
+                /* Pre-selected package card — replaces step 1 */
+                <div className="bg-gold-500/10 border border-gold-400/30 rounded-xl overflow-hidden">
+                  {/* Package image if available */}
+                  {preSelectedPackage.image && (
+                    <div className="w-full h-36 overflow-hidden">
+                      <img src={preSelectedPackage.image} alt={lang === 'es' ? preSelectedPackage.name_es : preSelectedPackage.name_en} className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                  <div className="p-5 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[9px] font-mono text-gold-400 uppercase tracking-widest font-semibold">{t.step1}</span>
+                      <CheckCircle2 size={16} className="text-gold-400 shrink-0" />
+                    </div>
+                    <div>
+                      <h4 className="font-serif text-lg text-white">
+                        {lang === 'es' ? preSelectedPackage.name_es : preSelectedPackage.name_en}
                       </h4>
-                      <p className="text-[10px] text-white/40 leading-snug line-clamp-2 mt-0.5 font-sans">
-                        {lang === 'es' ? 'Cualquier otro proyecto editorial, de marca, moda o destino.' : lang === 'pt' ? 'Qualquer outro projeto editorial, de marca, moda ou destino.' : 'Any other editorial, branding, fashion or destination project.'}
+                      <p className="text-[10px] text-white/60 leading-relaxed mt-0.5 line-clamp-2">
+                        {lang === 'es' ? preSelectedPackage.description_es : preSelectedPackage.description_en}
                       </p>
                     </div>
-
-                    <div className="pt-2 border-t border-white/5 mt-2 flex items-center justify-between">
-                      <span className="text-[9px] font-mono text-white/40 uppercase">Rate</span>
-                      <span className="text-xs font-mono font-bold text-gold-400 uppercase">
-                        Bespoke
+                    <div className="flex items-center justify-between pt-2 border-t border-white/10">
+                      <span className="text-[10px] font-mono text-white/45">
+                        {lang === 'es' ? preSelectedPackage.duration_es : preSelectedPackage.duration_en}
+                      </span>
+                      <span className="text-lg font-bold font-mono text-gold-400">
+                        ${preSelectedPackage.price.toLocaleString()}
                       </span>
                     </div>
-                  </button>
+                    {onClearPackage && (
+                      <button
+                        type="button"
+                        onClick={onClearPackage}
+                        className="w-full mt-2 py-2 border border-white/10 hover:border-white/30 rounded-lg text-[9px] font-mono text-white/50 hover:text-white uppercase tracking-widest transition-all cursor-pointer"
+                      >
+                        Cambiar paquete
+                      </button>
+                    )}
+                  </div>
                 </div>
-
-                {/* Show details input if Custom Session is selected */}
-                <AnimatePresence>
-                  {selectedServiceId === 'custom' && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="overflow-hidden pt-1"
-                    >
-                      <textarea
-                        required
-                        rows={2}
-                        value={customServiceText}
-                        onChange={(e) => setCustomServiceText(e.target.value)}
-                        placeholder={t.customProjectPlaceholder}
-                        className="w-full bg-dark/60 border border-gold-400/20 rounded-lg p-3 text-xs text-white/90 placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans resize-none"
-                      />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+              )}
 
               {/* TWO COLUMN ROW: DATE AND PREFERRED TIMEFRAME */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -509,19 +519,6 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
 
               </div>
 
-              {/* Pre-selected package banner */}
-              {preSelectedPackage && (
-                <div className="bg-gold-500/10 border border-gold-400/30 rounded-xl p-4 flex items-center space-x-3">
-                  <CheckCircle2 size={18} className="text-gold-400 shrink-0" />
-                  <div>
-                    <span className="text-[9px] font-mono text-gold-400 uppercase tracking-widest block">Paquete elegido</span>
-                    <span className="text-sm font-serif text-white">
-                      {lang === 'es' ? preSelectedPackage.name_es : lang === 'pt' ? preSelectedPackage.name_pt : preSelectedPackage.name_en}
-                    </span>
-                  </div>
-                </div>
-              )}
-
               {/* QUESTION 4: CONTACT DATA AND REGISTRATION FORM */}
               <div className="space-y-4 pt-2">
                 <label className="block text-xs font-mono tracking-widest text-gold-300 uppercase">
@@ -611,15 +608,22 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                 <div className="text-center sm:text-left">
                   <span className="text-[9px] font-mono text-white/40 uppercase tracking-wider block">Estudio de Presupuesto</span>
                   <span className="text-xs text-white/80 font-sans font-medium mt-0.5 block">
-                    {selectedServiceId === 'custom' 
-                      ? 'Se definirá un presupuesto a medida basado en tus requerimientos.' 
-                      : `Incluye el paquete seleccionado (${selectedService?.duration || '1-2 Horas'})`
+                    {preSelectedPackage
+                      ? `Paquete: ${lang === 'es' ? preSelectedPackage.name_es : preSelectedPackage.name_en}`
+                      : selectedServiceId === 'custom' 
+                        ? 'Se definirá un presupuesto a medida basado en tus requerimientos.' 
+                        : `Incluye el paquete seleccionado (${selectedService?.duration || '1-2 Horas'})`
                     }
                   </span>
                 </div>
                 
                 <div className="flex items-center space-x-1 font-mono text-xl font-bold text-gold-400">
-                  {selectedServiceId === 'custom' ? (
+                  {preSelectedPackage ? (
+                    <>
+                      <DollarSign size={18} className="-mr-1 text-gold-400" />
+                      <span>{totalPrice.toLocaleString()}</span>
+                    </>
+                  ) : selectedServiceId === 'custom' ? (
                     <span className="text-sm tracking-wider uppercase bg-gold-400/10 px-3 py-1 rounded border border-gold-400/20">Por Definir</span>
                   ) : (
                     <>

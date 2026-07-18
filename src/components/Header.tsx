@@ -55,7 +55,7 @@ export default function Header({
   const languages: { code: ActiveLanguage; name: string }[] = [
     { code: 'es', name: 'ESP' },
     { code: 'en', name: 'ENG' },
-    { code: 'pt', name: 'POR' }
+
   ];
 
   const drawerX = useMotionValue(0);

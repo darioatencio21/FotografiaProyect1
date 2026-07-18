@@ -215,7 +215,7 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
             <div className="flex flex-col md:flex-row md:items-end md:justify-between border-b border-[#D8C0A8] pb-6 gap-4 text-left">
               <div>
                 <span className="text-[10px] font-mono text-gold-400 tracking-widest uppercase">
-                  {lang === 'en' ? 'Client Proof Session' : (lang === 'pt' ? 'Sessão de Provas de Cliente' : 'Sesión de Pruebas de Cliente')}
+                  {lang === 'en' ? 'Client Proof Session' : 'Sesión de Pruebas de Cliente'}
                 </span>
                 <h3 className="font-serif text-3xl text-white font-semibold mt-1">
                   {currentAccount ? currentAccount.clientName : 'Cliente Verificado'}

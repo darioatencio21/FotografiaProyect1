@@ -10,7 +10,7 @@ interface Props {
 }
 
 function getMilestone(m: (typeof MILESTONES)[number], lang: ActiveLanguage) {
-  const key = lang === 'es' ? 'es' : lang === 'pt' ? 'pt' : 'en';
+  const key = lang === 'es' ? 'es' : 'en';
   return {
     title: m[`title_${key}` as keyof typeof m] as string,
     description: m[`description_${key}` as keyof typeof m] as string,
@@ -23,7 +23,7 @@ function getText(
   t: Record<string, string>,
   field: 'aboutTitle' | 'aboutText1' | 'aboutText2'
 ) {
-  const key = lang === 'es' ? 'es' : lang === 'pt' ? 'pt' : 'en';
+  const key = lang === 'es' ? 'es' : 'en';
   const profileField = `${field}_${key}` as keyof PhotographerProfile;
   return (profile[profileField] as string) || t[field] || '';
 }

@@ -7,17 +7,17 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   BarChart3, Camera, Calendar, BookOpen, MessageSquare, HelpCircle, 
-  Settings, LogOut, Check, X, ShieldAlert, Edit, Trash2, Plus, Menu,
-  ArrowUpRight, Eye, RefreshCw, UploadCloud, Sliders, FileCode, CheckSquare,
+  Settings, LogOut, Check, X, ShieldAlert, Edit, Edit3, Trash2, Plus, Menu, Save,
+  ArrowUpRight, Eye, RefreshCw, Upload, Sliders, FileCode, CheckSquare,
   User, Mail, ChevronDown, ChevronUp, Phone, Users, FileText, ShoppingBag
 } from 'lucide-react';
 import { 
   Photograph, Service, Testimonial, BlogPost, FAQ, Booking, 
   Message, SEOMetadata, AnalyticsStats, ActiveLanguage, PhotographerProfile, BookingConfig, EmailConfig,
-  ClientAccount, ProofPhoto, PhotographyPackage
+  ClientAccount, ProofPhoto, SessionCategory, PhotographyPackage
 } from '../types';
 import { sanitizeString, sanitizeEmail, sanitizeObject } from '../lib/sanitize';
-import AdminServicesTab from './AdminServicesTab';
+
 import AdminSEOTab from './AdminSEOTab';
 import AdminProfileTab from './AdminProfileTab';
 import AdminPackagesTab from './AdminPackagesTab';
@@ -38,7 +38,6 @@ interface AdminCMSProps {
   stats: AnalyticsStats;
   lang: ActiveLanguage;
   onUpdatePhotographs: (photos: Photograph[]) => void;
-  onUpdateServices: (services: Service[]) => void;
   onUpdateTestimonials: (testimonials: Testimonial[]) => void;
   onUpdateBlogPosts: (posts: BlogPost[]) => void;
   onUpdateFaqs: (faqs: FAQ[]) => void;
@@ -49,6 +48,8 @@ interface AdminCMSProps {
   onUpdateProfile: (profile: PhotographerProfile) => void;
   onUpdateBookingConfig: (config: BookingConfig) => void;
   onUpdateEmailConfig: (config: EmailConfig) => void;
+  sessionCategories: SessionCategory[];
+  onUpdateSessionCategories: (categories: SessionCategory[]) => void;
   packages: PhotographyPackage[];
   onUpdatePackages: (packages: PhotographyPackage[]) => void;
   onLogout: () => void;
@@ -57,16 +58,24 @@ interface AdminCMSProps {
 
 export default function AdminCMS({
   photographs, services, testimonials, blogPosts, faqs, bookings, messages, clientAccounts = [], seo, profile, bookingConfig, emailConfig, stats, lang,
-  onUpdatePhotographs, onUpdateServices, onUpdateTestimonials, onUpdateBlogPosts,
-  onUpdateFaqs, onUpdateBookings, onUpdateMessages, onUpdateClientAccounts, onUpdateSeo, onUpdateProfile, onUpdateBookingConfig, onUpdateEmailConfig, packages, onUpdatePackages, onLogout, onBackToSite
+  onUpdatePhotographs, onUpdateTestimonials, onUpdateBlogPosts,
+  onUpdateFaqs, onUpdateBookings, onUpdateMessages, onUpdateClientAccounts, onUpdateSeo, onUpdateProfile, onUpdateBookingConfig, onUpdateEmailConfig, sessionCategories, onUpdateSessionCategories, packages, onUpdatePackages, onLogout, onBackToSite
 }: AdminCMSProps) {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'photos' | 'bookings' | 'services' | 'messages' | 'seo' | 'profile' | 'email_settings' | 'clients' | 'packages'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'photos' | 'bookings' | 'messages' | 'seo' | 'profile' | 'email_settings' | 'clients' | 'packages' | 'session-categories'>('dashboard');
   const [expandedBookingId, setExpandedBookingId] = useState<string | null>(null);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
-  const t = (es: string, en: string, pt: string = en) => {
+  useEffect(() => {
+    if (mobileSidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileSidebarOpen]);
+
+  const t = (es: string, en: string, _pt?: string) => {
     if (lang === 'en') return en;
-    if (lang === 'pt') return pt;
     return es;
   };
 
@@ -559,16 +568,6 @@ export default function AdminCMS({
             </button>
 
             <button
-              onClick={() => setActiveTab('services')}
-              className={`w-full text-left px-3 py-2 rounded-lg font-mono text-[10px] uppercase tracking-wider transition-all flex items-center space-x-2 ${
-                activeTab === 'services' ? 'bg-gold-500 text-dark font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
-              }`}
-            >
-              <Sliders size={12} />
-              <span>{t('Paquetes Premium', 'Premium Packages', 'Pacotes Premium')}</span>
-            </button>
-
-            <button
               onClick={() => setActiveTab('packages')}
               className={`w-full text-left px-3 py-2 rounded-lg font-mono text-[10px] uppercase tracking-wider transition-all flex items-center space-x-2 ${
                 activeTab === 'packages' ? 'bg-gold-500 text-dark font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
@@ -576,6 +575,16 @@ export default function AdminCMS({
             >
               <ShoppingBag size={12} />
               <span>{t('Paquetes Fotográficos', 'Photography Packages', 'Pacotes Fotográficos')}</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('session-categories')}
+              className={`w-full text-left px-3 py-2 rounded-lg font-mono text-[10px] uppercase tracking-wider transition-all flex items-center space-x-2 ${
+                activeTab === 'session-categories' ? 'bg-gold-500 text-dark font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <Sliders size={12} />
+              <span>{t('Tipos de Sesión', 'Session Types', 'Tipos de Sessão')}</span>
             </button>
 
             <button
@@ -651,7 +660,7 @@ export default function AdminCMS({
       {/* Floating hamburger — mobile only, centered on right edge */}
       <button
         onClick={() => setMobileSidebarOpen(true)}
-        className="lg:hidden fixed right-4 top-1/2 -translate-y-1/2 z-30 bg-dark-gray/90 border border-border/60 rounded-full p-3 text-white hover:text-gold-400 hover:border-gold-400/50 transition-all shadow-lg cursor-pointer backdrop-blur-sm"
+        className={`${mobileSidebarOpen ? 'hidden' : 'flex'} lg:hidden fixed right-4 top-1/2 -translate-y-1/2 z-30 bg-dark-gray/90 border border-border/60 rounded-full p-3 text-white hover:text-gold-400 hover:border-gold-400/50 transition-all shadow-lg cursor-pointer backdrop-blur-sm`}
         aria-label="Open menu"
       >
         <Menu size={20} />
@@ -794,7 +803,7 @@ export default function AdminCMS({
                   : 'border-[#D8C0A8] bg-charcoal hover:border-white/20'
               }`}
             >
-              <UploadCloud size={36} className="text-gold-400/80 mx-auto mb-3" />
+              <Upload size={36} className="text-gold-400/80 mx-auto mb-3" />
               <p className="text-xs font-semibold text-white/95 mb-1">
                 {t('Arrastra y suelta las fotografías originales aquí', 'Drag and Drop RAW photographs here', 'Arraste e solte as fotos originais aqui')}
               </p>
@@ -880,14 +889,22 @@ export default function AdminCMS({
                           onChange={(e) => setPhotoEditItem({ ...photoEditItem, category: e.target.value })}
                           className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white focus:outline-none focus:border-gold-400"
                         >
-                          <option value="retrato">Retrato</option>
-                          <option value="boda">Boda</option>
-                          <option value="moda">Moda</option>
-                          <option value="drone">Drone / Aéreo</option>
-                          <option value="viajes">Viajes</option>
-                          <option value="producto">Producto</option>
-                          <option value="evento">Evento</option>
-                          <option value="naturaleza">Naturaleza</option>
+                          <option value="retrato">Retrato / Portrait</option>
+                          <option value="boda">Boda / Wedding</option>
+                          <option value="moda">Moda / Fashion</option>
+                          <option value="drone">Drone / Aerial</option>
+                          <option value="viajes">Viajes / Travel</option>
+                          <option value="producto">Producto / Product</option>
+                          <option value="evento">Evento / Event</option>
+                          <option value="naturaleza">Naturaleza / Nature</option>
+                          <option value="compromiso">Compromiso / Engagement</option>
+                          <option value="familia">Familia / Family</option>
+                          <option value="infantil">Infantil / Children</option>
+                          <option value="maternidad">Maternidad / Maternity</option>
+                          <option value="cumpleanos">Cumpleaños / Birthday</option>
+                          <option value="graduacion">Graduación / Graduation</option>
+                          <option value="corporativo">Corporativo / Corporate</option>
+                          <option value="gastronomia">Gastronomía / Gastronomy</option>
                         </select>
                       </div>
                     </div>
@@ -1308,21 +1325,22 @@ export default function AdminCMS({
           </div>
         )}
 
-        {/* PREMIUM PACKAGES CRUD */}
-        {activeTab === 'services' && (
-          <AdminServicesTab
-            services={services}
-            onUpdateServices={onUpdateServices}
+        {/* PHOTOGRAPHY PACKAGES */}
+        {activeTab === 'packages' && (
+          <AdminPackagesTab
+            sessionCategories={sessionCategories}
+            packages={packages}
+            onUpdatePackages={onUpdatePackages}
             triggerAlert={triggerAlert}
             lang={lang}
           />
         )}
 
-        {/* PHOTOGRAPHY PACKAGES */}
-        {activeTab === 'packages' && (
-          <AdminPackagesTab
-            packages={packages}
-            onUpdatePackages={onUpdatePackages}
+        {/* SESSION CATEGORIES */}
+        {activeTab === 'session-categories' && (
+          <SessionCategoriesEditor
+            categories={sessionCategories}
+            onUpdate={onUpdateSessionCategories}
             triggerAlert={triggerAlert}
             lang={lang}
           />
@@ -2060,7 +2078,7 @@ export default function AdminCMS({
                             className="hidden"
                             onChange={(e) => handleMultipleFilesUpload(e.target.files)}
                           />
-                          <UploadCloud size={32} className={`mb-3 transition-colors ${isDragOver ? 'text-gold-400' : 'text-white/40'}`} />
+                          <Upload size={32} className={`mb-3 transition-colors ${isDragOver ? 'text-gold-400' : 'text-white/40'}`} />
                           <span className="text-xs text-white/80 font-medium block">
                             {t('Arrastra y suelta tus fotos aquí o haz clic para explorar', 'Drag & drop your photos here or click to browse')}
                           </span>
@@ -2383,7 +2401,7 @@ export default function AdminCMS({
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'tween', duration: 0.3 }}
-              className="fixed top-0 left-0 bottom-0 w-72 bg-dark-gray border-r border-white/5 z-50 lg:hidden flex flex-col p-6"
+              className="fixed top-0 left-0 bottom-0 w-72 bg-dark-gray border-r border-white/5 z-50 lg:hidden flex flex-col p-6 overflow-y-auto touch-pan-y"
             >
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center space-x-2">
@@ -2404,8 +2422,8 @@ export default function AdminCMS({
                     { id: 'dashboard', icon: BarChart3, label: t('Dashboard', 'Dashboard', 'Painel') },
                     { id: 'photos', icon: Camera, label: t('Fotografías', 'Photographs', 'Fotografias') },
                     { id: 'bookings', icon: Calendar, label: t('Cola de Reservas', 'Bookings Queue', 'Fila de Reservas') },
-                    { id: 'services', icon: Sliders, label: t('Paquetes Premium', 'Premium Packages', 'Pacotes Premium') },
                     { id: 'packages', icon: ShoppingBag, label: t('Paquetes Fotográficos', 'Photography Packages', 'Pacotes Fotográficos') },
+                    { id: 'session-categories', icon: Sliders, label: t('Tipos de Sesión', 'Session Types', 'Tipos de Sessão') },
                     { id: 'messages', icon: MessageSquare, label: `${t('Bandeja de Entrada', 'Inbox', 'Caixa de Entrada')} (${messages.filter(m=>!m.isRead).length})` },
                     { id: 'seo', icon: FileCode, label: t('Configuración SEO', 'SEO Schema', 'Configuração SEO') },
                     { id: 'profile', icon: User, label: t('Biografía y Perfil', 'Biography & Profile', 'Biografia e Perfil') },
@@ -2460,6 +2478,202 @@ export default function AdminCMS({
         )}
       </AnimatePresence>
 
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────
+   Session Categories Editor (sub-component)
+   ────────────────────────────────────────────── */
+interface SessionCatEditorProps {
+  categories: SessionCategory[];
+  onUpdate: (cats: SessionCategory[]) => void;
+  triggerAlert: (msg: string) => void;
+  lang: ActiveLanguage;
+}
+
+const CATEGORY_ICONS = ['Heart', 'Gem', 'Camera', 'Users', 'Baby', 'Sparkles', 'PartyPopper', 'GraduationCap', 'Briefcase', 'Utensils', 'Package', 'Calendar'];
+
+function SessionCategoriesEditor({ categories, onUpdate, triggerAlert, lang }: SessionCatEditorProps) {
+  const [localCats, setLocalCats] = useState<SessionCategory[]>(categories);
+  const [editingCat, setEditingCat] = useState<SessionCategory | null>(null);
+
+  useEffect(() => { setLocalCats(categories); }, [categories]);
+
+  const t = (es: string, en: string) => lang === 'en' ? en : es;
+
+  const sorted = [...localCats].sort((a, b) => a.sortOrder - b.sortOrder);
+
+  const handleSaveAll = () => {
+    onUpdate(localCats);
+    triggerAlert(t('✓ Categorías guardadas.', '✓ Categories saved.'));
+  };
+
+  const startEdit = (cat: SessionCategory) => setEditingCat({ ...cat });
+  const cancelEdit = () => setEditingCat(null);
+
+  const saveEdit = () => {
+    if (!editingCat) return;
+    setLocalCats(prev => prev.map(c => c.id === editingCat.id ? editingCat : c));
+    triggerAlert(t('✓ Categoría actualizada.', '✓ Category updated.'));
+    setEditingCat(null);
+  };
+
+  const toggleActive = (id: string) => {
+    setLocalCats(prev => prev.map(c => c.id === id ? { ...c, active: !c.active } : c));
+  };
+
+  const updateField = (field: keyof SessionCategory, value: string | number | boolean) => {
+    if (!editingCat) return;
+    setEditingCat({ ...editingCat, [field]: value });
+  };
+
+  const inputClass = "w-full bg-charcoal border border-[#D8C0A8] rounded px-2.5 py-2 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans";
+  const labelClass = "text-[9px] font-mono text-white/50 uppercase";
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between border-b border-white/5 pb-4">
+        <div>
+          <h2 className="font-serif text-2xl text-white">{t('Tipos de Sesión', 'Session Types')}</h2>
+          <p className="text-xs text-white/50">{t('Gestiona las categorías de sesión que se muestran en la sección pública.', 'Manage session categories shown in the public section.')}</p>
+        </div>
+        <button onClick={handleSaveAll} className="py-1.5 px-4 bg-gold-500 text-dark hover:bg-gold-400 rounded-lg text-[10px] font-mono tracking-widest uppercase font-semibold flex items-center space-x-1 cursor-pointer transition-all">
+          <Save size={11} />
+          <span>{t('Guardar Todo', 'Save All')}</span>
+        </button>
+      </div>
+
+      {/* Edit Modal */}
+      {editingCat && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center p-4 bg-overlay/80 backdrop-blur-sm overflow-y-auto pt-12">
+          <div className="bg-charcoal border border-[#D8C0A8] rounded-2xl p-6 max-w-lg w-full space-y-5 shadow-2xl my-8">
+            <div className="flex items-center justify-between border-b border-white/5 pb-3">
+              <h3 className="font-serif text-lg text-white">{t('Editar Categoría', 'Edit Category')}</h3>
+              <button onClick={cancelEdit} className="text-white/50 hover:text-white cursor-pointer p-1"><X size={16} /></button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <label className={labelClass}>{t('Icono', 'Icon')}</label>
+                <select value={editingCat.icon} onChange={(e) => updateField('icon', e.target.value)}
+                  className="w-full bg-charcoal border border-[#D8C0A8] rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-gold-400">
+                  {CATEGORY_ICONS.map(ico => <option key={ico} value={ico} className="bg-charcoal">{ico}</option>)}
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <label className={labelClass}>Nombre / Name</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <input value={editingCat.name_es} onChange={(e) => updateField('name_es', e.target.value)} placeholder="Español" className={inputClass} />
+                  <input value={editingCat.name_en} onChange={(e) => updateField('name_en', e.target.value)} placeholder="English" className={inputClass} />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className={labelClass}>{t('Descripción', 'Description')}</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <textarea rows={2} value={editingCat.description_es} onChange={(e) => updateField('description_es', e.target.value)} placeholder="Español" className={inputClass + " resize-none"} />
+                  <textarea rows={2} value={editingCat.description_en} onChange={(e) => updateField('description_en', e.target.value)} placeholder="English" className={inputClass + " resize-none"} />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className={labelClass}>{t('Imagen', 'Image')}</label>
+                <div className="flex items-center space-x-2">
+                  <input value={editingCat.image} onChange={(e) => updateField('image', e.target.value)} placeholder="https://..." className={inputClass} />
+                  <label className="shrink-0 py-2 px-3 bg-white/10 hover:bg-white/20 border border-[#D8C0A8] rounded text-[9px] font-mono text-white/70 hover:text-white uppercase tracking-widest cursor-pointer transition-all whitespace-nowrap">
+                    {t('Subir', 'Upload')}
+                    <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = (ev) => {
+                        const dataUrl = ev.target?.result as string;
+                        updateField('image', dataUrl);
+                      };
+                      reader.readAsDataURL(file);
+                      e.target.value = '';
+                    }} />
+                  </label>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className={labelClass}>{t('Orden', 'Order')}</label>
+                  <input type="number" min="0" value={editingCat.sortOrder} onChange={(e) => updateField('sortOrder', Number(e.target.value))} className={inputClass} />
+                </div>
+                <div className="space-y-1 flex items-end pb-2">
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input type="checkbox" checked={editingCat.active} onChange={(e) => updateField('active', e.target.checked)} className="accent-gold-500 w-3.5 h-3.5" />
+                    <span className="text-[10px] font-mono text-white/70 uppercase">{t('Activo', 'Active')}</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Image preview */}
+              {editingCat.image && (
+                <div className="rounded-xl overflow-hidden border border-white/10">
+                  <img src={editingCat.image} alt="Preview" className="w-full h-32 object-cover" />
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end space-x-3 pt-2 border-t border-white/5">
+              <button onClick={cancelEdit} className="px-4 py-2 border border-[#D8C0A8] rounded-lg text-[10px] font-mono text-white/70 hover:text-white cursor-pointer transition-all">
+                {t('Cancelar', 'Cancel')}
+              </button>
+              <button onClick={saveEdit} className="px-4 py-2 bg-gold-500 text-dark font-mono text-[10px] tracking-widest uppercase font-bold rounded-lg hover:bg-gold-400 cursor-pointer transition-all">
+                {t('Guardar', 'Save')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Categories List */}
+      <div className="space-y-2">
+        {sorted.map(cat => {
+          const cName = lang === 'es' ? cat.name_es : cat.name_en;
+          return (
+            <div key={cat.id} className={`flex items-center justify-between p-3 rounded-xl border transition-all ${cat.active ? 'border-[#D8C0A8] bg-dark-gray' : 'border-[#D8C0A8]/30 bg-dark-gray opacity-60'}`}>
+              <div className="flex items-center space-x-3 flex-1 min-w-0">
+                <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-charcoal border border-white/5">
+                  {cat.image && <img src={cat.image} alt={cName} className="w-full h-full object-cover" />}
+                </div>
+                <div className="min-w-0">
+                  <span className="text-sm font-serif text-white truncate block">{cName}</span>
+                  <span className="text-[9px] font-mono text-white/40 uppercase">ID: {cat.id}</span>
+                </div>
+              </div>
+              <div className="flex items-center space-x-1.5 shrink-0">
+                <label className="flex items-center space-x-1 cursor-pointer">
+                  <input type="checkbox" checked={cat.active} onChange={() => toggleActive(cat.id)} className="accent-gold-500 w-3 h-3" />
+                  <span className="text-[8px] font-mono text-white/40">{t('ON', 'ON')}</span>
+                </label>
+                <label className="p-1.5 text-white/40 hover:text-gold-400 cursor-pointer transition-colors" title={t('Subir imagen', 'Upload image')}>
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                      const dataUrl = ev.target?.result as string;
+                      setLocalCats(prev => prev.map(c => c.id === cat.id ? { ...c, image: dataUrl } : c));
+                    };
+                    reader.readAsDataURL(file);
+                    e.target.value = '';
+                  }} />
+                  <Upload size={12} />
+                </label>
+                <button onClick={() => startEdit(cat)} className="p-1.5 text-white/40 hover:text-gold-400 cursor-pointer transition-colors" title={t('Editar', 'Edit')}>
+                  <Edit3 size={12} />
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

@@ -59,7 +59,7 @@ function AdminSEOTab({ seo, onUpdateSeo, triggerAlert, lang }: AdminSEOTabProps)
       <div className="flex items-center justify-between border-b border-white/5 pb-4">
         <div>
           <h2 className="font-serif text-2xl text-white">
-            {lang === 'es' ? 'Configuración SEO y Meta-tags' : lang === 'pt' ? 'Configuração SEO e Meta-Tags' : 'SEO & Meta-Tag Deployment'}
+            {lang === 'es' ? 'Configuración SEO y Meta-tags' : 'SEO & Meta-Tag Deployment'}
           </h2>
           <p className="text-xs text-white/50">
             {lang === 'es' ? 'Configura los títulos, meta descripciones, Open Graph y datos estructurados.' : 'Edit Schema.org, Open Graph preview data, and custom metadata settings.'}
