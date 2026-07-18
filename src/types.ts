@@ -213,6 +213,16 @@ export interface PhotographyPackage {
   featured: boolean;
 }
 
+export interface Milestone {
+  year: string;
+  title_es: string;
+  title_en: string;
+  title_pt: string;
+  description_es: string;
+  description_en: string;
+  description_pt: string;
+}
+
 export type ActiveLanguage = 'es' | 'en' | 'pt';
 
 export interface ProofPhoto {

@@ -640,22 +640,17 @@ export default function AdminCMS({
         </button>
       </div>
 
+      {/* Floating hamburger — mobile only, centered on right edge */}
+      <button
+        onClick={() => setMobileSidebarOpen(true)}
+        className="lg:hidden fixed right-4 top-1/2 -translate-y-1/2 z-30 bg-dark-gray/90 border border-border/60 rounded-full p-3 text-white hover:text-gold-400 hover:border-gold-400/50 transition-all shadow-lg cursor-pointer backdrop-blur-sm"
+        aria-label="Open menu"
+      >
+        <Menu size={20} />
+      </button>
+
       {/* MAIN ADMIN WORKSPACE WORK AREA (Cols 10) */}
-      <div className="lg:col-span-10 lg:p-6 md:p-8 lg:overflow-y-auto lg:max-h-[85vh]">
-        
-        {/* MOBILE HEADER — hamburger + title (visible only on < lg) */}
-        <div className="lg:hidden flex items-center justify-between border-b border-white/5 pb-4 mb-6">
-          <div className="flex items-center space-x-2">
-            <Settings className="text-gold-400" size={18} />
-            <span className="font-serif text-sm tracking-widest text-gold-50 font-bold">AUREA CMS</span>
-          </div>
-          <button
-            onClick={() => setMobileSidebarOpen(true)}
-            className="text-white/80 p-2 hover:text-white cursor-pointer"
-          >
-            <Menu size={22} />
-          </button>
-        </div>
+      <div className="lg:col-span-10 p-4 sm:p-5 lg:p-6 lg:overflow-y-auto lg:max-h-[85vh]">
 
         {/* DASHBOARD TAB */}
         {activeTab === 'dashboard' && (

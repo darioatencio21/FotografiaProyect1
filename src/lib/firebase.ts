@@ -54,17 +54,23 @@ export async function getCollectionWithFallback<T extends { id: string }>(
         await batch.commit();
         localStorage.setItem(SEEDED_FLAG_KEY, 'true');
       }
-      return fallbackData;
+
+      // Read back from Firestore to get real data instead of returning hardcoded fallback
+      const freshSnapshot = await getDocs(colRef);
+      const freshItems: T[] = [];
+      freshSnapshot.forEach((d) => {
+        freshItems.push({ id: d.id, ...d.data() } as T);
+      });
+      if (freshItems.length > 0) return freshItems;
     }
 
     const items: T[] = [];
     querySnapshot.forEach((d) => {
-      const data = d.data() as T;
-      items.push(data);
+      items.push({ id: d.id, ...d.data() } as T);
     });
-    return items;
+    return items.length > 0 ? items : fallbackData;
   } catch (err: any) {
-    console.warn(`Firestore fetch error for "${collectionPath}":`, err?.code || err?.message || err);
+    console.error(`🔥 Firestore error for "${collectionPath}":`, err?.code || err?.message || err);
     return fallbackData;
   }
 }

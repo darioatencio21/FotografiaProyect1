@@ -45,13 +45,14 @@ El proyecto está diseñado para desplegarse en **Vercel** con Firestore como ba
 
 ### Filosofía de diseño
 
-- **Estética editorial** inspirada en Leica, Hasselblad, Aesop, Kinfolk y portfolios galardonados en Awwwards.
+- **Estética editorial** inspirada en Leica, Hasselblad, Aesop, Kinfolk, Madi Bence, Folk Studio y portfolios galardonados en Awwwards.
 - **Imágenes en blanco y negro por defecto**, revelan color al hacer hover — efecto slow-burn de 800ms con escala `1.04×`.
 - **Tarjetas de galería limpias**: sin texto permanente sobre las fotos, solo overlay hover con fade+slide para título y categoría.
 - **Gradiente sutíl desde abajo** (`from-overlay/8`) que aparece solo en hover para legibilidad.
 - **Hero dual** (split screen en desktop, single en mobile) con gradiente de 3 capas y animación Ken Burns via Motion.
 - **Sección de estadísticas** con Count Up al entrar en viewport, editoriale triptych layout (3 columnas en desktop, 1 en mobile).
 - **Shadows eliminados** de todas las tarjetas, botones y modales — apuesta por bordes finos y espacio negativo.
+- **Sección Sobre mí con diseño editorial**: fotografía en columna al inicio, biografía fluida, línea de tiempo vertical con hitos profesionales reales y sección de filosofía con 3 pilares. Animaciones sutiles con scroll (fade-up, divisores animados, stagger en timeline). Sin tarjetas, sin bordes redondeados, sin badges.
 
 ---
 
@@ -60,13 +61,14 @@ El proyecto está diseñado para desplegarse en **Vercel** con Firestore como ba
 - **Portafolio interactivo** — Galería masonry con filtros por categoría, búsqueda multilingual, hover que revela color+título, y lightbox a pantalla completa con metadatos EXIF, descarga, share y comparación antes/después.
 - **Sistema de reservas multi-paso** — Selección de servicio, fecha, horario, datos de contacto y extras (drone, entrega express, maquillaje) con cálculo de presupuesto en tiempo real.
 - **Portal de cliente** — Área protegida por código de acceso donde los clientes pueden ver, seleccionar y descargar sus fotos, y solicitar impresiones.
-- **CMS administrativo** — Dashboard con gráficos de ingresos y tráfico, CRUD completo de fotografías (con drag & drop y compresión), servicios, testimonios, blog, FAQ, mensajería, SEO, perfil del fotógrafo y cuentas de clientes. Sidebar tipo drawer en mobile.
+- **Sección Sobre mí editorial** — Diseño tipo revista con fotografía en columna, biografía fluida con tipografía serif/sans-serif, línea de tiempo vertical con hitos profesionales reales (2010–2025), y sección de filosofía con 3 pilares (Luz, Composición, Emoción). Animaciones sutiles con scroll sin tarjetas ni bordes.
+- **CMS administrativo** — Dashboard con gráficos de ingresos y tráfico, CRUD completo de fotografías (con drag & drop y compresión), servicios, testimonios, blog, FAQ, mensajería, SEO, perfil del fotógrafo y cuentas de clientes. Con padding responsive y botón flotante para navegación móvil.
 - **Checkout simulado** — Modal de pago con Stripe simulado, con animación de procesamiento y comprobante de transacción.
 - **Notificaciones por email** — Integración con EmailJS para notificaciones al administrador y auto-respuestas al cliente desde el formulario de contacto y reservas.
 - **Multi-idioma** — Soporte completo para Español, English y Português con cambio en tiempo real en toda la interfaz, incluyendo títulos y descripciones de fotografías.
 - **Cursor personalizado** — Cursor animado con física Spring que cambia de estado sobre elementos interactivos.
-- **Navbar scrolleable** — Barra de navegación solid con fondo beige, sin ocultar al hacer scroll. Menú mobile tipo drawer con animación slide.
-- **Persistencia offline** — Datos cacheados en localStorage con prefijo `aurea_` para funcionamiento sin conexión.
+- **Navbar scrolleable** — Barra de navegación solid con fondo beige, sin ocultar al hacer scroll. Menú mobile tipo drawer con apertura mediante pastilla deslizable dorada y cierre con botón X. Oculto automáticamente en vista admin.
+- **Persistencia offline** — Datos cacheados en localStorage con prefijo `aurea_` para funcionamiento sin conexión. Firebase como fuente de verdad con sincronización en segundo plano.
 
 ---
 
@@ -97,12 +99,13 @@ El proyecto está diseñado para desplegarse en **Vercel** con Firestore como ba
 │   ├── index.css                 # Configuración de Tailwind, tema (beige), fuentes y estilos globales
 │   ├── types.ts                  # Interfaces TypeScript para todos los modelos de datos
 │   ├── components/
-│   │   ├── Header.tsx            # Barra de navegación con menú drawer y selector de idioma
+│   │   ├── Header.tsx            # Barra de navegación con menú drawer, pastilla deslizable y selector de idioma
 │   │   ├── Footer.tsx            # Pie de página con newsletter, redes sociales y enlaces legales
 │   │   ├── CustomCursor.tsx      # Cursor animado personalizado con física Spring
 │   │   ├── Lightbox.tsx          # Visor de fotos a pantalla completa con EXIF y acciones
 │   │   ├── BookingCalendar.tsx   # Formulario de reserva en 4 pasos
 │   │   ├── ClientPortal.tsx      # Portal de pruebas protegido por código
+│   │   ├── AboutSection.tsx      # Sección Sobre mí con diseño editorial, timeline vertical y filosofía
 │   │   ├── AdminCMS.tsx          # Panel de administración completo
 │   │   ├── StripeCheckout.tsx    # Modal de pago simulado con Stripe
 │   │   ├── LegalViews.tsx        # Páginas de Política de Privacidad y Términos
@@ -193,21 +196,23 @@ App.tsx
 ```
 Firestore (cloud)
     │
-    ├── syncCollection() / getCollectionWithFallback()
+    ├── getCollectionWithFallback() / getSingleDocument()
+    │   └── Si colección vacía → seed automático desde mockData → lee de Firestore
     │
     ▼
 App.tsx State + localStorage (caché offline, prefijo aurea_)
     │
     ├── Se renderiza la vista correspondiente
     │
-    └── Cualquier mutación → saveDocument() → Firestore
+    └── Cualquier mutación → saveDocument() / syncCollection() → Firestore
 ```
 
 1. **Carga inicial**: `App.tsx` fetches todas las colecciones de Firestore mediante `getCollectionWithFallback()`.
-2. **Fallback**: Si Firestore devuelve vacío, se usan los datos definidos en `mockData.ts`.
-3. **Caché offline**: Los datos se persisten en `localStorage` con claves con prefijo `aurea_`.
-4. **Sincronización**: Cada modificación (crear, editar, eliminar) llama a `saveDocument()` o `syncCollection()` para persistir en Firestore.
-5. **Admin CMS**: El panel administrativo realiza operaciones CRUD directas contra Firestore.
+2. **Seeding automático**: Si Firestore está vacío, se seedea con los datos de `mockData.ts` y luego se lee de vuelta desde Firestore (no devuelve datos hardcodeados).
+3. **Fallback**: Solo si Firestore es inalcanzable (error de red o configuración) se usan los datos de `mockData.ts` como respaldo.
+4. **Caché offline**: Los datos se persisten en `localStorage` con claves con prefijo `aurea_`.
+5. **Sincronización**: Cada modificación (crear, editar, eliminar) llama a `saveDocument()` o `syncCollection()` para persistir en Firestore.
+6. **Admin CMS**: El panel administrativo realiza operaciones CRUD directas contra Firestore.
 
 ### Colecciones de Firestore
 
@@ -228,7 +233,7 @@ App.tsx State + localStorage (caché offline, prefijo aurea_)
 
 ### Autenticación
 
-- **Admin**: Hardcoded (`admin` / `admin123`). La sesión se guarda en `localStorage` como `aurea_admin_logged`.
+- **Admin**: Tres niveles de fallback: hardcoded (`admin`/`admin123`) → Firebase Auth (con timeout de 2s) → Firestore `admin/config`. La sesión se guarda en `localStorage` como `aurea_admin_logged`.
 - **Client Portal**: Protegido por código de acceso validado contra la colección `clientAccounts`.
 
 ---
@@ -238,7 +243,7 @@ App.tsx State + localStorage (caché offline, prefijo aurea_)
 | Vista          | Ruta (state)   | Descripción                                                          |
 | -------------- | -------------- | -------------------------------------------------------------------- |
 | Inicio         | `home`         | Hero split-screen con Ken Burns, estadísticas con Count Up, 3 teasers |
-| Sobre mí       | `about`        | Biografía multilingual, avatar y línea de tiempo de premios          |
+| Sobre mí       | `about`        | Diseño editorial con foto en columna, biografía fluida, línea de tiempo vertical con hitos profesionales (2010–2025) y 3 pilares de filosofía. Animaciones scroll. Sin tarjetas |
 | Portafolio     | `portfolio`    | Galería masonry con hover grayscale→color, filtros, búsqueda, lightbox |
 | Servicios      | `services`     | Tarjetas de paquetes + calendario de reservas multi-paso             |
 | Portal Cliente | `client-portal` | Galería privada protegida por código con selección y descarga        |
@@ -322,10 +327,18 @@ vercel --prod
 
 | Variable         | Descripción                       | Ejemplo                          |
 | ---------------- | --------------------------------- | -------------------------------- |
-| `GEMINI_API_KEY` | Clave de API de Gemini            | `AIzaSy...`                      |
+| `VITE_FIREBASE_API_KEY` | API Key de Firebase           | `AIzaSy...`                      |
+| `VITE_FIREBASE_AUTH_DOMAIN` | Auth Domain de Firebase     | `proyecto.firebaseapp.com`       |
+| `VITE_FIREBASE_PROJECT_ID` | Project ID de Firebase       | `proyecto-de-fotografia-v1`     |
+| `VITE_FIREBASE_STORAGE_BUCKET` | Storage Bucket           | `proyecto.firebasestorage.app`   |
+| `VITE_FIREBASE_MESSAGING_SENDER_ID` | Sender ID           | `671464861989`                   |
+| `VITE_FIREBASE_APP_ID` | App ID de Firebase                 | `1:671464861989:web:...`         |
+| `VITE_FIREBASE_DATABASE_ID` | Database ID (Firestore)    | `(default)`                      |
+| `GEMINI_API_KEY` | Clave de API de Gemini (opcional)   | `AIzaSy...`                      |
 | `APP_URL`        | URL base de la aplicación         | `http://localhost:3000`          |
 
-Copia `.env.example` a `.env.local` y completa los valores antes de ejecutar la aplicación.
+Copia `.env.example` a `.env.local` y completa los valores antes de ejecutar la aplicación.  
+**Importante**: En Vercel, agrega todas las `VITE_FIREBASE_*` en Project Settings → Environment Variables para que Firebase funcione en producción.
 
 ---
 

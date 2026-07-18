@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'motion/react';
-import { Menu, X, Globe, User, ShieldAlert, ChevronLeft } from 'lucide-react';
+import { X, Globe, User, ShieldAlert, ChevronLeft } from 'lucide-react';
 import { ActiveLanguage } from '../types';
 import { TRANSLATIONS } from '../data/mockData';
 import { Logo } from './Logo';
@@ -65,7 +65,6 @@ export default function Header({
 
   const closeDrawer = () => {
     setIsMobileMenuOpen(false);
-    animate(drawerX, 0, { type: 'tween', duration: 0.3, ease: [0.32, 0.72, 0, 1] });
   };
 
   const openDrawer = () => {
@@ -78,6 +77,7 @@ export default function Header({
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
+      drawerX.set(0);
     }
     return () => {
       document.body.style.overflow = '';
@@ -257,19 +257,13 @@ export default function Header({
           <span>{isAdminLoggedIn ? 'CMS' : 'Staff'}</span>
         </button>
 
-        <button
-          onClick={() => (isMobileMenuOpen ? closeDrawer() : openDrawer())}
-          className="text-white/80 p-1.5 hover:text-white"
-        >
-          {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-        </button>
       </div>
 
       {/* Drag handle — visible only on mobile, only when menu is closed.
           Outer button is an extended hit-target (44px+ tall for accessibility);
           inner span is the visible gold pill. */}
       <AnimatePresence>
-        {!isMobileMenuOpen && (
+        {currentView !== 'admin' && !isMobileMenuOpen && (
           <motion.button
             key="drag-handle"
             type="button"
@@ -299,10 +293,11 @@ export default function Header({
               animate={{ x: [-1, -8, -1, -5, -1] }}
               transition={{ duration: 2.4, repeat: 2, ease: 'easeInOut' }}
               className="block w-3.5 h-28 sm:w-4 sm:h-32
-                         bg-gold-500/70 hover:bg-gold-400 active:bg-gold-300
-                         rounded-l-full shadow-[-2px_0_8px_rgba(0,0,0,0.4)]
-                         transition-colors
-                         flex items-center justify-center"
+                          bg-gold-400 hover:bg-gold-300 active:bg-gold-200
+                          rounded-l-full border-l border-gold-300/40
+                          shadow-[-3px_0_12px_rgba(0,0,0,0.5)]
+                          transition-colors
+                          flex items-center justify-center"
             >
               <motion.span
                 animate={{ scale: [1, 1.15, 1] }}
@@ -334,27 +329,29 @@ export default function Header({
 
       {/* Mobile drawer (draggable) */}
       <AnimatePresence>
-        {isMobileMenuOpen && (
+        {currentView !== 'admin' && isMobileMenuOpen && (
           <motion.aside
             key="mobile-drawer"
             className="fixed inset-y-0 right-0 w-[85vw] max-w-sm bg-dark z-40 lg:hidden
-                       flex flex-col justify-between p-6 pt-4 text-left overflow-y-auto
-                       border-l border-[#D8C0A8] shadow-[-8px_0_24px_rgba(0,0,0,0.5)]
-                       touch-pan-y"
-            drag="x"
-            dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.05}
-            dragMomentum={false}
-            onDragStart={() => isDragging.set(1)}
-            onDragEnd={handleDrawerDragEnd}
-            style={{ x: drawerX, touchAction: 'pan-y' }}
+                        flex flex-col justify-between p-6 pt-4 text-left overflow-y-auto
+                        border-l border-[#D8C0A8] shadow-[-8px_0_24px_rgba(0,0,0,0.5)]
+                        touch-pan-y"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'tween', duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
           >
-            {/* Drag affordance at the top */}
-            <div className="w-16 h-1.5 bg-white/25 rounded-full mx-auto mb-4 opacity-70" aria-hidden="true" />
+            {/* Drawer header with drag affordance + close button */}
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-16 h-1.5 bg-white/25 rounded-full mx-auto opacity-70" aria-hidden="true" />
+              <button
+                onClick={closeDrawer}
+                className="text-white/60 hover:text-white p-1 -mr-1 cursor-pointer transition-colors"
+                aria-label="Close menu"
+              >
+                <X size={20} />
+              </button>
+            </div>
 
             <div className="space-y-6 pt-2">
               {menuItems.map(item => {

@@ -26,6 +26,7 @@ import Lightbox from './components/Lightbox';
 import BookingCalendar from './components/BookingCalendar';
 import ClientPortal from './components/ClientPortal';
 import StripeCheckout from './components/StripeCheckout';
+import AboutSection from './components/AboutSection';
 import AdminCMS from './components/AdminCMS';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -1064,66 +1065,7 @@ export default function App() {
           {/* ABOUT SCREEN */}
           {/* ======================================================= */}
           {currentView === 'about' && (
-            <div className="space-y-24 text-left">
-              <section className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-                {/* Artist Bio image (Cols 5) */}
-                <div className="lg:col-span-5 relative rounded-2xl overflow-hidden aspect-[4/5] border border-white/5">
-                  <img
-                    src={profile.avatarUrl || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=85&w=800"}
-                    alt={profile.name || "Photographer Portrait"}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute bottom-4 left-4 bg-dark-gray/90 border border-white/10 px-3 py-1.5 rounded text-[9px] font-mono text-gold-400">
-                    {profile.title || "AUREA STUDIO HEAD PHOTOGRAPHER"}
-                  </div>
-                </div>
-
-                {/* Biography (Cols 7) */}
-                <div className="lg:col-span-7 space-y-6">
-                  <span className="text-[10px] font-mono text-gold-400 tracking-widest uppercase block">BIOGRAPHY</span>
-                  <h2 className="font-serif text-3xl md:text-4xl text-white tracking-wide">
-                    {lang === 'es' ? (profile.aboutTitle_es || t.aboutTitle) : lang === 'pt' ? (profile.aboutTitle_pt || t.aboutTitle) : (profile.aboutTitle_en || t.aboutTitle)}
-                  </h2>
-                  <p className="text-xs md:text-sm text-white/90 leading-relaxed font-sans">
-                    {lang === 'es' ? (profile.aboutText1_es || t.aboutText1) : lang === 'pt' ? (profile.aboutText1_pt || t.aboutText1) : (profile.aboutText1_en || t.aboutText1)}
-                  </p>
-                  <p className="text-xs md:text-sm text-white/90 leading-relaxed font-sans">
-                    {lang === 'es' ? (profile.aboutText2_es || t.aboutText2) : lang === 'pt' ? (profile.aboutText2_pt || t.aboutText2) : (profile.aboutText2_en || t.aboutText2)}
-                  </p>
-                </div>
-              </section>
-
-              {/* Award List Dynamic Timeline */}
-              <section className="space-y-6">
-                <div>
-                  <span className="text-[10px] font-mono text-gold-400 tracking-widest uppercase block">ACHIEVEMENTS</span>
-                  <h2 className="font-serif text-2xl text-white mt-1">Selected Fine-Art Prizes</h2>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="bg-dark-gray border border-white/5 p-5 rounded-xl text-left space-y-2">
-                    <span className="font-mono text-xs text-gold-400 font-bold">2026</span>
-                    <h4 className="text-xs font-semibold text-white">Awwwards Portfolio Site of the Year Nomination</h4>
-                    <p className="text-[10px] text-white/70 font-sans leading-normal">Celebrated for interactive medium format gallery UX.</p>
-                  </div>
-                  <div className="bg-dark-gray border border-white/5 p-5 rounded-xl text-left space-y-2">
-                    <span className="font-mono text-xs text-gold-400 font-bold">2024</span>
-                    <h4 className="text-xs font-semibold text-white">Hasselblad Master Award (Editorial & Fashion)</h4>
-                    <p className="text-[10px] text-white/70 font-sans leading-normal">Voted best macro commercial product campaigns.</p>
-                  </div>
-                  <div className="bg-dark-gray border border-white/5 p-5 rounded-xl text-left space-y-2">
-                    <span className="font-mono text-xs text-gold-400 font-bold">2022</span>
-                    <h4 className="text-xs font-semibold text-white">Leica Oskar Barnack Newcomer Prize</h4>
-                    <p className="text-[10px] text-white/70 font-sans leading-normal">Documentary series on rural Italian coastal mists.</p>
-                  </div>
-                  <div className="bg-dark-gray border border-white/5 p-5 rounded-xl text-left space-y-2">
-                    <span className="font-mono text-xs text-gold-400 font-bold">2019</span>
-                    <h4 className="text-xs font-semibold text-white">Siena International Photo Awards</h4>
-                    <p className="text-[10px] text-white/70 font-sans leading-normal">First place under destination wedding candid categories.</p>
-                  </div>
-                </div>
-              </section>
-            </div>
+            <AboutSection profile={profile} lang={lang} t={t} />
           )}
 
           {/* ======================================================= */}

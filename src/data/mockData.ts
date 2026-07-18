@@ -667,6 +667,63 @@ export const INITIAL_PROFILE: PhotographerProfile = {
   aboutText2_pt: 'Com mais de 15 anos documentando casamentos de alta-costura, campanhas publicitárias mundiais e ensaios de moda, o meu trabalho foca no minimalismo luxuoso, espaço em branco e equilíbrio visual absoluto.'
 };
 
+export const MILESTONES = [
+  {
+    year: '2010',
+    title_es: 'El Inicio de una Pasión',
+    title_en: 'The Beginning of a Passion',
+    title_pt: 'O Início de uma Paixão',
+    description_es: 'Descubrí mi vocación por la fotografía documental. Con una cámara prestada comencé a retratar la luz y las emociones en mi entorno, sentando las bases de lo que sería una trayectoria dedicada al arte visual.',
+    description_en: 'I discovered my calling for documentary photography. With a borrowed camera I began capturing light and emotion in my surroundings, laying the foundation for a lifelong dedication to visual art.',
+    description_pt: 'Descobri minha vocação pela fotografia documental. Com uma câmera emprestada comecei a retratar a luz e as emoções ao meu redor, estabelecendo as bases do que seria uma trajetória dedicada à arte visual.',
+  },
+  {
+    year: '2013',
+    title_es: 'Primeros Pasos en Editorial',
+    title_en: 'First Steps in Editorial',
+    title_pt: 'Primeiros Passos no Editorial',
+    description_es: 'Realicé mis primeras sesiones profesionales de moda y retrato. Comencé a colaborar con agencias locales y a definir un estilo propio basado en la luz natural, la simetría y la elegancia minimalista.',
+    description_en: 'I completed my first professional fashion and portrait shoots. I began collaborating with local agencies, defining a signature style based on natural light, symmetry, and minimalist elegance.',
+    description_pt: 'Realizei minhas primeiras sessões profissionais de moda e retrato. Comecei a colaborar com agências locais e a definir um estilo próprio baseado na luz natural, simetria e elegância minimalista.',
+  },
+  {
+    year: '2017',
+    title_es: 'Expansión Internacional',
+    title_en: 'International Expansion',
+    title_pt: 'Expansão Internacional',
+    description_es: 'Llevé mi trabajo a Europa y América Latina, fotografiando bodas editoriales de alta costura y campañas comerciales. Mi portfolio cruzó fronteras y comencé a trabajar con equipos de formato medio.',
+    description_en: 'I took my work to Europe and Latin America, shooting haute-couture destination weddings and commercial campaigns. My portfolio crossed borders and I began working with medium-format gear.',
+    description_pt: 'Levei meu trabalho para a Europa e América Latina, fotografando casamentos editoriais de alta-costura e campanhas comerciais. Meu portfolio cruzou fronteiras e comecei a trabalhar com equipamento de formato médio.',
+  },
+  {
+    year: '2020',
+    title_es: '500 Sesiones Realizadas',
+    title_en: '500 Sessions Completed',
+    title_pt: '500 Sessões Realizadas',
+    description_es: 'Alcancé el hito de más de 500 sesiones fotográficas entre bodas, editoriales de moda, retratos y campañas de producto. Un momento de reflexión y consolidación artística que reafirmó mi compromiso con la excelencia.',
+    description_en: 'I reached over 500 photographic sessions spanning weddings, fashion editorials, portraits, and product campaigns. A moment of reflection and artistic consolidation that reaffirmed my commitment to excellence.',
+    description_pt: 'Atingi a marca de mais de 500 sessões fotográficas entre casamentos, editoriais de moda, retratos e campanhas de produto. Um momento de reflexão e consolidação artística que reafirmou meu compromisso com a excelência.',
+  },
+  {
+    year: '2023',
+    title_es: 'Nuevo Estudio Creativo',
+    title_en: 'New Creative Studio',
+    title_pt: 'Novo Estúdio Criativo',
+    description_es: 'Inauguré mi propio espacio fotográfico equipado con tecnología Hasselblad y Leica. Un estudio concebido como taller de luz donde cada sesión es una obra única, con atención meticulosa a cada detalle.',
+    description_en: 'I opened my own photographic space equipped with Hasselblad and Leica technology. A studio conceived as a light workshop where every session is a unique piece, with meticulous attention to every detail.',
+    description_pt: 'Inaugurei meu próprio espaço fotográfico equipado com tecnologia Hasselblad e Leica. Um estúdio concebido como oficina de luz onde cada sessão é uma obra única, com atenção meticulosa a cada detalhe.',
+  },
+  {
+    year: '2025',
+    title_es: '15 Años de Luz',
+    title_en: '15 Years of Light',
+    title_pt: '15 Anos de Luz',
+    description_es: 'Más de 15 años de trayectoria, 200+ clientes felices en 12 países y una evolución constante. La fotografía sigue siendo mi lenguaje: congelar instantes, esculpir emociones y contar historias que trascienden el tiempo.',
+    description_en: 'Over 15 years of career, 200+ happy clients across 12 countries, and constant evolution. Photography remains my language: freezing moments, sculpting emotions, and telling stories that transcend time.',
+    description_pt: 'Mais de 15 anos de trajetória, 200+ clientes felizes em 12 países e uma evolução constante. A fotografia continua sendo minha linguagem: congelar instantes, esculpir emoções e contar histórias que transcendem o tempo.',
+  },
+];
+
 export const INITIAL_PHOTOGRAPHY_PACKAGES: PhotographyPackage[] = [
   {
     id: 'pkg-wedding',
@@ -937,6 +994,14 @@ export const TRANSLATIONS = {
     stripePay: 'Pasarela Stripe Segura',
     compareTitle: 'Comparar Imágenes',
     compareDesc: 'Desliza para contrastar los sutiles retoques de color y corrección cromática Leica.',
+    milestonesTitle: 'Una Década de Luz',
+    philosophyTitle: 'Mi Enfoque',
+    philosophyPillar1: 'Luz Natural',
+    philosophyPillar1Desc: 'Cada sesión comienza con el estudio de la luz. Trabajo exclusivamente con luz natural y direccional para esculpir volúmenes y revelar la textura genuina de cada instante.',
+    philosophyPillar2: 'Composición',
+    philosophyPillar2Desc: 'La geometría y el equilibrio visual son el alma de cada imagen. Componer con intención, respetando los espacios y las proporciones, es mi forma de narrar sin palabras.',
+    philosophyPillar3: 'Emoción',
+    philosophyPillar3Desc: 'Más allá de la técnica, busco congelar lo que late: una mirada, un silencio, un gesto. La fotografía es emoción convertida en luz y sombra.',
     searchPlaceholder: 'Buscar fotos por etiqueta, cámara, color...'
   },
   en: {
@@ -1019,6 +1084,14 @@ export const TRANSLATIONS = {
     stripePay: 'Secure Stripe Checkout',
     compareTitle: 'Compare Masterclasses',
     compareDesc: 'Slide to compare the masterly raw file and final signature Leica color-grade edits.',
+    milestonesTitle: 'A Decade of Light',
+    philosophyTitle: 'My Approach',
+    philosophyPillar1: 'Natural Light',
+    philosophyPillar1Desc: 'Every session begins with the study of light. I work exclusively with natural and directional light to sculpt volumes and reveal the genuine texture of each moment.',
+    philosophyPillar2: 'Composition',
+    philosophyPillar2Desc: 'Geometry and visual balance are the soul of every image. Composing with intention, respecting space and proportion, is my way of telling stories without words.',
+    philosophyPillar3: 'Emotion',
+    philosophyPillar3Desc: 'Beyond technique, I seek to freeze what beats: a glance, a silence, a gesture. Photography is emotion turned into light and shadow.',
     searchPlaceholder: 'Search photos by tag, camera, color...'
   },
   pt: {
@@ -1101,6 +1174,14 @@ export const TRANSLATIONS = {
     stripePay: 'Pagamento Seguro Stripe',
     compareTitle: 'Comparar Edições',
     compareDesc: 'Deslize para ver a diferença entre o ficheiro RAW e a revelação cromática Leica.',
+    milestonesTitle: 'Uma Década de Luz',
+    philosophyTitle: 'Minha Abordagem',
+    philosophyPillar1: 'Luz Natural',
+    philosophyPillar1Desc: 'Cada sessão começa com o estudo da luz. Trabalho exclusivamente com luz natural e direcional para esculpir volumes e revelar a textura genuína de cada instante.',
+    philosophyPillar2: 'Composição',
+    philosophyPillar2Desc: 'A geometria e o equilíbrio visual são a alma de cada imagem. Compor com intenção, respeitando os espaços e as proporções, é a minha forma de narrar sem palavras.',
+    philosophyPillar3: 'Emoção',
+    philosophyPillar3Desc: 'Além da técnica, busco congelar o que pulsa: um olhar, um silêncio, um gesto. A fotografia é emoção convertida em luz e sombra.',
     searchPlaceholder: 'Procurar fotos por tag, câmara, cor...'
   }
 };
