@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "dotenv": "^16.4.7",
-    "tailwindcss": "^4.1.14",
+    "tailwindcss": "^4.3.3",
     "typescript": "~5.8.2"
   }
 }
