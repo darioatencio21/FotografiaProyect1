@@ -1,6 +1,41 @@
 ﻿import React, { useState, useCallback, useEffect } from 'react';
 import { Save, Plus, Trash2, Edit3, X, Upload } from 'lucide-react';
 import { PhotographyPackage, ActiveLanguage, SessionCategory } from '../types';
+import { uploadImageBlob } from '../lib/firebase';
+
+async function compressToBlob(file: File, maxSize = 1200, quality = 0.8): Promise<Blob> {
+  const rawUrl = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => resolve(e.target?.result as string);
+    reader.onerror = () => reject(new Error('FileReader failed'));
+    reader.readAsDataURL(file);
+  });
+  const img = new Image();
+  return await new Promise<Blob>((resolve, reject) => {
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let w = img.width;
+      let h = img.height;
+      if (w > h) {
+        if (w > maxSize) { h *= maxSize / w; w = maxSize; }
+      } else {
+        if (h > maxSize) { w *= maxSize / h; h = maxSize; }
+      }
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) { reject(new Error('Canvas context failed')); return; }
+      ctx.drawImage(img, 0, 0, w, h);
+      canvas.toBlob(
+        (b) => b ? resolve(b) : reject(new Error('toBlob failed')),
+        'image/jpeg',
+        quality
+      );
+    };
+    img.onerror = () => reject(new Error('Image load failed'));
+    img.src = rawUrl;
+  });
+}
 
 interface AdminPackagesTabProps {
   sessionCategories: SessionCategory[];
@@ -294,15 +329,17 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
                     <input value={editForm.image || ''} onChange={(e) => updateField('image', e.target.value || undefined)} placeholder="https://..." className={inputClass} />
                     <label className="shrink-0 py-2 px-3 bg-white/10 hover:bg-white/20 border border-[#D8C0A8] rounded text-[9px] font-mono text-white/70 hover:text-white uppercase tracking-widest cursor-pointer transition-all whitespace-nowrap">
                       {t('Subir', 'Upload')}
-                      <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                      <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
                         const file = e.target.files?.[0];
                         if (!file) return;
-                        const reader = new FileReader();
-                        reader.onload = (ev) => {
-                          const dataUrl = ev.target?.result as string;
-                          updateField('image', dataUrl);
-                        };
-                        reader.readAsDataURL(file);
+                        try {
+                          const blob = await compressToBlob(file);
+                          const id = `pkg-${editForm.id}-${Date.now()}`;
+                          const downloadUrl = await uploadImageBlob(`packages/${id}.jpg`, blob);
+                          updateField('image', downloadUrl);
+                        } catch (err) {
+                          console.error('Package image upload failed', err);
+                        }
                         e.target.value = '';
                       }} />
                     </label>
@@ -407,15 +444,17 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
                       </label>
                       <label className="p-1.5 text-white/40 hover:text-gold-400 cursor-pointer transition-colors" title={t('Subir imagen', 'Upload image')}>
                         <Upload size={12} />
-                        <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                        <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
                           const file = e.target.files?.[0];
                           if (!file) return;
-                          const reader = new FileReader();
-                          reader.onload = (ev) => {
-                            const dataUrl = ev.target?.result as string;
-                            setLocalPackages(prev => prev.map(p => p.id === pkg.id ? { ...p, image: dataUrl } : p));
-                          };
-                          reader.readAsDataURL(file);
+                          try {
+                            const blob = await compressToBlob(file);
+                            const id = `pkg-${pkg.id}-${Date.now()}`;
+                            const downloadUrl = await uploadImageBlob(`packages/${id}.jpg`, blob);
+                            setLocalPackages(prev => prev.map(p => p.id === pkg.id ? { ...p, image: downloadUrl } : p));
+                          } catch (err) {
+                            console.error('Package image upload failed', err);
+                          }
                           e.target.value = '';
                         }} />
                       </label>

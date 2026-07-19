@@ -343,6 +343,16 @@ vercel --prod
 Copia `.env.example` a `.env.local` y completa los valores antes de ejecutar la aplicación.  
 **Importante**: En Vercel, agrega todas las `VITE_FIREBASE_*` en Project Settings → Environment Variables para que Firebase funcione en producción.
 
+### Firebase Storage
+
+Las imágenes subidas desde el CMS se guardan en Firebase Storage y en Firestore solo se almacena su URL. Antes de desplegar, publica las reglas de Firestore y Storage:
+
+```bash
+npx firebase-tools deploy --only firestore:rules,storage
+```
+
+En Vercel, configura todas las variables `VITE_FIREBASE_*` para los entornos **Production**, **Preview** y **Development**, y ejecuta un redeploy después de guardarlas. Sin esas variables, Vite compila Firebase sin configuración y la aplicación muestra los datos de respaldo locales.
+
 ---
 
 ## Licencia

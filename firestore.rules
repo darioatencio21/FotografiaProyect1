@@ -37,6 +37,16 @@ service cloud.firestore {
       allow write: if isValidId(faqId);
     }
 
+    match /photography_packages/{pkgId} {
+      allow read: if true;
+      allow write: if isValidId(pkgId);
+    }
+
+    match /session_categories/{catId} {
+      allow read: if true;
+      allow write: if isValidId(catId);
+    }
+
     // Clients can submit bookings and messages
     match /bookings/{bookingId} {
       allow read: if true;

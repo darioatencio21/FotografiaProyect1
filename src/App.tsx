@@ -232,6 +232,7 @@ export default function App() {
   const t = TRANSLATIONS[lang];
 
   const [seoAnalytics, setSeoAnalytics] = useState<AnalyticsStats>(INITIAL_ANALYTICS);
+  const [bootstrapped, setBootstrapped] = useState(false);
 
   useEffect(() => {
     const unsub = onAuthChange((user) => {
@@ -358,7 +359,11 @@ export default function App() {
         await saveDocument('admin', 'config', { username: 'admin', password: 'admin123' });
       }
     }
-    syncFirestore().catch(console.error);
+    syncFirestore()
+      .catch(console.error)
+      .finally(() => {
+        if (!cancelled) setBootstrapped(true);
+      });
     return () => { cancelled = true; };
   }, []);
 
@@ -437,56 +442,56 @@ export default function App() {
 
   // Sync to LocalStorage whenever DB collections update (for offline-fallback cache layer)
   useEffect(() => {
-    localStorage.setItem('aurea_photos', JSON.stringify(photographs));
-  }, [photographs]);
+    if (bootstrapped) localStorage.setItem('aurea_photos', JSON.stringify(photographs));
+  }, [photographs, bootstrapped]);
 
   useEffect(() => {
-    localStorage.setItem('aurea_services', JSON.stringify(services));
-  }, [services]);
+    if (bootstrapped) localStorage.setItem('aurea_services', JSON.stringify(services));
+  }, [services, bootstrapped]);
 
   useEffect(() => {
-    localStorage.setItem('aurea_testimonials', JSON.stringify(testimonials));
-  }, [testimonials]);
+    if (bootstrapped) localStorage.setItem('aurea_testimonials', JSON.stringify(testimonials));
+  }, [testimonials, bootstrapped]);
 
   useEffect(() => {
-    localStorage.setItem('aurea_blog', JSON.stringify(blogPosts));
-  }, [blogPosts]);
+    if (bootstrapped) localStorage.setItem('aurea_blog', JSON.stringify(blogPosts));
+  }, [blogPosts, bootstrapped]);
 
   useEffect(() => {
-    localStorage.setItem('aurea_faqs', JSON.stringify(faqs));
-  }, [faqs]);
+    if (bootstrapped) localStorage.setItem('aurea_faqs', JSON.stringify(faqs));
+  }, [faqs, bootstrapped]);
 
   useEffect(() => {
-    localStorage.setItem('aurea_bookings', JSON.stringify(bookings));
-  }, [bookings]);
+    if (bootstrapped) localStorage.setItem('aurea_bookings', JSON.stringify(bookings));
+  }, [bookings, bootstrapped]);
 
   useEffect(() => {
-    localStorage.setItem('aurea_messages', JSON.stringify(messages));
-  }, [messages]);
+    if (bootstrapped) localStorage.setItem('aurea_messages', JSON.stringify(messages));
+  }, [messages, bootstrapped]);
 
   useEffect(() => {
-    localStorage.setItem('aurea_seo', JSON.stringify(seo));
-  }, [seo]);
+    if (bootstrapped) localStorage.setItem('aurea_seo', JSON.stringify(seo));
+  }, [seo, bootstrapped]);
 
   useEffect(() => {
-    localStorage.setItem('aurea_profile', JSON.stringify(profile));
-  }, [profile]);
+    if (bootstrapped) localStorage.setItem('aurea_profile', JSON.stringify(profile));
+  }, [profile, bootstrapped]);
 
   useEffect(() => {
-    localStorage.setItem('aurea_booking_config', JSON.stringify(bookingConfig));
-  }, [bookingConfig]);
+    if (bootstrapped) localStorage.setItem('aurea_booking_config', JSON.stringify(bookingConfig));
+  }, [bookingConfig, bootstrapped]);
 
   useEffect(() => {
-    localStorage.setItem('aurea_email_config', JSON.stringify(emailConfig));
-  }, [emailConfig]);
+    if (bootstrapped) localStorage.setItem('aurea_email_config', JSON.stringify(emailConfig));
+  }, [emailConfig, bootstrapped]);
 
   useEffect(() => {
-    localStorage.setItem('aurea_session_categories', JSON.stringify(sessionCategories));
-  }, [sessionCategories]);
+    if (bootstrapped) localStorage.setItem('aurea_session_categories', JSON.stringify(sessionCategories));
+  }, [sessionCategories, bootstrapped]);
 
   useEffect(() => {
-    localStorage.setItem('aurea_packages', JSON.stringify(packages));
-  }, [packages]);
+    if (bootstrapped) localStorage.setItem('aurea_packages', JSON.stringify(packages));
+  }, [packages, bootstrapped]);
 
   useEffect(() => {
     localStorage.setItem('aurea_favorites', JSON.stringify(favorites));

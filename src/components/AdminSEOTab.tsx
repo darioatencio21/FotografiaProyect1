@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { RefreshCw, UploadCloud } from 'lucide-react';
 import { SEOMetadata, ActiveLanguage } from '../types';
 import { sanitizeObject } from '../lib/sanitize';
+import { uploadImageBlob } from '../lib/firebase';
 
 interface AdminSEOTabProps {
   seo: SEOMetadata;
@@ -24,34 +25,49 @@ function AdminSEOTab({ seo, onUpdateSeo, triggerAlert, lang }: AdminSEOTabProps)
     triggerAlert('SEO Schema, Meta tags and Robots.txt deployed to production');
   }, [seoForm, onUpdateSeo, triggerAlert]);
 
-  const handleImageUpload = useCallback((field: 'heroImageLeft' | 'heroImageRight' | 'ogImage') => (file: File) => {
+  const handleImageUpload = useCallback((field: 'heroImageLeft' | 'heroImageRight' | 'ogImage') => async (file: File) => {
     triggerAlert('Optimizing image...');
-    const reader = new FileReader();
-    reader.onload = (event) => {
+    try {
+      const rawUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target?.result as string);
+        reader.onerror = () => reject(new Error('FileReader failed'));
+        reader.readAsDataURL(file);
+      });
       const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const max_size = 1600;
-        let width = img.width;
-        let height = img.height;
-        if (width > height) {
-          if (width > max_size) { height *= max_size / width; width = max_size; }
-        } else {
-          if (height > max_size) { width *= max_size / height; height = max_size; }
-        }
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(img, 0, 0, width, height);
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-          setSeoForm(prev => ({ ...prev, [field]: dataUrl }));
-          triggerAlert('Image loaded! Click "Deploy Metadata" to save.');
-        }
-      };
-      img.src = event.target?.result as string;
-    };
-    reader.readAsDataURL(file);
+      const { blob } = await new Promise<{ blob: Blob }>((resolve, reject) => {
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const max_size = 1600;
+          let w = img.width;
+          let h = img.height;
+          if (w > h) {
+            if (w > max_size) { h *= max_size / w; w = max_size; }
+          } else {
+            if (h > max_size) { w *= max_size / h; h = max_size; }
+          }
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) { reject(new Error('Canvas context failed')); return; }
+          ctx.drawImage(img, 0, 0, w, h);
+          canvas.toBlob(
+            (b) => b ? resolve({ blob: b }) : reject(new Error('toBlob failed')),
+            'image/jpeg',
+            0.9
+          );
+        };
+        img.onerror = () => reject(new Error('Image load failed'));
+        img.src = rawUrl;
+      });
+      const id = `seo-${field}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+      const downloadUrl = await uploadImageBlob(`seo/${id}.jpg`, blob);
+      setSeoForm(prev => ({ ...prev, [field]: downloadUrl }));
+      triggerAlert('Image loaded! Click "Deploy Metadata" to save.');
+    } catch (err) {
+      console.error('SEO image upload failed', err);
+      triggerAlert('Error uploading image. Please try again.');
+    }
   }, [triggerAlert]);
 
   return (

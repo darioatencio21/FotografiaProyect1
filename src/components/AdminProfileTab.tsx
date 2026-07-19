@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { Check, UploadCloud } from 'lucide-react';
 import { PhotographerProfile, ActiveLanguage } from '../types';
 import { sanitizeObject } from '../lib/sanitize';
+import { uploadImageBlob } from '../lib/firebase';
 
 interface AdminProfileTabProps {
   profile: PhotographerProfile;
@@ -24,44 +25,50 @@ function AdminProfileTab({ profile, onUpdateProfile, triggerAlert, lang }: Admin
     triggerAlert('✓ Biografía y datos de perfil guardados correctamente.');
   }, [profileForm, onUpdateProfile, triggerAlert]);
 
-  const handleAvatarImageUpload = useCallback((file: File) => {
+  const handleAvatarImageUpload = useCallback(async (file: File) => {
     triggerAlert('Optimizando foto de perfil para el portafolio...');
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const rawUrl = event.target?.result as string;
+    try {
+      const rawUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target?.result as string);
+        reader.onerror = () => reject(new Error('FileReader failed'));
+        reader.readAsDataURL(file);
+      });
       const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const max_size = 800;
-        let width = img.width;
-        let height = img.height;
-        if (width > height) {
-          if (width > max_size) { height *= max_size / width; width = max_size; }
-        } else {
-          if (height > max_size) { width *= max_size / height; height = max_size; }
-        }
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(img, 0, 0, width, height);
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-          setProfileForm(prev => ({ ...prev, avatarUrl: dataUrl }));
-          triggerAlert('✓ Foto de perfil optimizada con éxito! Presiona "Guardar Perfil" para persistir.');
-        } else {
-          setProfileForm(prev => ({ ...prev, avatarUrl: rawUrl }));
-          triggerAlert('✓ Foto cargada correctamente (sin optimización).');
-        }
-      };
-      img.onerror = () => {
-        triggerAlert('Error al cargar la imagen. Intenta con otro archivo.');
-      };
-      img.src = rawUrl;
-    };
-    reader.onerror = () => {
-      triggerAlert('Error al leer el archivo. Intenta de nuevo.');
-    };
-    reader.readAsDataURL(file);
+      const { blob, width, height } = await new Promise<{ blob: Blob; width: number; height: number }>((resolve, reject) => {
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const max_size = 800;
+          let w = img.width;
+          let h = img.height;
+          if (w > h) {
+            if (w > max_size) { h *= max_size / w; w = max_size; }
+          } else {
+            if (h > max_size) { w *= max_size / h; h = max_size; }
+          }
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) { reject(new Error('Canvas context failed')); return; }
+          ctx.drawImage(img, 0, 0, w, h);
+          canvas.toBlob(
+            (b) => b ? resolve({ blob: b, width: w, height: h }) : reject(new Error('toBlob failed')),
+            'image/jpeg',
+            0.85
+          );
+        };
+        img.onerror = () => reject(new Error('Image load failed'));
+        img.src = rawUrl;
+      });
+      void width; void height;
+      const id = `avatar-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+      const downloadUrl = await uploadImageBlob(`profile/${id}.jpg`, blob);
+      setProfileForm(prev => ({ ...prev, avatarUrl: downloadUrl }));
+      triggerAlert('✓ Foto de perfil optimizada con éxito! Presiona "Guardar Perfil" para persistir.');
+    } catch (err) {
+      console.error('Avatar upload failed', err);
+      triggerAlert('Error al subir la foto. Intenta con otro archivo.');
+    }
   }, [triggerAlert]);
 
   return (

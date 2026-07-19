@@ -17,6 +17,13 @@ import {
   onAuthStateChanged,
   User
 } from 'firebase/auth';
+import {
+  getStorage,
+  ref as storageRef,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject
+} from 'firebase/storage';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -31,6 +38,27 @@ const app = initializeApp(firebaseConfig);
 
 export const db = getFirestore(app);
 export const auth = getAuth(app);
+export const storage = getStorage(app);
+
+export async function uploadImageBlob(
+  path: string,
+  blob: Blob
+): Promise<string> {
+  const ref = storageRef(storage, path);
+  await uploadBytes(ref, blob, { contentType: blob.type || 'image/jpeg' });
+  return await getDownloadURL(ref);
+}
+
+export async function deleteImageByUrl(url: string): Promise<void> {
+  try {
+    if (!url || !url.startsWith('https://')) return;
+    const decoded = decodeURIComponent(url.split('/o/')[1]?.split('?')[0] || '');
+    if (!decoded) return;
+    await deleteObject(storageRef(storage, decoded));
+  } catch (err) {
+    console.warn('Storage delete skipped:', err);
+  }
+}
 
 export const SEEDED_FLAG_KEY = 'aurea_firestore_seeded';
 
@@ -46,16 +74,22 @@ export async function getCollectionWithFallback<T extends { id: string }>(
       const seededFlag = localStorage.getItem(SEEDED_FLAG_KEY);
       if (!seededFlag) {
         console.log(`Collection "${collectionPath}" is empty. Seeding with fallback data...`);
-        const batch = writeBatch(db);
-        for (const item of fallbackData) {
-          const docRef = doc(db, collectionPath, item.id);
-          batch.set(docRef, item);
+        try {
+          const batch = writeBatch(db);
+          for (const item of fallbackData) {
+            const docRef = doc(db, collectionPath, item.id);
+            batch.set(docRef, item as Record<string, unknown>);
+          }
+          await batch.commit();
+          localStorage.setItem(SEEDED_FLAG_KEY, 'true');
+        } catch (seedErr: any) {
+          console.warn(
+            `⚠️ Seed skipped for "${collectionPath}" (likely doc size > 1 MiB). Run "npm run seed" from a privileged machine instead.`,
+            seedErr?.code || seedErr?.message || seedErr
+          );
         }
-        await batch.commit();
-        localStorage.setItem(SEEDED_FLAG_KEY, 'true');
       }
 
-      // Read back from Firestore to get real data instead of returning hardcoded fallback
       const freshSnapshot = await getDocs(colRef);
       const freshItems: T[] = [];
       freshSnapshot.forEach((d) => {

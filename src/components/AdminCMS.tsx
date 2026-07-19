@@ -17,12 +17,46 @@ import {
   ClientAccount, ProofPhoto, SessionCategory, PhotographyPackage
 } from '../types';
 import { sanitizeString, sanitizeEmail, sanitizeObject } from '../lib/sanitize';
-import { db } from '../lib/firebase';
+import { db, uploadImageBlob, deleteImageByUrl } from '../lib/firebase';
 import { onSnapshot, collection, query, orderBy } from 'firebase/firestore';
 
 import AdminSEOTab from './AdminSEOTab';
 import AdminProfileTab from './AdminProfileTab';
 import AdminPackagesTab from './AdminPackagesTab';
+
+function compressImage(file: File, maxSize = 1600, quality = 0.85): Promise<{ blob: Blob; width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        if (width > height) {
+          if (width > maxSize) { height *= maxSize / width; width = maxSize; }
+        } else if (height > maxSize) {
+          width *= maxSize / height;
+          height = maxSize;
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) { reject(new Error('Canvas context failed')); return; }
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(
+          (blob) => blob ? resolve({ blob, width, height }) : reject(new Error('Canvas toBlob failed')),
+          'image/jpeg',
+          quality
+        );
+      };
+      img.onerror = () => reject(new Error('Image load failed'));
+      img.src = event.target?.result as string;
+    };
+    reader.onerror = () => reject(new Error('FileReader failed'));
+    reader.readAsDataURL(file);
+  });
+}
 
 interface AdminCMSProps {
   photographs: Photograph[];
@@ -217,79 +251,90 @@ export default function AdminCMS({
     }
   };
 
+  const compressImage = (file: File, maxSize = 1600, quality = 0.85): Promise<{ blob: Blob; width: number; height: number }> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          if (width > height) {
+            if (width > maxSize) {
+              height *= maxSize / width;
+              width = maxSize;
+            }
+          } else {
+            if (height > maxSize) {
+              width *= maxSize / height;
+              height = maxSize;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            reject(new Error('Canvas context failed'));
+            return;
+          }
+          ctx.drawImage(img, 0, 0, width, height);
+          canvas.toBlob(
+            (blob) => {
+              if (!blob) {
+                reject(new Error('Canvas toBlob failed'));
+                return;
+              }
+              resolve({ blob, width, height });
+            },
+            'image/jpeg',
+            quality
+          );
+        };
+        img.onerror = () => reject(new Error('Image load failed'));
+        img.src = event.target?.result as string;
+      };
+      reader.onerror = () => reject(new Error('FileReader failed'));
+      reader.readAsDataURL(file);
+    });
+  };
+
   const processFiles = async (files: FileList) => {
     const filesCount = files.length;
     triggerAlert(`Optimizing ${filesCount} images: Auto-converting, generating thumbnails & AI Alt Tags...`);
 
-    const promises = Array.from(files).map((file, index) => {
-      return new Promise<Photograph>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const img = new Image();
-          img.onload = () => {
-            const canvas = document.createElement('canvas');
-            const max_size = 1000; // Crisp but compact
-            let width = img.width;
-            let height = img.height;
-
-            if (width > height) {
-              if (width > max_size) {
-                height *= max_size / width;
-                width = max_size;
-              }
-            } else {
-              if (height > max_size) {
-                width *= max_size / height;
-                height = max_size;
-              }
-            }
-
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-            if (ctx) {
-              ctx.drawImage(img, 0, 0, width, height);
-              const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-
-              const randomId = `photo-${Date.now()}-${index}-${Math.floor(Math.random() * 1000)}`;
-              resolve({
-                id: randomId,
-                url: dataUrl,
-                title: file.name.split('.')[0] || 'Unfinished Frame',
-                category: 'retrato',
-                description: 'Optimized WebP master uploaded via back-office CMS.',
-                exif: {
-                  camera: 'Leica M11 Rangefinder',
-                  lens: 'Summilux-M 35mm f/1.4 ASPH.',
-                  focalLength: '35mm',
-                  aperture: 'f/2.0',
-                  shutterSpeed: '1/500s',
-                  iso: '100',
-                  location: 'Madrid, Spain'
-                },
-                tags: ['Portfolio', 'New Upload', 'WebP Optimized'],
-                colors: ['#0B0B0B', '#C7A962', '#EFEFEF'],
-                isFavorite: false,
-                isFeatured: false,
-                resolution: `${Math.round(width)} x ${Math.round(height)}`,
-                size: `${Math.round(dataUrl.length / 1024)} KB`
-              });
-            } else {
-              reject(new Error('Canvas context failed'));
-            }
-          };
-          img.onerror = () => reject(new Error('Image load failed'));
-          img.src = event.target?.result as string;
-        };
-        reader.onerror = () => reject(new Error('FileReader failed'));
-        reader.readAsDataURL(file);
-      });
-    });
-
     try {
-      const newPhotos = await Promise.all(promises);
-      onUpdatePhotographs([...newPhotos, ...photographs]);
-      triggerAlert(`${newPhotos.length} photos deployed into index catalog.`);
+      const uploaded: Photograph[] = [];
+      for (let index = 0; index < files.length; index++) {
+        const file = files[index];
+        const { blob, width, height } = await compressImage(file);
+        const id = `photo-${Date.now()}-${index}-${Math.floor(Math.random() * 1000)}`;
+        const downloadUrl = await uploadImageBlob(`photographs/${id}.jpg`, blob);
+        uploaded.push({
+          id,
+          url: downloadUrl,
+          title: file.name.split('.')[0] || 'Unfinished Frame',
+          category: 'retrato',
+          description: 'Optimized master uploaded via back-office CMS.',
+          exif: {
+            camera: 'Leica M11 Rangefinder',
+            lens: 'Summilux-M 35mm f/1.4 ASPH.',
+            focalLength: '35mm',
+            aperture: 'f/2.0',
+            shutterSpeed: '1/500s',
+            iso: '100',
+            location: 'Madrid, Spain'
+          },
+          tags: ['Portfolio', 'New Upload', 'WebP Optimized'],
+          colors: ['#0B0B0B', '#C7A962', '#EFEFEF'],
+          isFavorite: false,
+          isFeatured: false,
+          resolution: `${Math.round(width)} x ${Math.round(height)}`,
+          size: `${Math.round(blob.size / 1024)} KB`
+        });
+      }
+      onUpdatePhotographs([...uploaded, ...photographs]);
+      triggerAlert(`${uploaded.length} photos deployed into index catalog.`);
     } catch (err) {
       console.error('Error processing uploaded images:', err);
       triggerAlert('Error processing uploaded images. Please try again.');
@@ -511,7 +556,7 @@ export default function AdminCMS({
 
   const handleMultipleFilesUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
-    
+
     triggerAlert(t('Optimizando imágenes para la web...', 'Optimizing images for web...'));
     const addedPhotos: ProofPhoto[] = [];
 
@@ -520,50 +565,14 @@ export default function AdminCMS({
       if (!file.type.startsWith('image/')) continue;
 
       try {
-        const compressedBase64 = await new Promise<string>((resolve) => {
-          const reader = new FileReader();
-          reader.onload = (event) => {
-            const img = new Image();
-            img.onload = () => {
-              const canvas = document.createElement('canvas');
-              const maxDim = 1200; // Medida ideal para web/móvil
-              let width = img.width;
-              let height = img.height;
-
-              if (width > maxDim || height > maxDim) {
-                if (width > height) {
-                  height = Math.round((height * maxDim) / width);
-                  width = maxDim;
-                } else {
-                  width = Math.round((width * maxDim) / height);
-                  height = maxDim;
-                }
-              }
-
-              canvas.width = width;
-              canvas.height = height;
-
-              const ctx = canvas.getContext('2d');
-              if (ctx) {
-                ctx.drawImage(img, 0, 0, width, height);
-                // Compresión a JPEG con calidad 75% para reducir drásticamente el peso manteniendo alta nitidez visual
-                const dataUrl = canvas.toDataURL('image/jpeg', 0.75);
-                resolve(dataUrl);
-              } else {
-                resolve(event.target?.result as string);
-              }
-            };
-            img.src = event.target?.result as string;
-          };
-          reader.readAsDataURL(file);
-        });
-
+        const { blob } = await compressImage(file, 1200, 0.75);
         const title = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
         const photoId = `proof-${Date.now()}-${i}-${Math.random().toString(36).substring(2, 5)}`;
-        
+        const downloadUrl = await uploadImageBlob(`proofs/${photoId}.jpg`, blob);
+
         const newPhoto: ProofPhoto = {
           id: photoId,
-          url: compressedBase64,
+          url: downloadUrl,
           title: title,
           sharpness: 92 + Math.floor(Math.random() * 8),
           thirdsAlign: 88 + Math.floor(Math.random() * 12),
@@ -2859,15 +2868,17 @@ function SessionCategoriesEditor({ categories, onUpdate, triggerAlert, lang }: S
                   <input value={editingCat.image} onChange={(e) => updateField('image', e.target.value)} placeholder="https://..." className={inputClass} />
                   <label className="shrink-0 py-2 px-3 bg-white/10 hover:bg-white/20 border border-[#D8C0A8] rounded text-[9px] font-mono text-white/70 hover:text-white uppercase tracking-widest cursor-pointer transition-all whitespace-nowrap">
                     {t('Subir', 'Upload')}
-                    <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                    <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (!file) return;
-                      const reader = new FileReader();
-                      reader.onload = (ev) => {
-                        const dataUrl = ev.target?.result as string;
-                        updateField('image', dataUrl);
-                      };
-                      reader.readAsDataURL(file);
+                      try {
+                        const { blob } = await compressImage(file, 1200, 0.8);
+                        const id = `cat-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+                        const downloadUrl = await uploadImageBlob(`session_categories/${id}.jpg`, blob);
+                        updateField('image', downloadUrl);
+                      } catch (err) {
+                        console.error('Category image upload failed', err);
+                      }
                       e.target.value = '';
                     }} />
                   </label>
@@ -2928,15 +2939,17 @@ function SessionCategoriesEditor({ categories, onUpdate, triggerAlert, lang }: S
                   <span className="text-[8px] font-mono text-white/40">{t('ON', 'ON')}</span>
                 </label>
                 <label className="p-1.5 text-white/40 hover:text-gold-400 cursor-pointer transition-colors" title={t('Subir imagen', 'Upload image')}>
-                  <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                  <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
                     const file = e.target.files?.[0];
                     if (!file) return;
-                    const reader = new FileReader();
-                    reader.onload = (ev) => {
-                      const dataUrl = ev.target?.result as string;
-                      setLocalCats(prev => prev.map(c => c.id === cat.id ? { ...c, image: dataUrl } : c));
-                    };
-                    reader.readAsDataURL(file);
+                    try {
+                      const { blob } = await compressImage(file, 1200, 0.8);
+                      const id = `cat-${cat.id}-${Date.now()}`;
+                      const downloadUrl = await uploadImageBlob(`session_categories/${id}.jpg`, blob);
+                      setLocalCats(prev => prev.map(c => c.id === cat.id ? { ...c, image: downloadUrl } : c));
+                    } catch (err) {
+                      console.error('Category image upload failed', err);
+                    }
                     e.target.value = '';
                   }} />
                   <Upload size={12} />
