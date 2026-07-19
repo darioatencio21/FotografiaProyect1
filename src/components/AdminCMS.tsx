@@ -17,8 +17,7 @@ import {
   ClientAccount, ProofPhoto, SessionCategory, PhotographyPackage
 } from '../types';
 import { sanitizeString, sanitizeEmail, sanitizeUrl, sanitizeObject } from '../lib/sanitize';
-import { db, uploadImageBlob, deleteImageByUrl } from '../lib/firebase';
-import { onSnapshot, collection, query, orderBy } from 'firebase/firestore';
+import { supabase, uploadImageBlob, deleteImageByUrl } from '../lib/db';
 
 import AdminSEOTab from './AdminSEOTab';
 import AdminProfileTab from './AdminProfileTab';
@@ -154,20 +153,24 @@ export default function AdminCMS({
   const [unseenBookings, setUnseenBookings] = useState(0);
   const seenBookingIds = useRef<Set<string>>(new Set());
 
-  // Firestore real-time listener for new bookings
+  // Real-time subscription for new bookings
   useEffect(() => {
-    const q = query(collection(db, 'bookings'), orderBy('createdAt', 'desc'));
-    const unsub = onSnapshot(q, (snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        if (change.type === 'added') {
-          const id = change.doc.id;
-          if (!seenBookingIds.current.has(id)) {
+    if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+    const channel = supabase
+      .channel('bookings-changes')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'bookings' },
+        (payload) => {
+          const newBooking = payload.new as Record<string, any>;
+          const id = newBooking.id;
+          if (id && !seenBookingIds.current.has(id)) {
             seenBookingIds.current.add(id);
             setUnseenBookings(prev => prev + 1);
-            const data = change.doc.data() as Booking;
-            const cName = data.clientName || 'Alguien';
+            const cName = newBooking.clientname || 'Alguien';
             triggerAlert(`📅 ¡Nueva reserva de ${cName}!`);
-            // Browser Notification API
             if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
               new Notification('Nueva Reserva - Aurea Studio', {
                 body: `${cName} ha solicitado una sesión. Revisa la cola de reservas.`,
@@ -176,31 +179,29 @@ export default function AdminCMS({
             }
           }
         }
-      });
-    });
-    // Request notification permission on mount
-    if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
-      Notification.requestPermission();
-    }
-    return () => unsub();
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, []);
 
   // Real-time message notification state
   const [unseenMessages, setUnseenMessages] = useState(0);
   const seenMessageIds = useRef<Set<string>>(new Set());
 
-  // Firestore real-time listener for new messages
+  // Real-time subscription for new messages
   useEffect(() => {
-    const q = query(collection(db, 'messages'), orderBy('createdAt', 'desc'));
-    const unsub = onSnapshot(q, (snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        if (change.type === 'added') {
-          const id = change.doc.id;
-          if (!seenMessageIds.current.has(id)) {
+    const channel = supabase
+      .channel('messages-changes')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages' },
+        (payload) => {
+          const newMsg = payload.new as Record<string, any>;
+          const id = newMsg.id;
+          if (id && !seenMessageIds.current.has(id)) {
             seenMessageIds.current.add(id);
             setUnseenMessages(prev => prev + 1);
-            const data = change.doc.data() as Message;
-            const cName = data.name || 'Alguien';
+            const cName = newMsg.name || 'Alguien';
             triggerAlert(`✉️ ¡Nuevo mensaje de ${cName}!`);
             if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
               new Notification('Nuevo Mensaje - Aurea Studio', {
@@ -210,9 +211,9 @@ export default function AdminCMS({
             }
           }
         }
-      });
-    });
-    return () => unsub();
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, []);
 
   // Client Account management state
@@ -650,6 +651,11 @@ export default function AdminCMS({
             >
               <Calendar size={12} />
               <span className="flex-1">{t('Cola de Reservas', 'Bookings Queue', 'Fila de Reservas')}</span>
+              {bookings.filter(b => b.status === 'pending').length > 0 && (
+                <span className="bg-gold-500 text-dark text-[8px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
+                  {bookings.filter(b => b.status === 'pending').length}
+                </span>
+              )}
               {unseenBookings > 0 && (
                 <span className="bg-red-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
                   {unseenBookings}
@@ -684,7 +690,12 @@ export default function AdminCMS({
               }`}
             >
               <MessageSquare size={12} />
-              <span className="flex-1">{t('Bandeja de Entrada', 'Inbox', 'Caixa de Entrada')} ({messages.filter(m=>!m.isRead).length})</span>
+              <span className="flex-1">{t('Bandeja de Entrada', 'Inbox', 'Caixa de Entrada')}</span>
+              {messages.filter(m => !m.isRead).length > 0 && (
+                <span className="bg-gold-500 text-dark text-[8px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
+                  {messages.filter(m => !m.isRead).length}
+                </span>
+              )}
               {unseenMessages > 0 && (
                 <span className="bg-red-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
                   {unseenMessages}
@@ -2696,7 +2707,7 @@ export default function AdminCMS({
                     { id: 'bookings', icon: Calendar, label: t('Cola de Reservas', 'Bookings Queue', 'Fila de Reservas') },
                     { id: 'packages', icon: ShoppingBag, label: t('Paquetes Fotográficos', 'Photography Packages', 'Pacotes Fotográficos') },
                     { id: 'session-categories', icon: Sliders, label: t('Tipos de Sesión', 'Session Types', 'Tipos de Sessão') },
-                    { id: 'messages', icon: MessageSquare, label: `${t('Bandeja de Entrada', 'Inbox', 'Caixa de Entrada')} (${messages.filter(m=>!m.isRead).length})` },
+                    { id: 'messages', icon: MessageSquare, label: t('Bandeja de Entrada', 'Inbox', 'Caixa de Entrada') },
                     { id: 'seo', icon: FileCode, label: t('Configuración SEO', 'SEO Schema', 'Configuração SEO') },
                     { id: 'profile', icon: User, label: t('Biografía y Perfil', 'Biography & Profile', 'Biografia e Perfil') },
                     { id: 'clients', icon: Users, label: t('Clientes y Galerías', 'Clients & Galleries', 'Clientes e Galerias') },
@@ -2719,9 +2730,19 @@ export default function AdminCMS({
                       >
                         <Icon size={16} />
                         <span className="flex-1">{tab.label}</span>
+                        {tab.id === 'bookings' && bookings.filter(b => b.status === 'pending').length > 0 && (
+                          <span className="bg-gold-500 text-dark text-[8px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
+                            {bookings.filter(b => b.status === 'pending').length}
+                          </span>
+                        )}
                         {tab.id === 'bookings' && unseenBookings > 0 && (
                           <span className="bg-red-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
                             {unseenBookings}
+                          </span>
+                        )}
+                        {tab.id === 'messages' && messages.filter(m => !m.isRead).length > 0 && (
+                          <span className="bg-gold-500 text-dark text-[8px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
+                            {messages.filter(m => !m.isRead).length}
                           </span>
                         )}
                         {tab.id === 'messages' && unseenMessages > 0 && (

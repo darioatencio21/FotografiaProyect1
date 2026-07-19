@@ -1,6 +1,6 @@
 # Miriam Campos Photography
 
-> Plataforma profesional de portafolio y suite administrativa para un estudio fotográfico de lujo. Construida como una Single Page Application (SPA) con React, TypeScript y Firebase.
+> Plataforma profesional de portafolio y suite administrativa para un estudio fotográfico de lujo. Construida como una Single Page Application (SPA) con React, TypeScript y Supabase.
 
 ---
 
@@ -25,7 +25,7 @@
 
 Miriam Campos Photography es una aplicación web completa que funciona como **portafolio público interactivo** y como **suite de gestión empresarial** para un estudio fotográfico de alta gama con estética editorial premium. Permite a los visitantes explorar galerías de fotos, reservar sesiones en un flujo de 2 pasos (elegir tipo de sesión → ver paquetes), contactar al estudio y acceder a un portal privado de pruebas mediante links compartibles. Del lado administrativo, incluye un CMS completo con dashboard de analytics, gestión de contenido, cola de reservas, bandeja de mensajes con notificaciones en tiempo real, categorías de sesión, paquetes fotográficos configurables y administración de cuentas de clientes.
 
-El proyecto está diseñado para desplegarse en **Vercel** con Firestore como base de datos en tiempo real.
+El proyecto está diseñado para desplegarse en **Vercel** con Supabase (PostgreSQL + Storage + Auth) como backend.
 
 ---
 
@@ -59,17 +59,17 @@ El proyecto está diseñado para desplegarse en **Vercel** con Firestore como ba
 ## Funcionalidades
 
 - **Portafolio interactivo** — Galería masonry con filtros por categoría (16 categorías), búsqueda multilingual y lightbox a pantalla completa con descarga.
-- **Sistema de reservas en 2 pasos** — Selección de tipo de sesión → paquetes por categoría, con nota de gastos de viaje por paquete. Formulario multi-paso con fecha, horario y datos de contacto.
+- **Sistema de reservas en 2 pasos** — Selección de tipo de sesión → paquetes por categoría, con nota de gastos de viaje por paquete. Formulario simplificado con fecha, horario y datos de contacto.
 - **Portal de cliente con links compartibles** — Área protegida por código de acceso donde los clientes pueden ver, seleccionar y descargar sus fotos, y solicitar impresiones. Cada cliente tiene un link directo tipo `?gallery=PASSCODE` que puede compartirse por WhatsApp/email.
 - **Sección Sobre mí editorial** — Diseño tipo revista con fotografía en columna, biografía fluida, línea de tiempo vertical con hitos profesionales reales (2010–2025) y filosofía con 3 pilares.
 - **CMS administrativo** — Dashboard con analytics, CRUD completo de fotografías (con drag & drop y compresión), servicios, testimonios, blog, FAQ, mensajería, SEO, perfil del fotógrafo, categorías de sesión, paquetes fotográficos (agrupados por categoría con upload de imágenes), cuentas de clientes con fotos de prueba, editor de sesiones y notificaciones en tiempo real. Con sidebar responsive y botón flotante para navegación móvil.
-- **Notificaciones en tiempo real** — Badge con contador de no leídos en sidebar, toast dorado y notificación de escritorio (API Notification) para nuevas reservas y mensajes. Marcado automático como leído al hacer clic.
+- **Notificaciones en tiempo real** — Badge con contador de pendientes por estado (reservas `pending` y mensajes sin leer) en sidebar desktop y drawer mobile, toast dorado y notificación de escritorio (API Notification) para nuevas reservas y mensajes vía Supabase Realtime. Marcado automático como leído al hacer clic.
 - **Checkout simulado** — Modal de pago con Stripe simulado, con animación de procesamiento y comprobante de transacción.
 - **Notificaciones por email** — Integración con EmailJS para notificaciones al administrador y auto-respuestas al cliente desde el formulario de contacto, reservas y envío de links de galería.
 - **Multi-idioma** — Soporte completo para Español, English y Português con cambio en tiempo real en toda la interfaz.
 - **Cursor personalizado** — Cursor animado con física Spring que cambia de estado sobre elementos interactivos.
 - **Navbar scrolleable** — Barra de navegación solid, menú mobile tipo drawer con apertura mediante pastilla deslizable dorada.
-- **Persistencia offline** — Datos cacheados en localStorage con prefijo `aurea_`. Firebase como fuente de verdad con sincronización en segundo plano y merge automático de campos nuevos.
+- **Persistencia offline** — Datos cacheados en localStorage con prefijo `aurea_`. Supabase como fuente de verdad con sincronización en segundo plano.
 
 ---
 
@@ -83,7 +83,9 @@ El proyecto está diseñado para desplegarse en **Vercel** con Firestore como ba
 | Estilos             | Tailwind CSS                        | 4       |
 | Animaciones         | Motion (ex Framer Motion)           | 12      |
 | Iconos              | Lucide React                        | 0.546   |
-| Base de datos       | Firebase Firestore                  | —       |
+| Base de datos       | Supabase (PostgreSQL)               | —       |
+| Storage             | Supabase Storage                    | —       |
+| Auth                | Supabase Auth                       | —       |
 | Hosting             | Vercel                              | —       |
 | Email               | EmailJS                             | —       |
 | CI/CD               | Vercel (automático desde GitHub)    | —       |
@@ -94,38 +96,43 @@ El proyecto está diseñado para desplegarse en **Vercel** con Firestore como ba
 
 ```
 ├── public/
+├── supabase/
+│   └── migrations/
+│       └── 001_init.sql              # Esquema de tablas PostgreSQL + RLS
 ├── src/
-│   ├── App.tsx                   # Componente raíz: estado global, routing y lógica de datos
-│   ├── main.tsx                  # Punto de entrada de React
-│   ├── index.css                 # Configuración de Tailwind, tema (beige), fuentes y estilos globales
-│   ├── types.ts                  # Interfaces TypeScript para todos los modelos de datos
+│   ├── App.tsx                       # Componente raíz: estado global, routing y lógica de datos
+│   ├── main.tsx                      # Punto de entrada de React
+│   ├── index.css                     # Configuración de Tailwind, tema (beige), fuentes y estilos globales
+│   ├── types.ts                      # Interfaces TypeScript para todos los modelos de datos
 │   ├── components/
-│   │   ├── Header.tsx            # Barra de navegación con menú drawer, pastilla deslizable y selector de idioma
-│   │   ├── Footer.tsx            # Pie de página con newsletter, redes sociales y enlaces legales
-│   │   ├── CustomCursor.tsx      # Cursor animado personalizado con física Spring
-│   │   ├── Lightbox.tsx          # Visor de fotos a pantalla completa con EXIF y acciones
-│   │   ├── BookingCalendar.tsx   # Formulario de reserva en 4 pasos
-│   │   ├── ClientPortal.tsx      # Portal de pruebas protegido por código
-│   │   ├── AboutSection.tsx      # Sección Sobre mí con diseño editorial, timeline vertical y filosofía
-│   │   ├── AdminCMS.tsx          # Panel de administración completo
-│   │   ├── StripeCheckout.tsx    # Modal de pago simulado con Stripe
-│   │   ├── LegalViews.tsx        # Páginas de Política de Privacidad y Términos
-│   │   └── Logo.tsx              # Logotipo SVG del estudio
+│   │   ├── Header.tsx                # Barra de navegación con menú drawer, pastilla deslizable y selector de idioma
+│   │   ├── Footer.tsx                # Pie de página con newsletter, redes sociales y enlaces legales
+│   │   ├── CustomCursor.tsx          # Cursor animado personalizado con física Spring
+│   │   ├── Lightbox.tsx              # Visor de fotos a pantalla completa con EXIF y acciones
+│   │   ├── BookingCalendar.tsx       # Formulario de reserva en 3 pasos
+│   │   ├── ClientPortal.tsx          # Portal de pruebas protegido por código
+│   │   ├── AboutSection.tsx          # Sección Sobre mí con diseño editorial, timeline vertical y filosofía
+│   │   ├── AdminCMS.tsx              # Panel de administración completo
+│   │   ├── StripeCheckout.tsx        # Modal de pago simulado con Stripe
+│   │   ├── LegalViews.tsx            # Páginas de Política de Privacidad y Términos
+│   │   └── Logo.tsx                  # Logotipo SVG del estudio
 │   ├── lib/
-│   │   ├── firebase.ts           # Inicialización de Firebase y helpers CRUD
-│   │   └── sanitize.ts           # Funciones de sanitización de texto
+│   │   ├── supabase.ts               # Cliente Supabase (anon key)
+│   │   ├── db.ts                     # Capa CRUD: queries, storage, auth (reemplaza firebase.ts)
+│   │   └── sanitize.ts               # Funciones de sanitización de texto
 │   └── data/
-│       └── mockData.ts           # Datos de inicialización, fallback y diccionario multi-idioma
-├── firebase.json                 # Configuración de Firebase Hosting + Firestore
-├── firestore.rules               # Reglas de seguridad de Firestore
-├── .env.example                  # Plantilla de variables de entorno
-├── firebase-blueprint.json       # Schema de las colecciones de Firestore
-├── vercel.json                   # Configuración de deploy en Vercel
-├── vite.config.ts                # Configuración de Vite
-├── tsconfig.json                 # Configuración de TypeScript
-├── package.json                  # Dependencias y scripts
-├── index.html                    # Entry point HTML
-└── metadata.json                 # Metadatos de AI Studio
+│       └── mockData.ts               # Datos de inicialización, fallback y diccionario multi-idioma
+├── scripts/
+│   ├── seed.ts                       # Siembra datos iniciales (analytics) vía service_role
+│   ├── setup-buckets.ts              # Crea buckets de Storage en Supabase
+│   └── apply-migration.ts            # Aplica migración SQL (fallback)
+├── .env.example                      # Plantilla de variables de entorno
+├── vercel.json                       # Configuración de deploy en Vercel
+├── vite.config.ts                    # Configuración de Vite
+├── tsconfig.json                     # Configuración de TypeScript
+├── package.json                      # Dependencias y scripts
+├── index.html                        # Entry point HTML
+└── metadata.json                     # Metadatos de AI Studio
 ```
 
 ---
@@ -136,6 +143,7 @@ El proyecto está diseñado para desplegarse en **Vercel** con Firestore como ba
 
 - Node.js 18 o superior
 - npm
+- Proyecto en [Supabase](https://supabase.com) (gratuito, sin tarjeta de crédito)
 
 ### Instalación
 
@@ -149,7 +157,16 @@ npm install
 
 # Configurar variables de entorno
 cp .env.example .env.local
-# Editar .env.local con los valores correspondientes
+# Editar .env.local con VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY
+
+# Inicializar base de datos: pegar supabase/migrations/001_init.sql
+# en el SQL Editor de Supabase y ejecutar
+
+# Crear buckets de Storage
+npm run setup:buckets
+
+# (Opcional) sembrar analytics
+npm run seed
 
 # Iniciar servidor de desarrollo
 npm run dev
@@ -167,6 +184,8 @@ La aplicación estará disponible en `http://localhost:3000`.
 | `npm run build`      | Genera el build de producción en `dist/`      |
 | `npm run preview`    | Previsualiza el build de producción           |
 | `npm run lint`       | Ejecuta TypeScript type checking (`tsc --noEmit`) |
+| `npm run seed`       | Siembra analytics/stats via Supabase service_role |
+| `npm run setup:buckets` | Crea los buckets de Storage en Supabase    |
 
 ---
 
@@ -194,49 +213,65 @@ App.tsx
 ### Flujo de Datos
 
 ```
-Firestore (cloud)
+Supabase (PostgreSQL + Storage + Auth)
     │
     ├── getCollectionWithFallback() / getSingleDocument()
-    │   └── Si colección vacía → seed automático desde mockData → lee de Firestore
+    │   └── Si colección vacía → seed automático desde mockData
     │
     ▼
 App.tsx State + localStorage (caché offline, prefijo aurea_)
     │
     ├── Se renderiza la vista correspondiente
     │
-    └── Cualquier mutación → saveDocument() / syncCollection() → Firestore
+    └── Cualquier mutación → saveDocument() / syncCollection() → Supabase
 ```
 
-1. **Carga inicial**: `App.tsx` fetches todas las colecciones de Firestore mediante `getCollectionWithFallback()`.
-2. **Seeding automático**: Si Firestore está vacío, se seedea con los datos de `mockData.ts` y luego se lee de vuelta desde Firestore (no devuelve datos hardcodeados).
-3. **Fallback**: Solo si Firestore es inalcanzable (error de red o configuración) se usan los datos de `mockData.ts` como respaldo.
+1. **Carga inicial**: `App.tsx` fetches todas las tablas de Supabase mediante `getCollectionWithFallback()`.
+2. **Seeding automático**: Si una tabla está vacía, se seedea con los datos de `mockData.ts` y luego se lee de vuelta.
+3. **Fallback**: Solo si Supabase es inalcanzable (error de red) se usan los datos de `mockData.ts` como respaldo.
 4. **Caché offline**: Los datos se persisten en `localStorage` con claves con prefijo `aurea_`.
-5. **Sincronización**: Cada modificación (crear, editar, eliminar) llama a `saveDocument()` o `syncCollection()` para persistir en Firestore.
-6. **Admin CMS**: El panel administrativo realiza operaciones CRUD directas contra Firestore.
+5. **Sincronización**: Cada modificación (crear, editar, eliminar) llama a `saveDocument()` o `syncCollection()` para persistir en Supabase.
+6. **Admin CMS**: El panel administrativo realiza operaciones CRUD directas contra Supabase. Las notificaciones en tiempo real usan Supabase Realtime (`postgres_changes`).
 
-### Colecciones de Firestore
+### Tablas de Base de Datos
 
-| Colección            | Propósito                       |
-| -------------------- | ------------------------------- |
-| `photographs`        | Fotografías del portafolio       |
-| `services`           | Paquetes de servicio            |
-| `testimonials`       | Testimonios de clientes         |
-| `blogPosts`          | Artículos del blog              |
-| `faqs`               | Preguntas frecuentes            |
-| `bookings`           | Solicitudes de reserva          |
-| `messages`           | Mensajes de contacto            |
-| `clientAccounts`     | Cuentas de clientes             |
-| `photography_packages` | Paquetes fotográficos         |
-| `sessionCategories`  | Categorías de sesión            |
-| `seo/config`         | Metadatos SEO globales          |
-| `profile/photographer` | Perfil del fotógrafo          |
-| `bookingConfig/config` | Configuración de reservas     |
-| `emailConfig/config` | Configuración de EmailJS        |
+| Tabla                 | Propósito                       |
+| --------------------- | ------------------------------- |
+| `photographs`         | Fotografías del portafolio       |
+| `services`            | Paquetes de servicio            |
+| `testimonials`        | Testimonios de clientes         |
+| `blogposts`           | Artículos del blog              |
+| `faqs`                | Preguntas frecuentes            |
+| `bookings`            | Solicitudes de reserva          |
+| `messages`            | Mensajes de contacto            |
+| `clientaccounts`      | Cuentas de clientes             |
+| `photography_packages` | Paquetes fotográficos          |
+| `session_categories`  | Categorías de sesión            |
+| `seo`                 | Metadatos SEO globales          |
+| `profile`             | Perfil del fotógrafo            |
+| `bookingconfig`       | Configuración de reservas       |
+| `emailconfig`         | Configuración de EmailJS        |
+| `analytics`           | Estadísticas del dashboard      |
+
+### Almacenamiento (Storage)
+
+Las imágenes subidas desde el CMS se guardan en buckets de Supabase Storage:
+
+| Bucket                | Propósito                        |
+| --------------------- | -------------------------------- |
+| `photographs`         | Fotografías del portafolio       |
+| `proofs`              | Fotos de prueba para clientes    |
+| `profile`             | Avatar del fotógrafo             |
+| `seo`                 | Imágenes del hero y OG           |
+| `packages`            | Imágenes de paquetes             |
+| `session_categories`  | Thumbnails de categorías         |
+
+Todos los buckets son públicos (lectura) para que las URLs funcionen en el frontend. La escritura está protegida por autenticación.
 
 ### Autenticación
 
-- **Admin**: El acceso usa exclusivamente Firebase Authentication con el correo real del usuario. No se guardan credenciales ni indicadores de sesión administrativa en `localStorage`.
-- **Client Portal**: Protegido por código de acceso validado contra la colección `clientAccounts`. Acceso directo mediante link compartible con query param `?gallery=PASSCODE`.
+- **Admin**: El acceso usa exclusivamente Supabase Auth con el correo real del usuario. No se guardan credenciales ni indicadores de sesión administrativa en `localStorage`.
+- **Client Portal**: Protegido por código de acceso validado contra la tabla `clientaccounts`. Acceso directo mediante link compartible con query param `?gallery=PASSCODE`.
 
 ---
 
@@ -315,14 +350,8 @@ Desactiva el deploy automático por integración Git en Vercel para no publicar 
 Agregá estas en el dashboard (Project Settings → Environment Variables):
 
 ```
-VITE_FIREBASE_API_KEY
-VITE_FIREBASE_AUTH_DOMAIN
-VITE_FIREBASE_PROJECT_ID
-VITE_FIREBASE_STORAGE_BUCKET
-VITE_FIREBASE_MESSAGING_SENDER_ID
-VITE_FIREBASE_APP_ID
-VITE_FIREBASE_DATABASE_ID
-GEMINI_API_KEY (opcional)
+VITE_SUPABASE_URL
+VITE_SUPABASE_ANON_KEY
 APP_URL=https://tu-app.vercel.app
 ```
 
@@ -351,32 +380,18 @@ Si una clave se filtra, revócala inmediatamente en el proveedor, reemplázala e
 
 ## Variables de Entorno
 
-| Variable         | Descripción                       | Ejemplo                          |
-| ---------------- | --------------------------------- | -------------------------------- |
-| `VITE_FIREBASE_API_KEY` | API Key de Firebase           | `AIzaSy...`                      |
-| `VITE_FIREBASE_AUTH_DOMAIN` | Auth Domain de Firebase     | `proyecto.firebaseapp.com`       |
-| `VITE_FIREBASE_PROJECT_ID` | Project ID de Firebase       | `proyecto-de-fotografia-v1`     |
-| `VITE_FIREBASE_STORAGE_BUCKET` | Storage Bucket           | `proyecto.firebasestorage.app`   |
-| `VITE_FIREBASE_MESSAGING_SENDER_ID` | Sender ID           | `671464861989`                   |
-| `VITE_FIREBASE_APP_ID` | App ID de Firebase                 | `1:671464861989:web:...`         |
-| `VITE_FIREBASE_DATABASE_ID` | Database ID (Firestore)    | `(default)`                      |
-| `GEMINI_API_KEY` | Clave de API de Gemini (opcional)   | `AIzaSy...`                      |
-| `APP_URL`        | URL base de la aplicación         | `http://localhost:3000`          |
+| Variable                     | Descripción                              | Ejemplo                                       |
+| ---------------------------- | ---------------------------------------- | --------------------------------------------- |
+| `VITE_SUPABASE_URL`          | URL del proyecto Supabase                | `https://pkdzxqsplfeobhflgmyu.supabase.co`    |
+| `VITE_SUPABASE_ANON_KEY`     | Clave anónima (frontend)                 | `eyJhbGciOi...`                               |
+| `SUPABASE_SERVICE_ROLE_KEY`  | Clave service_role (solo scripts)        | `eyJhbGciOi...`                               |
+| `APP_URL`                    | URL base de la aplicación                | `http://localhost:3000`                        |
 
-Copia `.env.example` a `.env.local` y completa los valores antes de ejecutar la aplicación.  
-**Importante**: En Vercel, agrega todas las `VITE_FIREBASE_*` en Project Settings → Environment Variables para que Firebase funcione en producción.
+Copia `.env.example` a `.env.local` y completa los valores antes de ejecutar la aplicación.
 
-### Firebase Storage
+**Importante en Vercel**: Agrega `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` y `APP_URL` en Project Settings → Environment Variables para los entornos Production, Preview y Development.
 
-Las imágenes subidas desde el CMS se guardan en Firebase Storage y en Firestore solo se almacena su URL. Antes de desplegar, publica las reglas de Firestore y Storage:
-
-```bash
-npx firebase-tools deploy --only firestore:rules,storage
-```
-
-En Vercel, configura todas las variables `VITE_FIREBASE_*` para los entornos **Production**, **Preview** y **Development**, y ejecuta un redeploy después de guardarlas. Sin esas variables, Vite compila Firebase sin configuración y la aplicación muestra los datos de respaldo locales.
-
-La API key de Firebase usada por una aplicación web no es un secreto: forma parte de la configuración que llega al navegador. En Google Cloud Console, restringe la nueva key por sitios web (`localhost`, tu dominio de producción y los dominios de preview necesarios) y limita las APIs al uso de Firebase. Como la key anterior quedó expuesta en Git, revócala y reemplázala en Vercel y en `.env.local`.
+**Importante**: `SUPABASE_SERVICE_ROLE_KEY` tiene acceso completo a tu base de datos. Nunca la incluyas en código frontend ni la expongas al navegador. Solo se usa en scripts del lado del servidor (`scripts/seed.ts`, `scripts/setup-buckets.ts`).
 
 ---
 

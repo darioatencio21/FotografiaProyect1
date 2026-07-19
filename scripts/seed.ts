@@ -1,40 +1,22 @@
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
-import { initializeApp } from 'firebase/app';
-import { getFirestore, doc, setDoc } from 'firebase/firestore';
+import { createClient } from '@supabase/supabase-js';
 
-const requiredVars = [
-  'VITE_FIREBASE_API_KEY',
-  'VITE_FIREBASE_AUTH_DOMAIN',
-  'VITE_FIREBASE_PROJECT_ID',
-  'VITE_FIREBASE_STORAGE_BUCKET',
-  'VITE_FIREBASE_MESSAGING_SENDER_ID',
-  'VITE_FIREBASE_APP_ID'
-];
+const supabaseUrl = process.env.VITE_SUPABASE_URL;
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-for (const v of requiredVars) {
-  if (!process.env[v]) {
-    console.error(`Missing ${v}. Create a .env.local file with your Firebase config.`);
-    process.exit(1);
-  }
+if (!supabaseUrl || !serviceRoleKey) {
+  console.error('Missing VITE_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in .env.local');
+  process.exit(1);
 }
 
-const firebaseConfig = {
-  apiKey: process.env.VITE_FIREBASE_API_KEY,
-  authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.VITE_FIREBASE_APP_ID
-};
-
-const seedApp = initializeApp(firebaseConfig);
-const db = getFirestore(seedApp);
+const supabase = createClient(supabaseUrl, serviceRoleKey);
 
 async function seed() {
-  console.log('Seeding Firestore...\n');
+  console.log('Seeding analytics...\n');
 
-  await setDoc(doc(db, 'analytics', 'stats'), {
+  const { error } = await supabase.from('analytics').upsert({
+    id: 'stats',
     totalVisits: 14890,
     totalRevenue: 64200,
     bookingConversionRate: 4.8,
@@ -62,10 +44,15 @@ async function seed() {
       { day: 'Sat', count: 880 },
       { day: 'Sun', count: 820 }
     ]
-  }, { merge: true });
-  console.log('✓ analytics/stats created');
+  });
 
-  console.log('\nDone. Create the administrator in Firebase Authentication.');
+  if (error) {
+    console.error('Error seeding analytics:', error.message);
+  } else {
+    console.log('✓ analytics/stats seeded');
+  }
+
+  console.log('\nDone. Create the administrator in Supabase Auth (Authentication > Users > Invite User).');
 }
 
 seed().catch(console.error);

@@ -36,7 +36,7 @@ interface BookingCalendarProps {
 const LOCAL_TRANSLATIONS = {
   es: {
     title: 'DISEÑA TU SESIÓN FOTOGRÁFICA',
-    subtitle: 'Responde este breve cuestionario y te enviaremos una propuesta artística adaptada a tus deseos.',
+    subtitle: 'Completa tus datos y te enviaremos una propuesta artística personalizada.',
     step1: '1. ¿Qué tipo de sesión o paquete te gustaría?',
     step2: '2. ¿Qué día te gustaría agendar?',
     step3: '3. ¿En qué horario prefieres la sesión?',
@@ -51,11 +51,11 @@ const LOCAL_TRANSLATIONS = {
     otherSchedule: 'Otro horario (especificar abajo)',
     otherSchedulePlaceholder: 'Ej: 11:30 AM o sesión nocturna...',
     customScheduleLabel: 'Especifica tu horario preferido',
-    successTitle: '¡Cuestionario Recibido!',
-    successDesc: 'Hemos registrado tus preferencias correctamente. En las próximas horas Miriam se pondrá en contacto contigo con un diseño de sesión y cotización final personalizada.',
-    submit: 'Enviar Cuestionario Creativo',
-    submitting: 'PROCESANDO TU PROPUESTA...',
-    backToGallery: 'Diseñar Otra Sesión',
+    successTitle: '¡Solicitud Enviada a la Fotógrafa!',
+    successDesc: 'Hemos enviado tu solicitud de reserva a Miriam. En las próximas horas se pondrá en contacto contigo para coordinar los detalles finales.',
+    submit: 'Enviar Solicitud de Reserva',
+    submitting: 'ENVIANDO TU SOLICITUD...',
+    backToGallery: 'Nueva Solicitud',
     peopleLabel: 'Cantidad de Personas',
     notesLabel: 'Ideas, Locación o Notas Creativas',
     extrasTitle: 'Servicios y Adiciones Exclusivas',
@@ -68,7 +68,7 @@ const LOCAL_TRANSLATIONS = {
   },
   en: {
     title: 'DESIGN YOUR PHOTOGRAPHIC SESSION',
-    subtitle: 'Answer this brief questionnaire and we will craft a bespoke artistic proposal tailored to your vision.',
+    subtitle: 'Fill in your details and we will send you a customized artistic proposal.',
     step1: '1. What type of session or package would you like?',
     step2: '2. What day would you like to schedule?',
     step3: '3. What time of day do you prefer?',
@@ -83,11 +83,11 @@ const LOCAL_TRANSLATIONS = {
     otherSchedule: 'Other timeframe (specify below)',
     otherSchedulePlaceholder: 'E.g. 11:30 AM or night shoot...',
     customScheduleLabel: 'Specify your preferred time',
-    successTitle: 'Questionnaire Received!',
-    successDesc: 'We have received your creative preferences. Miriam will get in touch shortly with a customized shoot concept and formal proposal.',
-    submit: 'Submit Creative Questionnaire',
-    submitting: 'PROCESSING YOUR PROPOSAL...',
-    backToGallery: 'Design Another Session',
+    successTitle: 'Request Sent to Photographer!',
+    successDesc: 'Your booking request has been sent to Miriam. She will contact you shortly to coordinate the final details.',
+    submit: 'Send Booking Request',
+    submitting: 'SENDING YOUR REQUEST...',
+    backToGallery: 'New Request',
     peopleLabel: 'Number of People',
     notesLabel: 'Ideas, Location or Creative Notes',
     extrasTitle: 'Bespoke Add-ons & Curated Services',
@@ -167,7 +167,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
 
     const formattedDate = dateValue;
     const notesText = safeNotes + 
-           `\n\n[Respuestas del Cuestionario Creativo]` +
+           `\n\n[Solicitud de Reserva]` +
            `\n- Paquete elegido: ${serviceName}` +
            `\n- Fecha solicitada: ${formattedDate}` +
            `\n- Horario preferido: ${finalSchedule}`;
@@ -258,158 +258,6 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
 
             <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
               
-              {/* QUESTION 1: CHOOSE PACKAGE / SESSION TYPE — OR SHOW PRE-SELECTED */}
-              {!preSelectedPackage ? (
-                <div className="space-y-3">
-                  <label className="block text-xs font-mono tracking-widest text-gold-300 uppercase">
-                    {t.step1}
-                  </label>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                    {services.map((service) => {
-                      const isSelected = selectedServiceId === service.id;
-                      return (
-                        <button
-                          key={service.id}
-                          type="button"
-                          onClick={() => setSelectedServiceId(service.id)}
-                          className={`text-left p-4 rounded-xl border transition-all duration-300 relative group flex flex-col justify-between h-36 ${
-                            isSelected 
-                              ? 'bg-gold-500/10 border-gold-400 text-white shadow-lg' 
-                              : 'bg-dark/40 border-white/5 text-white/70 hover:border-white/20'
-                          }`}
-                        >
-                          <div className="space-y-1">
-                            <div className="flex items-center justify-between">
-                              <span className="text-[10px] font-mono tracking-wider text-gold-400 uppercase font-semibold">
-                                {service.duration || 'Colección'}
-                              </span>
-                              {isSelected ? (
-                                <CheckCircle2 size={14} className="text-gold-400 shrink-0" />
-                              ) : (
-                                <Camera size={14} className="text-white/20 group-hover:text-white/40 transition-colors shrink-0" />
-                              )}
-                            </div>
-                            <h4 className="text-xs font-semibold tracking-wide text-white group-hover:text-gold-100 transition-colors mt-1 line-clamp-1">
-                              {service.title}
-                            </h4>
-                            <p className="text-[10px] text-white/40 leading-snug line-clamp-2 mt-0.5 font-sans">
-                              {service.description || 'Exclusive curated photographic session'}
-                            </p>
-                          </div>
-
-                          <div className="pt-2 border-t border-white/5 mt-2 flex items-center justify-between">
-                            <span className="text-[9px] font-mono text-white/40 uppercase">Base Rate</span>
-                            <span className="text-xs font-mono font-bold text-gold-400">
-                              ${service.price.toLocaleString()}
-                            </span>
-                          </div>
-                        </button>
-                      );
-                    })}
-
-                    {/* CUSTOM SESSION CARD */}
-                    <button
-                      type="button"
-                      onClick={() => setSelectedServiceId('custom')}
-                      className={`text-left p-4 rounded-xl border transition-all duration-300 relative group flex flex-col justify-between h-36 ${
-                        selectedServiceId === 'custom' 
-                          ? 'bg-gold-500/10 border-gold-400 text-white shadow-lg' 
-                          : 'bg-dark/40 border-white/5 text-white/70 hover:border-white/20'
-                      }`}
-                    >
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-mono tracking-wider text-gold-400 uppercase font-semibold">
-                            Custom Art
-                          </span>
-                          {selectedServiceId === 'custom' ? (
-                            <CheckCircle2 size={14} className="text-gold-400 shrink-0" />
-                          ) : (
-                            <Sparkles size={14} className="text-white/20 group-hover:text-white/40 transition-colors shrink-0" />
-                          )}
-                        </div>
-                        <h4 className="text-xs font-semibold tracking-wide text-white group-hover:text-gold-100 transition-colors mt-1">
-                          {t.customProject}
-                        </h4>
-                        <p className="text-[10px] text-white/40 leading-snug line-clamp-2 mt-0.5 font-sans">
-                          {lang === 'es' ? 'Cualquier otro proyecto editorial, de marca, moda o destino.' : 'Any other editorial, branding, fashion or destination project.'}
-                        </p>
-                      </div>
-
-                      <div className="pt-2 border-t border-white/5 mt-2 flex items-center justify-between">
-                        <span className="text-[9px] font-mono text-white/40 uppercase">Rate</span>
-                        <span className="text-xs font-mono font-bold text-gold-400 uppercase">
-                          Bespoke
-                        </span>
-                      </div>
-                    </button>
-                  </div>
-
-                  {/* Show details input if Custom Session is selected */}
-                  <AnimatePresence>
-                    {selectedServiceId === 'custom' && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="overflow-hidden pt-1"
-                      >
-                        <textarea
-                          required
-                          rows={2}
-                          value={customServiceText}
-                          onChange={(e) => setCustomServiceText(e.target.value)}
-                          placeholder={t.customProjectPlaceholder}
-                          className="w-full bg-dark/60 border border-gold-400/20 rounded-lg p-3 text-xs text-white/90 placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans resize-none"
-                        />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              ) : (
-                /* Pre-selected package card — replaces step 1 */
-                <div className="bg-gold-500/10 border border-gold-400/30 rounded-xl overflow-hidden">
-                  {/* Package image if available */}
-                  {preSelectedPackage.image && (
-                    <div className="w-full h-36 overflow-hidden">
-                      <img src={preSelectedPackage.image} alt={lang === 'es' ? preSelectedPackage.name_es : preSelectedPackage.name_en} className="w-full h-full object-cover" />
-                    </div>
-                  )}
-                  <div className="p-5 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[9px] font-mono text-gold-400 uppercase tracking-widest font-semibold">{t.step1}</span>
-                      <CheckCircle2 size={16} className="text-gold-400 shrink-0" />
-                    </div>
-                    <div>
-                      <h4 className="font-serif text-lg text-white">
-                        {lang === 'es' ? preSelectedPackage.name_es : preSelectedPackage.name_en}
-                      </h4>
-                      <p className="text-[10px] text-white/60 leading-relaxed mt-0.5 line-clamp-2">
-                        {lang === 'es' ? preSelectedPackage.description_es : preSelectedPackage.description_en}
-                      </p>
-                    </div>
-                    <div className="flex items-center justify-between pt-2 border-t border-white/10">
-                      <span className="text-[10px] font-mono text-white/45">
-                        {lang === 'es' ? preSelectedPackage.duration_es : preSelectedPackage.duration_en}
-                      </span>
-                      <span className="text-lg font-bold font-mono text-gold-400">
-                        ${preSelectedPackage.price.toLocaleString()}
-                      </span>
-                    </div>
-                    {onClearPackage && (
-                      <button
-                        type="button"
-                        onClick={onClearPackage}
-                        className="w-full mt-2 py-2 border border-white/10 hover:border-white/30 rounded-lg text-[9px] font-mono text-white/50 hover:text-white uppercase tracking-widest transition-all cursor-pointer"
-                      >
-                        Cambiar paquete
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )}
-
               {/* TWO COLUMN ROW: DATE AND PREFERRED TIMEFRAME */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 

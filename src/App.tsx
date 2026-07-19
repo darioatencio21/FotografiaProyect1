@@ -41,7 +41,7 @@ import {
   loginWithFirebase,
   logoutFromFirebase,
   onAuthChange
-} from './lib/firebase';
+} from './lib/db';
 import { sanitizeString, sanitizeEmail, sanitizeUrl, unescapeHTMLEntities } from './lib/sanitize';
 
 async function syncCollection<T extends { id: string }>(
@@ -127,8 +127,36 @@ export default function App() {
   // Navigation & Language Context
   const [currentView, setCurrentView] = useState<string>(() => {
     const params = new URLSearchParams(window.location.search);
-    return params.has('gallery') ? 'client-portal' : 'home';
+    if (params.has('gallery')) return 'client-portal';
+    return params.get('view') || 'home';
   });
+
+  const navigateTo = (view: string) => {
+    setCurrentView(view);
+    const url = view === 'home' ? '/' : '/?view=' + view;
+    window.history.pushState({ view }, '', url);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    const initialView = currentView;
+    const initialUrl = initialView === 'home' ? '/' : '/?view=' + initialView + (galleryPasscode ? '&gallery=' + galleryPasscode : '');
+    window.history.replaceState({ view: initialView }, '', initialUrl);
+
+    const handlePopState = (event: PopStateEvent) => {
+      const view = event.state?.view;
+      if (view) {
+        setCurrentView(view);
+      } else {
+        const params = new URLSearchParams(window.location.search);
+        const fallbackView = params.get('view') || 'home';
+        setCurrentView(fallbackView);
+        window.history.pushState({ view: fallbackView }, '', fallbackView === 'home' ? '/' : '/?view=' + fallbackView);
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
   const [galleryPasscode, setGalleryPasscode] = useState<string>(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get('gallery') || '';
@@ -619,8 +647,7 @@ export default function App() {
       await loginWithFirebase(email, password);
       setIsAdminLoggedIn(true);
       setShowAdminLogin(false);
-      setCurrentView('admin');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      navigateTo('admin');
       setIsAdminAuthLoading(false);
       return;
     } catch (err: any) {
@@ -640,13 +667,12 @@ export default function App() {
 
   const handleAdminLogout = () => {
     setIsAdminLoggedIn(false);
-    setCurrentView('home');
+    navigateTo('home');
     logoutFromFirebase().catch(console.error);
   };
 
   const handleBackToSite = () => {
-    setCurrentView('home');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    navigateTo('home');
   };
 
   // Trigger Stripe print or service booking Checkout overlay
@@ -721,7 +747,7 @@ export default function App() {
       {/* CORE HEADER */}
       <Header
         currentView={currentView}
-        onSetView={setCurrentView}
+        onSetView={navigateTo}
         lang={lang}
         onSetLang={setLang}
         isAdminLoggedIn={isAdminLoggedIn}
@@ -836,14 +862,14 @@ export default function App() {
                 className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-4 mt-5 md:mt-12"
               >
                 <button
-                  onClick={() => setCurrentView('portfolio')}
+                  onClick={() => navigateTo('portfolio')}
                   className="px-4 sm:px-6 md:px-7 py-2 md:py-3 bg-hero text-[#2B211A] hover:bg-hero/90 font-mono text-[clamp(7px,2vw,10px)] tracking-widest uppercase font-semibold transition-all duration-300 cursor-pointer whitespace-nowrap"
                 >
                   {t.ctaPortfolio}
                 </button>
                 <button
                   onClick={() => {
-                    setCurrentView('services');
+                    navigateTo('services');
                     setTimeout(() => {
                       const element = document.getElementById('booking-calendar');
                       if (element) element.scrollIntoView({ behavior: 'smooth' });
@@ -1017,7 +1043,7 @@ export default function App() {
                     <h2 className="font-serif text-3xl text-white tracking-wide mt-1">Symmetrical Curation</h2>
                   </div>
                   <button 
-                    onClick={() => setCurrentView('portfolio')}
+                    onClick={() => navigateTo('portfolio')}
                     className="text-xs font-mono text-gold-400 hover:text-gold-300 flex items-center space-x-1 transition-colors"
                   >
                     <span>View Full Portfolio</span>
@@ -1177,19 +1203,7 @@ export default function App() {
           {/* SERVICES SCREEN — PHOTOGRAPHY PACKAGES */}
           {/* ======================================================= */}
           {currentView === 'services' && (
-            <div className="space-y-24">
-              {/* Header */}
-              <motion.section
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                className="space-y-4 text-center max-w-2xl mx-auto"
-              >
-                <span className="text-[10px] font-mono text-gold-400 tracking-widest uppercase block">PACKAGES</span>
-                <h2 className="font-serif text-3xl md:text-4xl text-white tracking-wide">{t.servicesTitle}</h2>
-                <p className="text-xs text-white/55 leading-relaxed">{t.servicesSubtitle}</p>
-              </motion.section>
-
+            <div className="space-y-12">
               {/* Step 1: Category Grid OR Step 2: Packages by Category */}
               <AnimatePresence mode="wait">
                 {selectedCategory === null ? (
@@ -1202,9 +1216,11 @@ export default function App() {
                     transition={{ duration: 0.4, ease: 'easeOut' }}
                     className="space-y-6"
                   >
-                    <div className="text-center space-y-2 mb-2">
-                      <span className="text-[9px] font-mono text-white/40 tracking-widest uppercase block">{t.categorySectionTitle}</span>
-                      <p className="text-xs text-white/50">{t.categorySectionSubtitle}</p>
+                    {/* Single header for Step 1 */}
+                    <div className="text-center space-y-4 max-w-2xl mx-auto">
+                      <span className="text-[10px] font-mono text-gold-400 tracking-widest uppercase block">SERVICES</span>
+                      <h2 className="font-serif text-3xl md:text-4xl text-white tracking-wide">{t.servicesTitle}</h2>
+                      <p className="text-xs text-white/55 leading-relaxed">{t.servicesSubtitle}</p>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
@@ -1237,7 +1253,7 @@ export default function App() {
                             viewport={{ once: true, margin: "-30px" }}
                             transition={{ duration: 0.4, delay: idx * 0.05 }}
                             onClick={() => setSelectedCategory(cat.id)}
-                            className="group relative overflow-hidden rounded-2xl aspect-[4/5] text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
+                            className="group relative overflow-hidden rounded-2xl aspect-[3/4] md:aspect-[4/5] text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
                           >
                             {/* Background image */}
                             <div className="absolute inset-0">
@@ -1258,7 +1274,7 @@ export default function App() {
                               </div>
                               <div>
                                 <h3 className="font-serif text-lg text-white font-medium leading-tight">{cName}</h3>
-                                <p className="text-[10px] text-white/90 leading-relaxed mt-0.5 line-clamp-2">{cDesc}</p>
+                                <p className="text-[11px] md:text-[10px] text-white/90 leading-relaxed mt-0.5 line-clamp-2">{cDesc}</p>
                               </div>
                               <div className="flex items-center space-x-1.5 text-[9px] font-mono text-white/80 uppercase tracking-wider">
                                 <span>{activePkgCount} {lang === 'es' ? 'paquetes' : 'packages'}</span>
@@ -1278,39 +1294,43 @@ export default function App() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.4, ease: 'easeOut' }}
-                    className="space-y-8"
                   >
-                    {/* Back button */}
-                    <button
-                      onClick={() => {
-                        setSelectedCategory(null);
-                        setSelectedPackageId(null);
-                      }}
-                      className="inline-flex items-center space-x-1.5 text-[10px] font-mono text-gold-400 hover:text-gold-300 uppercase tracking-widest transition-colors cursor-pointer"
-                    >
-                      <ArrowRight size={10} className="rotate-180" />
-                      <span>{t.backToCategories}</span>
-                    </button>
-
-                    {/* Category info */}
                     {(() => {
                       const cat = sessionCategories.find(c => c.id === selectedCategory);
                       if (!cat) return null;
                       const cName = lang === 'es' ? cat.name_es : cat.name_en;
                       const cDesc = lang === 'es' ? cat.description_es : cat.description_en;
+                      const cEyebrow = lang === 'es' ? 'SERVICIOS' : 'SERVICES';
                       const categoryPkgs = packages
                         .filter(p => p.category === selectedCategory && p.active)
                         .sort((a, b) => a.sortOrder - b.sortOrder);
 
                       return (
                         <div className="space-y-6">
-                          <div className="text-center space-y-2">
-                            <h3 className="font-serif text-2xl md:text-3xl text-white">{cName}</h3>
-                            <p className="text-xs text-white/80 max-w-lg mx-auto">{cDesc}</p>
+                          {/* Hero header */}
+                          <div className="text-center space-y-6 py-6 md:py-10">
+                            {/* Back button */}
+                            <button
+                              onClick={() => {
+                                setSelectedCategory(null);
+                                setSelectedPackageId(null);
+                              }}
+                              className="group inline-flex items-center space-x-2 text-[11px] font-mono text-gold-400/80 hover:text-gold-300 tracking-wider transition-all duration-300 cursor-pointer"
+                            >
+                              <ArrowRight size={11} className="rotate-180 transition-transform duration-300 group-hover:-translate-x-0.5" />
+                              <span>{t.backToCategories}</span>
+                            </button>
+
+                            <div className="space-y-6">
+                              <span className="text-[9px] font-mono text-gold-400/40 tracking-[0.25em] uppercase block">{cEyebrow}</span>
+                              <h2 className="font-serif text-3xl md:text-5xl lg:text-6xl text-white/90 font-light tracking-wide">{cName}</h2>
+                              <p className="text-sm text-white/50 max-w-xl mx-auto font-light leading-relaxed">{cDesc}</p>
+                              <div className="w-12 h-px bg-gold-400/25 mx-auto" />
+                            </div>
                           </div>
 
                           {/* Package cards grid */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                             {categoryPkgs.map((pkg, idx) => {
                               const pName = lang === 'es' ? pkg.name_es : pkg.name_en;
                               const pDesc = lang === 'es' ? pkg.description_es : pkg.description_en;
@@ -1325,49 +1345,47 @@ export default function App() {
                                   whileInView={{ opacity: 1, y: 0 }}
                                   viewport={{ once: true, margin: "-40px" }}
                                   transition={{ duration: 0.4, delay: idx * 0.08 }}
-                                  className={`group bg-dark-gray border rounded-2xl p-6 md:p-7 flex flex-col justify-between space-y-5 text-left transition-all duration-300 hover:-translate-y-1 ${
-                                    pkg.featured
-                                      ? 'border-gold-500/40 ring-1 ring-gold-500/30 shadow-lg shadow-gold-500/5'
-                                      : 'border-white/5 hover:border-white/20'
-                                  }`}
+                                   className={`group bg-dark-gray border rounded-2xl p-5 md:p-8 flex flex-col justify-between space-y-6 text-left transition-all duration-500 hover:-translate-y-1 ${
+                                     pkg.featured
+                                       ? 'border-gold-500/30 ring-1 ring-gold-500/20 shadow-lg shadow-gold-500/5'
+                                       : 'border-white/[0.07] hover:border-gold-400/20 hover:shadow-xl hover:shadow-gold-500/5'
+                                   }`}
                                 >
-                                  <div className="space-y-4">
+                                  <div className="space-y-5">
                                     {pkg.image && (
-                                      <div className="rounded-xl overflow-hidden -mx-1 -mt-1">
-                                        <img src={pkg.image} alt={pName} className="w-full h-36 object-cover" />
-                                      </div>
-                                    )}
-                                    {/* Featured badge */}
-                                    {pkg.featured && (
-                                      <div className="flex items-center justify-between mb-1">
-                                        <span className="text-[8px] font-mono text-gold-400 border border-gold-500/30 bg-gold-500/10 px-2 py-0.5 rounded-full uppercase tracking-widest">
-                                          {t.recommended}
-                                        </span>
-                                        <span className="text-[8px] font-mono text-white/50 uppercase tracking-widest">{pName}</span>
+                                      <div className="rounded-xl overflow-hidden -mx-2 -mt-2">
+                                        <img src={pkg.image} alt={pName} className="w-full h-40 object-cover transition-all duration-700 group-hover:scale-105" />
                                       </div>
                                     )}
 
-                                    <div className="space-y-1.5">
-                                      {!pkg.featured && (
-                                        <h3 className="font-serif text-xl text-white font-medium">{pName}</h3>
+                                    {/* Featured badge + Name */}
+                                    <div className="space-y-2">
+                                      {pkg.featured && (
+                                        <span className="inline-block text-[8px] font-mono text-gold-400/70 border border-gold-500/20 bg-gold-500/5 px-2 py-0.5 rounded-full uppercase tracking-[0.15em]">
+                                          {t.recommended}
+                                        </span>
                                       )}
-                                      <div className="flex items-baseline justify-between">
-                                        <span className="text-[10px] font-mono text-white/65">{pDuration}</span>
-                                        <div className="text-right font-mono">
-                                          <span className="text-[8px] text-white/60 block">{pPriceFrom}</span>
-                                          <span className="text-xl font-bold text-gold-400">${pkg.price.toLocaleString()}</span>
-                                        </div>
+                                      <h3 className="font-serif text-xl md:text-2xl text-white/90 font-light">{pName}</h3>
+                                    </div>
+
+                                    {/* Duration + Price */}
+                                    <div className="flex items-baseline justify-between border-b border-white/5 pb-4">
+                                      <span className="text-[10px] font-mono text-white/50 tracking-wide">{pDuration}</span>
+                                      <div className="text-right">
+                                        <span className="text-[8px] text-white/40 block font-mono tracking-wider">{pPriceFrom}</span>
+                                        <span className="text-xl md:text-2xl md:text-3xl font-light text-gold-400 font-mono">${pkg.price.toLocaleString()}</span>
                                       </div>
                                     </div>
 
-                                    <p className="text-xs text-white/75 leading-relaxed font-sans">{pDesc}</p>
+                                    <p className="text-xs text-white/60 leading-relaxed font-light">{pDesc}</p>
 
-                                    <div className="space-y-2.5">
-                                      <h5 className="text-[9px] font-mono tracking-widest text-white/55 uppercase font-bold">{t.includesLabel}:</h5>
+                                    {/* Benefits */}
+                                    <div className="space-y-3">
+                                      <h5 className="text-[8px] font-mono tracking-[0.2em] text-white/40 uppercase">{t.includesLabel}</h5>
                                       <ul className="space-y-2">
                                         {(lang === 'es' ? (pkg.benefits_es || pkg.benefits) : (pkg.benefits_en || pkg.benefits)).map((benefit, i) => (
-                                          <li key={i} className="flex items-start space-x-2.5 text-xs text-white/70">
-                                            <CheckCircle2 size={12} className="text-gold-400 mt-0.5 shrink-0" />
+                                          <li key={i} className="flex items-start space-x-2.5 text-[11px] text-white/60 font-light">
+                                            <CheckCircle2 size={9} className="text-white/30 mt-0.5 shrink-0" />
                                             <span>{benefit}</span>
                                           </li>
                                         ))}
@@ -1375,13 +1393,14 @@ export default function App() {
                                     </div>
 
                                     {(lang === 'es' ? pkg.travelNote_es : pkg.travelNote_en) && (
-                                      <div className="flex items-start space-x-2.5 text-[10px] text-white/50">
-                                        <MapPin size={11} className="text-white/40 mt-0.5 shrink-0" />
-                                        <span className="font-sans">{lang === 'es' ? pkg.travelNote_es : pkg.travelNote_en}</span>
+                                      <div className="flex items-start space-x-2 text-[9px] text-white/40 font-light">
+                                        <MapPin size={9} className="text-white/30 mt-0.5 shrink-0" />
+                                        <span>{lang === 'es' ? pkg.travelNote_es : pkg.travelNote_en}</span>
                                       </div>
                                     )}
                                   </div>
 
+                                  {/* CTA button - outline style */}
                                   <button
                                     onClick={() => {
                                       setSelectedPackageId(pkg.id);
@@ -1390,10 +1409,10 @@ export default function App() {
                                         targetCalendar.scrollIntoView({ behavior: 'smooth' });
                                       }
                                     }}
-                                    className="w-full py-3 bg-white hover:bg-gold-400 text-dark font-mono text-[10px] tracking-widest uppercase font-bold rounded-lg transition-all duration-300 flex items-center justify-center space-x-1.5 cursor-pointer group/btn"
+                                    className="w-full py-3 bg-transparent border border-white/20 hover:border-gold-400/50 text-white/70 hover:text-gold-300 font-mono text-[10px] tracking-[0.2em] uppercase font-light rounded-xl transition-all duration-300 flex items-center justify-center space-x-2 cursor-pointer group/btn"
                                   >
                                     <span>{pButton}</span>
-                                    <ArrowRight size={10} className="transition-transform duration-300 group-hover/btn:translate-x-0.5" />
+                                    <ArrowRight size={9} className="transition-transform duration-300 group-hover/btn:translate-x-1" />
                                   </button>
                                 </motion.div>
                               );
@@ -1691,10 +1710,7 @@ export default function App() {
             <LegalViews
               type={currentView}
               lang={lang}
-              onBack={() => {
-                setCurrentView('home');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
+              onBack={() => navigateTo('home')}
             />
           )}
         </motion.main>
@@ -1702,7 +1718,7 @@ export default function App() {
 
       {/* FOOTER */}
       <Footer
-        onSetView={setCurrentView}
+        onSetView={navigateTo}
         lang={lang}
       />
 

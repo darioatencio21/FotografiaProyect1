@@ -1,7 +1,7 @@
 ﻿import React, { useState, useCallback, useEffect } from 'react';
 import { Save, Plus, Trash2, Edit3, X, Upload } from 'lucide-react';
 import { PhotographyPackage, ActiveLanguage, SessionCategory } from '../types';
-import { uploadImageBlob } from '../lib/firebase';
+import { uploadImageBlob } from '../lib/db';
 
 async function compressToBlob(file: File, maxSize = 1200, quality = 0.8): Promise<Blob> {
   const rawUrl = await new Promise<string>((resolve, reject) => {

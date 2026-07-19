@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { Check, UploadCloud } from 'lucide-react';
 import { PhotographerProfile, ActiveLanguage } from '../types';
 import { sanitizeObject } from '../lib/sanitize';
-import { uploadImageBlob } from '../lib/firebase';
+import { uploadImageBlob } from '../lib/db';
 
 interface AdminProfileTabProps {
   profile: PhotographerProfile;
