@@ -235,7 +235,7 @@ App.tsx State + localStorage (caché offline, prefijo aurea_)
 
 ### Autenticación
 
-- **Admin**: El acceso usa exclusivamente Firebase Authentication. No se guardan credenciales ni indicadores de sesión administrativa en `localStorage`.
+- **Admin**: El acceso usa exclusivamente Firebase Authentication con el correo real del usuario. No se guardan credenciales ni indicadores de sesión administrativa en `localStorage`.
 - **Client Portal**: Protegido por código de acceso validado contra la colección `clientAccounts`. Acceso directo mediante link compartible con query param `?gallery=PASSCODE`.
 
 ---

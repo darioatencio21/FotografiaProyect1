@@ -605,12 +605,17 @@ export default function App() {
     setIsAdminAuthLoading(true);
     setAdminLoginError('');
 
-    const username = sanitizeString(adminUsername).toLowerCase();
+    const email = sanitizeEmail(adminUsername);
     const password = adminPassword;
+
+    if (!email || !email.includes('@')) {
+      setAdminLoginError('INTRODUCE UN CORREO ELECTRÓNICO VÁLIDO.');
+      setIsAdminAuthLoading(false);
+      return;
+    }
 
     // Administrative access is handled exclusively by Firebase Authentication.
     try {
-      const email = `${username}@admin.local`;
       await loginWithFirebase(email, password);
       setIsAdminLoggedIn(true);
       setShowAdminLogin(false);
@@ -618,8 +623,16 @@ export default function App() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       setIsAdminAuthLoading(false);
       return;
-    } catch {
-      setAdminLoginError('CREDENCIALES INCORRECTAS O SERVICIO DE AUTENTICACIÓN NO DISPONIBLE.');
+    } catch (err: any) {
+      const errorMessages: Record<string, string> = {
+        'auth/invalid-email': 'EL CORREO ELECTRÓNICO NO ES VÁLIDO.',
+        'auth/user-not-found': 'NO EXISTE UN USUARIO CON ESE CORREO.',
+        'auth/wrong-password': 'LA CONTRASEÑA ES INCORRECTA.',
+        'auth/invalid-credential': 'EL CORREO O LA CONTRASEÑA SON INCORRECTOS.',
+        'auth/too-many-requests': 'DEMASIADOS INTENTOS. ESPERA UN MOMENTO Y VUELVE A INTENTARLO.',
+        'auth/operation-not-allowed': 'EL ACCESO CON CORREO Y CONTRASEÑA NO ESTÁ HABILITADO.'
+      };
+      setAdminLoginError(errorMessages[err?.code] || 'NO SE PUDO INICIAR SESIÓN EN FIREBASE AUTHENTICATION.');
     } finally {
       setIsAdminAuthLoading(false);
     }
@@ -1737,14 +1750,14 @@ export default function App() {
 
               <form onSubmit={handleAdminAuthSubmit} className="space-y-4 text-left">
                 <div className="space-y-1">
-                  <label className="text-[9px] font-mono text-white/50 uppercase">Username</label>
+                  <label className="text-[9px] font-mono text-white/50 uppercase">Email</label>
                   <input
                     type="text"
                     required
                     value={adminUsername}
                     onChange={(e) => setAdminUsername(e.target.value)}
                     className="w-full bg-charcoal border-[#D8C0A8] rounded p-2.5 text-xs text-white focus:outline-none focus:border-gold-400"
-                    placeholder="Username"
+                    placeholder="admin@tudominio.com"
                   />
                 </div>
 
