@@ -123,13 +123,13 @@ export async function deleteImageByUrl(url: string): Promise<void> {
   }
 }
 
-export async function loginWithFirebase(email: string, password: string): Promise<any> {
+export async function loginWithSupabase(email: string, password: string): Promise<any> {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) throw error;
   return data.user;
 }
 
-export async function logoutFromFirebase(): Promise<void> {
+export async function logoutFromSupabase(): Promise<void> {
   const { error } = await supabase.auth.signOut();
   if (error) throw error;
 }

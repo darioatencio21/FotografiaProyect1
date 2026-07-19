@@ -38,8 +38,8 @@ import {
   getSingleDocument,
   saveDocument,
   deleteDocument,
-  loginWithFirebase,
-  logoutFromFirebase,
+  loginWithSupabase,
+  logoutFromSupabase,
   onAuthChange
 } from './lib/db';
 import { sanitizeString, sanitizeEmail, sanitizeUrl, unescapeHTMLEntities } from './lib/sanitize';
@@ -642,24 +642,26 @@ export default function App() {
       return;
     }
 
-    // Administrative access is handled exclusively by Firebase Authentication.
+    // Administrative access is handled exclusively by Supabase Authentication.
     try {
-      await loginWithFirebase(email, password);
+      await loginWithSupabase(email, password);
       setIsAdminLoggedIn(true);
       setShowAdminLogin(false);
       navigateTo('admin');
       setIsAdminAuthLoading(false);
       return;
     } catch (err: any) {
+      const msg = err?.message || err?.error_description || err?.code || '';
       const errorMessages: Record<string, string> = {
-        'auth/invalid-email': 'EL CORREO ELECTRÓNICO NO ES VÁLIDO.',
-        'auth/user-not-found': 'NO EXISTE UN USUARIO CON ESE CORREO.',
-        'auth/wrong-password': 'LA CONTRASEÑA ES INCORRECTA.',
-        'auth/invalid-credential': 'EL CORREO O LA CONTRASEÑA SON INCORRECTOS.',
-        'auth/too-many-requests': 'DEMASIADOS INTENTOS. ESPERA UN MOMENTO Y VUELVE A INTENTARLO.',
-        'auth/operation-not-allowed': 'EL ACCESO CON CORREO Y CONTRASEÑA NO ESTÁ HABILITADO.'
+        'Invalid login credentials': 'EL CORREO O LA CONTRASEÑA SON INCORRECTOS.',
+        'Email not confirmed': 'EL CORREO NO ESTÁ CONFIRMADO. REVISA TU BANDEJA DE ENTRADA.',
+        'Invalid email': 'EL CORREO ELECTRÓNICO NO ES VÁLIDO.',
+        'User not found': 'NO EXISTE UN USUARIO CON ESE CORREO.',
+        'Too many requests': 'DEMASIADOS INTENTOS. ESPERA UN MOMENTO Y VUELVE A INTENTARLO.',
+        'Signup not allowed': 'EL REGISTRO NO ESTÁ HABILITADO.',
       };
-      setAdminLoginError(errorMessages[err?.code] || 'NO SE PUDO INICIAR SESIÓN EN FIREBASE AUTHENTICATION.');
+      const matched = Object.keys(errorMessages).find(k => msg.includes(k));
+      setAdminLoginError(matched ? errorMessages[matched] : 'NO SE PUDO INICIAR SESIÓN EN SUPABASE AUTHENTICATION.');
     } finally {
       setIsAdminAuthLoading(false);
     }
@@ -668,7 +670,7 @@ export default function App() {
   const handleAdminLogout = () => {
     setIsAdminLoggedIn(false);
     navigateTo('home');
-    logoutFromFirebase().catch(console.error);
+    logoutFromSupabase().catch(console.error);
   };
 
   const handleBackToSite = () => {
