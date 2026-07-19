@@ -118,14 +118,13 @@ El proyecto está diseñado para desplegarse en **Vercel** con Firestore como ba
 │       └── mockData.ts           # Datos de inicialización, fallback y diccionario multi-idioma
 ├── firebase.json                 # Configuración de Firebase Hosting + Firestore
 ├── firestore.rules               # Reglas de seguridad de Firestore
-├── firebase-applet-config.json   # Credenciales de Firebase
+├── .env.example                  # Plantilla de variables de entorno
 ├── firebase-blueprint.json       # Schema de las colecciones de Firestore
 ├── vercel.json                   # Configuración de deploy en Vercel
 ├── vite.config.ts                # Configuración de Vite
 ├── tsconfig.json                 # Configuración de TypeScript
 ├── package.json                  # Dependencias y scripts
 ├── index.html                    # Entry point HTML
-├── .env.example                  # Plantilla de variables de entorno
 └── metadata.json                 # Metadatos de AI Studio
 ```
 
@@ -352,6 +351,8 @@ npx firebase-tools deploy --only firestore:rules,storage
 ```
 
 En Vercel, configura todas las variables `VITE_FIREBASE_*` para los entornos **Production**, **Preview** y **Development**, y ejecuta un redeploy después de guardarlas. Sin esas variables, Vite compila Firebase sin configuración y la aplicación muestra los datos de respaldo locales.
+
+La API key de Firebase usada por una aplicación web no es un secreto: forma parte de la configuración que llega al navegador. En Google Cloud Console, restringe la nueva key por sitios web (`localhost`, tu dominio de producción y los dominios de preview necesarios) y limita las APIs al uso de Firebase. Como la key anterior quedó expuesta en Git, revócala y reemplázala en Vercel y en `.env.local`.
 
 ---
 
