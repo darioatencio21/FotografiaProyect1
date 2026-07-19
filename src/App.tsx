@@ -42,7 +42,7 @@ import {
   logoutFromFirebase,
   onAuthChange
 } from './lib/firebase';
-import { sanitizeString, sanitizeEmail, unescapeHTMLEntities } from './lib/sanitize';
+import { sanitizeString, sanitizeEmail, sanitizeUrl, unescapeHTMLEntities } from './lib/sanitize';
 
 async function syncCollection<T extends { id: string }>(
   collectionPath: string,
@@ -187,9 +187,7 @@ export default function App() {
     try { const saved = localStorage.getItem('aurea_packages'); return saved ? JSON.parse(saved) : INITIAL_PHOTOGRAPHY_PACKAGES; } catch { return INITIAL_PHOTOGRAPHY_PACKAGES; }
   });
 
-  const [clientAccounts, setClientAccounts] = useState<ClientAccount[]>(() => {
-    try { const saved = localStorage.getItem('aurea_client_accounts'); return saved ? JSON.parse(saved) : INITIAL_CLIENT_ACCOUNTS; } catch { return INITIAL_CLIENT_ACCOUNTS; }
-  });
+  const [clientAccounts, setClientAccounts] = useState<ClientAccount[]>(INITIAL_CLIENT_ACCOUNTS);
 
   // UI Interactive States
   const [activeFilter, setActiveFilter] = useState<string>('all');
@@ -205,9 +203,7 @@ export default function App() {
 
   // Administrative Workspace credentials
   const [showAdminLogin, setShowAdminLogin] = useState(false);
-  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(() => {
-    return localStorage.getItem('aurea_admin_logged') === 'true';
-  });
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   const [adminUsername, setAdminUsername] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
   const [showAdminPassword, setShowAdminPassword] = useState(false);
@@ -238,10 +234,14 @@ export default function App() {
     const unsub = onAuthChange((user) => {
       if (user) {
         setIsAdminLoggedIn(true);
-        localStorage.setItem('aurea_admin_logged', 'true');
       }
     });
     return () => unsub();
+  }, []);
+
+  useEffect(() => {
+    // Remove client passcodes written by older versions of the application.
+    localStorage.removeItem('aurea_client_accounts');
   }, []);
 
   useEffect(() => {
@@ -260,13 +260,12 @@ export default function App() {
       ]);
 
       const packagesRes = await getCollectionWithFallback<PhotographyPackage>('photography_packages', []);
-      const [seoRes, profileRes, bookingConfigRes, emailConfigRes, analyticsRes, adminDocRes] = await Promise.all([
+      const [seoRes, profileRes, bookingConfigRes, emailConfigRes, analyticsRes] = await Promise.all([
         getSingleDocument<SEOMetadata>('seo', 'config'),
         getSingleDocument<PhotographerProfile>('profile', 'photographer'),
         getSingleDocument<BookingConfig>('bookingConfig', 'config'),
         getSingleDocument<EmailConfig>('emailConfig', 'config'),
-        getSingleDocument<AnalyticsStats>('analytics', 'stats'),
-        getSingleDocument<{ username: string }>('admin', 'config'),
+        getSingleDocument<AnalyticsStats>('analytics', 'stats')
       ]);
 
       if (cancelled) return;
@@ -323,7 +322,6 @@ export default function App() {
         setBookings(migratedBookings);
         setMessages(migratedMessages);
         setClientAccounts(migratedClients);
-        localStorage.setItem('aurea_client_accounts', JSON.stringify(migratedClients));
         setSeo(migratedSeo ?? INITIAL_SEO);
         setProfile(migratedProfile ?? INITIAL_PROFILE);
       } else {
@@ -335,7 +333,6 @@ export default function App() {
         setBookings(bookingsRes);
         setMessages(messagesRes);
         setClientAccounts(clientAccsRes);
-        localStorage.setItem('aurea_client_accounts', JSON.stringify(clientAccsRes));
         setSeo(seoRes ?? INITIAL_SEO);
         setProfile(profileRes ?? INITIAL_PROFILE);
       }
@@ -354,9 +351,6 @@ export default function App() {
         for (const pkg of INITIAL_PHOTOGRAPHY_PACKAGES) {
           await saveDocument('photography_packages', pkg.id, pkg);
         }
-      }
-      if (!adminDocRes) {
-        await saveDocument('admin', 'config', { username: 'admin', password: 'admin123' });
       }
     }
     syncFirestore()
@@ -406,7 +400,6 @@ export default function App() {
   const handleUpdateClientAccounts = (newAccounts: ClientAccount[]) => {
     syncCollection('clientAccounts', clientAccounts, newAccounts);
     setClientAccounts(newAccounts);
-    localStorage.setItem('aurea_client_accounts', JSON.stringify(newAccounts));
   };
 
   const handleUpdateSeo = async (newSeo: SEOMetadata) => {
@@ -612,55 +605,21 @@ export default function App() {
     setIsAdminAuthLoading(true);
     setAdminLoginError('');
 
-    const FALLBACK_USER = 'admin';
-    const FALLBACK_PASS = 'admin123';
     const username = sanitizeString(adminUsername).toLowerCase();
     const password = adminPassword;
 
-    // 1) Check hardcoded fallback FIRST — instant, no network
-    if (username === FALLBACK_USER && password === FALLBACK_PASS) {
-      setIsAdminLoggedIn(true);
-      localStorage.setItem('aurea_admin_logged', 'true');
-      setShowAdminLogin(false);
-      setCurrentView('admin');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      setIsAdminAuthLoading(false);
-      return;
-    }
-
-    // 2) Try Firebase Auth with a short timeout
+    // Administrative access is handled exclusively by Firebase Authentication.
     try {
       const email = `${username}@admin.local`;
-      await Promise.race([
-        loginWithFirebase(email, password),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2000))
-      ]);
+      await loginWithFirebase(email, password);
       setIsAdminLoggedIn(true);
-      localStorage.setItem('aurea_admin_logged', 'true');
       setShowAdminLogin(false);
       setCurrentView('admin');
       window.scrollTo({ top: 0, behavior: 'smooth' });
       setIsAdminAuthLoading(false);
       return;
     } catch {
-      // Firebase Auth not available or credentials wrong - continue
-    }
-
-    // 3) Try Firestore admin document
-    try {
-      const adminDoc = await getSingleDocument<{ username: string; password: string }>('admin', 'config');
-      if (adminDoc && username === adminDoc.username.toLowerCase() && password === adminDoc.password) {
-        setIsAdminLoggedIn(true);
-        localStorage.setItem('aurea_admin_logged', 'true');
-        setShowAdminLogin(false);
-        setCurrentView('admin');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        setIsAdminAuthLoading(false);
-        return;
-      }
-      setAdminLoginError(adminDoc ? 'CREDENCIALES INCORRECTAS' : 'CUENTA ADMIN NO ENCONTRADA. VERIFIQUE LA CONFIGURACIÓN.');
-    } catch {
-      setAdminLoginError('AUTH SYSTEM UNAVAILABLE. CHECK DATABASE CONNECTION.');
+      setAdminLoginError('CREDENCIALES INCORRECTAS O SERVICIO DE AUTENTICACIÓN NO DISPONIBLE.');
     } finally {
       setIsAdminAuthLoading(false);
     }
@@ -668,7 +627,6 @@ export default function App() {
 
   const handleAdminLogout = () => {
     setIsAdminLoggedIn(false);
-    localStorage.setItem('aurea_admin_logged', 'false');
     setCurrentView('home');
     logoutFromFirebase().catch(console.error);
   };
@@ -1063,7 +1021,7 @@ export default function App() {
                     >
                       <div className="aspect-[3/4]">
                         <img
-                          src={photo.url}
+                          src={sanitizeUrl(photo.url) || undefined}
                           alt={getPhotoTitle(photo, lang)}
                           className="w-full h-full object-cover transition-all duration-[800ms] ease-out group-hover:scale-[1.04]"
                         />
@@ -1152,7 +1110,7 @@ export default function App() {
                         className="break-inside-avoid relative overflow-hidden cursor-pointer group bg-dark-gray"
                       >
                         <img
-                          src={photo.url}
+                          src={sanitizeUrl(photo.url) || undefined}
                           alt={getPhotoTitle(photo, lang)}
                           className="w-full h-auto object-cover transition-all duration-[800ms] ease-out group-hover:scale-[1.04]"
                         />

@@ -34,12 +34,6 @@ const db = getFirestore(seedApp);
 async function seed() {
   console.log('Seeding Firestore...\n');
 
-  await setDoc(doc(db, 'admin', 'config'), {
-    username: 'admin',
-    password: 'admin123'
-  }, { merge: true });
-  console.log('✓ admin/config created (username: admin, password: admin123)');
-
   await setDoc(doc(db, 'analytics', 'stats'), {
     totalVisits: 14890,
     totalRevenue: 64200,
@@ -71,7 +65,7 @@ async function seed() {
   }, { merge: true });
   console.log('✓ analytics/stats created');
 
-  console.log('\nDone. You can now log in with admin / admin123');
+  console.log('\nDone. Create the administrator in Firebase Authentication.');
 }
 
 seed().catch(console.error);

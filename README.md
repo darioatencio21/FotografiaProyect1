@@ -235,7 +235,7 @@ App.tsx State + localStorage (caché offline, prefijo aurea_)
 
 ### Autenticación
 
-- **Admin**: Tres niveles de fallback: hardcoded (`admin`/`admin123`) → Firebase Auth (con timeout de 2s) → Firestore `admin/config`. La sesión se guarda en `localStorage` como `aurea_admin_logged`.
+- **Admin**: El acceso usa exclusivamente Firebase Authentication. No se guardan credenciales ni indicadores de sesión administrativa en `localStorage`.
 - **Client Portal**: Protegido por código de acceso validado contra la colección `clientAccounts`. Acceso directo mediante link compartible con query param `?gallery=PASSCODE`.
 
 ---

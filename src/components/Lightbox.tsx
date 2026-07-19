@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Camera, Eye, Heart, Download, Share2, X, ChevronLeft, ChevronRight, Sliders, Layers } from 'lucide-react';
 import { Photograph, ActiveLanguage } from '../types';
 import { TRANSLATIONS } from '../data/mockData';
+import { sanitizeUrl } from '../lib/sanitize';
 
 interface LightboxProps {
   photo: Photograph;
@@ -49,11 +50,17 @@ export default function Lightbox({
 
   const handleDownload = async () => {
     setShowDownloadToast(true);
+    const safeUrl = sanitizeUrl(photo.url);
+    if (!safeUrl) {
+      setShowDownloadToast(false);
+      return;
+    }
+
     try {
       const fileName = `${photo.title.toLowerCase().replace(/\s+/g, '-')}-master.webp`;
-      if (photo.url.startsWith('data:')) {
+      if (safeUrl.startsWith('data:')) {
         const link = document.createElement('a');
-        link.href = photo.url;
+        link.href = safeUrl;
         link.download = fileName;
         document.body.appendChild(link);
         link.click();
@@ -61,7 +68,7 @@ export default function Lightbox({
         setShowDownloadToast(false);
         return;
       }
-      const response = await fetch(photo.url, { mode: 'cors' });
+      const response = await fetch(safeUrl, { mode: 'cors' });
       const blob = await response.blob();
       const blobUrl = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -74,8 +81,9 @@ export default function Lightbox({
     } catch (err) {
       console.warn('CORS or fetch error, falling back to direct tab open:', err);
       const link = document.createElement('a');
-      link.href = photo.url;
+      link.href = safeUrl;
       link.target = '_blank';
+      link.rel = 'noopener noreferrer';
       link.download = `${photo.title.toLowerCase().replace(/\s+/g, '-')}-master.webp`;
       document.body.appendChild(link);
       link.click();
@@ -162,7 +170,7 @@ export default function Lightbox({
             {activeTab !== 'compare' ? (
               <motion.img
                 key={photo.id}
-                src={photo.url}
+                src={sanitizeUrl(photo.url) || undefined}
                 alt={photo.title}
                 className="max-h-[60vh] max-w-full object-contain rounded-sm shadow-2xl pointer-events-none transition-transform duration-300"
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -179,7 +187,7 @@ export default function Lightbox({
                 {/* Underlay RAW image (greyscale or desaturated slightly to replicate sensor RAW data) */}
                 <div className="absolute inset-0 w-full h-full">
                   <img
-                    src={photo.url}
+                    src={sanitizeUrl(photo.url) || undefined}
                     alt="RAW"
                     className="w-full h-full object-cover"
                   />
@@ -194,7 +202,7 @@ export default function Lightbox({
                   style={{ width: `${compareSlider}%` }}
                 >
                   <img
-                    src={photo.url}
+                    src={sanitizeUrl(photo.url) || undefined}
                     alt="Master Color Graded"
                     className="absolute inset-0 w-full h-full object-cover"
                     style={{ width: '100%', maxWidth: 'none' }}

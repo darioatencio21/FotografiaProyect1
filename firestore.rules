@@ -58,10 +58,9 @@ service cloud.firestore {
       allow write: if isValidId(messageId);
     }
 
-    // Admin credentials — readable for login, writable only by admin
+    // Administrative credentials are managed by Firebase Authentication.
     match /admin/{docId} {
-      allow read: if true;
-      allow write: if isAdmin();
+      allow read, write: if isAdmin();
     }
 
     // Admin-only collections

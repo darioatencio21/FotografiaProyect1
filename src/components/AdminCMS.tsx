@@ -16,7 +16,7 @@ import {
   Message, SEOMetadata, AnalyticsStats, ActiveLanguage, PhotographerProfile, BookingConfig, EmailConfig,
   ClientAccount, ProofPhoto, SessionCategory, PhotographyPackage
 } from '../types';
-import { sanitizeString, sanitizeEmail, sanitizeObject } from '../lib/sanitize';
+import { sanitizeString, sanitizeEmail, sanitizeUrl, sanitizeObject } from '../lib/sanitize';
 import { db, uploadImageBlob, deleteImageByUrl } from '../lib/firebase';
 import { onSnapshot, collection, query, orderBy } from 'firebase/firestore';
 
@@ -522,7 +522,7 @@ export default function AdminCMS({
   };
 
   const handleAddProofPhoto = () => {
-    const safeUrl = sanitizeString(newProofPhotoUrl);
+    const safeUrl = sanitizeUrl(newProofPhotoUrl);
     const safeTitle = sanitizeString(newProofPhotoTitle);
     if (!safeUrl || !safeTitle) {
       triggerAlert(t('Por favor ingresa URL y título de la foto', 'Please enter both photo URL and title'));
@@ -945,7 +945,7 @@ export default function AdminCMS({
                   {/* Photo Preview Column */}
                   <div className="lg:col-span-4 space-y-4">
                     <div className="aspect-[3/2] rounded-xl overflow-hidden border border-white/10 relative">
-                      <img src={photoEditItem.url} className="w-full h-full object-cover" />
+                       <img src={sanitizeUrl(photoEditItem.url) || undefined} alt="" className="w-full h-full object-cover" />
                       <span className="absolute bottom-2 left-2 bg-overlay/70 border border-white/10 text-[9px] font-mono text-gold-400 px-2 py-0.5 rounded uppercase">
                         {photoEditItem.category}
                       </span>
@@ -1065,7 +1065,7 @@ export default function AdminCMS({
               {photographs.map(photo => (
                 <div key={photo.id} className="bg-charcoal border border-white/5 rounded-xl overflow-hidden flex flex-col justify-between animate-fadeIn">
                   <div className="relative aspect-[3/2] overflow-hidden">
-                    <img src={photo.url} className="w-full h-full object-cover" />
+                     <img src={sanitizeUrl(photo.url) || undefined} alt="" className="w-full h-full object-cover" />
                     <span className="absolute top-2 left-2 bg-dark/75 border border-white/10 px-1.5 py-0.5 text-[8px] font-mono text-gold-400 rounded uppercase tracking-wider">
                       {photo.category}
                     </span>
@@ -2241,7 +2241,7 @@ export default function AdminCMS({
                       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
                         {clientForm.photos?.map((p) => (
                           <div key={p.id} className="relative aspect-square bg-dark border border-white/10 rounded-lg overflow-hidden group">
-                            <img src={p.url} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                             <img src={sanitizeUrl(p.url) || undefined} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
                             <div className="absolute inset-0 bg-black/75 opacity-0 group-hover:opacity-100 transition-opacity p-2 flex flex-col justify-between text-left text-[8px] font-mono">
                               <div>
                                 <span className="text-white/90 font-semibold block truncate">{p.title}</span>
@@ -2313,7 +2313,7 @@ export default function AdminCMS({
                               </div>
 
                               <div className="aspect-[3/2] rounded-lg overflow-hidden border border-white/10">
-                                <img src={photoToEdit.url} className="w-full h-full object-cover" />
+                                 <img src={sanitizeUrl(photoToEdit.url) || undefined} alt="" className="w-full h-full object-cover" />
                               </div>
 
                               <div className="space-y-3">

@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ShieldCheck, Heart, ArrowRight, Download, Eye, EyeOff, ChevronLeft, ChevronRight, X, Copy, Check as CheckIcon, Mail, MapPin } from 'lucide-react';
 import { ActiveLanguage, ClientAccount, ProofPhoto } from '../types';
 import { TRANSLATIONS } from '../data/mockData';
-import { sanitizeString } from '../lib/sanitize';
+import { sanitizeString, sanitizeUrl } from '../lib/sanitize';
 
 interface ClientPortalProps {
   lang: ActiveLanguage;
@@ -114,18 +114,21 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
   }, 0);
 
   const handleDownload = async (photo: ProofPhoto) => {
+    const safeUrl = sanitizeUrl(photo.url);
+    if (!safeUrl) return;
+
     try {
       const fileName = `${photo.title.toLowerCase().replace(/\s+/g, '-')}-master.webp`;
-      if (photo.url.startsWith('data:')) {
+      if (safeUrl.startsWith('data:')) {
         const link = document.createElement('a');
-        link.href = photo.url;
+        link.href = safeUrl;
         link.download = fileName;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         return;
       }
-      const response = await fetch(photo.url, { mode: 'cors' });
+      const response = await fetch(safeUrl, { mode: 'cors' });
       const blob = await response.blob();
       const blobUrl = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -138,8 +141,9 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
     } catch (err) {
       console.warn('CORS or fetch error, falling back to direct tab open:', err);
       const link = document.createElement('a');
-      link.href = photo.url;
+      link.href = safeUrl;
       link.target = '_blank';
+      link.rel = 'noopener noreferrer';
       link.download = `${photo.title.toLowerCase().replace(/\s+/g, '-')}-master.webp`;
       document.body.appendChild(link);
       link.click();
@@ -326,7 +330,7 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                         onClick={() => setLightboxIndex(index)}
                       >
                         <img
-                          src={photo.url}
+                          src={sanitizeUrl(photo.url) || undefined}
                           alt={photo.title}
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                           referrerPolicy="no-referrer"
@@ -455,7 +459,7 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                     </button>
 
                     <img
-                      src={proofPhotos[lightboxIndex].url}
+                      src={sanitizeUrl(proofPhotos[lightboxIndex].url) || undefined}
                       alt={proofPhotos[lightboxIndex].title}
                       className="max-w-full max-h-[65vh] md:max-h-[68vh] object-contain rounded-lg shadow-2xl border border-[#D8C0A8]/30"
                     />
