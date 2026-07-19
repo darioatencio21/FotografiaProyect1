@@ -288,17 +288,27 @@ Ambas retornan el valor traducido según el idioma activo, con fallback al valor
 
 ## Despliegue
 
-El proyecto está configurado para desplegarse en **Vercel** con deploy automático desde GitHub.
+El proyecto está configurado para desplegarse en **Vercel** mediante GitHub Actions, después de que CI valide el cambio.
 
 ### Deploy automático
 
-Conectá el repositorio en [vercel.com/import](https://vercel.com/import). Vercel detecta automáticamente Vite y aplica la configuración de `vercel.json`:
+Vincula el proyecto en Vercel y configura el workflow con los secretos indicados abajo. Vercel detecta Vite y aplica la configuración de `vercel.json`:
 
 - **Build**: `npm run build`
 - **Output**: `dist/`
 - **SPA rewrites**: Todas las rutas redirigen a `index.html`
 
-Cada push a `main` dispara un deploy automático.
+Cada push a `main` ejecuta lint, auditoría de dependencias y build. Solo si CI termina correctamente se ejecuta el deploy de producción.
+
+Configura estos secretos en GitHub (`Settings → Secrets and variables → Actions`) para habilitar el deploy:
+
+```text
+VERCEL_TOKEN
+VERCEL_ORG_ID
+VERCEL_PROJECT_ID
+```
+
+Desactiva el deploy automático por integración Git en Vercel para no publicar dos veces el mismo commit. En `Settings → Branches`, protege `main` y exige los checks `CI`, `Security` y `CodeQL` antes de aceptar un pull request.
 
 ### Variables de entorno en Vercel
 
@@ -322,6 +332,20 @@ APP_URL=https://tu-app.vercel.app
 npm run build
 vercel --prod
 ```
+
+---
+
+## Seguridad y Versionado
+
+Los workflows de `.github/workflows/` aplican estos controles:
+
+- `CI`: type-check, `npm audit` y build de producción en cada pull request y push a `main`.
+- `Security`: Gitleaks analiza el historial completo para bloquear claves o tokens, además de auditar dependencias de producción.
+- `CodeQL`: análisis estático semanal y en cada cambio de código.
+- `Dependabot`: actualiza dependencias npm y GitHub Actions semanalmente.
+- `Version and release`: Release Please crea un pull request de versión siguiendo Conventional Commits (`feat:`, `fix:`, `BREAKING CHANGE:`).
+
+Si una clave se filtra, revócala inmediatamente en el proveedor, reemplázala en los secretos correspondientes y no la agregues al repositorio, aunque esté dentro de un archivo ignorado por Git.
 
 ---
 

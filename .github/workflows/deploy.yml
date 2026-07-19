@@ -1,0 +1,52 @@
+name: Deploy production
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to Vercel
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - name: Checkout tested revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Link Vercel project
+        run: npx vercel@latest link --yes --project="$VERCEL_PROJECT_ID" --scope="$VERCEL_ORG_ID" --token="$VERCEL_TOKEN"
+
+      - name: Pull production environment
+        run: npx vercel@latest pull --yes --environment=production --token="$VERCEL_TOKEN" --scope="$VERCEL_ORG_ID"
+
+      - name: Build Vercel artifact
+        run: npx vercel@latest build --prod --token="$VERCEL_TOKEN" --scope="$VERCEL_ORG_ID"
+
+      - name: Deploy Vercel artifact
+        run: npx vercel@latest deploy --prebuilt --prod --token="$VERCEL_TOKEN" --scope="$VERCEL_ORG_ID"
