@@ -9,3 +9,6 @@ coverage/
 firebase-applet-config.json
 *.key
 credentials.json
+
+.vercel
+.env*
