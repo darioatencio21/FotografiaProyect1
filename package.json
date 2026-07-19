@@ -23,7 +23,7 @@
     "vite": "^6.2.3"
   },
   "devDependencies": {
-    "dotenv": "^16.4.7",
+    "dotenv": "^17.4.2",
     "tailwindcss": "^4.3.3",
     "typescript": "~5.8.2"
   }
