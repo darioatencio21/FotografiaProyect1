@@ -174,7 +174,7 @@ export default function AdminCMS({
             if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
               new Notification('Nueva Reserva - Aurea Studio', {
                 body: `${cName} ha solicitado una sesión. Revisa la cola de reservas.`,
-                icon: '/favicon.ico',
+                icon: '/favicon.svg',
               });
             }
           }
@@ -206,7 +206,7 @@ export default function AdminCMS({
             if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
               new Notification('Nuevo Mensaje - Aurea Studio', {
                 body: `${cName} te ha escrito. Revisa la bandeja de entrada.`,
-                icon: '/favicon.ico',
+                icon: '/favicon.svg',
               });
             }
           }
