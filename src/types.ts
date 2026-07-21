@@ -94,6 +94,22 @@ export interface FAQ {
   answer_en?: string;
 }
 
+export interface ContractData {
+  brideName: string;
+  groomName: string;
+  brideEmail: string;
+  groomPhone: string;
+  brideAddress: string;
+  ceremonyLocation: string;
+  ceremonyAddress: string;
+  ceremonyStart: string;
+  ceremonyEnd: string;
+  receptionLocation: string;
+  receptionAddress: string;
+  receptionStart: string;
+  receptionEnd: string;
+}
+
 export interface Booking {
   id: string;
   clientName: string;
@@ -108,6 +124,19 @@ export interface Booking {
   createdAt: string;
   amount?: number;
   isRead?: boolean;
+  isPaid?: boolean;
+  contractData?: ContractData;
+  contractAccepted?: boolean;
+  contractSignature?: string;
+  contractSignedAt?: string;
+  contractPhotographerSignature?: string;
+  contractPhotographerSignedAt?: string;
+  packageName?: string;
+  packageDetails?: string;
+  contractType?: 'wedding' | 'session';
+  depositAmount?: number;
+  amountDue?: number;
+  travelExpenses?: string;
 }
 
 export interface Message {
@@ -196,6 +225,7 @@ export interface PhotographyPackage {
   image?: string;
 
   price: number;
+  deposit?: number;
   priceFromText_es: string;
   priceFromText_en: string;
 

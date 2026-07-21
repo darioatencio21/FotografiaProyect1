@@ -6,7 +6,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ShieldCheck, Heart, ArrowRight, Download, Eye, EyeOff, ChevronLeft, ChevronRight, X, Copy, Check as CheckIcon, Mail, MapPin } from 'lucide-react';
-import { ActiveLanguage, ClientAccount, ProofPhoto } from '../types';
+import { ActiveLanguage, Booking, ClientAccount, ProofPhoto } from '../types';
+import ContractView from './ContractView';
 import { TRANSLATIONS } from '../data/mockData';
 import { sanitizeString, sanitizeUrl } from '../lib/sanitize';
 
@@ -16,9 +17,11 @@ interface ClientPortalProps {
   clientAccounts?: ClientAccount[];
   onUpdateClientAccounts?: (accounts: ClientAccount[]) => void;
   autoPasscode?: string;
+  bookings?: Booking[];
+  onUpdateBookings?: (bookings: Booking[]) => void;
 }
 
-export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = [], onUpdateClientAccounts, autoPasscode }: ClientPortalProps) {
+export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = [], onUpdateClientAccounts, autoPasscode, bookings = [], onUpdateBookings }: ClientPortalProps) {
   const [passcode, setPasscode] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -28,6 +31,8 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
   const [activePhoto, setActivePhoto] = useState<ProofPhoto | null>(null);
   const [activeFilter, setActiveFilter] = useState<'all' | 'favorites'>('all');
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+  const [showContract, setShowContract] = useState(false);
 
   const t = TRANSLATIONS[lang];
 
@@ -50,6 +55,7 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
 
   const currentAccount = clientAccounts.find(c => c.id === authenticatedClientId);
   const proofPhotos = currentAccount ? (currentAccount.photos || []) : [];
+  const contractBooking = currentAccount ? bookings.find(b => b.clientName === currentAccount.clientName && b.contractData && b.isPaid && !b.contractSignature) : undefined;
 
   const handleAuth = (e: React.FormEvent) => {
     e.preventDefault();
@@ -283,6 +289,43 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                       <span>{lang === 'en' ? 'Copy Link' : 'Copiar Link'}</span>
                     </button>
                   </div>
+                </div>
+              )}
+
+              {/* Contract signing banner */}
+              {contractBooking && !showContract && (
+                <div className="bg-gold-500/10 border border-gold-500/30 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[10px] font-mono text-gold-400 tracking-widest uppercase">
+                      {lang === 'en' ? 'Contract Pending' : 'Contrato Pendiente'}
+                    </p>
+                    <p className="text-xs text-white/80 mt-1">
+                      {lang === 'en' ? 'Your contract is ready for review and signature.' : 'Tu contrato está listo para revisar y firmar.'}
+                    </p>
+                  </div>
+                  <button onClick={() => setShowContract(true)} className="px-4 py-2 bg-gold-500/20 hover:bg-gold-500/30 border border-gold-500/30 text-gold-400 rounded-lg text-[10px] font-mono tracking-wider uppercase transition-all shrink-0 cursor-pointer">
+                    {lang === 'en' ? 'Sign Contract' : 'Firmar Contrato'}
+                  </button>
+                </div>
+              )}
+
+              {showContract && contractBooking && (
+                <div className="relative bg-dark/40 border border-gold-500/20 rounded-xl p-4 md:p-6">
+                  <button onClick={() => setShowContract(false)} className="absolute top-3 right-3 text-white/50 hover:text-white text-[10px] font-mono cursor-pointer">
+                    {lang === 'en' ? 'Close' : 'Cerrar'}
+                  </button>
+                  <ContractView
+                    booking={contractBooking}
+                    mode="client-sign"
+                    lang={lang}
+                    t={t}
+                    onClientSign={(signature) => {
+                      if (onUpdateBookings) {
+                        onUpdateBookings(bookings.map(b => b.id === contractBooking.id ? { ...b, contractSignature: signature, contractSignedAt: new Date().toISOString() } : b));
+                      }
+                      setShowContract(false);
+                    }}
+                  />
                 </div>
               )}
 

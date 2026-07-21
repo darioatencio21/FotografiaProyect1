@@ -1312,6 +1312,67 @@ export default function AdminCMS({
                                         {t('Creada el:', 'Created at:', 'Criado em:')} {b.createdAt ? new Date(b.createdAt).toLocaleString(lang === 'es' ? 'es-ES' : 'en-US') : 'N/A'}
                                       </div>
                                     </div>
+
+                                      {/* Contract & Pricing section */}
+                                      {(b.contractData || b.status === 'accepted') && (
+                                        <div className="mt-6 pt-6 border-t border-white/5">
+                                          <h4 className="text-[10px] font-mono uppercase tracking-widest text-gold-400 font-semibold pb-3">
+                                            {t('Contrato y Montos', 'Contract & Pricing', 'Contrato e Valores')}
+                                          </h4>
+                                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="space-y-3">
+                                              <p className="text-[9px] uppercase tracking-wider text-white/40">{t('Montos', 'Amounts', 'Valores')}</p>
+                                              <div className="flex gap-2">
+                                                <input type="number" placeholder={t('Depósito', 'Deposit', 'Depósito')} defaultValue={b.depositAmount || 0} onChange={(e) => { const v = parseInt(e.target.value) || 0; onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, depositAmount: v } : book)); }} className="w-full bg-dark/60 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-mono" />
+                                                <input type="number" placeholder={t('Restante', 'Due', 'Restante')} defaultValue={b.amountDue || 0} onChange={(e) => { const v = parseInt(e.target.value) || 0; onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, amountDue: v } : book)); }} className="w-full bg-dark/60 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-mono" />
+                                              </div>
+                                              <input type="text" placeholder={t('Gastos de Viaje', 'Travel Expenses', 'Despesas de Viagem')} defaultValue={b.travelExpenses || ''} onChange={(e) => { onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, travelExpenses: e.target.value } : book)); }} className="w-full bg-dark/60 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-mono" />
+                                            </div>
+                                            <div className="space-y-2">
+                                              <div className="flex gap-2">
+                                                {!b.isPaid && b.status === 'accepted' && (
+                                                  <button onClick={() => onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, isPaid: true } : book))} className="flex-1 px-3 py-2 bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-emerald-600/30 transition-all">
+                                                    {t('Marcar como Pagado', 'Mark as Paid', 'Marcar como Pago')}
+                                                  </button>
+                                                )}
+                                                {b.contractSignature && !b.contractPhotographerSignature && (
+                                                  <button onClick={() => onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, contractPhotographerSignature: 'Miriam Tellez', contractPhotographerSignedAt: new Date().toISOString() } : book))} className="flex-1 px-3 py-2 bg-gold-500/20 border border-gold-500/30 text-gold-400 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-gold-500/30 transition-all">
+                                                    {t('Firmar como Fotógrafa', 'Sign as Photographer', 'Assinar como Fotógrafa')}
+                                                  </button>
+                                                )}
+                                              </div>
+                                              {b.isPaid && <span className="text-[9px] text-emerald-400 font-mono">{t('✓ Pagado', '✓ Paid', '✓ Pago')}</span>}
+                                              {b.contractSignature && <span className="text-[9px] text-green-400 font-mono block">{t('✓ Cliente firmó', '✓ Client signed', '✓ Cliente assinou')}</span>}
+                                              {b.contractPhotographerSignature && <span className="text-[9px] text-gold-400 font-mono block">{t('✓ Fotógrafa firmó', '✓ Photographer signed', '✓ Fotógrafa assinou')}</span>}
+                                            </div>
+                                          </div>
+                                          {b.contractData && (
+                                            <div className="mt-3">
+                                              <details className="text-xs">
+                                                <summary className="text-gold-400/70 cursor-pointer hover:text-gold-400 text-[10px] font-mono">{b.contractType === 'session' ? t('Ver detalles de la sesión', 'View session details', 'Ver detalhes da sessão') : t('Ver datos de la boda', 'View wedding details', 'Ver dados do casamento')}</summary>
+                                                <div className="mt-2 text-white/70 space-y-1 text-[11px]">
+                                                  {b.contractType === 'session' ? (
+                                                    <>
+                                                      <p>{t('Cliente', 'Client', 'Cliente')}: {b.contractData.brideName} — {b.contractData.brideEmail}</p>
+                                                      <p>{t('Teléfono', 'Phone', 'Telefone')}: {b.contractData.groomPhone}</p>
+                                                      <p>{t('Fecha', 'Date', 'Data')}: {b.date}</p>
+                                                      <p>{t('Horario', 'Schedule', 'Horário')}: {b.timeSlot}</p>
+                                                    </>
+                                                  ) : (
+                                                    <>
+                                                      <p>{t('Novia', 'Bride', 'Noiva')}: {b.contractData.brideName} — {b.contractData.brideEmail}</p>
+                                                      <p>{t('Novio', 'Groom', 'Noivo')}: {b.contractData.groomName} — {b.contractData.groomPhone}</p>
+                                                      <p>{t('Ceremonia', 'Ceremony', 'Cerimônia')}: {b.contractData.ceremonyLocation} ({b.contractData.ceremonyStart} - {b.contractData.ceremonyEnd})</p>
+                                                      <p>{t('Recepción', 'Reception', 'Recepção')}: {b.contractData.receptionLocation} ({b.contractData.receptionStart} - {b.contractData.receptionEnd})</p>
+                                                    </>
+                                                  )}
+                                                </div>
+                                              </details>
+                                            </div>
+                                          )}
+
+                                        </div>
+                                      )}
                                   </div>
                                 </motion.div>
                               </td>
@@ -1421,6 +1482,55 @@ export default function AdminCMS({
                             {b.notes || t('Sin notas adicionales', 'No additional notes', 'Sem notas adicionais')}
                           </div>
                         </div>
+                        {(b.contractData || b.status === 'accepted') && (
+                          <div className="pt-3 border-t border-white/5 space-y-3">
+                            <h4 className="text-[10px] font-mono uppercase tracking-widest text-gold-400 font-semibold">
+                              {t('Contrato y Montos', 'Contract & Pricing', 'Contrato e Valores')}
+                            </h4>
+                            <div className="flex gap-2">
+                              <input type="number" placeholder={t('Depósito', 'Deposit', 'Depósito')} defaultValue={b.depositAmount || 0} onChange={(e) => { const v = parseInt(e.target.value) || 0; onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, depositAmount: v } : book)); }} className="w-full bg-dark/60 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-mono" />
+                              <input type="number" placeholder={t('Restante', 'Due', 'Restante')} defaultValue={b.amountDue || 0} onChange={(e) => { const v = parseInt(e.target.value) || 0; onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, amountDue: v } : book)); }} className="w-full bg-dark/60 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-mono" />
+                            </div>
+                            <input type="text" placeholder={t('Gastos de Viaje', 'Travel Expenses', 'Despesas de Viagem')} defaultValue={b.travelExpenses || ''} onChange={(e) => { onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, travelExpenses: e.target.value } : book)); }} className="w-full bg-dark/60 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-mono" />
+                            <div className="flex gap-2">
+                              {!b.isPaid && b.status === 'accepted' && (
+                                <button onClick={() => onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, isPaid: true } : book))} className="flex-1 px-3 py-2 bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-emerald-600/30 transition-all">
+                                  {t('Marcar como Pagado', 'Mark as Paid', 'Marcar como Pago')}
+                                </button>
+                              )}
+                              {b.contractSignature && !b.contractPhotographerSignature && (
+                                <button onClick={() => onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, contractPhotographerSignature: 'Miriam Tellez', contractPhotographerSignedAt: new Date().toISOString() } : book))} className="flex-1 px-3 py-2 bg-gold-500/20 border border-gold-500/30 text-gold-400 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-gold-500/30 transition-all">
+                                  {t('Firmar como Fotógrafa', 'Sign as Photographer', 'Assinar como Fotógrafa')}
+                                </button>
+                              )}
+                            </div>
+                            {b.isPaid && <span className="text-[9px] text-emerald-400 font-mono block">{t('✓ Pagado', '✓ Paid', '✓ Pago')}</span>}
+                            {b.contractSignature && <span className="text-[9px] text-green-400 font-mono block">{t('✓ Cliente firmó', '✓ Client signed', '✓ Cliente assinou')}</span>}
+                            {b.contractPhotographerSignature && <span className="text-[9px] text-gold-400 font-mono block">{t('✓ Fotógrafa firmó', '✓ Photographer signed', '✓ Fotógrafa assinou')}</span>}
+                            {b.contractData && (
+                              <details className="text-xs">
+                                <summary className="text-gold-400/70 cursor-pointer hover:text-gold-400 text-[10px] font-mono">{b.contractType === 'session' ? t('Ver detalles de la sesión', 'View session details', 'Ver detalhes da sessão') : t('Ver datos de la boda', 'View wedding details', 'Ver dados do casamento')}</summary>
+                                <div className="mt-2 text-white/70 space-y-1 text-[11px]">
+                                  {b.contractType === 'session' ? (
+                                    <>
+                                      <p>{t('Cliente', 'Client', 'Cliente')}: {b.contractData.brideName} — {b.contractData.brideEmail}</p>
+                                      <p>{t('Teléfono', 'Phone', 'Telefone')}: {b.contractData.groomPhone}</p>
+                                      <p>{t('Fecha', 'Date', 'Data')}: {b.date}</p>
+                                      <p>{t('Horario', 'Schedule', 'Horário')}: {b.timeSlot}</p>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <p>{t('Novia', 'Bride', 'Noiva')}: {b.contractData.brideName} — {b.contractData.brideEmail}</p>
+                                      <p>{t('Novio', 'Groom', 'Noivo')}: {b.contractData.groomName} — {b.contractData.groomPhone}</p>
+                                      <p>{t('Ceremonia', 'Ceremony', 'Cerimônia')}: {b.contractData.ceremonyLocation} ({b.contractData.ceremonyStart} - {b.contractData.ceremonyEnd})</p>
+                                      <p>{t('Recepción', 'Reception', 'Recepção')}: {b.contractData.receptionLocation} ({b.contractData.receptionStart} - {b.contractData.receptionEnd})</p>
+                                    </>
+                                  )}
+                                </div>
+                              </details>
+                            )}
+                          </div>
+                        )}
                         <div className="text-[10px] text-white/30 italic text-right">
                           {t('Creada:', 'Created:', 'Criada:')} {b.createdAt ? new Date(b.createdAt).toLocaleString(lang === 'es' ? 'es-ES' : 'en-US') : 'N/A'}
                         </div>

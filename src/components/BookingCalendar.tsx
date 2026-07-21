@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Calendar as CalendarIcon, 
@@ -18,10 +18,13 @@ import {
   User,
   Heart,
   ChevronRight,
-  MapPin
+  MapPin,
+  Printer
 } from 'lucide-react';
-import { Service, ActiveLanguage, Booking, BookingConfig, EmailConfig, PhotographyPackage } from '../types';
+import { Service, ActiveLanguage, Booking, BookingConfig, EmailConfig, PhotographyPackage, ContractData } from '../types';
 import { sanitizeString, sanitizeEmail, sanitizePhone } from '../lib/sanitize';
+import ContractView from './ContractView';
+import { TRANSLATIONS } from '../data/mockData';
 
 interface BookingCalendarProps {
   services: Service[];
@@ -30,6 +33,7 @@ interface BookingCalendarProps {
   emailConfig?: EmailConfig;
   preSelectedPackage?: PhotographyPackage | null;
   onClearPackage?: () => void;
+  onCheckout?: (amount: number, description: string, onDone: () => void, onCancel?: () => void) => void;
   onAddBooking: (booking: Omit<Booking, 'id' | 'status' | 'createdAt'>) => void;
 }
 
@@ -100,7 +104,7 @@ const LOCAL_TRANSLATIONS = {
   },
 };
 
-export default function BookingCalendar({ services, lang, config, emailConfig, preSelectedPackage, onClearPackage, onAddBooking }: BookingCalendarProps) {
+export default function BookingCalendar({ services, lang, config, emailConfig, preSelectedPackage, onClearPackage, onCheckout, onAddBooking }: BookingCalendarProps) {
   const t = LOCAL_TRANSLATIONS[lang] || LOCAL_TRANSLATIONS.es;
 
   // Form State
@@ -120,14 +124,27 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
   const [peopleCount, setPeopleCount] = useState<number>(1);
   const [creativeNotes, setCreativeNotes] = useState<string>('');
   
+  // Wedding-specific fields (only shown for boda packages)
+  const isWedding = preSelectedPackage?.category === 'boda';
+  const [weddingData, setWeddingData] = useState<ContractData>({
+    brideName: '', groomName: '', brideEmail: '', groomPhone: '', brideAddress: '',
+    ceremonyLocation: '', ceremonyAddress: '', ceremonyStart: '', ceremonyEnd: '',
+    receptionLocation: '', receptionAddress: '', receptionStart: '', receptionEnd: '',
+  });
+
   // Flow State
-  const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+  const [step, setStep] = useState<'form' | 'payment' | 'contract' | 'success'>('form');
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
+  const [pendingBooking, setPendingBooking] = useState<Booking | null>(null);
+  const [weddingError, setWeddingError] = useState<string>('');
+  const [paymentCancelled, setPaymentCancelled] = useState(false);
 
   // Pricing Calculation
   const selectedService = services.find(s => s.id === selectedServiceId);
   const basePrice = preSelectedPackage ? preSelectedPackage.price : (selectedService ? selectedService.price : 0);
   const totalPrice = basePrice;
+  const depositAmount = preSelectedPackage?.deposit || Math.round((totalPrice || 0) / 2) || 500;
+  const bookingId = useMemo(() => `AUREA-${Math.floor(Math.random() * 8999 + 1000)}`, []);
 
   // Handle Date Selection Input
   const handleDateChange = (val: string) => {
@@ -150,6 +167,21 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
     const safeCustomTime = sanitizeString(customTimeframeText);
 
     if (!safeName || !safeEmail || !safePhone || !dateValue) return;
+
+    if (isWedding) {
+      const campos: (keyof ContractData)[] = [
+        'brideName','groomName','brideEmail','groomPhone','brideAddress',
+        'ceremonyLocation','ceremonyAddress','ceremonyStart','ceremonyEnd',
+        'receptionLocation','receptionAddress','receptionStart','receptionEnd'
+      ];
+      const faltan = campos.filter(k => !weddingData[k]?.trim());
+      if (faltan.length > 0) {
+        setWeddingError(lang === 'en' ? 'Please fill in all wedding details' : 'Completa todos los campos de la boda');
+        return;
+      }
+    }
+    setWeddingError('');
+    setPaymentCancelled(false);
 
     setIsSyncing(true);
 
@@ -225,9 +257,8 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
     }
 
     setIsSyncing(false);
-    setIsSubmitted(true);
 
-    onAddBooking({
+    const baseBooking = {
       clientName: safeName,
       clientEmail: safeEmail,
       clientPhone: safePhone,
@@ -236,14 +267,39 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
       serviceId: selectedServiceId,
       peopleCount,
       notes: notesText,
-      amount: totalPrice
+      amount: totalPrice,
+      packageName: preSelectedPackage
+        ? (lang === 'es' ? preSelectedPackage.name_es : preSelectedPackage.name_en)
+        : undefined,
+      packageDetails: preSelectedPackage
+        ? (lang === 'es' ? preSelectedPackage.description_es : preSelectedPackage.description_en)
+        : undefined,
+    };
+
+    const contractData: ContractData = isWedding
+      ? weddingData
+      : { brideName: safeName, brideEmail: safeEmail, groomPhone: safePhone, groomName: '', brideAddress: '', ceremonyLocation: '', ceremonyAddress: '', ceremonyStart: '', ceremonyEnd: '', receptionLocation: '', receptionAddress: '', receptionStart: '', receptionEnd: '' };
+    const contractType = isWedding ? 'wedding' : 'session';
+    const depositAmt = preSelectedPackage?.deposit || Math.round((totalPrice || 0) / 2) || 500;
+    setPendingBooking({ status: 'pending', createdAt: new Date().toISOString(), ...baseBooking, contractData, contractType, depositAmount: depositAmt });
+    setStep('payment');
+  };
+
+  const handleSignContract = (signature: string) => {
+    if (!pendingBooking) return;
+    onAddBooking({
+      ...pendingBooking,
+      contractSignature: signature,
+      contractSignedAt: new Date().toISOString(),
+      isPaid: false,
     });
+    setStep('success');
   };
 
   return (
     <div className="glass-premium rounded-2xl border border-white/5 p-6 md:p-8 max-w-4xl mx-auto shadow-2xl">
       <AnimatePresence mode="wait">
-        {!isSubmitted ? (
+        {step === 'form' ? (
           <form onSubmit={handleSubmit} className="space-y-8">
             
             {/* INTRO SPEECH */}
@@ -255,6 +311,16 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                 {t.subtitle}
               </p>
             </div>
+
+            {paymentCancelled && (
+              <div className="text-center py-2 px-4 rounded-lg bg-gold-400/10 border border-gold-400/30">
+                <p className="text-[11px] font-mono text-gold-300">
+                  {lang === 'en'
+                    ? 'Payment was cancelled — you can try again below.'
+                    : 'Pago cancelado — puedes intentar de nuevo abajo.'}
+                </p>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
               
@@ -452,6 +518,59 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                 </div>
               </div>
 
+              {/* WEDDING DETAILS (only for boda packages) */}
+              {isWedding && (
+                <div className="space-y-4 pt-2 border-t border-white/5">
+                  <label className="block text-xs font-mono tracking-widest text-gold-300 uppercase">
+                    {lang === 'es' ? 'Detalles de la Boda' : 'Wedding Details'}
+                  </label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-3 p-4 border border-white/5 rounded-lg">
+                      <p className="text-[10px] font-mono tracking-widest text-gold-400 uppercase">
+                        {lang === 'es' ? 'Novia' : 'Bride'}
+                      </p>
+                      <input type="text" required placeholder={lang === 'es' ? 'Nombre de la Novia' : 'Bride Name'} value={weddingData.brideName} onChange={(e) => setWeddingData({...weddingData, brideName: e.target.value})} className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans" />
+                      <input type="email" required placeholder={lang === 'es' ? 'Correo de la Novia' : 'Bride Email'} value={weddingData.brideEmail} onChange={(e) => setWeddingData({...weddingData, brideEmail: e.target.value})} className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans" />
+                      <input type="text" required placeholder={lang === 'es' ? 'Dirección de la Novia' : 'Bride Address'} value={weddingData.brideAddress} onChange={(e) => setWeddingData({...weddingData, brideAddress: e.target.value})} className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans" />
+                    </div>
+                    <div className="space-y-3 p-4 border border-white/5 rounded-lg">
+                      <p className="text-[10px] font-mono tracking-widest text-gold-400 uppercase">
+                        {lang === 'es' ? 'Novio' : 'Groom'}
+                      </p>
+                      <input type="text" required placeholder={lang === 'es' ? 'Nombre del Novio' : 'Groom Name'} value={weddingData.groomName} onChange={(e) => setWeddingData({...weddingData, groomName: e.target.value})} className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans" />
+                      <input type="tel" required placeholder={lang === 'es' ? 'Teléfono del Novio' : 'Groom Phone'} value={weddingData.groomPhone} onChange={(e) => setWeddingData({...weddingData, groomPhone: e.target.value})} className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-3 p-4 border border-white/5 rounded-lg">
+                      <p className="text-[10px] font-mono tracking-widest text-gold-400 uppercase">
+                        {lang === 'es' ? 'Ceremonia' : 'Ceremony'}
+                      </p>
+                      <input type="text" required placeholder={lang === 'es' ? 'Lugar' : 'Location'} value={weddingData.ceremonyLocation} onChange={(e) => setWeddingData({...weddingData, ceremonyLocation: e.target.value})} className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans" />
+                      <input type="text" required placeholder={lang === 'es' ? 'Dirección' : 'Address'} value={weddingData.ceremonyAddress} onChange={(e) => setWeddingData({...weddingData, ceremonyAddress: e.target.value})} className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans" />
+                      <div className="flex gap-2">
+                        <input type="time" required placeholder={lang === 'es' ? 'Inicio' : 'Start'} value={weddingData.ceremonyStart} onChange={(e) => setWeddingData({...weddingData, ceremonyStart: e.target.value})} className="w-1/2 bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans" />
+                        <input type="time" required placeholder={lang === 'es' ? 'Fin' : 'End'} value={weddingData.ceremonyEnd} onChange={(e) => setWeddingData({...weddingData, ceremonyEnd: e.target.value})} className="w-1/2 bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans" />
+                      </div>
+                    </div>
+                    <div className="space-y-3 p-4 border border-white/5 rounded-lg">
+                      <p className="text-[10px] font-mono tracking-widest text-gold-400 uppercase">
+                        {lang === 'es' ? 'Recepción' : 'Reception'}
+                      </p>
+                      <input type="text" required placeholder={lang === 'es' ? 'Lugar' : 'Location'} value={weddingData.receptionLocation} onChange={(e) => setWeddingData({...weddingData, receptionLocation: e.target.value})} className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans" />
+                      <input type="text" required placeholder={lang === 'es' ? 'Dirección' : 'Address'} value={weddingData.receptionAddress} onChange={(e) => setWeddingData({...weddingData, receptionAddress: e.target.value})} className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans" />
+                      <div className="flex gap-2">
+                        <input type="time" required placeholder={lang === 'es' ? 'Inicio' : 'Start'} value={weddingData.receptionStart} onChange={(e) => setWeddingData({...weddingData, receptionStart: e.target.value})} className="w-1/2 bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans" />
+                        <input type="time" required placeholder={lang === 'es' ? 'Fin' : 'End'} value={weddingData.receptionEnd} onChange={(e) => setWeddingData({...weddingData, receptionEnd: e.target.value})} className="w-1/2 bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {weddingError && (
+                <p className="text-[10px] text-red-400 font-mono text-center">{weddingError}</p>
+              )}
+
               {/* ESTIMATION & QUOTE SUMMARY */}
               <div className="bg-dark-gray/60 border border-gold-400/10 rounded-xl p-4 space-y-2 mt-2">
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -512,6 +631,96 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
 
             </div>
           </form>
+          ) : step === 'payment' && pendingBooking ? (
+          /* PAYMENT STEP (only for weddings) */
+          <motion.div
+            className="py-12 px-6 text-center max-w-md mx-auto space-y-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <div className="inline-flex p-4 rounded-full bg-gold-400/10 border border-gold-400/30 text-gold-400 mx-auto">
+              <DollarSign size={40} />
+            </div>
+            <div className="space-y-2">
+              <h3 className="font-serif text-2xl text-gold-50 tracking-wide">
+                {lang === 'en' ? 'Secure Your Date' : 'Asegura tu Fecha'}
+              </h3>
+              <p className="text-[11px] text-white/60">
+                {lang === 'en'
+                  ? 'A deposit is required to confirm your wedding booking. You can pay the remaining balance later.'
+                  : 'Se requiere un depósito para confirmar tu reserva de boda. Puedes pagar el resto después.'}
+              </p>
+            </div>
+            <div className="bg-dark/40 border border-white/5 rounded-lg p-4 space-y-2">
+              <div className="flex justify-between text-xs text-white/70">
+                <span>{lang === 'en' ? 'Package' : 'Paquete'}</span>
+                <span className="font-semibold text-white">{pendingBooking.packageName || '—'}</span>
+              </div>
+              <div className="flex justify-between text-xs text-white/70">
+                <span>{lang === 'en' ? 'Total' : 'Total'}</span>
+                <span className="font-semibold text-white">${pendingBooking.amount || 0}</span>
+              </div>
+              <div className="border-t border-white/5 pt-2 flex justify-between text-sm">
+                <span className="text-gold-400 font-semibold">{lang === 'en' ? 'Deposit Required' : 'Depósito Requerido'}</span>
+                <span className="font-serif text-xl text-gold-50">${depositAmount}</span>
+              </div>
+            </div>
+            <div className="flex gap-3 justify-center">
+              <button
+                type="button"
+                onClick={() => setStep('form')}
+                className="py-2.5 px-5 border border-white/15 hover:border-white/30 text-white/70 rounded-lg font-mono text-[10px] tracking-widest uppercase transition-all"
+              >
+                {lang === 'en' ? 'Back' : 'Volver'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onCheckout?.(
+                    depositAmount,
+                    `${pendingBooking.packageName || 'Wedding Photography'} — Deposit (${pendingBooking.clientName})`,
+                    () => setStep('contract'),
+                    () => { setStep('form'); setPaymentCancelled(true); }
+                  );
+                }}
+                className="py-2.5 px-6 bg-gold-500 hover:bg-gold-400 text-dark font-mono text-xs tracking-widest uppercase font-semibold rounded-lg transition-all"
+              >
+                {lang === 'en' ? `Pay $${depositAmount} Deposit` : `Pagar $${depositAmount} de Depósito`}
+              </button>
+            </div>
+          </motion.div>
+        ) : step === 'contract' && pendingBooking ? (
+          /* CONTRACT SIGNING STEP (only for weddings) */
+          <motion.div
+            className="py-6 px-2 md:px-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <p className="text-[10px] font-mono text-gold-400 tracking-widest uppercase">
+                  {lang === 'en' ? 'Step 2 of 2 — Sign Contract' : 'Paso 2 de 2 — Firma el Contrato'}
+                </p>
+                <h3 className="font-serif text-xl text-white/90 mt-1">
+                  {lang === 'en' ? 'Wedding Photography Contract' : 'Contrato de Fotografía de Boda'}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setStep('form')}
+                className="text-[10px] font-mono text-white/50 hover:text-white underline"
+              >
+                {lang === 'en' ? 'Back' : 'Volver'}
+              </button>
+            </div>
+            <ContractView
+              booking={pendingBooking}
+              mode="client-sign"
+              lang={lang}
+              t={TRANSLATIONS[lang]}
+              onClientSign={handleSignContract}
+            />
+          </motion.div>
         ) : (
           /* SUCCESS STATE */
           <motion.div
@@ -527,7 +736,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                 {t.successTitle}
               </h3>
               <p className="text-[10px] font-mono text-gold-400 uppercase tracking-widest">
-                ID: AUREA-{Math.floor(Math.random() * 8999 + 1000)}
+                ID: {bookingId}
               </p>
             </div>
             <p className="text-xs text-white/70 font-sans leading-relaxed">
@@ -536,11 +745,44 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                 <> Hemos enviado un acuse de recibo y detalles iniciales de la propuesta a <strong className="text-white">{clientEmail}</strong>.</>
               )}
             </p>
+
+            {/* Invoice / Receipt */}
+            <div className="bg-dark/40 border border-white/5 rounded-xl p-4 text-left text-xs font-mono space-y-2 print:border-gray-400 print:bg-white print:text-black">
+              <div className="flex items-center justify-between border-b border-white/5 print:border-gray-300 pb-2">
+                <span className="text-gold-400 font-bold uppercase tracking-widest text-[9px] print:text-gray-700">{lang === 'en' ? 'INVOICE / RECEIPT' : 'FACTURA / RECIBO'}</span>
+                <span className="text-[9px] text-white/40 print:text-gray-500">#{bookingId}</span>
+              </div>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[10px]">
+                <span className="text-white/50 print:text-gray-500">{lang === 'en' ? 'Client' : 'Cliente'}:</span>
+                <span className="text-white print:text-black text-right">{clientName}</span>
+                <span className="text-white/50 print:text-gray-500">{lang === 'en' ? 'Package' : 'Paquete'}:</span>
+                <span className="text-white print:text-black text-right">{preSelectedPackage ? (lang === 'es' ? preSelectedPackage.name_es : preSelectedPackage.name_en) : '—'}</span>
+                <span className="text-white/50 print:text-gray-500">{lang === 'en' ? 'Date' : 'Fecha'}:</span>
+                <span className="text-white print:text-black text-right">{dateValue}</span>
+                <span className="text-white/50 print:text-gray-500">{lang === 'en' ? 'Total' : 'Total'}:</span>
+                <span className="text-gold-400 print:text-black font-bold text-right">${(totalPrice || 0).toLocaleString()}</span>
+                <span className="text-white/50 print:text-gray-500">{lang === 'en' ? 'Deposit Paid' : 'Depósito Pagado'}:</span>
+                <span className="text-emerald-400 print:text-black font-bold text-right">${depositAmount.toLocaleString()}</span>
+                <span className="text-white/50 print:text-gray-500">{lang === 'en' ? 'Balance Due' : 'Saldo Restante'}:</span>
+                <span className="text-white print:text-black text-right">${((totalPrice || 0) - depositAmount).toLocaleString()}</span>
+              </div>
+              <div className="border-t border-white/5 print:border-gray-300 pt-2 flex justify-between items-center">
+                <span className="text-[8px] text-emerald-400/70 print:text-gray-500 uppercase tracking-widest">{lang === 'en' ? '✓ PAID' : '✓ PAGADO'}</span>
+                <button onClick={() => window.print()} className="inline-flex items-center gap-1.5 text-[9px] font-mono text-gold-400 hover:text-gold-300 print:hidden transition-colors">
+                  <Printer size={12} />
+                  {lang === 'en' ? 'Download Invoice' : 'Descargar Factura'}
+                </button>
+              </div>
+            </div>
+
             <div className="border-t border-white/10 pt-5 flex justify-center">
               <button
                 type="button"
                 onClick={() => {
-                  setIsSubmitted(false);
+                  setStep('form');
+                  setPendingBooking(null);
+                  setWeddingError('');
+                  setPaymentCancelled(false);
                   setDateValue('');
                   setSelectedDate(null);
                   setClientName('');

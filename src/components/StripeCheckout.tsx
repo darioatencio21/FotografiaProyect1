@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CreditCard, Lock, CheckCircle2, X, AlertCircle } from 'lucide-react';
 
@@ -16,6 +16,11 @@ interface StripeCheckoutProps {
 }
 
 export default function StripeCheckout({ isOpen, amount, description, onClose, onSuccess }: StripeCheckoutProps) {
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [isOpen]);
+
   const [cardNumber, setCardNumber] = useState('');
   const [expiry, setExpiry] = useState('');
   const [cvc, setCvc] = useState('');

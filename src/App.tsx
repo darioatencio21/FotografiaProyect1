@@ -28,6 +28,7 @@ import BookingCalendar from './components/BookingCalendar';
 import ClientPortal from './components/ClientPortal';
 import StripeCheckout from './components/StripeCheckout';
 import AboutSection from './components/AboutSection';
+import PixiesetGallery from './components/PixiesetGallery';
 import AdminCMS from './components/AdminCMS';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -161,7 +162,7 @@ export default function App() {
     const params = new URLSearchParams(window.location.search);
     return params.get('gallery') || '';
   });
-  const [lang, setLang] = useState<'es' | 'en'>('es');
+  const [lang, setLang] = useState<'es' | 'en'>('en');
 
   const [photographs, setPhotographs] = useState<Photograph[]>(() => {
     try { const saved = localStorage.getItem('aurea_photos'); return saved ? JSON.parse(saved) : INITIAL_PHOTOGRAPHS; } catch { return INITIAL_PHOTOGRAPHS; }
@@ -218,7 +219,7 @@ export default function App() {
   const [clientAccounts, setClientAccounts] = useState<ClientAccount[]>(INITIAL_CLIENT_ACCOUNTS);
 
   // UI Interactive States
-  const [activeFilter, setActiveFilter] = useState<string>('all');
+  const [activeFilter, setActiveFilter] = useState<string>('galeria');
   const [selectedPhotoForLightbox, setSelectedPhotoForLightbox] = useState<Photograph | null>(null);
   const [favorites, setFavorites] = useState<string[]>(() => {
     try { const saved = localStorage.getItem('aurea_favorites'); return saved ? JSON.parse(saved) : []; } catch { return []; }
@@ -678,10 +679,19 @@ export default function App() {
   };
 
   // Trigger Stripe print or service booking Checkout overlay
+  const pendingPaymentRef = useRef<(() => void) | null>(null);
+  const pendingCancelRef = useRef<(() => void) | null>(null);
+
   const handleOpenStripeCheckout = (amount: number, description: string) => {
     setCheckoutAmount(amount);
     setCheckoutDesc(description);
     setCheckoutOpen(true);
+  };
+
+  const handleCheckoutWithCallback = (amount: number, description: string, onDone: () => void, onCancel?: () => void) => {
+    pendingPaymentRef.current = onDone;
+    pendingCancelRef.current = onCancel ?? null;
+    handleOpenStripeCheckout(amount, description);
   };
 
   // Next / Prev photo in Lightbox
@@ -725,7 +735,8 @@ export default function App() {
     { value: 'cumpleanos', label: t.cumpleanos },
     { value: 'graduacion', label: t.graduacion },
     { value: 'corporativo', label: t.corporativo },
-    { value: 'gastronomia', label: t.gastronomia }
+    { value: 'gastronomia', label: t.gastronomia },
+    { value: 'galeria', label: t.galeria }
   ];
 
   // Filtered photograph collection
@@ -1097,107 +1108,11 @@ export default function App() {
           {/* ======================================================= */}
           {currentView === 'portfolio' && (
             <div className="space-y-8">
-              <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between border-b border-white/5 pb-6 gap-4 text-left">
-                <div>
-                  <h2 className="font-serif text-3xl text-gold-50 tracking-wide">Archival Portfolio</h2>
-                  <p className="text-xs text-white/50">Filtered by commission categories. Click any master frame for EXIF diagnostics.</p>
-                </div>
-
-                {/* Filter & Search actions bar */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                  {/* Dynamic text-search query field */}
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder={t.searchPlaceholder}
-                    className="bg-dark-gray border-[#D8C0A8] rounded-lg px-4 py-2 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-mono w-full sm:w-64"
-                  />
-                </div>
+              <div className="border-b border-white/5 pb-6">
+                <h2 className="font-serif text-3xl text-gold-50 tracking-wide">{t.portfolioTitle}</h2>
               </div>
 
-              {/* Responsive Category Filters scrollable trail */}
-              <div className="flex flex-wrap items-center gap-2 border-b border-white/5 pb-4">
-                {filterCategories.map(cat => {
-                  const isActive = activeFilter === cat.value;
-                  return (
-                    <button
-                      key={cat.value}
-                      onClick={() => {
-                        setActiveFilter(cat.value);
-                        window.scrollTo({ top: 150, behavior: 'smooth' });
-                      }}
-                      className={`px-3 py-1.5 rounded-full font-mono text-[9px] uppercase tracking-widest border transition-all cursor-pointer ${
-                        isActive
-                          ? 'bg-gold-500 border-gold-500 text-dark font-bold'
-                          : 'bg-dark-gray border-white/5 text-white/50 hover:border-white/20 hover:text-white'
-                      }`}
-                    >
-                      {cat.label}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Editorial Masonry layout */}
-              <div className="columns-1 sm:columns-2 lg:columns-3 gap-5 space-y-5">
-                {filteredPhotographs.length > 0 ? (
-                  filteredPhotographs.map(photo => {
-                    const isFav = favorites.includes(photo.id);
-                    return (
-                      <div
-                        key={photo.id}
-                        onClick={() => setSelectedPhotoForLightbox(photo)}
-                        className="break-inside-avoid relative overflow-hidden cursor-pointer group bg-dark-gray"
-                      >
-                        <img
-                          src={sanitizeUrl(photo.url) || undefined}
-                          alt={getPhotoTitle(photo, lang)}
-                          className="w-full h-auto object-cover transition-all duration-[800ms] ease-out group-hover:scale-[1.04]"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-overlay/8 via-overlay/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-
-                        {/* Category — on hover, top left */}
-                        <div className="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-all duration-700 translate-y-1 group-hover:translate-y-0">
-                          <span className="text-[7px] font-mono tracking-[0.25em] text-hero/60 uppercase">
-                            {t[photo.category as keyof typeof t] || photo.category}
-                          </span>
-                        </div>
-
-                        {/* Favorite — on hover, top right */}
-                        <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-700 translate-y-1 group-hover:translate-y-0">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleToggleFavorite(photo.id);
-                            }}
-                            className={`w-8 h-8 flex items-center justify-center rounded-full border ${
-                              isFav ? 'bg-gold-500 border-gold-500 text-dark' : 'border-hero/30 text-hero/70 hover:border-hero/60 hover:text-hero'
-                            }`}
-                          >
-                            <Heart size={11} className={isFav ? 'fill-dark' : ''} />
-                          </button>
-                        </div>
-
-                        {/* Title — on hover, bottom left */}
-                        <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-700 translate-y-2 group-hover:translate-y-0">
-                          <h3 className="font-serif text-sm md:text-base text-hero font-light leading-snug">{getPhotoTitle(photo, lang)}</h3>
-                        </div>
-                      </div>
-                    );
-                  })
-                ) : (
-                  <div className="py-24 text-center max-w-sm mx-auto space-y-3 col-span-3">
-                    <p className="text-white/40 text-xs">No photographs matches your query.</p>
-                    <button
-                      onClick={() => { setActiveFilter('all'); setSearchQuery(''); }}
-                      className="px-4 py-2 border border-white/10 rounded font-mono text-[9px] tracking-widest uppercase text-white hover:border-gold-400"
-                    >
-                      Reset Filter
-                    </button>
-                  </div>
-                )}
-              </div>
+              <PixiesetGallery lang={lang} t={t} />
             </div>
           )}
 
@@ -1441,14 +1356,15 @@ export default function App() {
                   emailConfig={emailConfig}
                   preSelectedPackage={selectedPackageId ? packages.find(p => p.id === selectedPackageId) ?? null : null}
                   onClearPackage={() => setSelectedPackageId(null)}
+                  onCheckout={handleCheckoutWithCallback}
                   onAddBooking={(newBook) => {
                     setSelectedPackageId(null);
                     const savedBook: Booking = {
+                      ...newBook,
                       id: `book-${Date.now()}`,
                       status: 'pending',
                       isRead: false,
                       createdAt: new Date().toISOString(),
-                      ...newBook
                     };
                     handleUpdateBookings([savedBook, ...bookings]);
                   }}
@@ -1468,6 +1384,8 @@ export default function App() {
                 clientAccounts={clientAccounts}
                 onUpdateClientAccounts={handleUpdateClientAccounts}
                 autoPasscode={galleryPasscode}
+                bookings={bookings}
+                onUpdateBookings={handleUpdateBookings}
               />
             </div>
           )}
@@ -1831,9 +1749,15 @@ export default function App() {
         isOpen={checkoutOpen}
         amount={checkoutAmount}
         description={checkoutDesc}
-        onClose={() => setCheckoutOpen(false)}
+        onClose={() => {
+          setCheckoutOpen(false);
+          pendingCancelRef.current?.();
+          pendingCancelRef.current = null;
+        }}
         onSuccess={() => {
-          // Success triggered
+          pendingPaymentRef.current?.();
+          pendingPaymentRef.current = null;
+          pendingCancelRef.current = null;
         }}
       />
     </div>
