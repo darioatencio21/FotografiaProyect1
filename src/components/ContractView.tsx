@@ -148,6 +148,11 @@ export default function ContractView({ booking, lang, t, mode = 'view', onClient
             {t.contractTravelExpenses}: {booking.travelExpenses}
           </p>
         )}
+        {booking.invoiceId && (
+          <p className="text-[9px] uppercase tracking-widest text-white/30 pt-2">
+            {lang === 'en' ? 'Invoice reference' : 'Referencia de factura'}: {booking.invoiceId}
+          </p>
+        )}
       </div>
 
       {/* Clauses */}

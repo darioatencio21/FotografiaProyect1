@@ -6,8 +6,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ShieldCheck, Heart, ArrowRight, Download, Eye, EyeOff, ChevronLeft, ChevronRight, X, Copy, Check as CheckIcon, Mail, MapPin } from 'lucide-react';
-import { ActiveLanguage, Booking, ClientAccount, ProofPhoto } from '../types';
+import { ActiveLanguage, Booking, ClientAccount, ProofPhoto, Invoice } from '../types';
 import ContractView from './ContractView';
+import InvoiceReceipt from './InvoiceReceipt';
 import { TRANSLATIONS } from '../data/mockData';
 import { sanitizeString, sanitizeUrl } from '../lib/sanitize';
 
@@ -19,9 +20,10 @@ interface ClientPortalProps {
   autoPasscode?: string;
   bookings?: Booking[];
   onUpdateBookings?: (bookings: Booking[]) => void;
+  invoices?: Invoice[];
 }
 
-export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = [], onUpdateClientAccounts, autoPasscode, bookings = [], onUpdateBookings }: ClientPortalProps) {
+export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = [], onUpdateClientAccounts, autoPasscode, bookings = [], onUpdateBookings, invoices = [] }: ClientPortalProps) {
   const [passcode, setPasscode] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -56,6 +58,7 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
   const currentAccount = clientAccounts.find(c => c.id === authenticatedClientId);
   const proofPhotos = currentAccount ? (currentAccount.photos || []) : [];
   const contractBooking = currentAccount ? bookings.find(b => b.clientName === currentAccount.clientName && b.contractData && b.isPaid && !b.contractSignature) : undefined;
+  const clientInvoices = currentAccount ? invoices.filter(invoice => invoice.clientEmail.toLowerCase() === currentAccount.clientEmail.toLowerCase()) : [];
 
   const handleAuth = (e: React.FormEvent) => {
     e.preventDefault();
@@ -327,6 +330,16 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                     }}
                   />
                 </div>
+              )}
+
+              {clientInvoices.length > 0 && (
+                <section className="bg-dark-gray/60 border border-gold-400/20 rounded-xl p-4 text-left space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-[10px] font-mono tracking-widest text-gold-400 uppercase">{t.invoiceReceipt}</h4>
+                    <span className="text-[9px] text-white/40">{clientInvoices.length}</span>
+                  </div>
+                  {clientInvoices.map(invoice => <InvoiceReceipt key={invoice.id} invoice={invoice} lang={lang} compact />)}
+                </section>
               )}
 
               {/* Filtering tabs */}

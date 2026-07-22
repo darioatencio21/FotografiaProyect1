@@ -110,6 +110,28 @@ export interface ContractData {
   receptionEnd: string;
 }
 
+export interface Invoice {
+  id: string;
+  bookingId: string;
+  invoiceNumber: string;
+  clientName: string;
+  clientEmail: string;
+  packageName: string;
+  items: { description: string; amount: number }[];
+  subtotal: number;
+  depositPaid: number;
+  total: number;
+  amountPaid: number;
+  balanceDue: number;
+  status: 'paid' | 'partial' | 'unpaid' | 'cancelled';
+  paymentMethod: string;
+  stripePaymentIntentId?: string;
+  stripeTxHash?: string;
+  createdAt: string;
+  paidAt?: string;
+  notes?: string;
+}
+
 export interface Booking {
   id: string;
   clientName: string;
@@ -137,6 +159,7 @@ export interface Booking {
   depositAmount?: number;
   amountDue?: number;
   travelExpenses?: string;
+  invoiceId?: string;
 }
 
 export interface Message {

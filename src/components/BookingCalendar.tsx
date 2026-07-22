@@ -21,9 +21,10 @@ import {
   MapPin,
   Printer
 } from 'lucide-react';
-import { Service, ActiveLanguage, Booking, BookingConfig, EmailConfig, PhotographyPackage, ContractData } from '../types';
+import { Service, ActiveLanguage, Booking, BookingConfig, EmailConfig, PhotographyPackage, ContractData, Invoice } from '../types';
 import { sanitizeString, sanitizeEmail, sanitizePhone } from '../lib/sanitize';
 import ContractView from './ContractView';
+import InvoiceReceipt from './InvoiceReceipt';
 import { TRANSLATIONS } from '../data/mockData';
 
 interface BookingCalendarProps {
@@ -35,6 +36,7 @@ interface BookingCalendarProps {
   onClearPackage?: () => void;
   onCheckout?: (amount: number, description: string, onDone: () => void, onCancel?: () => void) => void;
   onAddBooking: (booking: Omit<Booking, 'id' | 'status' | 'createdAt'>) => void;
+  onInvoiceCreated?: (invoice: Invoice) => void;
 }
 
 const LOCAL_TRANSLATIONS = {
@@ -104,7 +106,7 @@ const LOCAL_TRANSLATIONS = {
   },
 };
 
-export default function BookingCalendar({ services, lang, config, emailConfig, preSelectedPackage, onClearPackage, onCheckout, onAddBooking }: BookingCalendarProps) {
+export default function BookingCalendar({ services, lang, config, emailConfig, preSelectedPackage, onClearPackage, onCheckout, onAddBooking, onInvoiceCreated }: BookingCalendarProps) {
   const t = LOCAL_TRANSLATIONS[lang] || LOCAL_TRANSLATIONS.es;
 
   // Form State
@@ -138,6 +140,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
   const [pendingBooking, setPendingBooking] = useState<Booking | null>(null);
   const [weddingError, setWeddingError] = useState<string>('');
   const [paymentCancelled, setPaymentCancelled] = useState(false);
+  const [createdInvoice, setCreatedInvoice] = useState<Invoice | null>(null);
 
   // Pricing Calculation
   const selectedService = services.find(s => s.id === selectedServiceId);
@@ -287,11 +290,37 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
 
   const handleSignContract = (signature: string) => {
     if (!pendingBooking) return;
+    const now = new Date().toISOString();
+    const invNumber = `INV-${now.substring(0, 7).replace('-', '')}-${String(Math.floor(Math.random() * 8999 + 1000)).padStart(4, '0')}`;
+    const newInvoice: Invoice = {
+      id: `inv-${Date.now()}`,
+      bookingId: bookingId,
+      invoiceNumber: invNumber,
+      clientName: pendingBooking.clientName,
+      clientEmail: pendingBooking.clientEmail,
+      packageName: pendingBooking.packageName || 'Photography Session',
+      items: [
+        { description: pendingBooking.packageName || 'Photography Session', amount: pendingBooking.amount || 0 },
+      ],
+      subtotal: pendingBooking.amount || 0,
+      depositPaid: depositAmount,
+      total: pendingBooking.amount || 0,
+      amountPaid: depositAmount,
+      balanceDue: (pendingBooking.amount || 0) - depositAmount,
+      status: depositAmount >= (pendingBooking.amount || 0) ? 'paid' : 'partial',
+      paymentMethod: 'Credit Card (Stripe)',
+      stripeTxHash: 'ch_mock_' + Math.random().toString(36).substring(2, 15),
+      createdAt: now,
+      paidAt: now,
+    };
+    onInvoiceCreated?.(newInvoice);
+    setCreatedInvoice(newInvoice);
     onAddBooking({
       ...pendingBooking,
       contractSignature: signature,
-      contractSignedAt: new Date().toISOString(),
-      isPaid: false,
+      contractSignedAt: now,
+      isPaid: depositAmount > 0,
+      invoiceId: newInvoice.id,
     });
     setStep('success');
   };
@@ -632,7 +661,6 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
             </div>
           </form>
           ) : step === 'payment' && pendingBooking ? (
-          /* PAYMENT STEP (only for weddings) */
           <motion.div
             className="py-12 px-6 text-center max-w-md mx-auto space-y-6"
             initial={{ opacity: 0, y: 20 }}
@@ -647,8 +675,8 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
               </h3>
               <p className="text-[11px] text-white/60">
                 {lang === 'en'
-                  ? 'A deposit is required to confirm your wedding booking. You can pay the remaining balance later.'
-                  : 'Se requiere un depósito para confirmar tu reserva de boda. Puedes pagar el resto después.'}
+                  ? 'A deposit is required to confirm your booking. You can pay the remaining balance later.'
+                  : 'Se requiere un depósito para confirmar tu reserva. Puedes pagar el resto después.'}
               </p>
             </div>
             <div className="bg-dark/40 border border-white/5 rounded-lg p-4 space-y-2">
@@ -678,7 +706,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                 onClick={() => {
                   onCheckout?.(
                     depositAmount,
-                    `${pendingBooking.packageName || 'Wedding Photography'} — Deposit (${pendingBooking.clientName})`,
+                    `${pendingBooking.packageName || 'Photography Session'} — Deposit (${pendingBooking.clientName})`,
                     () => setStep('contract'),
                     () => { setStep('form'); setPaymentCancelled(true); }
                   );
@@ -690,7 +718,6 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
             </div>
           </motion.div>
         ) : step === 'contract' && pendingBooking ? (
-          /* CONTRACT SIGNING STEP (only for weddings) */
           <motion.div
             className="py-6 px-2 md:px-6"
             initial={{ opacity: 0, y: 20 }}
@@ -702,7 +729,9 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                   {lang === 'en' ? 'Step 2 of 2 — Sign Contract' : 'Paso 2 de 2 — Firma el Contrato'}
                 </p>
                 <h3 className="font-serif text-xl text-white/90 mt-1">
-                  {lang === 'en' ? 'Wedding Photography Contract' : 'Contrato de Fotografía de Boda'}
+                  {isWedding
+                    ? (lang === 'en' ? 'Wedding Photography Contract' : 'Contrato de Fotografía de Boda')
+                    : (lang === 'en' ? 'Photography Services Contract' : 'Contrato de Servicios Fotográficos')}
                 </h3>
               </div>
               <button
@@ -746,41 +775,15 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
               )}
             </p>
 
-            {/* Invoice / Receipt */}
-            <div className="bg-dark/40 border border-white/5 rounded-xl p-4 text-left text-xs font-mono space-y-2 print:border-gray-400 print:bg-white print:text-black">
-              <div className="flex items-center justify-between border-b border-white/5 print:border-gray-300 pb-2">
-                <span className="text-gold-400 font-bold uppercase tracking-widest text-[9px] print:text-gray-700">{lang === 'en' ? 'INVOICE / RECEIPT' : 'FACTURA / RECIBO'}</span>
-                <span className="text-[9px] text-white/40 print:text-gray-500">#{bookingId}</span>
-              </div>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[10px]">
-                <span className="text-white/50 print:text-gray-500">{lang === 'en' ? 'Client' : 'Cliente'}:</span>
-                <span className="text-white print:text-black text-right">{clientName}</span>
-                <span className="text-white/50 print:text-gray-500">{lang === 'en' ? 'Package' : 'Paquete'}:</span>
-                <span className="text-white print:text-black text-right">{preSelectedPackage ? (lang === 'es' ? preSelectedPackage.name_es : preSelectedPackage.name_en) : '—'}</span>
-                <span className="text-white/50 print:text-gray-500">{lang === 'en' ? 'Date' : 'Fecha'}:</span>
-                <span className="text-white print:text-black text-right">{dateValue}</span>
-                <span className="text-white/50 print:text-gray-500">{lang === 'en' ? 'Total' : 'Total'}:</span>
-                <span className="text-gold-400 print:text-black font-bold text-right">${(totalPrice || 0).toLocaleString()}</span>
-                <span className="text-white/50 print:text-gray-500">{lang === 'en' ? 'Deposit Paid' : 'Depósito Pagado'}:</span>
-                <span className="text-emerald-400 print:text-black font-bold text-right">${depositAmount.toLocaleString()}</span>
-                <span className="text-white/50 print:text-gray-500">{lang === 'en' ? 'Balance Due' : 'Saldo Restante'}:</span>
-                <span className="text-white print:text-black text-right">${((totalPrice || 0) - depositAmount).toLocaleString()}</span>
-              </div>
-              <div className="border-t border-white/5 print:border-gray-300 pt-2 flex justify-between items-center">
-                <span className="text-[8px] text-emerald-400/70 print:text-gray-500 uppercase tracking-widest">{lang === 'en' ? '✓ PAID' : '✓ PAGADO'}</span>
-                <button onClick={() => window.print()} className="inline-flex items-center gap-1.5 text-[9px] font-mono text-gold-400 hover:text-gold-300 print:hidden transition-colors">
-                  <Printer size={12} />
-                  {lang === 'en' ? 'Download Invoice' : 'Descargar Factura'}
-                </button>
-              </div>
-            </div>
+            {createdInvoice && <InvoiceReceipt invoice={createdInvoice} lang={lang} />}
 
             <div className="border-t border-white/10 pt-5 flex justify-center">
               <button
                 type="button"
                 onClick={() => {
                   setStep('form');
-                  setPendingBooking(null);
+                   setPendingBooking(null);
+                   setCreatedInvoice(null);
                   setWeddingError('');
                   setPaymentCancelled(false);
                   setDateValue('');

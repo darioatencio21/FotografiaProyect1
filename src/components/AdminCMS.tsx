@@ -9,19 +9,21 @@ import {
   BarChart3, Camera, Calendar, BookOpen, MessageSquare, HelpCircle, 
   Settings, LogOut, Check, X, ShieldAlert, Edit, Edit3, Trash2, Plus, Menu, Save,
   ArrowUpRight, Eye, RefreshCw, Upload, Sliders, FileCode, CheckSquare,
-  User, Mail, ChevronDown, ChevronUp, Phone, Users, FileText, ShoppingBag, Copy
+  User, Mail, ChevronDown, ChevronUp, Phone, Users, FileText, ShoppingBag, Copy, Receipt
 } from 'lucide-react';
 import { 
   Photograph, Service, Testimonial, BlogPost, FAQ, Booking, 
   Message, SEOMetadata, AnalyticsStats, ActiveLanguage, PhotographerProfile, BookingConfig, EmailConfig,
-  ClientAccount, ProofPhoto, SessionCategory, PhotographyPackage
+  ClientAccount, ProofPhoto, SessionCategory, PhotographyPackage, Invoice
 } from '../types';
+import { TRANSLATIONS } from '../data/mockData';
 import { sanitizeString, sanitizeEmail, sanitizeUrl, sanitizeObject } from '../lib/sanitize';
 import { supabase, uploadImageBlob, deleteImageByUrl } from '../lib/db';
 
 import AdminSEOTab from './AdminSEOTab';
 import AdminProfileTab from './AdminProfileTab';
 import AdminPackagesTab from './AdminPackagesTab';
+import ContractView from './ContractView';
 
 function compressImage(file: File, maxSize = 1600, quality = 0.85): Promise<{ blob: Blob; width: number; height: number }> {
   return new Promise((resolve, reject) => {
@@ -87,6 +89,8 @@ interface AdminCMSProps {
   onUpdateSessionCategories: (categories: SessionCategory[]) => void;
   packages: PhotographyPackage[];
   onUpdatePackages: (packages: PhotographyPackage[]) => void;
+  invoices: Invoice[];
+  onUpdateInvoices: (invoices: Invoice[]) => void;
   onLogout: () => void;
   onBackToSite?: () => void;
 }
@@ -94,10 +98,11 @@ interface AdminCMSProps {
 export default function AdminCMS({
   photographs, services, testimonials, blogPosts, faqs, bookings, messages, clientAccounts = [], seo, profile, bookingConfig, emailConfig, stats, lang,
   onUpdatePhotographs, onUpdateTestimonials, onUpdateBlogPosts,
-  onUpdateFaqs, onUpdateBookings, onUpdateMessages, onUpdateClientAccounts, onUpdateSeo, onUpdateProfile, onUpdateBookingConfig, onUpdateEmailConfig, sessionCategories, onUpdateSessionCategories, packages, onUpdatePackages, onLogout, onBackToSite
+  onUpdateFaqs, onUpdateBookings, onUpdateMessages, onUpdateClientAccounts, onUpdateSeo, onUpdateProfile, onUpdateBookingConfig, onUpdateEmailConfig, sessionCategories, onUpdateSessionCategories, packages, onUpdatePackages, invoices, onUpdateInvoices, onLogout, onBackToSite
 }: AdminCMSProps) {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'photos' | 'bookings' | 'messages' | 'seo' | 'profile' | 'email_settings' | 'clients' | 'packages' | 'session-categories'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'photos' | 'bookings' | 'invoices' | 'messages' | 'seo' | 'profile' | 'email_settings' | 'clients' | 'packages' | 'session-categories'>('dashboard');
   const [expandedBookingId, setExpandedBookingId] = useState<string | null>(null);
+  const [contractToView, setContractToView] = useState<Booking | null>(null);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -671,6 +676,16 @@ export default function AdminCMS({
             >
               <ShoppingBag size={12} />
               <span>{t('Paquetes Fotográficos', 'Photography Packages', 'Pacotes Fotográficos')}</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('invoices')}
+              className={`w-full text-left px-3 py-2 rounded-lg font-mono text-[10px] uppercase tracking-wider transition-all flex items-center space-x-2 ${
+                activeTab === 'invoices' ? 'bg-gold-500 text-dark font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <Receipt size={12} />
+              <span>{t('Facturas', 'Invoices', 'Faturas')}</span>
             </button>
 
             <button
@@ -1346,7 +1361,7 @@ export default function AdminCMS({
                                               {b.contractPhotographerSignature && <span className="text-[9px] text-gold-400 font-mono block">{t('✓ Fotógrafa firmó', '✓ Photographer signed', '✓ Fotógrafa assinou')}</span>}
                                             </div>
                                           </div>
-                                          {b.contractData && (
+                                           {b.contractData && (
                                             <div className="mt-3">
                                               <details className="text-xs">
                                                 <summary className="text-gold-400/70 cursor-pointer hover:text-gold-400 text-[10px] font-mono">{b.contractType === 'session' ? t('Ver detalles de la sesión', 'View session details', 'Ver detalhes da sessão') : t('Ver datos de la boda', 'View wedding details', 'Ver dados do casamento')}</summary>
@@ -1368,10 +1383,20 @@ export default function AdminCMS({
                                                   )}
                                                 </div>
                                               </details>
-                                            </div>
-                                          )}
+                                             </div>
+                                           )}
+                                           {b.contractData && (
+                                             <button
+                                               type="button"
+                                               onClick={() => setContractToView(b)}
+                                               className="mt-4 inline-flex items-center gap-2 px-3 py-2 bg-gold-500/10 border border-gold-500/30 text-gold-300 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-gold-500/20 transition-all"
+                                             >
+                                               <FileText size={12} />
+                                               {t('Ver / Descargar Contrato', 'View / Download Contract', 'Ver / Baixar Contrato')}
+                                             </button>
+                                           )}
 
-                                        </div>
+                                         </div>
                                       )}
                                   </div>
                                 </motion.div>
@@ -1552,6 +1577,29 @@ export default function AdminCMS({
             triggerAlert={triggerAlert}
             lang={lang}
           />
+        )}
+
+        {/* INVOICES */}
+        {activeTab === 'invoices' && (
+          <div className="space-y-6">
+            <div className="border-b border-white/5 pb-4">
+              <h2 className="font-serif text-2xl text-white">{t('Facturas y Recibos', 'Invoices & Receipts', 'Faturas e Recibos')}</h2>
+              <p className="text-xs text-white/50">{t('Consulta los pagos registrados y descarga sus comprobantes.', 'Review recorded payments and print their receipts.', 'Consulte os pagamentos registrados e imprima os recibos.')}</p>
+            </div>
+            <div className="space-y-3">
+              {invoices.length === 0 ? (
+                <p className="text-sm text-white/40">{t('No hay facturas disponibles.', 'No invoices available.', 'Nenhuma fatura disponível.')}</p>
+              ) : invoices.map(invoice => (
+                <div key={invoice.id} className="bg-dark-gray border border-white/5 rounded-xl p-4 grid grid-cols-1 md:grid-cols-6 gap-3 items-center text-xs">
+                  <div><p className="text-[9px] text-white/40 uppercase">{t('Factura', 'Invoice', 'Fatura')}</p><p className="font-mono text-gold-300">{invoice.invoiceNumber}</p></div>
+                  <div><p className="text-[9px] text-white/40 uppercase">{t('Cliente', 'Client', 'Cliente')}</p><p className="text-white/80">{invoice.clientName}</p></div>
+                  <div className="md:col-span-2"><p className="text-[9px] text-white/40 uppercase">{t('Paquete', 'Package', 'Pacote')}</p><p className="text-white/70 truncate">{invoice.packageName}</p></div>
+                  <div><p className="text-[9px] text-white/40 uppercase">{t('Total', 'Total', 'Total')}</p><p className="text-gold-300 font-mono">${invoice.total.toLocaleString()}</p></div>
+                  <div className="flex items-center justify-between gap-2"><span className={invoice.status === 'paid' ? 'text-emerald-400' : 'text-gold-300'}>{invoice.status === 'paid' ? t('Pagada', 'Paid', 'Paga') : invoice.status === 'partial' ? t('Parcial', 'Partial', 'Parcial') : t('Pendiente', 'Pending', 'Pendente')}</span><button onClick={() => window.print()} className="text-gold-400 hover:text-gold-300"><FileText size={14} /></button></div>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
 
         {/* SESSION CATEGORIES */}
@@ -2393,6 +2441,16 @@ export default function AdminCMS({
                                 FAV
                               </div>
                             )}
+                            {b.contractData && (
+                              <button
+                                type="button"
+                                onClick={() => setContractToView(b)}
+                                className="mt-4 inline-flex items-center gap-2 px-3 py-2 bg-gold-500/10 border border-gold-500/30 text-gold-300 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-gold-500/20 transition-all"
+                              >
+                                <FileText size={12} />
+                                {t('Ver / Descargar Contrato', 'View / Download Contract', 'Ver / Baixar Contrato')}
+                              </button>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -2777,6 +2835,39 @@ export default function AdminCMS({
           </div>
         )}
       </div>
+
+      {/* Contract document viewer */}
+      <AnimatePresence>
+        {contractToView && (
+          <motion.div
+            className="fixed inset-0 z-[70] bg-black/80 backdrop-blur-sm p-3 sm:p-6 overflow-y-auto"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setContractToView(null)}
+          >
+            <motion.div
+              className="relative max-w-5xl mx-auto my-4 sm:my-8"
+              initial={{ opacity: 0, y: 20, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.98 }}
+              onClick={(event) => event.stopPropagation()}
+            >
+              <button
+                type="button"
+                onClick={() => setContractToView(null)}
+                className="absolute right-3 top-3 z-10 p-2 rounded-full bg-dark/80 text-white/70 hover:text-white border border-white/10"
+                aria-label={t('Cerrar contrato', 'Close contract', 'Fechar contrato')}
+              >
+                <X size={16} />
+              </button>
+              <div className="bg-dark-gray rounded-2xl p-4 sm:p-8 shadow-2xl">
+                <ContractView booking={contractToView} mode="view" lang={lang} t={TRANSLATIONS[lang]} />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* MOBILE SIDEBAR DRAWER — slides from left on < lg */}
       <AnimatePresence>

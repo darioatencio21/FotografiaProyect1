@@ -7,12 +7,19 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CreditCard, Lock, CheckCircle2, X, AlertCircle } from 'lucide-react';
 
+export interface PaymentResult {
+  txHash: string;
+  amount: number;
+  paymentMethod: string;
+  status: 'success';
+}
+
 interface StripeCheckoutProps {
   isOpen: boolean;
   amount: number;
   description: string;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: (result?: PaymentResult) => void;
 }
 
 export default function StripeCheckout({ isOpen, amount, description, onClose, onSuccess }: StripeCheckoutProps) {
@@ -40,7 +47,13 @@ export default function StripeCheckout({ isOpen, amount, description, onClose, o
       setTxHash(generatedHash);
       setStatus('success');
       setTimeout(() => {
-        onSuccess();
+        const result: PaymentResult = {
+          txHash: generatedHash,
+          amount,
+          paymentMethod: 'Visa •••• 4242',
+          status: 'success',
+        };
+        onSuccess(result);
         onClose();
         setStatus('idle');
         // Reset fields

@@ -18,9 +18,9 @@ import {
   INITIAL_BLOG_POSTS, INITIAL_FAQS, INITIAL_BOOKINGS, 
   INITIAL_MESSAGES, INITIAL_SEO, INITIAL_ANALYTICS, TRANSLATIONS,
   INITIAL_PROFILE, INITIAL_BOOKING_CONFIG, INITIAL_EMAIL_CONFIG,
-   INITIAL_CLIENT_ACCOUNTS, INITIAL_PHOTOGRAPHY_PACKAGES, INITIAL_SESSION_CATEGORIES
-} from './data/mockData';
-import { Photograph, Service, Testimonial, BlogPost, FAQ, Booking, Message, SEOMetadata, PhotographerProfile, BookingConfig, EmailConfig, ClientAccount, AnalyticsStats, SessionCategory, PhotographyPackage } from './types';
+   INITIAL_CLIENT_ACCOUNTS, INITIAL_PHOTOGRAPHY_PACKAGES, INITIAL_SESSION_CATEGORIES, INITIAL_INVOICES
+ } from './data/mockData';
+import { Photograph, Service, Testimonial, BlogPost, FAQ, Booking, Message, SEOMetadata, PhotographerProfile, BookingConfig, EmailConfig, ClientAccount, AnalyticsStats, SessionCategory, PhotographyPackage, Invoice } from './types';
 
 import CustomCursor from './components/CustomCursor';
 import Lightbox from './components/Lightbox';
@@ -216,6 +216,10 @@ export default function App() {
     try { const saved = localStorage.getItem('aurea_packages'); return saved ? JSON.parse(saved) : INITIAL_PHOTOGRAPHY_PACKAGES; } catch { return INITIAL_PHOTOGRAPHY_PACKAGES; }
   });
 
+  const [invoices, setInvoices] = useState<Invoice[]>(() => {
+    try { const saved = localStorage.getItem('aurea_invoices'); return saved ? JSON.parse(saved) : INITIAL_INVOICES; } catch { return INITIAL_INVOICES; }
+  });
+
   const [clientAccounts, setClientAccounts] = useState<ClientAccount[]>(INITIAL_CLIENT_ACCOUNTS);
 
   // UI Interactive States
@@ -277,7 +281,7 @@ export default function App() {
     let cancelled = false;
     async function syncFirestore() {
       const [photosRes, servicesRes, testimonialsRes, blogRes, faqsRes,
-        bookingsRes, messagesRes, clientAccsRes] = await Promise.all([
+        bookingsRes, messagesRes, clientAccsRes, invoicesRes] = await Promise.all([
         getCollectionWithFallback<Photograph>('photographs', INITIAL_PHOTOGRAPHS),
         getCollectionWithFallback<Service>('services', INITIAL_SERVICES),
         getCollectionWithFallback<Testimonial>('testimonials', INITIAL_TESTIMONIALS),
@@ -285,7 +289,8 @@ export default function App() {
         getCollectionWithFallback<FAQ>('faqs', INITIAL_FAQS),
         getCollectionWithFallback<Booking>('bookings', INITIAL_BOOKINGS),
         getCollectionWithFallback<Message>('messages', INITIAL_MESSAGES),
-        getCollectionWithFallback<ClientAccount>('clientAccounts', INITIAL_CLIENT_ACCOUNTS),
+         getCollectionWithFallback<ClientAccount>('clientAccounts', INITIAL_CLIENT_ACCOUNTS),
+         getCollectionWithFallback<Invoice>('invoices', INITIAL_INVOICES),
       ]);
 
       const packagesRes = await getCollectionWithFallback<PhotographyPackage>('photography_packages', []);
@@ -322,8 +327,9 @@ export default function App() {
         const migratedBlogs = blogRes.map(b => migrateStrings(b));
         const migratedFaqs = faqsRes.map(f => migrateStrings(f));
         const migratedBookings = bookingsRes.map(b => migrateStrings(b));
-        const migratedMessages = messagesRes.map(m => migrateStrings(m));
-        const migratedClients = clientAccsRes.map(c => migrateStrings(c));
+         const migratedMessages = messagesRes.map(m => migrateStrings(m));
+         const migratedClients = clientAccsRes.map(c => migrateStrings(c));
+         const migratedInvoices = invoicesRes.map(i => migrateStrings(i));
         const migratedSeo = seoRes ? migrateStrings(seoRes) : seoRes;
         const migratedProfile = profileRes ? migrateStrings(profileRes) : profileRes;
         const migratedEmailCfg = emailConfigRes ? migrateStrings(emailConfigRes) : emailConfigRes;
@@ -335,7 +341,8 @@ export default function App() {
           ...(migratedFaqs as FAQ[]).map((f, i) => f !== faqsRes[i] ? saveDocument('faqs', f.id, f) : Promise.resolve()),
           ...(migratedBookings as Booking[]).map((b, i) => b !== bookingsRes[i] ? saveDocument('bookings', b.id, b) : Promise.resolve()),
           ...(migratedMessages as Message[]).map((m, i) => m !== messagesRes[i] ? saveDocument('messages', m.id, m) : Promise.resolve()),
-          ...(migratedClients as ClientAccount[]).map((c, i) => c !== clientAccsRes[i] ? saveDocument('clientAccounts', c.id, c) : Promise.resolve()),
+           ...(migratedClients as ClientAccount[]).map((c, i) => c !== clientAccsRes[i] ? saveDocument('clientAccounts', c.id, c) : Promise.resolve()),
+           ...(migratedInvoices as Invoice[]).map((i, index) => i !== invoicesRes[index] ? saveDocument('invoices', i.id, i) : Promise.resolve()),
           migratedSeo && migratedSeo !== seoRes ? saveDocument('seo', 'config', migratedSeo) : Promise.resolve(),
           migratedProfile && migratedProfile !== profileRes ? saveDocument('profile', 'photographer', migratedProfile) : Promise.resolve(),
           migratedEmailCfg && migratedEmailCfg !== emailConfigRes ? saveDocument('emailConfig', 'config', migratedEmailCfg) : Promise.resolve(),
@@ -349,8 +356,9 @@ export default function App() {
         setBlogPosts(migratedBlogs);
         setFaqs(migratedFaqs);
         setBookings(migratedBookings);
-        setMessages(migratedMessages);
-        setClientAccounts(migratedClients);
+         setMessages(migratedMessages);
+         setClientAccounts(migratedClients);
+         setInvoices(migratedInvoices as Invoice[]);
         setSeo(migratedSeo ?? INITIAL_SEO);
         setProfile(migratedProfile ?? INITIAL_PROFILE);
       } else {
@@ -361,7 +369,8 @@ export default function App() {
         setFaqs(faqsRes);
         setBookings(bookingsRes);
         setMessages(messagesRes);
-        setClientAccounts(clientAccsRes);
+       setClientAccounts(clientAccsRes);
+       setInvoices(invoicesRes);
         setSeo(seoRes ?? INITIAL_SEO);
         setProfile(profileRes ?? INITIAL_PROFILE);
       }
@@ -431,6 +440,15 @@ export default function App() {
     setClientAccounts(newAccounts);
   };
 
+  const handleUpdateInvoices = (newInvoices: Invoice[]) => {
+    syncCollection('invoices', invoices, newInvoices);
+    setInvoices(newInvoices);
+  };
+
+  const handleInvoiceCreated = (invoice: Invoice) => {
+    handleUpdateInvoices([invoice, ...invoices.filter(existing => existing.id !== invoice.id)]);
+  };
+
   const handleUpdateSeo = async (newSeo: SEOMetadata) => {
     setSeo(newSeo);
     await saveDocument('seo', 'config', newSeo);
@@ -486,6 +504,10 @@ export default function App() {
   useEffect(() => {
     if (bootstrapped) localStorage.setItem('aurea_bookings', JSON.stringify(bookings));
   }, [bookings, bootstrapped]);
+
+  useEffect(() => {
+    if (bootstrapped) localStorage.setItem('aurea_invoices', JSON.stringify(invoices));
+  }, [invoices, bootstrapped]);
 
   useEffect(() => {
     if (bootstrapped) localStorage.setItem('aurea_messages', JSON.stringify(messages));
@@ -1356,7 +1378,8 @@ export default function App() {
                   emailConfig={emailConfig}
                   preSelectedPackage={selectedPackageId ? packages.find(p => p.id === selectedPackageId) ?? null : null}
                   onClearPackage={() => setSelectedPackageId(null)}
-                  onCheckout={handleCheckoutWithCallback}
+                   onCheckout={handleCheckoutWithCallback}
+                   onInvoiceCreated={handleInvoiceCreated}
                   onAddBooking={(newBook) => {
                     setSelectedPackageId(null);
                     const savedBook: Booking = {
@@ -1384,8 +1407,9 @@ export default function App() {
                 clientAccounts={clientAccounts}
                 onUpdateClientAccounts={handleUpdateClientAccounts}
                 autoPasscode={galleryPasscode}
-                bookings={bookings}
-                onUpdateBookings={handleUpdateBookings}
+               bookings={bookings}
+               onUpdateBookings={handleUpdateBookings}
+               invoices={invoices}
               />
             </div>
           )}
@@ -1594,7 +1618,8 @@ export default function App() {
               testimonials={testimonials}
               blogPosts={blogPosts}
               faqs={faqs}
-              bookings={bookings}
+               bookings={bookings}
+               invoices={invoices}
               messages={messages}
               clientAccounts={clientAccounts}
               seo={seo}
@@ -1607,7 +1632,8 @@ export default function App() {
               onUpdateTestimonials={handleUpdateTestimonials}
               onUpdateBlogPosts={handleUpdateBlogPosts}
               onUpdateFaqs={handleUpdateFaqs}
-              onUpdateBookings={handleUpdateBookings}
+               onUpdateBookings={handleUpdateBookings}
+               onUpdateInvoices={handleUpdateInvoices}
               onUpdateMessages={handleUpdateMessages}
               onUpdateClientAccounts={handleUpdateClientAccounts}
               onUpdateSeo={handleUpdateSeo}
