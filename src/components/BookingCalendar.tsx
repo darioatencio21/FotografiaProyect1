@@ -25,6 +25,7 @@ import { Service, ActiveLanguage, Booking, BookingConfig, EmailConfig, Photograp
 import { sanitizeString, sanitizeEmail, sanitizePhone } from '../lib/sanitize';
 import ContractView from './ContractView';
 import InvoiceReceipt from './InvoiceReceipt';
+import { PaymentResult } from './StripeCheckout';
 import { TRANSLATIONS } from '../data/mockData';
 
 interface BookingCalendarProps {
@@ -34,7 +35,7 @@ interface BookingCalendarProps {
   emailConfig?: EmailConfig;
   preSelectedPackage?: PhotographyPackage | null;
   onClearPackage?: () => void;
-  onCheckout?: (amount: number, description: string, onDone: () => void, onCancel?: () => void) => void;
+  onCheckout?: (amount: number, description: string, onDone: (result?: PaymentResult) => void, onCancel?: () => void) => void;
   onAddBooking: (booking: Omit<Booking, 'id' | 'status' | 'createdAt'>) => void;
   onInvoiceCreated?: (invoice: Invoice) => void;
 }
@@ -141,12 +142,15 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
   const [weddingError, setWeddingError] = useState<string>('');
   const [paymentCancelled, setPaymentCancelled] = useState(false);
   const [createdInvoice, setCreatedInvoice] = useState<Invoice | null>(null);
+  const [paymentResult, setPaymentResult] = useState<PaymentResult | null>(null);
 
   // Pricing Calculation
   const selectedService = services.find(s => s.id === selectedServiceId);
   const basePrice = preSelectedPackage ? preSelectedPackage.price : (selectedService ? selectedService.price : 0);
   const totalPrice = basePrice;
-  const depositAmount = preSelectedPackage?.deposit || Math.round((totalPrice || 0) / 2) || 500;
+  const depositAmount = totalPrice > 0
+    ? Math.min(preSelectedPackage?.deposit || Math.round(totalPrice / 2), totalPrice)
+    : 0;
   const bookingId = useMemo(() => `AUREA-${Math.floor(Math.random() * 8999 + 1000)}`, []);
 
   // Handle Date Selection Input
@@ -283,8 +287,26 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
       ? weddingData
       : { brideName: safeName, brideEmail: safeEmail, groomPhone: safePhone, groomName: '', brideAddress: '', ceremonyLocation: '', ceremonyAddress: '', ceremonyStart: '', ceremonyEnd: '', receptionLocation: '', receptionAddress: '', receptionStart: '', receptionEnd: '' };
     const contractType = isWedding ? 'wedding' : 'session';
-    const depositAmt = preSelectedPackage?.deposit || Math.round((totalPrice || 0) / 2) || 500;
-    setPendingBooking({ status: 'pending', createdAt: new Date().toISOString(), ...baseBooking, contractData, contractType, depositAmount: depositAmt });
+    const depositAmt = totalPrice > 0
+      ? Math.min(preSelectedPackage?.deposit || Math.round(totalPrice / 2), totalPrice)
+      : 0;
+
+    // Custom projects need a quote before any payment can be collected.
+    if (totalPrice <= 0) {
+      onAddBooking({ ...baseBooking, contractData, contractType, depositAmount: 0, amountDue: 0, isPaid: false });
+      setStep('success');
+      return;
+    }
+
+    setPendingBooking({
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+      ...baseBooking,
+      contractData,
+      contractType,
+      depositAmount: depositAmt,
+      amountDue: Math.max(0, totalPrice - depositAmt),
+    });
     setStep('payment');
   };
 
@@ -306,10 +328,10 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
       depositPaid: depositAmount,
       total: pendingBooking.amount || 0,
       amountPaid: depositAmount,
-      balanceDue: (pendingBooking.amount || 0) - depositAmount,
+       balanceDue: pendingBooking.amountDue ?? Math.max(0, (pendingBooking.amount || 0) - depositAmount),
       status: depositAmount >= (pendingBooking.amount || 0) ? 'paid' : 'partial',
-      paymentMethod: 'Credit Card (Stripe)',
-      stripeTxHash: 'ch_mock_' + Math.random().toString(36).substring(2, 15),
+       paymentMethod: paymentResult?.paymentMethod || 'Credit Card (Stripe)',
+       stripeTxHash: paymentResult?.txHash || '',
       createdAt: now,
       paidAt: now,
     };
@@ -320,19 +342,20 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
       contractSignature: signature,
       contractSignedAt: now,
       isPaid: depositAmount > 0,
+      amountDue: pendingBooking.amountDue ?? Math.max(0, (pendingBooking.amount || 0) - depositAmount),
       invoiceId: newInvoice.id,
     });
     setStep('success');
   };
 
   return (
-    <div className="glass-premium rounded-2xl border border-white/5 p-6 md:p-8 max-w-4xl mx-auto shadow-2xl">
+    <div className="glass-premium rounded-2xl border border-white/10 p-6 md:p-8 max-w-4xl mx-auto shadow-2xl">
       <AnimatePresence mode="wait">
         {step === 'form' ? (
           <form onSubmit={handleSubmit} className="space-y-8">
             
             {/* INTRO SPEECH */}
-            <div className="text-center pb-2 border-b border-white/5 max-w-2xl mx-auto space-y-1.5">
+            <div className="text-center pb-2 border-b border-white/10 max-w-2xl mx-auto space-y-1.5">
               <h3 className="font-serif text-xl md:text-2xl text-white/80">
                 {t.title}
               </h3>
@@ -392,7 +415,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                       className={`py-2 px-3 rounded-lg text-[10px] font-mono text-left border flex items-center space-x-2 transition-all ${
                         selectedTimeframe === 'morning'
                           ? 'bg-gold-500/10 border-gold-400 text-gold-300 font-bold'
-                          : 'bg-dark/40 border-white/5 text-white/60 hover:border-white/15'
+                          : 'bg-dark/40 border-white/10 text-white/60 hover:border-white/15'
                       }`}
                     >
                       <Clock size={11} className="text-gold-400" />
@@ -405,7 +428,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                       className={`py-2 px-3 rounded-lg text-[10px] font-mono text-left border flex items-center space-x-2 transition-all ${
                         selectedTimeframe === 'afternoon'
                           ? 'bg-gold-500/10 border-gold-400 text-gold-300 font-bold'
-                          : 'bg-dark/40 border-white/5 text-white/60 hover:border-white/15'
+                          : 'bg-dark/40 border-white/10 text-white/60 hover:border-white/15'
                       }`}
                     >
                       <Clock size={11} className="text-gold-400" />
@@ -418,7 +441,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                       className={`py-2 px-3 rounded-lg text-[10px] font-mono text-left border flex items-center space-x-2 transition-all col-span-2 ${
                         selectedTimeframe === 'goldenHour'
                           ? 'bg-gold-500/10 border-gold-400 text-gold-300 font-bold shadow-sm'
-                          : 'bg-dark/40 border-white/5 text-white/60 hover:border-white/15'
+                          : 'bg-dark/40 border-white/10 text-white/60 hover:border-white/15'
                       }`}
                     >
                       <Heart size={11} className="text-red-400 fill-red-400/10 animate-pulse shrink-0" />
@@ -431,7 +454,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                       className={`py-2 px-3 rounded-lg text-[10px] font-mono text-left border flex items-center space-x-2 transition-all col-span-2 ${
                         selectedTimeframe === 'other'
                           ? 'bg-gold-500/10 border-gold-400 text-gold-300 font-bold'
-                          : 'bg-dark/40 border-white/5 text-white/60 hover:border-white/15'
+                          : 'bg-dark/40 border-white/10 text-white/60 hover:border-white/15'
                       }`}
                     >
                       <Sparkles size={11} className="text-gold-400" />
@@ -549,12 +572,12 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
 
               {/* WEDDING DETAILS (only for boda packages) */}
               {isWedding && (
-                <div className="space-y-4 pt-2 border-t border-white/5">
+                <div className="space-y-4 pt-2 border-t border-white/10">
                   <label className="block text-xs font-mono tracking-widest text-gold-300 uppercase">
                     {lang === 'es' ? 'Detalles de la Boda' : 'Wedding Details'}
                   </label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-3 p-4 border border-white/5 rounded-lg">
+                    <div className="space-y-3 p-4 border border-white/10 rounded-lg">
                       <p className="text-[10px] font-mono tracking-widest text-gold-400 uppercase">
                         {lang === 'es' ? 'Novia' : 'Bride'}
                       </p>
@@ -562,7 +585,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                       <input type="email" required placeholder={lang === 'es' ? 'Correo de la Novia' : 'Bride Email'} value={weddingData.brideEmail} onChange={(e) => setWeddingData({...weddingData, brideEmail: e.target.value})} className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans" />
                       <input type="text" required placeholder={lang === 'es' ? 'Dirección de la Novia' : 'Bride Address'} value={weddingData.brideAddress} onChange={(e) => setWeddingData({...weddingData, brideAddress: e.target.value})} className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans" />
                     </div>
-                    <div className="space-y-3 p-4 border border-white/5 rounded-lg">
+                    <div className="space-y-3 p-4 border border-white/10 rounded-lg">
                       <p className="text-[10px] font-mono tracking-widest text-gold-400 uppercase">
                         {lang === 'es' ? 'Novio' : 'Groom'}
                       </p>
@@ -571,7 +594,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-3 p-4 border border-white/5 rounded-lg">
+                    <div className="space-y-3 p-4 border border-white/10 rounded-lg">
                       <p className="text-[10px] font-mono tracking-widest text-gold-400 uppercase">
                         {lang === 'es' ? 'Ceremonia' : 'Ceremony'}
                       </p>
@@ -582,7 +605,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                         <input type="time" required placeholder={lang === 'es' ? 'Fin' : 'End'} value={weddingData.ceremonyEnd} onChange={(e) => setWeddingData({...weddingData, ceremonyEnd: e.target.value})} className="w-1/2 bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans" />
                       </div>
                     </div>
-                    <div className="space-y-3 p-4 border border-white/5 rounded-lg">
+                    <div className="space-y-3 p-4 border border-white/10 rounded-lg">
                       <p className="text-[10px] font-mono tracking-widest text-gold-400 uppercase">
                         {lang === 'es' ? 'Recepción' : 'Reception'}
                       </p>
@@ -632,7 +655,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                   </div>
                 </div>
                 {preSelectedPackage && (lang === 'es' ? preSelectedPackage.travelNote_es : preSelectedPackage.travelNote_en) && (
-                  <div className="flex items-start space-x-2 text-[10px] text-white/40 border-t border-white/5 pt-2">
+                  <div className="flex items-start space-x-2 text-[10px] text-white/40 border-t border-white/10 pt-2">
                     <MapPin size={11} className="text-white/30 mt-0.5 shrink-0" />
                     <span className="font-sans">{lang === 'es' ? preSelectedPackage.travelNote_es : preSelectedPackage.travelNote_en}</span>
                   </div>
@@ -679,7 +702,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                   : 'Se requiere un depósito para confirmar tu reserva. Puedes pagar el resto después.'}
               </p>
             </div>
-            <div className="bg-dark/40 border border-white/5 rounded-lg p-4 space-y-2">
+            <div className="bg-dark/40 border border-white/10 rounded-lg p-4 space-y-2">
               <div className="flex justify-between text-xs text-white/70">
                 <span>{lang === 'en' ? 'Package' : 'Paquete'}</span>
                 <span className="font-semibold text-white">{pendingBooking.packageName || '—'}</span>
@@ -688,7 +711,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                 <span>{lang === 'en' ? 'Total' : 'Total'}</span>
                 <span className="font-semibold text-white">${pendingBooking.amount || 0}</span>
               </div>
-              <div className="border-t border-white/5 pt-2 flex justify-between text-sm">
+              <div className="border-t border-white/10 pt-2 flex justify-between text-sm">
                 <span className="text-gold-400 font-semibold">{lang === 'en' ? 'Deposit Required' : 'Depósito Requerido'}</span>
                 <span className="font-serif text-xl text-gold-50">${depositAmount}</span>
               </div>
@@ -707,7 +730,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                   onCheckout?.(
                     depositAmount,
                     `${pendingBooking.packageName || 'Photography Session'} — Deposit (${pendingBooking.clientName})`,
-                    () => setStep('contract'),
+                     (result) => { setPaymentResult(result || null); setStep('contract'); },
                     () => { setStep('form'); setPaymentCancelled(true); }
                   );
                 }}
@@ -784,6 +807,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                   setStep('form');
                    setPendingBooking(null);
                    setCreatedInvoice(null);
+                   setPaymentResult(null);
                   setWeddingError('');
                   setPaymentCancelled(false);
                   setDateValue('');

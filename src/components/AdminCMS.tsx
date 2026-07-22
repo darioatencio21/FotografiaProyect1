@@ -100,10 +100,13 @@ export default function AdminCMS({
   onUpdatePhotographs, onUpdateTestimonials, onUpdateBlogPosts,
   onUpdateFaqs, onUpdateBookings, onUpdateMessages, onUpdateClientAccounts, onUpdateSeo, onUpdateProfile, onUpdateBookingConfig, onUpdateEmailConfig, sessionCategories, onUpdateSessionCategories, packages, onUpdatePackages, invoices, onUpdateInvoices, onLogout, onBackToSite
 }: AdminCMSProps) {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'photos' | 'bookings' | 'invoices' | 'messages' | 'seo' | 'profile' | 'email_settings' | 'clients' | 'packages' | 'session-categories'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'photos' | 'testimonials' | 'bookings' | 'invoices' | 'messages' | 'seo' | 'profile' | 'email_settings' | 'clients' | 'packages' | 'session-categories'>('dashboard');
   const [expandedBookingId, setExpandedBookingId] = useState<string | null>(null);
   const [contractToView, setContractToView] = useState<Booking | null>(null);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [editingTestimonialId, setEditingTestimonialId] = useState<string | null>(null);
+  const [showTestimonialForm, setShowTestimonialForm] = useState(false);
+  const [testimonialForm, setTestimonialForm] = useState<Omit<Testimonial, 'id'>>({ name: '', role: '', comment: '', rating: 5, image: '' });
 
   useEffect(() => {
     if (mobileSidebarOpen) {
@@ -152,6 +155,27 @@ export default function AdminCMS({
   const triggerAlert = (msg: string) => {
     setCmsAlert(msg);
     setTimeout(() => setCmsAlert(null), 3000);
+  };
+
+  const resetTestimonialForm = () => {
+    setEditingTestimonialId(null);
+    setShowTestimonialForm(false);
+    setTestimonialForm({ name: '', role: '', comment: '', rating: 5, image: '' });
+  };
+
+  const saveTestimonial = () => {
+    const testimonial: Testimonial = {
+      id: editingTestimonialId || `testimonial-${Date.now()}`,
+      name: sanitizeString(testimonialForm.name),
+      role: sanitizeString(testimonialForm.role),
+      comment: sanitizeString(testimonialForm.comment),
+      rating: Math.min(5, Math.max(1, Number(testimonialForm.rating) || 5)),
+      image: sanitizeUrl(testimonialForm.image),
+    };
+    if (!testimonial.name || !testimonial.comment) return;
+    onUpdateTestimonials(editingTestimonialId ? testimonials.map(item => item.id === editingTestimonialId ? testimonial : item) : [testimonial, ...testimonials]);
+    resetTestimonialForm();
+    triggerAlert(t('Testimonio guardado', 'Testimonial saved', 'Depoimento guardado'));
   };
 
   // Real-time booking notification state
@@ -602,7 +626,7 @@ export default function AdminCMS({
   };
 
   return (
-    <div className="min-h-dvh bg-dark-gray rounded-3xl border border-white/5 overflow-hidden grid grid-cols-1 lg:grid-cols-12 text-left shadow-2xl relative">
+    <div className="min-h-dvh bg-dark-gray rounded-3xl border border-white/10 overflow-hidden grid grid-cols-1 lg:grid-cols-12 text-left shadow-2xl relative">
       
       {/* Toast Alert */}
       <AnimatePresence>
@@ -620,7 +644,7 @@ export default function AdminCMS({
       </AnimatePresence>
 
       {/* ADMIN NAVIGATION RAIL (Cols 2) — Desktop only */}
-      <div className="hidden lg:flex lg:col-span-2 border-r border-white/5 bg-dark-gray p-6 flex-col justify-between">
+      <div className="hidden lg:flex lg:col-span-2 border-r border-white/10 bg-dark-gray p-6 flex-col justify-between">
         <div className="space-y-6">
           <div className="flex items-center space-x-2 px-2">
             <Settings className="text-gold-400" size={18} />
@@ -657,15 +681,25 @@ export default function AdminCMS({
               <Calendar size={12} />
               <span className="flex-1">{t('Cola de Reservas', 'Bookings Queue', 'Fila de Reservas')}</span>
               {bookings.filter(b => b.status === 'pending').length > 0 && (
-                <span className="bg-gold-500 text-dark text-[8px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
+                <span className="bg-gold-500 text-dark text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
                   {bookings.filter(b => b.status === 'pending').length}
                 </span>
               )}
               {unseenBookings > 0 && (
-                <span className="bg-red-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
+                <span className="bg-red-500 text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
                   {unseenBookings}
                 </span>
               )}
+            </button>
+
+            <button
+              onClick={() => setActiveTab('testimonials')}
+              className={`w-full text-left px-3 py-2 rounded-lg font-mono text-[10px] uppercase tracking-wider transition-all flex items-center space-x-2 ${
+                activeTab === 'testimonials' ? 'bg-gold-500 text-dark font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <MessageSquare size={12} />
+              <span>{t('Testimonios', 'Testimonials', 'Depoimentos')}</span>
             </button>
 
             <button
@@ -707,12 +741,12 @@ export default function AdminCMS({
               <MessageSquare size={12} />
               <span className="flex-1">{t('Bandeja de Entrada', 'Inbox', 'Caixa de Entrada')}</span>
               {messages.filter(m => !m.isRead).length > 0 && (
-                <span className="bg-gold-500 text-dark text-[8px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
+                <span className="bg-gold-500 text-dark text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
                   {messages.filter(m => !m.isRead).length}
                 </span>
               )}
               {unseenMessages > 0 && (
-                <span className="bg-red-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
+                <span className="bg-red-500 text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
                   {unseenMessages}
                 </span>
               )}
@@ -793,7 +827,7 @@ export default function AdminCMS({
         {/* DASHBOARD TAB */}
         {activeTab === 'dashboard' && (
           <div className="space-y-6">
-            <div className="flex items-center justify-between border-b border-white/5 pb-4">
+            <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <div>
                 <h2 className="font-serif text-2xl text-white">{t('Análisis Interactivo', 'Interactive Analytics', 'Análise Interativa')}</h2>
                 <p className="text-xs text-white/50">{t('Estadísticas integradas de visitas, reservas e ingresos estimados.', 'Bespoke integration of total visits, conversion rates, and estimated revenue.', 'Estatísticas integradas de visitas, reservas e receita estimada.')}</p>
@@ -805,7 +839,7 @@ export default function AdminCMS({
 
             {/* Micro Stats Grid */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-charcoal border border-white/5 rounded-xl p-4 flex flex-col text-left">
+              <div className="bg-charcoal border border-white/10 rounded-xl p-4 flex flex-col text-left">
                 <span className="text-[9px] font-mono text-white/40 uppercase">{t('Ingresos Estimados', 'Estimated Revenue', 'Receita Estimada')}</span>
                 <span className="text-2xl font-mono font-bold text-gold-400 mt-1">${stats.totalRevenue.toLocaleString()}</span>
                 <span className="text-[10px] font-mono text-emerald-400 mt-2 flex items-center space-x-1">
@@ -814,7 +848,7 @@ export default function AdminCMS({
                 </span>
               </div>
 
-              <div className="bg-charcoal border border-white/5 rounded-xl p-4 flex flex-col text-left">
+              <div className="bg-charcoal border border-white/10 rounded-xl p-4 flex flex-col text-left">
                 <span className="text-[9px] font-mono text-white/40 uppercase">{t('Tasa de Conversión', 'Conversion Rate', 'Taxa de Conversão')}</span>
                 <span className="text-2xl font-mono font-bold text-white mt-1">{stats.bookingConversionRate}%</span>
                 <span className="text-[10px] font-mono text-emerald-400 mt-2 flex items-center space-x-1">
@@ -823,13 +857,13 @@ export default function AdminCMS({
                 </span>
               </div>
 
-              <div className="bg-charcoal border border-white/5 rounded-xl p-4 flex flex-col text-left">
+              <div className="bg-charcoal border border-white/10 rounded-xl p-4 flex flex-col text-left">
                 <span className="text-[9px] font-mono text-white/40 uppercase">{t('Sesiones Totales', 'Total Sessions', 'Sessões Totais')}</span>
                 <span className="text-2xl font-mono font-bold text-white mt-1">{stats.sessionsCount}</span>
                 <span className="text-[10px] font-mono text-gold-300 mt-2">{t('Capacidad alcanzada para Q3', 'Cap reached for Q3', 'Capacidade máxima atingida para Q3')}</span>
               </div>
 
-              <div className="bg-charcoal border border-white/5 rounded-xl p-4 flex flex-col text-left">
+              <div className="bg-charcoal border border-white/10 rounded-xl p-4 flex flex-col text-left">
                 <span className="text-[9px] font-mono text-white/40 uppercase">{t('Visitantes Únicos', 'Page Visitors', 'Visitantes Únicos')}</span>
                 <span className="text-2xl font-mono font-bold text-white mt-1">{stats.totalVisits.toLocaleString()}</span>
                 <span className="text-[10px] font-mono text-emerald-400 mt-2 flex items-center space-x-1">
@@ -842,15 +876,15 @@ export default function AdminCMS({
             {/* Bespoke Custom SVG Visual Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Monthly Revenue Chart */}
-              <div className="bg-charcoal border border-white/5 rounded-2xl p-4">
+              <div className="bg-charcoal border border-white/10 rounded-2xl p-4">
                 <h4 className="text-xs font-mono tracking-widest text-white/60 uppercase mb-4 text-left">Revenue Progression (Last 6 Months)</h4>
                 <div className="h-44 w-full flex items-end justify-between px-4 pb-2 relative">
                   {/* Grid Lines */}
-                  <div className="absolute inset-y-0 inset-x-4 flex flex-col justify-between pointer-events-none border-b border-white/5">
-                    <div className="border-t border-white/5 w-full h-px" />
-                    <div className="border-t border-white/5 w-full h-px" />
-                    <div className="border-t border-white/5 w-full h-px" />
-                    <div className="border-t border-white/5 w-full h-px" />
+                  <div className="absolute inset-y-0 inset-x-4 flex flex-col justify-between pointer-events-none border-b border-white/10">
+                    <div className="border-t border-white/10 w-full h-px" />
+                    <div className="border-t border-white/10 w-full h-px" />
+                    <div className="border-t border-white/10 w-full h-px" />
+                    <div className="border-t border-white/10 w-full h-px" />
                   </div>
                   {stats.revenueByMonth.map((item, index) => {
                     const pct = (item.value / 35000) * 100;
@@ -871,15 +905,15 @@ export default function AdminCMS({
               </div>
 
               {/* Visitors Daily Activity Chart */}
-              <div className="bg-charcoal border border-white/5 rounded-2xl p-4">
+              <div className="bg-charcoal border border-white/10 rounded-2xl p-4">
                 <h4 className="text-xs font-mono tracking-widest text-white/60 uppercase mb-4 text-left">Traffic Density (Weekly visits)</h4>
                 <div className="h-44 w-full flex items-end justify-between px-4 pb-2 relative">
                   {/* Grid Lines */}
-                  <div className="absolute inset-y-0 inset-x-4 flex flex-col justify-between pointer-events-none border-b border-white/5">
-                    <div className="border-t border-white/5 w-full h-px" />
-                    <div className="border-t border-white/5 w-full h-px" />
-                    <div className="border-t border-white/5 w-full h-px" />
-                    <div className="border-t border-white/5 w-full h-px" />
+                  <div className="absolute inset-y-0 inset-x-4 flex flex-col justify-between pointer-events-none border-b border-white/10">
+                    <div className="border-t border-white/10 w-full h-px" />
+                    <div className="border-t border-white/10 w-full h-px" />
+                    <div className="border-t border-white/10 w-full h-px" />
+                    <div className="border-t border-white/10 w-full h-px" />
                   </div>
                   {stats.visitsByDay.map((item, index) => {
                     const pct = (item.count / 1000) * 100;
@@ -905,7 +939,7 @@ export default function AdminCMS({
         {/* PHOTOGRAPHS CRUD */}
         {activeTab === 'photos' && (
           <div className="space-y-6">
-            <div className="flex items-center justify-between border-b border-white/5 pb-4">
+            <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <div>
                 <h2 className="font-serif text-2xl text-white">{t('Base de Datos de Fotografías', 'Photograph Database', 'Banco de Imagens')}</h2>
                 <p className="text-xs text-white/50">{t('Administra las galerías artísticas, formatos de recorte y etiquetas de las fotografías.', 'Manage fine-art galleries, crop layout formats, and image tags.', 'Gerencie as galerias de arte, formatos de corte e tags de imagem.')}</p>
@@ -954,7 +988,7 @@ export default function AdminCMS({
             {/* EDIT PHOTOGRAPH FORM */}
             {photoEditItem && (
               <div className="bg-dark border border-gold-400/20 rounded-2xl p-6 space-y-6 animate-fadeIn">
-                <div className="flex items-center justify-between border-b border-white/5 pb-3">
+                <div className="flex items-center justify-between border-b border-white/10 pb-3">
                   <h3 className="font-serif text-lg text-gold-300">
                     {t('Editar Detalles de Fotografía', 'Edit Photograph Details')}
                   </h3>
@@ -976,8 +1010,8 @@ export default function AdminCMS({
                         {photoEditItem.category}
                       </span>
                     </div>
-                    <div className="bg-dark-gray/20 border border-white/5 p-3 rounded-lg text-left">
-                      <span className="text-[8px] font-mono text-white/40 uppercase block mb-1">EXIF Data</span>
+                    <div className="bg-dark-gray/20 border border-white/10 p-3 rounded-lg text-left">
+                      <span className="text-[11px] font-mono text-white/40 uppercase block mb-1">EXIF Data</span>
                       <div className="grid grid-cols-2 gap-x-2 gap-y-1 font-mono text-[9px] text-white/70">
                         <div>Cámara: {photoEditItem.exif?.camera || 'N/A'}</div>
                         <div>Lente: {photoEditItem.exif?.lens || 'N/A'}</div>
@@ -1089,10 +1123,10 @@ export default function AdminCMS({
             {/* Photo List Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {photographs.map(photo => (
-                <div key={photo.id} className="bg-charcoal border border-white/5 rounded-xl overflow-hidden flex flex-col justify-between animate-fadeIn">
+                <div key={photo.id} className="bg-charcoal border border-white/10 rounded-xl overflow-hidden flex flex-col justify-between animate-fadeIn">
                   <div className="relative aspect-[3/2] overflow-hidden">
                      <img src={sanitizeUrl(photo.url) || undefined} alt="" className="w-full h-full object-cover" />
-                    <span className="absolute top-2 left-2 bg-dark/75 border border-white/10 px-1.5 py-0.5 text-[8px] font-mono text-gold-400 rounded uppercase tracking-wider">
+                    <span className="absolute top-2 left-2 bg-dark/75 border border-white/10 px-1.5 py-0.5 text-[11px] font-mono text-gold-400 rounded uppercase tracking-wider">
                       {photo.category}
                     </span>
                   </div>
@@ -1104,7 +1138,7 @@ export default function AdminCMS({
                       <p className="text-[9px] font-mono text-gold-300 truncate">📍 {photo.exif.location}</p>
                     )}
 
-                    <div className="flex items-center justify-between border-t border-white/5 pt-2.5 gap-2">
+                    <div className="flex items-center justify-between border-t border-white/10 pt-2.5 gap-2">
                       <button
                         onClick={() => handleTogglePhotoFeatured(photo.id)}
                         className={`text-[9px] font-mono px-2 py-0.5 rounded transition-all shrink-0 ${
@@ -1141,9 +1175,50 @@ export default function AdminCMS({
         )}
 
         {/* BOOKINGS QUEUE */}
+        {activeTab === 'testimonials' && (
+          <div className="space-y-8 max-w-5xl">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/10 pb-6">
+              <div>
+                <h2 className="font-serif text-3xl text-gold-50">{t('Testimonios de Clientes', 'Client Testimonials', 'Depoimentos de Clientes')}</h2>
+                <p className="text-xs text-white/45 mt-2">{t('Administra las experiencias que aparecen en tu sitio.', 'Manage the experiences shown on your site.', 'Administre as experiências exibidas no site.')}</p>
+              </div>
+              <button onClick={() => { resetTestimonialForm(); setShowTestimonialForm(true); }} className="px-4 py-2.5 bg-gold-500 hover:bg-gold-400 text-dark rounded-lg font-mono text-[10px] uppercase tracking-wider font-bold flex items-center gap-2 transition-colors">
+                <Plus size={13} /> {t('Nuevo testimonio', 'New testimonial', 'Novo depoimento')}
+              </button>
+            </div>
+
+            {showTestimonialForm && (
+              <div className="bg-dark-gray border border-gold-500/25 rounded-2xl p-5 md:p-7 space-y-5">
+                <div className="flex items-center justify-between"><h3 className="font-serif text-xl text-white">{editingTestimonialId ? t('Editar testimonio', 'Edit testimonial', 'Editar depoimento') : t('Nuevo testimonio', 'New testimonial', 'Novo depoimento')}</h3><button onClick={resetTestimonialForm} className="text-white/40 hover:text-white"><X size={17} /></button></div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <label className="space-y-2"><span className="block text-[10px] uppercase tracking-wider text-white/50">{t('Nombre', 'Name', 'Nome')}</span><input value={testimonialForm.name} onChange={event => setTestimonialForm({ ...testimonialForm, name: event.target.value })} className="w-full bg-dark border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-gold-400/60" placeholder="Ana García" /></label>
+                  <label className="space-y-2"><span className="block text-[10px] uppercase tracking-wider text-white/50">{t('Tipo de sesión / Rol', 'Session type / Role', 'Tipo de sessão / Função')}</span><input value={testimonialForm.role} onChange={event => setTestimonialForm({ ...testimonialForm, role: event.target.value })} className="w-full bg-dark border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-gold-400/60" placeholder="Boda - Madrid" /></label>
+                  <label className="space-y-2"><span className="block text-[10px] uppercase tracking-wider text-white/50">{t('Valoración', 'Rating', 'Avaliação')}</span><select value={testimonialForm.rating} onChange={event => setTestimonialForm({ ...testimonialForm, rating: Number(event.target.value) })} className="w-full bg-dark border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-gold-400/60">{[5, 4, 3, 2, 1].map(rating => <option key={rating} value={rating}>{rating} / 5</option>)}</select></label>
+                  <label className="space-y-2"><span className="block text-[10px] uppercase tracking-wider text-white/50">{t('URL de foto', 'Photo URL', 'URL da foto')}</span><input value={testimonialForm.image} onChange={event => setTestimonialForm({ ...testimonialForm, image: event.target.value })} className="w-full bg-dark border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-gold-400/60" placeholder="https://..." /></label>
+                </div>
+                <label className="space-y-2 block"><span className="block text-[10px] uppercase tracking-wider text-white/50">{t('Comentario', 'Comment', 'Comentário')}</span><textarea rows={4} value={testimonialForm.comment} onChange={event => setTestimonialForm({ ...testimonialForm, comment: event.target.value })} className="w-full bg-dark border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-gold-400/60 resize-y" placeholder={t('Escribe la experiencia del cliente...', 'Write the client experience...', 'Escreva a experiência do cliente...')} /></label>
+                <div className="flex justify-end gap-3"><button onClick={resetTestimonialForm} className="px-4 py-2 text-white/60 hover:text-white font-mono text-[10px] uppercase tracking-wider">{t('Cancelar', 'Cancel', 'Cancelar')}</button><button onClick={saveTestimonial} disabled={!testimonialForm.name.trim() || !testimonialForm.comment.trim()} className="px-5 py-2.5 bg-gold-500 disabled:opacity-40 hover:bg-gold-400 text-dark rounded-lg font-mono text-[10px] uppercase tracking-wider font-bold flex items-center gap-2"><Save size={13} /> {t('Guardar', 'Save', 'Guardar')}</button></div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {testimonials.map(testimonial => (
+                <article key={testimonial.id} className="bg-dark-gray/70 border border-white/10 rounded-xl p-5 flex gap-4">
+                  <img src={sanitizeUrl(testimonial.image) || undefined} alt={testimonial.name} className="w-12 h-12 rounded-full object-cover grayscale shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex justify-between gap-3"><div><h3 className="text-sm text-white">{testimonial.name}</h3><p className="text-[9px] text-white/35 uppercase tracking-wider mt-1">{testimonial.role}</p></div><div className="text-right"><div className="flex gap-0.5 text-gold-400 justify-end">{Array.from({ length: testimonial.rating }).map((_, index) => <span key={index}>★</span>)}</div>{testimonial.approved === false && <span className="text-[11px] font-mono uppercase tracking-wider text-amber-400">{t('Pendiente', 'Pending', 'Pendente')}</span>}</div></div>
+                    <p className="text-xs text-white/55 leading-relaxed mt-4">“{testimonial.comment}”</p>
+                    <div className="flex gap-3 mt-4"><button onClick={() => { setEditingTestimonialId(testimonial.id); setTestimonialForm({ name: testimonial.name, role: testimonial.role, comment: testimonial.comment, rating: testimonial.rating, image: testimonial.image }); setShowTestimonialForm(true); }} className="text-[10px] text-gold-400 hover:text-gold-300 flex items-center gap-1"><Edit3 size={12} /> {t('Editar', 'Edit', 'Editar')}</button>{testimonial.approved === false && <button onClick={() => onUpdateTestimonials(testimonials.map(item => item.id === testimonial.id ? { ...item, approved: true } : item))} className="text-[10px] text-emerald-400 hover:text-emerald-300 flex items-center gap-1"><Check size={12} /> {t('Aprobar', 'Approve', 'Aprovar')}</button>}<button onClick={() => { if (window.confirm(t('¿Eliminar este testimonio?', 'Delete this testimonial?', 'Excluir este depoimento?'))) onUpdateTestimonials(testimonials.filter(item => item.id !== testimonial.id)); }} className="text-[10px] text-red-400 hover:text-red-300 flex items-center gap-1"><Trash2 size={12} /> {t('Eliminar', 'Delete', 'Excluir')}</button></div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        )}
+
         {activeTab === 'bookings' && (
           <div className="space-y-6">
-            <div className="flex items-center justify-between border-b border-white/5 pb-4">
+            <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <div>
                 <h2 className="font-serif text-2xl text-white">{t('Registro de Reservas', 'Commission Booking Ledger', 'Registro de Reservas')}</h2>
                 <p className="text-xs text-white/50">{t('Gestiona las reservas de sesiones, revisa las respuestas de los cuestionarios y aprueba las solicitudes.', 'Manage booking slots, review questionnaire answers, and approve requests.', 'Gerencie as reservas de sessões, revise as respostas dos questionários e aprove as solicitações.')}</p>
@@ -1151,11 +1226,11 @@ export default function AdminCMS({
             </div>
 
             {/* Desktop table */}
-            <div className="hidden md:block border border-white/5 rounded-2xl overflow-hidden bg-charcoal">
+            <div className="hidden md:block border border-white/10 rounded-2xl overflow-hidden bg-charcoal">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
-                    <tr className="border-b border-white/5 bg-charcoal text-[10px] font-mono text-white/40 uppercase tracking-widest">
+                    <tr className="border-b border-white/10 bg-charcoal text-[10px] font-mono text-white/40 uppercase tracking-widest">
                       <th className="p-4">{t('Detalles del Cliente', 'Client Detail', 'Detalhes do Cliente')}</th>
                       <th className="p-4">{t('Fecha de Sesión', 'Shooting Date', 'Data da Sessão')}</th>
                       <th className="p-4">{t('Colección / Paquete', 'Package', 'Coleção')}</th>
@@ -1240,7 +1315,7 @@ export default function AdminCMS({
                           {/* Expanded questionnaire and detail card */}
                           {isExpanded && (
                             <tr className="bg-white/[0.02]">
-                              <td colSpan={6} className="p-6 border-b border-white/5">
+                              <td colSpan={6} className="p-6 border-b border-white/10">
                                 <motion.div
                                   initial={{ opacity: 0, y: -8 }}
                                   animate={{ opacity: 1, y: 0 }}
@@ -1250,7 +1325,7 @@ export default function AdminCMS({
                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     {/* Contact and Core Session Data */}
                                     <div className="space-y-4">
-                                      <h4 className="text-[10px] font-mono uppercase tracking-widest text-gold-400 font-semibold border-b border-white/5 pb-2">
+                                      <h4 className="text-[10px] font-mono uppercase tracking-widest text-gold-400 font-semibold border-b border-white/10 pb-2">
                                         {t('Detalles del Cliente y Sesión', 'Client & Session Details', 'Detalhes do Cliente e Sessão')}
                                       </h4>
                                       <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-xs">
@@ -1298,7 +1373,7 @@ export default function AdminCMS({
                                         </div>
                                       </div>
 
-                                      <div className="pt-2 border-t border-white/5 flex items-center justify-between">
+                                      <div className="pt-2 border-t border-white/10 flex items-center justify-between">
                                         <div>
                                           <span className="text-white/40 block text-[9px] uppercase font-mono tracking-wider">{t('Monto Presupuestado:', 'Estimated Amount:', 'Valor Orçado:')}</span>
                                           <span className="text-lg font-serif text-gold-300 font-semibold">${b.amount || 1800}</span>
@@ -1311,9 +1386,9 @@ export default function AdminCMS({
                                     </div>
 
                                     {/* Creative Questionnaire Details */}
-                                    <div className="space-y-3 bg-charcoal border border-white/5 rounded-xl p-4 flex flex-col justify-between">
+                                    <div className="space-y-3 bg-charcoal border border-white/10 rounded-xl p-4 flex flex-col justify-between">
                                       <div className="space-y-2">
-                                        <div className="flex items-center space-x-2 border-b border-white/5 pb-2">
+                                        <div className="flex items-center space-x-2 border-b border-white/10 pb-2">
                                           <FileText size={12} className="text-gold-400 shrink-0" />
                                           <h4 className="text-[10px] font-mono uppercase tracking-widest text-gold-400 font-semibold">
                                             {t('Respuestas del Cuestionario Creativo', 'Creative Questionnaire Answers', 'Respostas do Questionário Criativo')}
@@ -1323,14 +1398,14 @@ export default function AdminCMS({
                                           {b.notes || t('El cliente no dejó respuestas adicionales para el cuestionario.', 'The client did not leave additional answers for the questionnaire.', 'O cliente não deixou respostas adicionais para o questionário.')}
                                         </div>
                                       </div>
-                                      <div className="text-[10px] text-white/30 border-t border-white/5 pt-2 italic text-right">
+                                      <div className="text-[10px] text-white/30 border-t border-white/10 pt-2 italic text-right">
                                         {t('Creada el:', 'Created at:', 'Criado em:')} {b.createdAt ? new Date(b.createdAt).toLocaleString(lang === 'es' ? 'es-ES' : 'en-US') : 'N/A'}
                                       </div>
                                     </div>
 
                                       {/* Contract & Pricing section */}
                                       {(b.contractData || b.status === 'accepted') && (
-                                        <div className="mt-6 pt-6 border-t border-white/5">
+                                        <div className="mt-6 pt-6 border-t border-white/10">
                                           <h4 className="text-[10px] font-mono uppercase tracking-widest text-gold-400 font-semibold pb-3">
                                             {t('Contrato y Montos', 'Contract & Pricing', 'Contrato e Valores')}
                                           </h4>
@@ -1416,7 +1491,7 @@ export default function AdminCMS({
               {bookings.map(b => {
                 const isExpanded = expandedBookingId === b.id;
                 return (
-                  <div key={b.id} className={`border rounded-xl bg-dark-gray p-4 space-y-3 ${!b.isRead ? 'border-gold-400/25 bg-gold-500/5' : 'border-white/5'}`}>
+                  <div key={b.id} className={`border rounded-xl bg-dark-gray p-4 space-y-3 ${!b.isRead ? 'border-gold-400/25 bg-gold-500/5' : 'border-white/10'}`}>
                     <div onClick={() => { if (!b.isRead) handleToggleBookingRead(b.id); setExpandedBookingId(isExpanded ? null : b.id); }} className="cursor-pointer">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2 min-w-0 flex-1">
@@ -1455,7 +1530,7 @@ export default function AdminCMS({
                     </div>
 
                     {/* Action buttons */}
-                    <div className="flex items-center space-x-2 pt-2 border-t border-white/5" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center space-x-2 pt-2 border-t border-white/10" onClick={(e) => e.stopPropagation()}>
                       {b.status === 'pending' ? (
                         <>
                           <button
@@ -1489,7 +1564,7 @@ export default function AdminCMS({
                       <motion.div
                         initial={{ opacity: 0, y: -8 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="pt-3 border-t border-white/5 space-y-3 text-xs"
+                        className="pt-3 border-t border-white/10 space-y-3 text-xs"
                       >
                         <div className="grid grid-cols-2 gap-3">
                           <div className="space-y-0.5">
@@ -1503,12 +1578,12 @@ export default function AdminCMS({
                         </div>
                         <div>
                           <span className="text-white/40 block text-[9px] uppercase tracking-wider mb-1">{t('Notas:', 'Notes:', 'Notas:')}</span>
-                          <div className="text-white/80 whitespace-pre-wrap leading-relaxed bg-charcoal border border-white/5 rounded-lg p-3">
+                          <div className="text-white/80 whitespace-pre-wrap leading-relaxed bg-charcoal border border-white/10 rounded-lg p-3">
                             {b.notes || t('Sin notas adicionales', 'No additional notes', 'Sem notas adicionais')}
                           </div>
                         </div>
                         {(b.contractData || b.status === 'accepted') && (
-                          <div className="pt-3 border-t border-white/5 space-y-3">
+                          <div className="pt-3 border-t border-white/10 space-y-3">
                             <h4 className="text-[10px] font-mono uppercase tracking-widest text-gold-400 font-semibold">
                               {t('Contrato y Montos', 'Contract & Pricing', 'Contrato e Valores')}
                             </h4>
@@ -1582,7 +1657,7 @@ export default function AdminCMS({
         {/* INVOICES */}
         {activeTab === 'invoices' && (
           <div className="space-y-6">
-            <div className="border-b border-white/5 pb-4">
+            <div className="border-b border-white/10 pb-4">
               <h2 className="font-serif text-2xl text-white">{t('Facturas y Recibos', 'Invoices & Receipts', 'Faturas e Recibos')}</h2>
               <p className="text-xs text-white/50">{t('Consulta los pagos registrados y descarga sus comprobantes.', 'Review recorded payments and print their receipts.', 'Consulte os pagamentos registrados e imprima os recibos.')}</p>
             </div>
@@ -1590,7 +1665,7 @@ export default function AdminCMS({
               {invoices.length === 0 ? (
                 <p className="text-sm text-white/40">{t('No hay facturas disponibles.', 'No invoices available.', 'Nenhuma fatura disponível.')}</p>
               ) : invoices.map(invoice => (
-                <div key={invoice.id} className="bg-dark-gray border border-white/5 rounded-xl p-4 grid grid-cols-1 md:grid-cols-6 gap-3 items-center text-xs">
+                <div key={invoice.id} className="bg-dark-gray border border-white/10 rounded-xl p-4 grid grid-cols-1 md:grid-cols-6 gap-3 items-center text-xs">
                   <div><p className="text-[9px] text-white/40 uppercase">{t('Factura', 'Invoice', 'Fatura')}</p><p className="font-mono text-gold-300">{invoice.invoiceNumber}</p></div>
                   <div><p className="text-[9px] text-white/40 uppercase">{t('Cliente', 'Client', 'Cliente')}</p><p className="text-white/80">{invoice.clientName}</p></div>
                   <div className="md:col-span-2"><p className="text-[9px] text-white/40 uppercase">{t('Paquete', 'Package', 'Pacote')}</p><p className="text-white/70 truncate">{invoice.packageName}</p></div>
@@ -1615,7 +1690,7 @@ export default function AdminCMS({
         {/* INBOX MESSAGES */}
         {activeTab === 'messages' && (
           <div className="space-y-6">
-            <div className="flex items-center justify-between border-b border-white/5 pb-4">
+            <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <div>
                 <h2 className="font-serif text-2xl text-white">{t('Bandeja de Entrada del Cliente', 'Client Inbox', 'Caixa de Entrada')}</h2>
                 <p className="text-xs text-white/50">{t('Gestiona las consultas de contacto, lee los mensajes y redacta respuestas rápidas.', 'Manage contact inquiries, view messages, and compile instant replies.', 'Gerencie os contatos, leia as mensagens e envie respostas rápidas.')}</p>
@@ -1629,7 +1704,7 @@ export default function AdminCMS({
                   onClick={() => { if (!msg.isRead) handleToggleMessageRead(msg.id); }}
                   className={`border rounded-2xl p-5 space-y-3 transition-all text-left relative cursor-pointer ${
                     msg.isRead 
-                      ? 'bg-dark-gray border-white/5 opacity-70' 
+                      ? 'bg-dark-gray border-white/10 opacity-70' 
                       : 'bg-gold-500/5 border-gold-400/25 shadow-[0_0_10px_rgba(180,142,67,0.05)]'
                   }`}
                 >
@@ -1652,8 +1727,8 @@ export default function AdminCMS({
                   </div>
 
                   {msg.replyText && (
-                    <div className="bg-dark-gray border border-white/5 rounded-xl p-4 space-y-2 text-left mt-2">
-                      <div className="flex justify-between items-center border-b border-white/5 pb-1.5">
+                    <div className="bg-dark-gray border border-white/10 rounded-xl p-4 space-y-2 text-left mt-2">
+                      <div className="flex justify-between items-center border-b border-white/10 pb-1.5">
                         <span className="text-[9px] font-mono text-gold-400 uppercase tracking-widest font-semibold flex items-center space-x-1">
                           <span>✓ Respuesta Enviada (Reply Sent)</span>
                         </span>
@@ -1718,7 +1793,7 @@ export default function AdminCMS({
                     </div>
                   )}
 
-                  <div className="border-t border-white/5 pt-3.5 flex justify-between items-center">
+                  <div className="border-t border-white/10 pt-3.5 flex justify-between items-center">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -1793,7 +1868,7 @@ export default function AdminCMS({
         {/* EMAIL SETTINGS */}
         {activeTab === 'email_settings' && (
           <div className="space-y-6">
-            <div className="flex items-center justify-between border-b border-white/5 pb-4">
+            <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <div>
                 <h2 className="font-serif text-2xl text-white">{t('Configuración de Correo Electrónico', 'Email Configuration', 'Configuração de E-mail')}</h2>
                 <p className="text-xs text-white/50">{t('Vincula tu cuenta de EmailJS para automatizar y recibir las alertas reales en tu casilla de correo', 'Link your EmailJS credentials to automate client confirmations and receive notification alerts', 'Vincule sua conta do EmailJS para automatizar e receber alertas reais em sua caixa de entrada')}</p>
@@ -1825,8 +1900,8 @@ export default function AdminCMS({
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 text-left">
               {/* Left Column: Form Fields */}
               <div className="lg:col-span-7 space-y-6">
-                <div className="bg-dark-gray/40 border border-white/5 p-6 rounded-xl space-y-4">
-                  <h3 className="text-xs font-mono text-gold-400 uppercase tracking-wider border-b border-white/5 pb-2">Credenciales de EmailJS</h3>
+                <div className="bg-dark-gray/40 border border-white/10 p-6 rounded-xl space-y-4">
+                  <h3 className="text-xs font-mono text-gold-400 uppercase tracking-wider border-b border-white/10 pb-2">Credenciales de EmailJS</h3>
 
                   <div className="space-y-4 pt-2">
                     <div className="space-y-1.5">
@@ -1874,7 +1949,7 @@ export default function AdminCMS({
                     </div>
                   </div>
 
-                  <div className="pt-4 flex space-x-3 border-t border-white/5">
+                  <div className="pt-4 flex space-x-3 border-t border-white/10">
                     <button
                       type="button"
                       onClick={async () => {
@@ -1931,14 +2006,14 @@ export default function AdminCMS({
                     </button>
                   </div>
                   
-                  <p className="text-[10px] text-white/50 leading-relaxed font-sans bg-dark-gray p-3 rounded-lg border border-white/5 mt-2">
+                  <p className="text-[10px] text-white/50 leading-relaxed font-sans bg-dark-gray p-3 rounded-lg border border-white/10 mt-2">
                     ℹ️ <strong>¿Cómo funciona el envío?</strong> EmailJS es una API invisible que procesa el correo de forma 100% silenciosa en segundo plano. <strong>No te redireccionará a Gmail</strong> ni te pedirá abrir aplicaciones de correo externas al hacer clic; el mensaje se envía directamente a tu casilla destinataria.
                   </p>
                 </div>
 
                 {/* Auto-Responder Settings Card */}
-                <div className="bg-dark-gray/40 border border-white/5 p-6 rounded-xl space-y-4">
-                  <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                <div className="bg-dark-gray/40 border border-white/10 p-6 rounded-xl space-y-4">
+                  <div className="flex items-center justify-between border-b border-white/10 pb-2">
                     <h3 className="text-xs font-mono text-gold-400 uppercase tracking-wider">Respuestas Automáticas (Auto-Responder)</h3>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input 
@@ -1999,7 +2074,7 @@ export default function AdminCMS({
                         </span>
                       </div>
 
-                      <div className="pt-2 border-t border-white/5 flex flex-col space-y-2">
+                      <div className="pt-2 border-t border-white/10 flex flex-col space-y-2">
                         <button
                           type="button"
                           onClick={async () => {
@@ -2119,7 +2194,7 @@ export default function AdminCMS({
                       <p>Copia el <strong>Template ID</strong>, la <strong>Public Key</strong> (en Account → API Keys), pégalos aquí y haz clic en <strong>Guardar</strong>.</p>
                     </div>
 
-                    <div className="border-t border-white/5 pt-3 mt-2 space-y-2">
+                    <div className="border-t border-white/10 pt-3 mt-2 space-y-2">
                       <h4 className="text-[10px] uppercase font-mono text-gold-400 tracking-wider">⚠️ Configuración de Respuesta Automática</h4>
                       <p className="text-[10px] text-white/60 leading-normal">
                         Por defecto, las plantillas de EmailJS suelen tener tu correo de Miriam escrito de forma fija en el campo <strong>To Email (Para)</strong>. Si usas esa misma plantilla, EmailJS te enviará la respuesta automática a ti misma en lugar de al cliente.
@@ -2127,7 +2202,7 @@ export default function AdminCMS({
                       <p className="text-[10px] text-white/60 leading-normal">
                         Para solucionarlo, ve a EmailJS y crea una <strong>segunda plantilla independiente</strong> (por ejemplo: <code>plantilla_autoresponder</code>) y configúrala así:
                       </p>
-                      <div className="bg-black/40 p-3 rounded font-mono text-[9px] text-white/50 space-y-1.5 ml-2 border border-white/5">
+                      <div className="bg-black/40 p-3 rounded font-mono text-[9px] text-white/50 space-y-1.5 ml-2 border border-white/10">
                         <div>• <strong>To Email (Para):</strong> escribe <span className="text-gold-400">{"{{to_email}}"}</span> <span className="text-white/30">(¡muy importante!)</span></div>
                         <div>• <strong>Subject (Asunto):</strong> escribe <span className="text-gold-400">{"{{reply_subject}}"}</span></div>
                         <div>• <strong>Content (Cuerpo):</strong> usa las variables <span className="text-gold-400">{"{{reply_message}}"}</span> y <span className="text-gold-400">{"{{booking_details}}"}</span> para mostrar el texto personalizado y los datos de la reserva o contacto.</div>
@@ -2146,7 +2221,7 @@ export default function AdminCMS({
         {/* CLIENTS AND PRIVATE GALLERIES MANAGEMENT */}
         {activeTab === 'clients' && (
           <div className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-white/5 pb-4 gap-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-white/10 pb-4 gap-4">
               <div>
                 <h2 className="font-serif text-2xl text-white">
                   {t('Gestión de Clientes y Galerías Privadas', 'Client & Private Gallery Management', 'Gestão de Clientes e Galerias')}
@@ -2181,7 +2256,7 @@ export default function AdminCMS({
 
             {/* Dashboard / Quick Stats Row */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-charcoal border border-white/5 p-4 rounded-xl flex items-center space-x-4">
+              <div className="bg-charcoal border border-white/10 p-4 rounded-xl flex items-center space-x-4">
                 <div className="p-3 bg-gold-500/10 rounded-lg text-gold-400">
                   <Users size={20} />
                 </div>
@@ -2191,7 +2266,7 @@ export default function AdminCMS({
                 </div>
               </div>
 
-              <div className="bg-charcoal border border-white/5 p-4 rounded-xl flex items-center space-x-4">
+              <div className="bg-charcoal border border-white/10 p-4 rounded-xl flex items-center space-x-4">
                 <div className="p-3 bg-gold-500/10 rounded-lg text-gold-400">
                   <Camera size={20} />
                 </div>
@@ -2203,7 +2278,7 @@ export default function AdminCMS({
                 </div>
               </div>
 
-              <div className="bg-charcoal border border-white/5 p-4 rounded-xl flex items-center space-x-4">
+              <div className="bg-charcoal border border-white/10 p-4 rounded-xl flex items-center space-x-4">
                 <div className="p-3 bg-gold-500/10 rounded-lg text-gold-400">
                   <CheckSquare size={20} />
                 </div>
@@ -2219,7 +2294,7 @@ export default function AdminCMS({
             {/* Form Section (Visible only when clientForm is active) */}
             {clientForm.clientName !== undefined && (
               <div id="client-form-section" className="bg-dark border border-gold-400/20 rounded-2xl p-6 space-y-6">
-                <div className="flex items-center justify-between border-b border-white/5 pb-3">
+                <div className="flex items-center justify-between border-b border-white/10 pb-3">
                   <h3 className="font-serif text-lg text-gold-300">
                     {clientEditItem ? t('Editar Cuenta de Cliente', 'Edit Client Account') : t('Registrar Nueva Cuenta de Cliente', 'Register New Client Account')}
                   </h3>
@@ -2284,7 +2359,7 @@ export default function AdminCMS({
                       </div>
                     </div>
 
-                    <div className="space-y-1.5 col-span-1 md:col-span-2 bg-dark-gray p-4 rounded-xl border border-white/5 space-y-3">
+                    <div className="space-y-1.5 col-span-1 md:col-span-2 bg-dark-gray p-4 rounded-xl border border-white/10 space-y-3">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <label className="text-[10px] font-mono text-gold-300 uppercase tracking-wider flex items-center space-x-1.5">
                           <CheckSquare size={12} className="text-gold-400" />
@@ -2316,14 +2391,14 @@ export default function AdminCMS({
                   </div>
 
                     {/* PHOTOS MANAGEMENT SUB-SECTION */}
-                    <div className="border-t border-white/5 pt-4 space-y-4">
+                    <div className="border-t border-white/10 pt-4 space-y-4">
                       <div>
                         <h4 className="text-xs font-mono text-gold-400 uppercase tracking-widest">{t('Fotos en la Galería del Cliente', 'Photos in Client Gallery')}</h4>
                         <p className="text-[10px] text-white/50">{t('Añade las fotos de previsualización que el cliente verá para elegir sus preferidas y descargar.', 'Add the preview photographs the client will review to pick their favorites and download.')}</p>
                       </div>
 
                       {/* Drag-and-drop & File upload zone */}
-                      <div className="bg-dark-gray/30 p-4 rounded-xl border border-white/5 space-y-4">
+                      <div className="bg-dark-gray/30 p-4 rounded-xl border border-white/10 space-y-4">
                         <h5 className="text-[10px] font-mono text-white/60 uppercase tracking-wider">
                           {t('📁 Cargar Fotos de Pruebas', '📁 Upload Proof Photos')}
                         </h5>
@@ -2369,9 +2444,9 @@ export default function AdminCMS({
                           <summary className="text-[9px] font-mono text-white/40 hover:text-white/60 cursor-pointer select-none transition-colors outline-none list-none flex items-center space-x-1">
                             <span>▸ {t('¿Prefieres usar URLs externas?', 'Prefer to use external URLs?')}</span>
                           </summary>
-                          <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end mt-3 pt-3 border-t border-white/5 animate-fadeIn">
+                          <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end mt-3 pt-3 border-t border-white/10 animate-fadeIn">
                             <div className="md:col-span-5 space-y-1">
-                              <label className="text-[8px] font-mono text-white/40 uppercase">URL de la Imagen</label>
+                              <label className="text-[11px] font-mono text-white/40 uppercase">URL de la Imagen</label>
                               <input
                                 type="text"
                                 placeholder="https://images.unsplash.com/..."
@@ -2382,7 +2457,7 @@ export default function AdminCMS({
                             </div>
                             
                             <div className="md:col-span-4 space-y-1">
-                              <label className="text-[8px] font-mono text-white/40 uppercase">Título de la Foto</label>
+                              <label className="text-[11px] font-mono text-white/40 uppercase">Título de la Foto</label>
                               <input
                                 type="text"
                                 placeholder="Ej: Retrato Novia"
@@ -2411,17 +2486,17 @@ export default function AdminCMS({
                         {clientForm.photos?.map((p) => (
                           <div key={p.id} className="relative aspect-square bg-dark border border-white/10 rounded-lg overflow-hidden group">
                              <img src={sanitizeUrl(p.url) || undefined} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
-                            <div className="absolute inset-0 bg-black/75 opacity-0 group-hover:opacity-100 transition-opacity p-2 flex flex-col justify-between text-left text-[8px] font-mono">
+                            <div className="absolute inset-0 bg-black/75 opacity-0 group-hover:opacity-100 transition-opacity p-2 flex flex-col justify-between text-left text-[11px] font-mono">
                               <div>
                                 <span className="text-white/90 font-semibold block truncate">{p.title}</span>
-                                <span className="text-gold-400 text-[7px] block">⚡ SH:{p.sharpness} CO:{p.thirdsAlign} EM:{p.emotionScore}</span>
+                                <span className="text-gold-400 text-[10px] block">⚡ SH:{p.sharpness} CO:{p.thirdsAlign} EM:{p.emotionScore}</span>
                                 {p.location && <span className="text-white/50 block mt-0.5 truncate">📍 {p.location}</span>}
                               </div>
                               <div className="flex flex-col space-y-1">
                                 <button
                                   type="button"
                                   onClick={() => setEditingProofPhotoId(p.id)}
-                                  className="w-full py-1 px-1.5 bg-gold-500 hover:bg-gold-600 text-dark font-mono text-[7px] uppercase tracking-wider rounded font-bold text-center cursor-pointer flex items-center justify-center space-x-0.5"
+                                  className="w-full py-1 px-1.5 bg-gold-500 hover:bg-gold-600 text-dark font-mono text-[10px] uppercase tracking-wider rounded font-bold text-center cursor-pointer flex items-center justify-center space-x-0.5"
                                 >
                                   <Edit size={8} />
                                   <span>{t('Editar', 'Edit')}</span>
@@ -2429,7 +2504,7 @@ export default function AdminCMS({
                                 <button
                                   type="button"
                                   onClick={() => handleRemoveProofPhoto(p.id)}
-                                  className="w-full py-1 px-1.5 bg-red-500 hover:bg-red-600 text-white font-mono text-[7px] uppercase tracking-wider rounded font-semibold text-center cursor-pointer flex items-center justify-center space-x-0.5"
+                                  className="w-full py-1 px-1.5 bg-red-500 hover:bg-red-600 text-white font-mono text-[10px] uppercase tracking-wider rounded font-semibold text-center cursor-pointer flex items-center justify-center space-x-0.5"
                                 >
                                   <Trash2 size={8} />
                                   <span>{t('Quitar', 'Remove')}</span>
@@ -2437,7 +2512,7 @@ export default function AdminCMS({
                               </div>
                             </div>
                             {p.isFav && (
-                              <div className="absolute top-1 right-1 bg-gold-400 text-dark px-1.5 py-0.5 rounded text-[7px] font-mono font-bold">
+                              <div className="absolute top-1 right-1 bg-gold-400 text-dark px-1.5 py-0.5 rounded text-[10px] font-mono font-bold">
                                 FAV
                               </div>
                             )}
@@ -2478,7 +2553,7 @@ export default function AdminCMS({
                               animate={{ scale: 1 }}
                               exit={{ scale: 0.95 }}
                             >
-                              <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                              <div className="flex items-center justify-between border-b border-white/10 pb-2">
                                 <h4 className="font-serif text-sm font-semibold text-gold-300 uppercase tracking-wider">
                                   {t('Editar Metadatos de Foto de Prueba', 'Edit Proof Photo Metadata')}
                                 </h4>
@@ -2544,7 +2619,7 @@ export default function AdminCMS({
                                 </div>
                               </div>
 
-                              <div className="flex justify-end space-x-2 pt-2 border-t border-white/5">
+                              <div className="flex justify-end space-x-2 pt-2 border-t border-white/10">
                                 <button
                                   type="button"
                                   onClick={() => setEditingProofPhotoId(null)}
@@ -2561,7 +2636,7 @@ export default function AdminCMS({
                   </div>
 
                   {/* SAVE / CANCEL ACTION BUTTONS */}
-                  <div className="flex items-center space-x-3 border-t border-white/5 pt-4">
+                  <div className="flex items-center space-x-3 border-t border-white/10 pt-4">
                     <button
                       type="submit"
                       className="py-2 px-6 bg-gold-500 text-dark hover:bg-gold-400 rounded-lg text-[10px] font-mono tracking-widest uppercase font-bold flex items-center space-x-1 cursor-pointer"
@@ -2585,8 +2660,8 @@ export default function AdminCMS({
             )}
 
             {/* CLIENTS LIST / DIRECTORY */}
-            <div className="bg-charcoal border border-white/5 rounded-xl overflow-hidden">
-              <div className="p-4 border-b border-white/5 bg-dark-gray">
+            <div className="bg-charcoal border border-white/10 rounded-xl overflow-hidden">
+              <div className="p-4 border-b border-white/10 bg-dark-gray">
                 <h3 className="text-xs font-mono text-gold-400 uppercase tracking-wider">
                   {t('Listado de Clientes Activos', 'Active Client Directory')}
                 </h3>
@@ -2679,7 +2754,7 @@ export default function AdminCMS({
                                 document.getElementById('client-form-section')?.scrollIntoView({ behavior: 'smooth' });
                               }, 100);
                             }}
-                            className="py-1.5 px-3 bg-white/5 hover:bg-white/10 text-white/90 rounded text-[9px] font-mono uppercase tracking-wider flex items-center space-x-1 cursor-pointer border border-white/5 transition-colors"
+                            className="py-1.5 px-3 bg-white/5 hover:bg-white/10 text-white/90 rounded text-[9px] font-mono uppercase tracking-wider flex items-center space-x-1 cursor-pointer border border-white/10 transition-colors"
                           >
                             <Edit size={10} />
                             <span>{t('Gestionar y Editar', 'Manage & Edit')}</span>
@@ -2720,7 +2795,7 @@ export default function AdminCMS({
                     animate={{ scale: 1 }}
                     exit={{ scale: 0.95 }}
                   >
-                    <div className="flex items-center justify-between border-b border-white/5 pb-3">
+                    <div className="flex items-center justify-between border-b border-white/10 pb-3">
                       <div className="space-y-0.5">
                         <h3 className="font-serif text-base text-gold-300 font-semibold">
                           {t('Enviar Link de Galería por Email', 'Send Gallery Link via Email')}
@@ -2756,13 +2831,13 @@ export default function AdminCMS({
                           onChange={(e) => setSendEmailMessage(e.target.value)}
                           className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white focus:outline-none focus:border-gold-400 font-sans resize-none"
                         />
-                        <p className="text-[8px] text-white/40 font-mono">
+                        <p className="text-[11px] text-white/40 font-mono">
                           {t('Podés usar {name} y {link} como marcadores.', 'You can use {name} and {link} as placeholders.')}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-end space-x-3 pt-2 border-t border-white/5">
+                    <div className="flex items-center justify-end space-x-3 pt-2 border-t border-white/10">
                       <button
                         type="button"
                         onClick={() => setShowSendEmailModal(false)}
@@ -2885,7 +2960,7 @@ export default function AdminCMS({
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'tween', duration: 0.3 }}
-              className="fixed top-0 left-0 bottom-0 w-72 bg-dark-gray border-r border-white/5 z-50 lg:hidden flex flex-col p-6 overflow-y-auto touch-pan-y"
+              className="fixed top-0 left-0 bottom-0 w-72 bg-dark-gray border-r border-white/10 z-50 lg:hidden flex flex-col p-6 overflow-y-auto touch-pan-y"
             >
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center space-x-2">
@@ -2904,9 +2979,10 @@ export default function AdminCMS({
                 <div className="space-y-1.5">
                   {([
                     { id: 'dashboard', icon: BarChart3, label: t('Dashboard', 'Dashboard', 'Painel') },
-                    { id: 'photos', icon: Camera, label: t('Fotografías', 'Photographs', 'Fotografias') },
-                    { id: 'bookings', icon: Calendar, label: t('Cola de Reservas', 'Bookings Queue', 'Fila de Reservas') },
-                    { id: 'packages', icon: ShoppingBag, label: t('Paquetes Fotográficos', 'Photography Packages', 'Pacotes Fotográficos') },
+                     { id: 'photos', icon: Camera, label: t('Fotografías', 'Photographs', 'Fotografias') },
+                     { id: 'bookings', icon: Calendar, label: t('Cola de Reservas', 'Bookings Queue', 'Fila de Reservas') },
+                     { id: 'testimonials', icon: MessageSquare, label: t('Testimonios', 'Testimonials', 'Depoimentos') },
+                     { id: 'packages', icon: ShoppingBag, label: t('Paquetes Fotográficos', 'Photography Packages', 'Pacotes Fotográficos') },
                     { id: 'session-categories', icon: Sliders, label: t('Tipos de Sesión', 'Session Types', 'Tipos de Sessão') },
                     { id: 'messages', icon: MessageSquare, label: t('Bandeja de Entrada', 'Inbox', 'Caixa de Entrada') },
                     { id: 'seo', icon: FileCode, label: t('Configuración SEO', 'SEO Schema', 'Configuração SEO') },
@@ -2932,22 +3008,22 @@ export default function AdminCMS({
                         <Icon size={16} />
                         <span className="flex-1">{tab.label}</span>
                         {tab.id === 'bookings' && bookings.filter(b => b.status === 'pending').length > 0 && (
-                          <span className="bg-gold-500 text-dark text-[8px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
+                          <span className="bg-gold-500 text-dark text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
                             {bookings.filter(b => b.status === 'pending').length}
                           </span>
                         )}
                         {tab.id === 'bookings' && unseenBookings > 0 && (
-                          <span className="bg-red-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
+                          <span className="bg-red-500 text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
                             {unseenBookings}
                           </span>
                         )}
                         {tab.id === 'messages' && messages.filter(m => !m.isRead).length > 0 && (
-                          <span className="bg-gold-500 text-dark text-[8px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
+                          <span className="bg-gold-500 text-dark text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
                             {messages.filter(m => !m.isRead).length}
                           </span>
                         )}
                         {tab.id === 'messages' && unseenMessages > 0 && (
-                          <span className="bg-red-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
+                          <span className="bg-red-500 text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
                             {unseenMessages}
                           </span>
                         )}
@@ -3039,7 +3115,7 @@ function SessionCategoriesEditor({ categories, onUpdate, triggerAlert, lang }: S
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between border-b border-white/5 pb-4">
+      <div className="flex items-center justify-between border-b border-white/10 pb-4">
         <div>
           <h2 className="font-serif text-2xl text-white">{t('Tipos de Sesión', 'Session Types')}</h2>
           <p className="text-xs text-white/50">{t('Gestiona las categorías de sesión que se muestran en la sección pública.', 'Manage session categories shown in the public section.')}</p>
@@ -3054,7 +3130,7 @@ function SessionCategoriesEditor({ categories, onUpdate, triggerAlert, lang }: S
       {editingCat && (
         <div className="fixed inset-0 z-50 flex items-start justify-center p-4 bg-overlay/80 backdrop-blur-sm overflow-y-auto pt-12">
           <div className="bg-charcoal border border-[#D8C0A8] rounded-2xl p-6 max-w-lg w-full space-y-5 shadow-2xl my-8">
-            <div className="flex items-center justify-between border-b border-white/5 pb-3">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h3 className="font-serif text-lg text-white">{t('Editar Categoría', 'Edit Category')}</h3>
               <button onClick={cancelEdit} className="text-white/50 hover:text-white cursor-pointer p-1"><X size={16} /></button>
             </div>
@@ -3128,7 +3204,7 @@ function SessionCategoriesEditor({ categories, onUpdate, triggerAlert, lang }: S
               )}
             </div>
 
-            <div className="flex justify-end space-x-3 pt-2 border-t border-white/5">
+            <div className="flex justify-end space-x-3 pt-2 border-t border-white/10">
               <button onClick={cancelEdit} className="px-4 py-2 border border-[#D8C0A8] rounded-lg text-[10px] font-mono text-white/70 hover:text-white cursor-pointer transition-all">
                 {t('Cancelar', 'Cancel')}
               </button>
@@ -3147,7 +3223,7 @@ function SessionCategoriesEditor({ categories, onUpdate, triggerAlert, lang }: S
           return (
             <div key={cat.id} className={`flex items-center justify-between p-3 rounded-xl border transition-all ${cat.active ? 'border-[#D8C0A8] bg-dark-gray' : 'border-[#D8C0A8]/30 bg-dark-gray opacity-60'}`}>
               <div className="flex items-center space-x-3 flex-1 min-w-0">
-                <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-charcoal border border-white/5">
+                <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-charcoal border border-white/10">
                   {cat.image && <img src={cat.image} alt={cName} className="w-full h-full object-cover" />}
                 </div>
                 <div className="min-w-0">
@@ -3158,7 +3234,7 @@ function SessionCategoriesEditor({ categories, onUpdate, triggerAlert, lang }: S
               <div className="flex items-center space-x-1.5 shrink-0">
                 <label className="flex items-center space-x-1 cursor-pointer">
                   <input type="checkbox" checked={cat.active} onChange={() => toggleActive(cat.id)} className="accent-gold-500 w-3 h-3" />
-                  <span className="text-[8px] font-mono text-white/40">{t('ON', 'ON')}</span>
+                  <span className="text-[11px] font-mono text-white/40">{t('ON', 'ON')}</span>
                 </label>
                 <label className="p-1.5 text-white/40 hover:text-gold-400 cursor-pointer transition-colors" title={t('Subir imagen', 'Upload image')}>
                   <input type="file" accept="image/*" className="hidden" onChange={async (e) => {

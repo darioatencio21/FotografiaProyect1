@@ -1,48 +1,76 @@
 import { supabase } from './supabase';
 
 export const SEEDED_FLAG_KEY = 'aurea_firestore_seeded';
+const MISSING_TABLES_KEY = 'aurea_missing_tables';
 
 function tn(table: string): string {
   return table.toLowerCase();
+}
+
+function isTableMissing(table: string): boolean {
+  try {
+    const missing = JSON.parse(localStorage.getItem(MISSING_TABLES_KEY) || '[]');
+    return missing.includes(table);
+  } catch {
+    return false;
+  }
+}
+
+function markTableMissing(table: string): void {
+  try {
+    const missing = JSON.parse(localStorage.getItem(MISSING_TABLES_KEY) || '[]');
+    if (!missing.includes(table)) {
+      missing.push(table);
+      localStorage.setItem(MISSING_TABLES_KEY, JSON.stringify(missing));
+    }
+  } catch { /* ignore */ }
+}
+
+function isMissingTableError(err: any): boolean {
+  const msg = err?.message || String(err);
+  return /relation.*does not exist|not found.*table|PGRST(?:104|204|301)/i.test(msg);
 }
 
 export async function getCollectionWithFallback<T extends { id: string }>(
   collectionPath: string,
   fallbackData: T[]
 ): Promise<T[]> {
+  const table = tn(collectionPath);
+  if (isTableMissing(table)) return fallbackData;
+
   try {
-    const { data, error } = await supabase.from(tn(collectionPath)).select('*');
+    const { data, error } = await supabase.from(table).select('*');
     if (error) throw error;
 
     if (!data || data.length === 0) {
       if (fallbackData && fallbackData.length > 0) {
         const seededFlag = localStorage.getItem(SEEDED_FLAG_KEY);
         if (!seededFlag) {
-          console.log(`Collection "${collectionPath}" is empty. Seeding with fallback data...`);
-          const { error: insertError } = await supabase.from(tn(collectionPath)).insert(fallbackData as any[]);
-          if (insertError) {
-            console.warn(`Seed skipped for "${collectionPath}":`, insertError.message);
-          } else {
+          const { error: insertError } = await supabase.from(table).insert(fallbackData as any[]);
+          if (!insertError) {
             localStorage.setItem(SEEDED_FLAG_KEY, 'true');
           }
         }
-        const { data: fresh } = await supabase.from(tn(collectionPath)).select('*');
+        const { data: fresh } = await supabase.from(table).select('*');
         if (fresh && fresh.length > 0) return fresh as T[];
       }
       return fallbackData;
     }
 
     return data as T[];
-  } catch (err: any) {
-    console.error(`DB read error for "${collectionPath}":`, err?.message || err);
+  } catch {
+    markTableMissing(table);
     return fallbackData;
   }
 }
 
 export async function getSingleDocument<T>(collectionPath: string, docId: string): Promise<T | null> {
+  const table = tn(collectionPath);
+  if (isTableMissing(table)) return null;
+
   try {
     const { data, error } = await supabase
-      .from(tn(collectionPath))
+      .from(table)
       .select('*')
       .eq('id', docId)
       .single();
@@ -52,32 +80,44 @@ export async function getSingleDocument<T>(collectionPath: string, docId: string
     }
     return data as T;
   } catch (err: any) {
-    console.warn(`DB read error for "${collectionPath}/${docId}":`, err?.message || err);
+    if (isMissingTableError(err)) markTableMissing(table);
     return null;
   }
 }
 
 export async function saveDocument<T>(collectionPath: string, docId: string, data: T): Promise<void> {
+  const table = tn(collectionPath);
+  if (isTableMissing(table)) return;
+
   try {
     const { error } = await supabase
-      .from(tn(collectionPath))
+      .from(table)
       .upsert({ id: docId, ...data as any });
     if (error) throw error;
   } catch (err: any) {
-    console.error(`DB write error for "${collectionPath}/${docId}":`, err?.message || err);
+    if (isMissingTableError(err)) {
+      markTableMissing(table);
+      return;
+    }
     throw err;
   }
 }
 
 export async function deleteDocument(collectionPath: string, docId: string): Promise<void> {
+  const table = tn(collectionPath);
+  if (isTableMissing(table)) return;
+
   try {
     const { error } = await supabase
-      .from(tn(collectionPath))
+      .from(table)
       .delete()
       .eq('id', docId);
     if (error) throw error;
   } catch (err: any) {
-    console.error(`DB delete error for "${collectionPath}/${docId}":`, err?.message || err);
+    if (isMissingTableError(err)) {
+      markTableMissing(table);
+      return;
+    }
     throw err;
   }
 }
@@ -108,19 +148,14 @@ export async function deleteImageByUrl(url: string): Promise<void> {
 
     const supabasePattern = /\/storage\/v1\/object\/public\/([^/]+)\/(.+)/;
     const match = url.match(supabasePattern);
-    if (!match) {
-      console.warn('Could not parse Supabase Storage URL:', url);
-      return;
-    }
+    if (!match) return;
 
     const bucket = match[1];
     const filePath = decodeURIComponent(match[2]);
 
     const { error } = await supabase.storage.from(bucket).remove([filePath]);
     if (error) throw error;
-  } catch (err) {
-    console.warn('Storage delete skipped:', err);
-  }
+  } catch { /* ignore */ }
 }
 
 export async function loginWithSupabase(email: string, password: string): Promise<any> {

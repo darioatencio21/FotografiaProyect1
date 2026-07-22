@@ -41,6 +41,7 @@ export default function Header({
     { id: 'home', label: t.navHome },
     { id: 'about', label: t.navAbout },
     { id: 'portfolio', label: t.navPortfolio },
+    { id: 'testimonials', label: lang === 'es' ? 'Testimonios' : 'Testimonials' },
     { id: 'services', label: t.navServices },
     { id: 'client-portal', label: t.navClientPortal },
     { id: 'contact', label: t.navContact }
@@ -104,7 +105,7 @@ export default function Header({
   };
 
   return (
-    <header className="relative w-full max-h-[70px] lg:max-h-none bg-dark border-b border-white/5 py-2 lg:py-4 px-4 lg:px-12 flex items-center justify-between lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-x-24 z-40">
+    <header className="relative w-full max-h-[70px] lg:max-h-none bg-dark border-b border-white/10 py-2 lg:py-4 px-4 lg:px-12 flex items-center justify-between lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-x-24 z-40">
       {/* Desktop navigation link array - Left split (Home, About, Portfolio) */}
       <nav className="hidden lg:flex items-center space-x-8 z-10 justify-start">
         {menuItems.slice(0, 3).map(item => {
@@ -113,7 +114,7 @@ export default function Header({
             <button
               key={item.id}
               onClick={() => handleNav(item.id)}
-              className={`text-[10px] font-mono tracking-widest uppercase transition-all relative pb-1 cursor-pointer ${
+              className={`text-xs font-mono tracking-widest uppercase transition-all relative pb-1 cursor-pointer ${
                 isActive ? 'text-gold-400 font-bold' : 'text-white/70 hover:text-gold-400'
               }`}
             >
@@ -172,7 +173,7 @@ export default function Header({
           <div className="relative">
             <button
               onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}
-              className="flex items-center space-x-1.5 text-white/70 hover:text-gold-400 text-[10px] font-mono tracking-widest uppercase cursor-pointer transition-colors"
+              className="flex items-center space-x-1.5 text-white/70 hover:text-gold-400 text-xs font-mono tracking-widest uppercase cursor-pointer transition-colors"
             >
               <Globe size={12} className="text-gold-400" />
               <span>{lang.toUpperCase()}</span>
@@ -195,7 +196,7 @@ export default function Header({
                           onSetLang(item.code);
                           setShowLanguageDropdown(false);
                         }}
-                        className={`w-full text-left px-3.5 py-2 text-[10px] font-mono transition-all ${
+                        className={`w-full text-left px-3.5 py-2 text-xs font-mono transition-all ${
                           lang === item.code
                             ? 'bg-gold-500 text-dark font-bold'
                             : 'text-white/75 hover:bg-white/5 hover:text-white'
@@ -219,7 +220,7 @@ export default function Header({
                 onOpenAdminLogin();
               }
             }}
-            className={`px-4 py-2 border rounded-full text-[9px] font-mono tracking-widest uppercase transition-all flex items-center space-x-1 cursor-pointer ${
+            className={`px-4 py-2 border rounded-full text-[10px] font-mono tracking-widest uppercase transition-all flex items-center space-x-1 cursor-pointer ${
               currentView === 'admin'
                 ? 'bg-gold-500 border-gold-500 text-dark font-bold'
                 : 'border-white/15 text-white/70 hover:border-gold-400 hover:text-gold-400 hover:bg-white/5'
@@ -251,7 +252,7 @@ export default function Header({
               onOpenAdminLogin();
             }
           }}
-          className="px-3 py-1.5 border border-white/15 text-white/70 hover:text-gold-300 rounded-full text-[8px] font-mono tracking-widest uppercase transition-all"
+          className="px-3 py-1.5 border border-white/15 text-white/70 hover:text-gold-300 rounded-full text-[11px] font-mono tracking-widest uppercase transition-all"
         >
           <User size={10} className="inline-block mr-1" />
           <span>{isAdminLoggedIn ? 'CMS' : 'Staff'}</span>
@@ -360,7 +361,7 @@ export default function Header({
                   <button
                     key={item.id}
                     onClick={() => handleNav(item.id)}
-                    className={`block w-full text-left font-serif text-xl sm:text-2xl tracking-wide border-b border-white/5 pb-2 ${
+                    className={`block w-full text-left font-serif text-xl sm:text-2xl tracking-wide border-b border-white/10 pb-2 ${
                       isActive ? 'text-gold-400 font-bold' : 'text-white/95'
                     }`}
                   >
@@ -376,7 +377,7 @@ export default function Header({
                   <button
                     key={item.code}
                     onClick={() => onSetLang(item.code)}
-                    className={`text-[9px] font-mono px-2 py-1 rounded ${
+                    className={`text-[10px] font-mono px-2 py-1 rounded ${
                       lang === item.code ? 'text-gold-400 font-bold underline' : 'text-white/40'
                     }`}
                   >
@@ -386,7 +387,7 @@ export default function Header({
               </div>
               <div className="text-center flex flex-col items-center justify-center pt-2">
                 <Logo size="xs" className="mb-2 opacity-60 [&>svg]:h-10 [&>svg]:w-10" />
-                <span className="font-serif text-[9px] font-bold tracking-[0.2em] text-white/30 uppercase">
+                <span className="font-serif text-[10px] font-bold tracking-[0.2em] text-white/30 uppercase">
                   Miriam Campos Photography
                 </span>
               </div>

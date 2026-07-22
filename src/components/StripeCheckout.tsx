@@ -34,11 +34,25 @@ export default function StripeCheckout({ isOpen, amount, description, onClose, o
   const [name, setName] = useState('');
   const [status, setStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
   const [txHash, setTxHash] = useState('');
+  const [formError, setFormError] = useState('');
 
   if (!isOpen) return null;
 
   const handlePay = (e: React.FormEvent) => {
     e.preventDefault();
+    const digits = cardNumber.replace(/\s/g, '');
+    const [expiryMonth, expiryYear] = expiry.split('/').map(Number);
+    const currentDate = new Date();
+    const expiryIsValid = /^\d{2}\/\d{2}$/.test(expiry)
+      && expiryMonth >= 1
+      && expiryMonth <= 12
+      && (2000 + expiryYear > currentDate.getFullYear() || (2000 + expiryYear === currentDate.getFullYear() && expiryMonth >= currentDate.getMonth() + 1));
+
+    if (!name.trim() || !/^\d{13,19}$/.test(digits) || !expiryIsValid || !/^\d{3,4}$/.test(cvc)) {
+      setFormError('Enter a valid card number, expiration date, security code, and cardholder name.');
+      return;
+    }
+    setFormError('');
     setStatus('processing');
 
     // Simulate 3D Secure Verification & stripe charge completion
@@ -56,6 +70,7 @@ export default function StripeCheckout({ isOpen, amount, description, onClose, o
         onSuccess(result);
         onClose();
         setStatus('idle');
+        setFormError('');
         // Reset fields
         setCardNumber('');
         setExpiry('');
@@ -75,7 +90,7 @@ export default function StripeCheckout({ isOpen, amount, description, onClose, o
           exit={{ opacity: 0, scale: 0.9 }}
         >
           {/* Header */}
-          <div className="bg-dark/40 p-4 border-b border-white/5 flex items-center justify-between">
+          <div className="bg-dark/40 p-4 border-b border-white/10 flex items-center justify-between">
             <div className="flex items-center space-x-1.5 text-gold-400">
               <Lock size={14} />
               <span className="text-xs font-mono tracking-widest font-bold uppercase">SECURE STRIPE CHECKOUT</span>
@@ -94,7 +109,7 @@ export default function StripeCheckout({ isOpen, amount, description, onClose, o
               {status === 'idle' && (
                 <motion.form key="payment-form" onSubmit={handlePay} className="space-y-4 text-left">
                   {/* Order summary info */}
-                  <div className="bg-dark/30 p-3.5 rounded-lg border border-white/5 flex justify-between items-center">
+                  <div className="bg-dark/30 p-3.5 rounded-lg border border-white/10 flex justify-between items-center">
                     <div className="flex flex-col">
                       <span className="text-[9px] font-mono text-white/40 uppercase">ITEM DESCRIPTION</span>
                       <span className="text-xs font-semibold text-white/95 max-w-[240px] truncate">{description}</span>
@@ -176,7 +191,7 @@ export default function StripeCheckout({ isOpen, amount, description, onClose, o
                         <input
                           type="password"
                           required
-                          maxLength={3}
+                           maxLength={4}
                           placeholder="382"
                           value={cvc}
                           onChange={(e) => setCvc(e.target.value.replace(/[^0-9]/g, ''))}
@@ -185,6 +200,13 @@ export default function StripeCheckout({ isOpen, amount, description, onClose, o
                       </div>
                     </div>
                   </div>
+
+                  {formError && (
+                    <div className="flex items-start gap-2 rounded-lg border border-red-400/25 bg-red-400/10 px-3 py-2 text-[10px] text-red-300" role="alert">
+                      <AlertCircle size={13} className="mt-0.5 shrink-0" />
+                      <span>{formError}</span>
+                    </div>
+                  )}
 
                   <button
                     type="submit"
@@ -230,7 +252,7 @@ export default function StripeCheckout({ isOpen, amount, description, onClose, o
                   <div className="space-y-1.5">
                     <h4 className="font-serif text-xl text-white font-semibold">Payment Completed</h4>
                     <p className="text-[10px] font-mono text-gold-400 uppercase tracking-widest">TRANSACTION REFERENCE</p>
-                    <p className="text-[9px] font-mono text-white/55 bg-dark/60 border border-white/5 px-2 py-1.5 rounded truncate max-w-[280px] select-all">
+                    <p className="text-[9px] font-mono text-white/55 bg-dark/60 border border-white/10 px-2 py-1.5 rounded truncate max-w-[280px] select-all">
                       {txHash}
                     </p>
                   </div>

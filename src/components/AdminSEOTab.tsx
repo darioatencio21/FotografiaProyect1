@@ -72,7 +72,7 @@ function AdminSEOTab({ seo, onUpdateSeo, triggerAlert, lang }: AdminSEOTabProps)
 
   return (
     <form onSubmit={handleSaveSEO} className="space-y-6">
-      <div className="flex items-center justify-between border-b border-white/5 pb-4">
+      <div className="flex items-center justify-between border-b border-white/10 pb-4">
         <div>
           <h2 className="font-serif text-2xl text-white">
             {lang === 'es' ? 'Configuración SEO y Meta-tags' : 'SEO & Meta-Tag Deployment'}
@@ -99,8 +99,8 @@ function AdminSEOTab({ seo, onUpdateSeo, triggerAlert, lang }: AdminSEOTabProps)
             <textarea rows={3} required value={seoForm.description} onChange={(e) => setSeoForm(prev => ({ ...prev, description: e.target.value, ogDescription: e.target.value }))} className="w-full bg-charcoal border border-[#D8C0A8] rounded p-3 text-xs text-white resize-none" />
           </div>
 
-          <div className="bg-dark-gray border border-white/5 p-4 rounded-xl space-y-4">
-            <h3 className="text-[10px] font-mono text-gold-400 uppercase tracking-wider border-b border-white/5 pb-2">
+          <div className="bg-dark-gray border border-white/10 p-4 rounded-xl space-y-4">
+            <h3 className="text-[10px] font-mono text-gold-400 uppercase tracking-wider border-b border-white/10 pb-2">
               {lang === 'es' ? 'Hero Split — Imágenes' : 'Split Hero — Images'}
             </h3>
             <p className="text-[9px] text-white/40 font-mono">
@@ -119,7 +119,7 @@ function AdminSEOTab({ seo, onUpdateSeo, triggerAlert, lang }: AdminSEOTabProps)
                 <input type="text" value={seoForm.heroImageLeft || ''} onChange={(e) => setSeoForm(prev => ({ ...prev, heroImageLeft: e.target.value || undefined }))} placeholder="https://..." className="flex-1 bg-charcoal border border-[#D8C0A8] rounded px-2.5 py-2 text-[10px] text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-mono" />
               </div>
               {seoForm.heroImageLeft && (
-                <div className="mt-1 aspect-[3/2] rounded-lg overflow-hidden border border-white/5 bg-charcoal">
+                <div className="mt-1 aspect-[3/2] rounded-lg overflow-hidden border border-white/10 bg-charcoal">
                   <img src={seoForm.heroImageLeft} alt="Left hero preview" className="w-full h-full object-cover" />
                 </div>
               )}
@@ -137,7 +137,7 @@ function AdminSEOTab({ seo, onUpdateSeo, triggerAlert, lang }: AdminSEOTabProps)
                 <input type="text" value={seoForm.heroImageRight || ''} onChange={(e) => setSeoForm(prev => ({ ...prev, heroImageRight: e.target.value || undefined }))} placeholder="https://..." className="flex-1 bg-charcoal border border-[#D8C0A8] rounded px-2.5 py-2 text-[10px] text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-mono" />
               </div>
               {seoForm.heroImageRight && (
-                <div className="mt-1 aspect-[3/2] rounded-lg overflow-hidden border border-white/5 bg-charcoal">
+                <div className="mt-1 aspect-[3/2] rounded-lg overflow-hidden border border-white/10 bg-charcoal">
                   <img src={seoForm.heroImageRight} alt="Right hero preview" className="w-full h-full object-cover" />
                 </div>
               )}
@@ -179,7 +179,7 @@ function AdminSEOTab({ seo, onUpdateSeo, triggerAlert, lang }: AdminSEOTabProps)
             </div>
           </div>
 
-          <div className="border border-white/5 bg-charcoal rounded-xl p-4 space-y-1 text-left">
+          <div className="border border-white/10 bg-charcoal rounded-xl p-4 space-y-1 text-left">
             <span className="text-[9px] font-mono text-white/35 block">google.com/search</span>
             <span className="text-xs font-semibold text-[#8AB4F8] hover:underline cursor-pointer block">{seoForm.title}</span>
             <span className="text-[10px] text-[#A6C8FF] font-mono block">miriamcampos-photography.com</span>

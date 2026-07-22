@@ -5,8 +5,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ShieldCheck, Heart, ArrowRight, Download, Eye, EyeOff, ChevronLeft, ChevronRight, X, Copy, Check as CheckIcon, Mail, MapPin } from 'lucide-react';
-import { ActiveLanguage, Booking, ClientAccount, ProofPhoto, Invoice } from '../types';
+import { ShieldCheck, Heart, ArrowRight, Download, Eye, EyeOff, ChevronLeft, ChevronRight, X, Copy, Check as CheckIcon, Mail, MapPin, Star } from 'lucide-react';
+import { ActiveLanguage, Booking, ClientAccount, ProofPhoto, Invoice, Testimonial } from '../types';
 import ContractView from './ContractView';
 import InvoiceReceipt from './InvoiceReceipt';
 import { TRANSLATIONS } from '../data/mockData';
@@ -21,9 +21,10 @@ interface ClientPortalProps {
   bookings?: Booking[];
   onUpdateBookings?: (bookings: Booking[]) => void;
   invoices?: Invoice[];
+  onSubmitTestimonial?: (testimonial: Testimonial) => void;
 }
 
-export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = [], onUpdateClientAccounts, autoPasscode, bookings = [], onUpdateBookings, invoices = [] }: ClientPortalProps) {
+export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = [], onUpdateClientAccounts, autoPasscode, bookings = [], onUpdateBookings, invoices = [], onSubmitTestimonial }: ClientPortalProps) {
   const [passcode, setPasscode] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -35,6 +36,9 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const [showContract, setShowContract] = useState(false);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState('');
+  const [reviewSent, setReviewSent] = useState(false);
 
   const t = TRANSLATIONS[lang];
 
@@ -59,6 +63,23 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
   const proofPhotos = currentAccount ? (currentAccount.photos || []) : [];
   const contractBooking = currentAccount ? bookings.find(b => b.clientName === currentAccount.clientName && b.contractData && b.isPaid && !b.contractSignature) : undefined;
   const clientInvoices = currentAccount ? invoices.filter(invoice => invoice.clientEmail.toLowerCase() === currentAccount.clientEmail.toLowerCase()) : [];
+
+  const handleSubmitTestimonial = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!currentAccount || !reviewComment.trim() || !onSubmitTestimonial) return;
+    onSubmitTestimonial({
+      id: `testimonial-${Date.now()}`,
+      name: currentAccount.clientName,
+      role: currentAccount.sessionTitle || (lang === 'en' ? 'Photography client' : 'Cliente de fotografía'),
+      comment: reviewComment.trim(),
+      rating: reviewRating,
+      image: '',
+      approved: false,
+    });
+    setReviewComment('');
+    setReviewRating(5);
+    setReviewSent(true);
+  };
 
   const handleAuth = (e: React.FormEvent) => {
     e.preventDefault();
@@ -266,7 +287,7 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                     <span className="text-[10px] text-white/60 font-sans">
                       {lang === 'en' ? 'Share your gallery:' : 'Compartí tu galería:'}
                     </span>
-                    <code className="text-[9px] font-mono text-gold-300/80 bg-dark/40 px-2 py-0.5 rounded border border-white/5 truncate max-w-[200px] sm:max-w-xs">
+                    <code className="text-[9px] font-mono text-gold-300/80 bg-dark/40 px-2 py-0.5 rounded border border-white/10 truncate max-w-[200px] sm:max-w-xs">
                       {window.location.origin + window.location.pathname + '?gallery=' + currentAccount.passcode}
                     </code>
                   </div>
@@ -339,6 +360,34 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                     <span className="text-[9px] text-white/40">{clientInvoices.length}</span>
                   </div>
                   {clientInvoices.map(invoice => <InvoiceReceipt key={invoice.id} invoice={invoice} lang={lang} compact />)}
+                </section>
+              )}
+
+              {onSubmitTestimonial && (
+                <section className="bg-dark-gray/60 border border-white/10 rounded-xl p-5 md:p-6 text-left">
+                  {reviewSent ? (
+                    <div className="flex items-center gap-3 py-2">
+                      <CheckIcon size={20} className="text-gold-400" />
+                      <div>
+                        <h4 className="font-serif text-xl text-white">{lang === 'en' ? 'Thank you for sharing' : 'Gracias por compartir tu experiencia'}</h4>
+                        <p className="text-xs text-white/50 mt-1">{lang === 'en' ? 'Your review will be published after a quick studio review.' : 'Tu comentario se publicará después de una breve revisión del estudio.'}</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleSubmitTestimonial} className="space-y-4">
+                      <div>
+                        <span className="text-[10px] font-mono text-gold-400 tracking-widest uppercase">{lang === 'en' ? 'Your experience' : 'Tu experiencia'}</span>
+                        <h4 className="font-serif text-2xl text-white mt-1">{lang === 'en' ? 'How was your experience?' : '¿Cómo fue tu experiencia?'}</h4>
+                        <p className="text-xs text-white/50 mt-1">{lang === 'en' ? 'Tell us what you loved about the service.' : 'Cuéntanos qué te gustó del servicio.'}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-mono uppercase tracking-wider text-white/45 mr-2">{lang === 'en' ? 'Rating' : 'Valoración'}</span>
+                        {[1, 2, 3, 4, 5].map(rating => <button key={rating} type="button" onClick={() => setReviewRating(rating)} aria-label={`${rating} estrellas`} className="text-gold-400 hover:scale-110 transition-transform"><Star size={18} fill={rating <= reviewRating ? 'currentColor' : 'none'} /></button>)}
+                      </div>
+                      <textarea value={reviewComment} onChange={event => setReviewComment(event.target.value)} required rows={4} placeholder={lang === 'en' ? 'Write your comment here...' : 'Escribe aquí tu comentario...'} className="w-full bg-dark border border-white/10 rounded-lg px-3 py-3 text-sm text-white outline-none focus:border-gold-400/60 resize-y" />
+                      <div className="flex justify-end"><button type="submit" disabled={!reviewComment.trim()} className="px-5 py-2.5 bg-gold-500 hover:bg-gold-400 disabled:opacity-40 text-dark rounded-lg font-mono text-[10px] uppercase tracking-wider font-bold transition-colors">{lang === 'en' ? 'Send review' : 'Enviar comentario'}</button></div>
+                    </form>
+                  )}
                 </section>
               )}
 
@@ -417,9 +466,9 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                           <div className="min-w-0 flex-1">
                             <h4 className="text-[10px] sm:text-xs font-semibold text-white/90 truncate">{photo.title}</h4>
                             {photo.location ? (
-                              <span className="text-[8px] sm:text-[9px] font-mono text-gold-400 block truncate mt-0.5">📍 {photo.location}</span>
+                              <span className="text-[11px] sm:text-[9px] font-mono text-gold-400 block truncate mt-0.5">📍 {photo.location}</span>
                             ) : (
-                              <span className="text-[8px] sm:text-[9px] font-mono text-white/65 block mt-0.5 uppercase tracking-wider">High-Res</span>
+                              <span className="text-[11px] sm:text-[9px] font-mono text-white/65 block mt-0.5 uppercase tracking-wider">High-Res</span>
                             )}
                           </div>
                           

@@ -73,7 +73,7 @@ function AdminProfileTab({ profile, onUpdateProfile, triggerAlert, lang }: Admin
 
   return (
     <form onSubmit={handleSaveProfile} className="space-y-6">
-      <div className="flex items-center justify-between border-b border-white/5 pb-4">
+      <div className="flex items-center justify-between border-b border-white/10 pb-4">
         <div>
           <h2 className="font-serif text-2xl text-white">
             {lang === 'es' ? 'Biografía y Perfil Profesional' : 'Biography & Professional Profile'}
@@ -90,8 +90,8 @@ function AdminProfileTab({ profile, onUpdateProfile, triggerAlert, lang }: Admin
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 text-left">
         <div className="lg:col-span-8 space-y-6">
-          <div className="bg-dark-gray border border-white/5 p-6 rounded-xl space-y-4">
-            <h3 className="text-xs font-mono text-gold-400 uppercase tracking-wider border-b border-white/5 pb-2">
+          <div className="bg-dark-gray border border-white/10 p-6 rounded-xl space-y-4">
+            <h3 className="text-xs font-mono text-gold-400 uppercase tracking-wider border-b border-white/10 pb-2">
               {lang === 'es' ? 'Datos Principales' : 'Core Information'}
             </h3>
 
@@ -118,8 +118,8 @@ function AdminProfileTab({ profile, onUpdateProfile, triggerAlert, lang }: Admin
             </div>
           </div>
 
-          <div className="bg-dark-gray border border-white/5 p-6 rounded-xl space-y-6">
-            <h3 className="text-xs font-mono text-gold-400 uppercase tracking-wider border-b border-white/5 pb-2">{lang === 'es' ? 'Biografías Multilingües' : 'Multilingual Biographies'}</h3>
+          <div className="bg-dark-gray border border-white/10 p-6 rounded-xl space-y-6">
+            <h3 className="text-xs font-mono text-gold-400 uppercase tracking-wider border-b border-white/10 pb-2">{lang === 'es' ? 'Biografías Multilingües' : 'Multilingual Biographies'}</h3>
 
             {/* Spanish */}
             <div className="space-y-4 border-l-2 border-gold-500/30 pl-4">
@@ -139,7 +139,7 @@ function AdminProfileTab({ profile, onUpdateProfile, triggerAlert, lang }: Admin
             </div>
 
             {/* English */}
-            <div className="space-y-4 border-l-2 border-blue-500/30 pl-4 pt-4 border-t border-white/5">
+            <div className="space-y-4 border-l-2 border-blue-500/30 pl-4 pt-4 border-t border-white/10">
               <span className="text-[9px] font-mono bg-blue-500/10 text-blue-300 px-2 py-0.5 rounded uppercase font-semibold">English</span>
               <div className="space-y-1">
                 <label className="text-[10px] font-mono text-white/50 uppercase">Title</label>
@@ -160,8 +160,8 @@ function AdminProfileTab({ profile, onUpdateProfile, triggerAlert, lang }: Admin
         </div>
 
         <div className="lg:col-span-4 space-y-6">
-          <div className="bg-dark-gray border border-white/5 p-6 rounded-xl space-y-4">
-            <h3 className="text-xs font-mono text-gold-400 uppercase tracking-wider border-b border-white/5 pb-2">Foto de Perfil</h3>
+          <div className="bg-dark-gray border border-white/10 p-6 rounded-xl space-y-4">
+            <h3 className="text-xs font-mono text-gold-400 uppercase tracking-wider border-b border-white/10 pb-2">Foto de Perfil</h3>
             <div className="flex flex-col items-center space-y-4">
               <div className="relative w-32 h-32 rounded-full overflow-hidden border-2 border-gold-400 bg-charcoal shadow-lg">
                 {profileForm.avatarUrl ? (
@@ -184,34 +184,34 @@ function AdminProfileTab({ profile, onUpdateProfile, triggerAlert, lang }: Admin
             </div>
           </div>
 
-          <div className="bg-dark-gray border border-white/5 p-6 rounded-xl space-y-4">
-            <h3 className="text-xs font-mono text-gold-400 uppercase tracking-wider border-b border-white/5 pb-2">Previsualización en Vivo</h3>
+          <div className="bg-dark-gray border border-white/10 p-6 rounded-xl space-y-4">
+            <h3 className="text-xs font-mono text-gold-400 uppercase tracking-wider border-b border-white/10 pb-2">Previsualización en Vivo</h3>
             <div className="border border-[#D8C0A8] bg-charcoal rounded-xl p-4 text-left space-y-4">
-              <div className="aspect-[4/5] rounded-lg overflow-hidden relative border border-white/5">
+              <div className="aspect-[4/5] rounded-lg overflow-hidden relative border border-white/10">
                 {profileForm.avatarUrl ? (
                   <img src={profileForm.avatarUrl} className="w-full h-full object-cover" alt="preview" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-white/30 text-[10px] font-mono">Sin foto</div>
                 )}
-                <div className="absolute bottom-2 left-2 bg-dark-gray/90 border border-[#D8C0A8] px-2 py-1 rounded text-[8px] font-mono text-gold-400 uppercase">
+                <div className="absolute bottom-2 left-2 bg-dark-gray/90 border border-[#D8C0A8] px-2 py-1 rounded text-[11px] font-mono text-gold-400 uppercase">
                   {profileForm.title || "HEAD PHOTOGRAPHER"}
                 </div>
               </div>
               <div className="space-y-2">
-                <span className="text-[8px] font-mono text-gold-400 tracking-widest uppercase block">BIOGRAPHY</span>
+                <span className="text-[11px] font-mono text-gold-400 tracking-widest uppercase block">BIOGRAPHY</span>
                 <h4 className="font-serif text-sm text-white font-semibold">
                   {lang === 'es' ? profileForm.aboutTitle_es : profileForm.aboutTitle_en}
                 </h4>
                 <p className="text-[10px] text-white/80 leading-relaxed font-sans line-clamp-3">
                   {lang === 'es' ? profileForm.aboutText1_es : profileForm.aboutText1_en}
                 </p>
-                <div className="grid grid-cols-2 gap-2 border-t border-white/5 pt-2 mt-2 font-mono">
+                <div className="grid grid-cols-2 gap-2 border-t border-white/10 pt-2 mt-2 font-mono">
                   <div>
-                    <span className="text-[7px] text-white/50 uppercase block">CÁMARA</span>
+                    <span className="text-[10px] text-white/50 uppercase block">CÁMARA</span>
                     <span className="text-[9px] font-semibold text-white/95 truncate block">{profileForm.preferredCamera}</span>
                   </div>
                   <div>
-                    <span className="text-[7px] text-white/50 uppercase block">LENTE</span>
+                    <span className="text-[10px] text-white/50 uppercase block">LENTE</span>
                     <span className="text-[9px] font-semibold text-white/95 truncate block">{profileForm.preferredLens}</span>
                   </div>
                 </div>

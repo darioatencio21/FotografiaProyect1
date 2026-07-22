@@ -247,7 +247,7 @@ export default function Lightbox({
 
         {/* Bottom Panel - Dynamic Interactive details bar */}
         <div 
-          className="glass-premium rounded-xl w-full max-w-4xl mx-auto p-4 flex flex-col md:flex-row items-center justify-between text-left space-y-4 md:space-y-0 md:space-x-8 border border-white/5"
+          className="glass-premium rounded-xl w-full max-w-4xl mx-auto p-4 flex flex-col md:flex-row items-center justify-between text-left space-y-4 md:space-y-0 md:space-x-8 border border-white/10"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Controls tabs */}

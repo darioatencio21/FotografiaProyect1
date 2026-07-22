@@ -163,7 +163,7 @@ export default function LegalViews({ type, lang, onBack }: LegalViewProps) {
       </div>
 
       {/* Intro Description */}
-      <div className="bg-dark-gray border border-white/5 rounded-2xl p-6 md:p-8 space-y-4">
+      <div className="bg-dark-gray border border-white/10 rounded-2xl p-6 md:p-8 space-y-4 shadow-warm-sm">
         <p className="text-xs md:text-sm text-white/90 leading-relaxed font-sans italic">
           "{activeContent.subtitle}"
         </p>
@@ -174,9 +174,9 @@ export default function LegalViews({ type, lang, onBack }: LegalViewProps) {
         {activeContent.sections.map((section, idx) => (
           <div 
             key={idx}
-            className="bg-dark-gray border border-white/5 rounded-2xl p-6 space-y-3 hover:border-gold-500/15 transition-all flex flex-col justify-start"
+            className="bg-dark-gray border border-white/10 rounded-2xl p-6 space-y-3 hover:border-gold-500/15 transition-all flex flex-col justify-start shadow-warm-sm"
           >
-            <h3 className="font-serif text-lg text-gold-300 font-semibold border-b border-white/5 pb-2">
+            <h3 className="font-serif text-lg text-gold-300 font-semibold border-b border-white/10 pb-2">
               {section.title}
             </h3>
             <p className="text-xs text-white/70 leading-relaxed font-sans mt-1 flex-1">
@@ -187,7 +187,7 @@ export default function LegalViews({ type, lang, onBack }: LegalViewProps) {
       </div>
 
       {/* Decorative footer certification stamp */}
-      <div className="flex flex-col items-center justify-center pt-8 border-t border-white/5 space-y-3">
+      <div className="flex flex-col items-center justify-center pt-8 border-t border-white/10 space-y-3">
         <div className="inline-flex items-center space-x-2 text-gold-400 text-[10px] font-mono uppercase tracking-widest bg-gold-400/5 px-4 py-2 border border-gold-400/20 rounded-full">
           <CheckCircle size={12} />
           <span>{isEs ? 'Estudio Certificado Internacional' : 'International Studio Certified'}</span>

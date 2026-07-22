@@ -67,6 +67,7 @@ export interface Testimonial {
   comment: string;
   rating: number;
   image: string;
+  approved?: boolean;
 }
 
 export interface BlogPost {
@@ -306,4 +307,3 @@ export interface ClientAccount {
   photos: ProofPhoto[];
   createdAt: string;
 }
-

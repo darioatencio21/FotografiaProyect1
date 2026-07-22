@@ -45,8 +45,8 @@ export default function Footer({ onSetView, lang }: FooterProps) {
   };
 
   return (
-    <footer className="bg-dark border-t border-white/5 pt-16 pb-12 px-6 lg:px-12 text-left relative z-10">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 pb-12 border-b border-white/5">
+    <footer className="bg-dark border-t border-white/10 pt-16 pb-12 px-6 lg:px-12 text-left relative z-10">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 pb-12 border-b border-white/10">
         
         {/* Brand Column (Cols 4) */}
         <div className="md:col-span-4 space-y-4 text-left">
@@ -60,21 +60,18 @@ export default function Footer({ onSetView, lang }: FooterProps) {
             Fine-Art and high-end editorial photography commissions. Captured under golden proportions, rendering raw emotion with absolute Leica and Hasselblad precision.
           </p>
           <div className="flex space-x-4 pt-2">
-            <a href="https://instagram.com" target="_blank" rel="noreferrer" className="text-white/65 hover:text-gold-400 transition-colors">
+            <a href="https://www.instagram.com/miriamtellezphotography/" target="_blank" rel="noreferrer" className="text-white/65 hover:text-gold-400 transition-colors">
               <Instagram size={16} />
             </a>
-            <a href="https://facebook.com" target="_blank" rel="noreferrer" className="text-white/65 hover:text-gold-400 transition-colors">
+            <a href="https://www.facebook.com/mifephotography/?_rdr" target="_blank" rel="noreferrer" className="text-white/65 hover:text-gold-400 transition-colors">
               <Facebook size={16} />
-            </a>
-            <a href="mailto:info@miriamcamposphotography.com" className="text-white/65 hover:text-gold-400 transition-colors">
-              <Mail size={16} />
             </a>
           </div>
         </div>
 
         {/* Links Column 1 (Cols 3) */}
         <div className="md:col-span-3 space-y-3.5 text-left">
-          <h5 className="text-[10px] font-mono tracking-widest text-gold-300 uppercase">EXPLORE</h5>
+          <h5 className="text-xs font-mono tracking-widest text-gold-300 uppercase">EXPLORE</h5>
           <ul className="space-y-2 text-xs">
             <li>
               <button onClick={() => handleNav('home')} className="text-white/70 hover:text-white transition-colors cursor-pointer">
@@ -101,7 +98,7 @@ export default function Footer({ onSetView, lang }: FooterProps) {
 
         {/* Links Column 2 (Cols 2) */}
         <div className="md:col-span-2 space-y-3.5 text-left">
-          <h5 className="text-[10px] font-mono tracking-widest text-gold-300 uppercase">STUDIO</h5>
+          <h5 className="text-xs font-mono tracking-widest text-gold-300 uppercase">STUDIO</h5>
           <ul className="space-y-2 text-xs">
             <li>
               <button onClick={() => handleNav('client-portal')} className="text-white/70 hover:text-white transition-colors cursor-pointer">
@@ -123,7 +120,7 @@ export default function Footer({ onSetView, lang }: FooterProps) {
 
         {/* Newsletter Column (Cols 3) */}
         <div className="md:col-span-3 space-y-3.5 text-left">
-          <h5 className="text-[10px] font-mono tracking-widest text-gold-300 uppercase">NEWSLETTER</h5>
+          <h5 className="text-xs font-mono tracking-widest text-gold-300 uppercase">NEWSLETTER</h5>
           <p className="text-[11px] text-white/70 leading-relaxed">
             Subscribe to our journal for seasonal destination booking alerts & lighting masterclasses.
           </p>

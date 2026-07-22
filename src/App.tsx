@@ -27,8 +27,11 @@ import Lightbox from './components/Lightbox';
 import BookingCalendar from './components/BookingCalendar';
 import ClientPortal from './components/ClientPortal';
 import StripeCheckout from './components/StripeCheckout';
+import { PaymentResult } from './components/StripeCheckout';
 import AboutSection from './components/AboutSection';
 import PixiesetGallery from './components/PixiesetGallery';
+import InstagramFeed from './components/InstagramFeed';
+
 import AdminCMS from './components/AdminCMS';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -162,7 +165,10 @@ export default function App() {
     const params = new URLSearchParams(window.location.search);
     return params.get('gallery') || '';
   });
-  const [lang, setLang] = useState<'es' | 'en'>('en');
+  const [lang, setLang] = useState<'es' | 'en'>(() => {
+    const savedLanguage = localStorage.getItem('aurea_lang');
+    return savedLanguage === 'es' || savedLanguage === 'en' ? savedLanguage : 'en';
+  });
 
   const [photographs, setPhotographs] = useState<Photograph[]>(() => {
     try { const saved = localStorage.getItem('aurea_photos'); return saved ? JSON.parse(saved) : INITIAL_PHOTOGRAPHS; } catch { return INITIAL_PHOTOGRAPHS; }
@@ -215,6 +221,8 @@ export default function App() {
   const [packages, setPackages] = useState<PhotographyPackage[]>(() => {
     try { const saved = localStorage.getItem('aurea_packages'); return saved ? JSON.parse(saved) : INITIAL_PHOTOGRAPHY_PACKAGES; } catch { return INITIAL_PHOTOGRAPHY_PACKAGES; }
   });
+  const [publicReview, setPublicReview] = useState({ name: '', role: '', comment: '', rating: 5 });
+  const [publicReviewSent, setPublicReviewSent] = useState(false);
 
   const [invoices, setInvoices] = useState<Invoice[]>(() => {
     try { const saved = localStorage.getItem('aurea_invoices'); return saved ? JSON.parse(saved) : INITIAL_INVOICES; } catch { return INITIAL_INVOICES; }
@@ -530,6 +538,10 @@ export default function App() {
   }, [emailConfig, bootstrapped]);
 
   useEffect(() => {
+    localStorage.setItem('aurea_lang', lang);
+  }, [lang]);
+
+  useEffect(() => {
     if (bootstrapped) localStorage.setItem('aurea_session_categories', JSON.stringify(sessionCategories));
   }, [sessionCategories, bootstrapped]);
 
@@ -701,7 +713,7 @@ export default function App() {
   };
 
   // Trigger Stripe print or service booking Checkout overlay
-  const pendingPaymentRef = useRef<(() => void) | null>(null);
+  const pendingPaymentRef = useRef<((result?: PaymentResult) => void) | null>(null);
   const pendingCancelRef = useRef<(() => void) | null>(null);
 
   const handleOpenStripeCheckout = (amount: number, description: string) => {
@@ -710,7 +722,7 @@ export default function App() {
     setCheckoutOpen(true);
   };
 
-  const handleCheckoutWithCallback = (amount: number, description: string, onDone: () => void, onCancel?: () => void) => {
+  const handleCheckoutWithCallback = (amount: number, description: string, onDone: (result?: PaymentResult) => void, onCancel?: () => void) => {
     pendingPaymentRef.current = onDone;
     pendingCancelRef.current = onCancel ?? null;
     handleOpenStripeCheckout(amount, description);
@@ -925,7 +937,7 @@ export default function App() {
             transition={{ delay: 1.2 }}
             className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center space-y-2"
           >
-            <span className="text-[7px] font-mono tracking-[0.3em] text-hero/40 uppercase">Scroll</span>
+            <span className="text-[10px] font-mono tracking-wider text-hero/40 uppercase">Scroll</span>
             <motion.div
               animate={{ y: [0, 6, 0] }}
               transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
@@ -960,7 +972,7 @@ export default function App() {
                   className="flex items-center justify-center gap-2 mb-8"
                 >
                   <span className="w-6 md:w-8 h-px bg-white/10" />
-                  <span className="text-[7px] font-mono tracking-[0.4em] text-white/30 uppercase select-none">
+                  <span className="text-[10px] font-mono tracking-wider text-white/30 uppercase select-none">
                     {t.statsTitle}
                   </span>
                   <span className="w-6 md:w-8 h-px bg-white/10" />
@@ -978,7 +990,7 @@ export default function App() {
                     <CountUp end={2000} suffix="+" duration={2500} />
                   </p>
                   <div className="mt-3 space-y-1">
-                    <p className="text-[8px] md:text-[9px] font-mono tracking-[0.35em] text-gold-500/60 uppercase">
+                    <p className="text-[11px] md:text-[9px] font-mono tracking-[0.35em] text-gold-500/60 uppercase">
                       {t.sessions}
                     </p>
                     <p className="text-[9px] md:text-[10px] text-white/35 max-w-xs mx-auto leading-relaxed font-light">
@@ -1014,10 +1026,10 @@ export default function App() {
                       <p className="font-serif text-3xl md:text-4xl text-white font-light leading-none">
                         <CountUp end={15} suffix="+" duration={2000} />
                       </p>
-                      <p className="text-[8px] font-mono tracking-[0.25em] text-white/20 uppercase mt-2.5">
+                      <p className="text-[11px] font-mono tracking-[0.25em] text-white/20 uppercase mt-2.5">
                         {t.yearsExp}
                       </p>
-                      <p className="text-[8px] text-white/15 mt-1 leading-relaxed">
+                      <p className="text-[11px] text-white/15 mt-1 leading-relaxed">
                         {t.yearsExpSub}
                       </p>
                     </motion.div>
@@ -1046,10 +1058,10 @@ export default function App() {
                       <p className="font-serif text-3xl md:text-4xl text-white font-light leading-none">
                         <CountUp end={98} suffix="%" duration={2000} />
                       </p>
-                      <p className="text-[8px] font-mono tracking-[0.25em] text-white/20 uppercase mt-2.5">
+                      <p className="text-[11px] font-mono tracking-[0.25em] text-white/20 uppercase mt-2.5">
                         {t.satisfied}
                       </p>
-                      <p className="text-[8px] text-white/15 mt-1 leading-relaxed">
+                      <p className="text-[11px] text-white/15 mt-1 leading-relaxed">
                         {t.satisfiedSub}
                       </p>
                     </motion.div>
@@ -1070,48 +1082,116 @@ export default function App() {
                 </div>
               </section>
 
-              {/* Portfolio teaser block */}
-              <section className="space-y-6 text-left">
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+              <InstagramFeed lang={lang} />
+
+              {/* Featured packages */}
+              <section className="space-y-7 text-left">
+                <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
                   <div>
-                    <span className="text-[10px] font-mono text-gold-400 tracking-widest uppercase block">Fine Art Showcases</span>
-                    <h2 className="font-serif text-3xl text-white tracking-wide mt-1">Symmetrical Curation</h2>
+                    <span className="text-[10px] font-mono text-gold-400 tracking-widest uppercase block">
+                      {lang === 'es' ? 'Colecciones seleccionadas' : 'Selected collections'}
+                    </span>
+                    <h2 className="font-serif text-3xl text-white tracking-wide mt-1">
+                      {lang === 'es' ? 'Paquetes destacados' : 'Featured packages'}
+                    </h2>
+                    <p className="text-xs text-white/45 mt-2 max-w-xl">
+                      {lang === 'es' ? 'Experiencias diseñadas para convertir tus momentos en recuerdos que permanecen.' : 'Experiences designed to turn your moments into memories that last.'}
+                    </p>
                   </div>
-                  <button 
-                    onClick={() => navigateTo('portfolio')}
-                    className="text-xs font-mono text-gold-400 hover:text-gold-300 flex items-center space-x-1 transition-colors"
-                  >
-                    <span>View Full Portfolio</span>
+                  <button onClick={() => navigateTo('services')} className="text-xs font-mono text-gold-400 hover:text-gold-300 flex items-center gap-1 transition-colors">
+                    <span>{lang === 'es' ? 'Ver todos los paquetes' : 'View all packages'}</span>
                     <ArrowRight size={12} />
                   </button>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {photographs.slice(0, 3).map(photo => (
-                    <div
-                      key={photo.id}
-                      onClick={() => setSelectedPhotoForLightbox(photo)}
-                      className="group relative overflow-hidden cursor-pointer bg-dark-gray"
-                    >
-                      <div className="aspect-[3/4]">
-                        <img
-                          src={sanitizeUrl(photo.url) || undefined}
-                          alt={getPhotoTitle(photo, lang)}
-                          className="w-full h-full object-cover transition-all duration-[800ms] ease-out group-hover:scale-[1.04]"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-overlay/8 via-overlay/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                        <div className="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-all duration-700 translate-y-1 group-hover:translate-y-0">
-                          <span className="text-[7px] font-mono tracking-[0.25em] text-hero/60 uppercase">
-                            {t[photo.category as keyof typeof t] || photo.category}
-                          </span>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                  {packages.filter(pkg => pkg.active && pkg.featured).slice(0, 3).map(pkg => (
+                    <article key={pkg.id} className="group bg-dark-gray border border-gold-500/20 rounded-2xl overflow-hidden hover:border-gold-400/50 transition-all duration-500 shadow-warm-sm">
+                      {pkg.image && <div className="h-36 overflow-hidden"><img src={sanitizeUrl(pkg.image) || undefined} alt={lang === 'es' ? pkg.name_es : pkg.name_en} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" /></div>}
+                      <div className="p-5 space-y-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="text-[11px] font-mono tracking-[0.2em] uppercase text-gold-400/70">{t[pkg.category as keyof typeof t] || pkg.category}</p>
+                            <h3 className="font-serif text-xl text-white mt-1">{lang === 'es' ? pkg.name_es : pkg.name_en}</h3>
+                          </div>
+                          <span className="font-mono text-sm text-gold-400 whitespace-nowrap">${pkg.price.toLocaleString()}</span>
                         </div>
-                        <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-700 translate-y-2 group-hover:translate-y-0">
-                          <h3 className="font-serif text-sm md:text-base text-hero font-light leading-snug">
-                            {getPhotoTitle(photo, lang)}
-                          </h3>
-                        </div>
+                        <p className="text-[11px] text-white/50 leading-relaxed line-clamp-2">{lang === 'es' ? pkg.description_es : pkg.description_en}</p>
+                        <button onClick={() => { setSelectedCategory(pkg.category); setSelectedPackageId(pkg.id); navigateTo('services'); }} className="w-full py-2.5 border border-white/15 hover:border-gold-400/50 text-white/70 hover:text-gold-300 rounded-lg font-mono text-[9px] tracking-widest uppercase transition-all">
+                          {lang === 'es' ? 'Elegir paquete' : 'Choose package'}
+                        </button>
                       </div>
-                    </div>
+                    </article>
+                  ))}
+                </div>
+              </section>
+
+              {/* Booking process */}
+              <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-dark-gray to-charcoal p-6 md:p-10 text-left shadow-warm-md">
+                <div className="max-w-2xl">
+                  <span className="text-[10px] font-mono text-gold-400 tracking-widest uppercase">{lang === 'es' ? 'Tu experiencia' : 'Your experience'}</span>
+                  <h2 className="font-serif text-3xl text-white tracking-wide mt-1">{lang === 'es' ? 'Reservar es sencillo' : 'Booking made simple'}</h2>
+                  <p className="text-xs text-white/45 mt-2">{lang === 'es' ? 'Un proceso claro, seguro y acompañado de principio a fin.' : 'A clear, secure process with guidance from beginning to end.'}</p>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-9">
+                  {[
+                    { number: '01', title: lang === 'es' ? 'Elige tu colección' : 'Choose your collection', text: lang === 'es' ? 'Encuentra el paquete que encaja con tu historia.' : 'Find the package that fits your story.', icon: ShoppingBag },
+                    { number: '02', title: lang === 'es' ? 'Reserva tu fecha' : 'Reserve your date', text: lang === 'es' ? 'Completa tus datos y selecciona una fecha.' : 'Share your details and select a date.', icon: Calendar },
+                    { number: '03', title: lang === 'es' ? 'Confirma con seguridad' : 'Confirm securely', text: lang === 'es' ? 'Paga el depósito y firma tu contrato digital.' : 'Pay the deposit and sign digitally.', icon: ShieldCheck },
+                    { number: '04', title: lang === 'es' ? 'Vive la experiencia' : 'Live the experience', text: lang === 'es' ? 'Disfruta la sesión y recibe tu galería privada.' : 'Enjoy the session and receive your private gallery.', icon: CheckCircle2 },
+                  ].map(stepItem => {
+                    const Icon = stepItem.icon;
+                    return <div key={stepItem.number} className="relative space-y-3">
+                      <div className="flex items-center gap-3"><span className="font-mono text-[10px] text-gold-400">{stepItem.number}</span><Icon size={16} className="text-gold-400" /></div>
+                      <h3 className="font-serif text-lg text-white/90">{stepItem.title}</h3>
+                      <p className="text-[10px] text-white/45 leading-relaxed">{stepItem.text}</p>
+                    </div>;
+                  })}
+                </div>
+                <button onClick={() => { navigateTo('services'); setTimeout(() => document.getElementById('booking-calendar')?.scrollIntoView({ behavior: 'smooth' }), 200); }} className="mt-8 px-5 py-3 bg-gold-500 hover:bg-gold-400 text-dark font-mono text-[10px] tracking-widest uppercase font-bold rounded-lg transition-colors">
+                  {lang === 'es' ? 'Comenzar reserva' : 'Start booking'}
+                </button>
+              </section>
+
+              {/* Testimonials */}
+              <section className="space-y-7 text-left">
+                <motion.div
+                  initial={{ opacity: 0, y: 18 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.4 }}
+                  transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+                  className="text-center max-w-xl mx-auto"
+                >
+                  <span className="text-[10px] font-mono text-gold-400 tracking-widest uppercase">{lang === 'es' ? 'Historias reales' : 'Real stories'}</span>
+                  <h2 className="font-serif text-3xl text-white tracking-wide mt-1">{lang === 'es' ? 'Lo que dicen nuestros clientes' : 'What our clients say'}</h2>
+                  <button onClick={() => navigateTo('testimonials')} className="mt-3 text-[10px] font-mono uppercase tracking-widest text-gold-400 hover:text-gold-300 transition-colors">
+                    {lang === 'es' ? 'Leer todas las experiencias' : 'Read all experiences'} <ArrowRight size={11} className="inline ml-1" />
+                  </button>
+                </motion.div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                  {testimonials.filter(testimonial => testimonial.approved !== false).slice(0, 3).map((testimonial, index) => (
+                    <motion.article
+                      key={testimonial.id}
+                      initial={{ opacity: 0, y: 18 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      whileHover={{
+                        y: -4,
+                        transition: { duration: 0.28, ease: [0.22, 1, 0.36, 1] },
+                      }}
+                      viewport={{ once: true, amount: 0.25 }}
+                      transition={{
+                        opacity: { duration: 0.7, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] },
+                        y: { duration: 0.8, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] },
+                      }}
+                      style={{ willChange: 'transform, opacity' }}
+                      className="bg-dark-gray/70 border border-white/10 rounded-2xl p-6 space-y-5 shadow-warm-sm"
+                    >
+                      <div className="flex gap-1 text-gold-400">{Array.from({ length: testimonial.rating }).map((_, index) => <Star key={index} size={12} fill="currentColor" />)}</div>
+                      <p className="font-serif text-lg text-white/80 leading-relaxed">“{testimonial.comment}”</p>
+                      <div className="flex items-center gap-3 border-t border-white/10 pt-4">
+                        <img src={sanitizeUrl(testimonial.image) || undefined} alt={testimonial.name} className="w-9 h-9 rounded-full object-cover grayscale" />
+                        <div><p className="text-xs text-white/90 font-medium">{testimonial.name}</p><p className="text-[9px] font-mono text-white/35 uppercase tracking-wider">{testimonial.role}</p></div>
+                      </div>
+                    </motion.article>
                   ))}
                 </div>
               </section>
@@ -1130,11 +1210,90 @@ export default function App() {
           {/* ======================================================= */}
           {currentView === 'portfolio' && (
             <div className="space-y-8">
-              <div className="border-b border-white/5 pb-6">
+              <div className="border-b border-white/10 pb-6">
                 <h2 className="font-serif text-3xl text-gold-50 tracking-wide">{t.portfolioTitle}</h2>
               </div>
 
               <PixiesetGallery lang={lang} t={t} />
+            </div>
+          )}
+
+          {/* ======================================================= */}
+          {/* TESTIMONIALS SCREEN */}
+          {/* ======================================================= */}
+          {currentView === 'testimonials' && (
+            <div className="space-y-10">
+              <div className="max-w-2xl border-b border-white/10 pb-8">
+                <span className="text-[10px] font-mono text-gold-400 tracking-widest uppercase">{lang === 'es' ? 'Historias reales' : 'Real stories'}</span>
+                <h2 className="font-serif text-4xl md:text-5xl text-gold-50 tracking-wide mt-2">{lang === 'es' ? 'Experiencias que permanecen' : 'Experiences that stay with you'}</h2>
+                <p className="text-sm text-white/45 leading-relaxed mt-4 max-w-xl">{lang === 'es' ? 'Cada sesión es una historia compartida. Estas son algunas palabras de las personas que confiaron en Miriam Campos.' : 'Every session is a shared story. Here are a few words from the people who trusted Miriam Campos.'}</p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {testimonials.filter(testimonial => testimonial.approved !== false).map(testimonial => (
+                  <article key={testimonial.id} className="bg-dark-gray/70 border border-white/10 rounded-2xl p-7 md:p-9 space-y-6 hover:border-gold-500/25 transition-colors shadow-warm-sm">
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="flex gap-1 text-gold-400">{Array.from({ length: testimonial.rating }).map((_, index) => <Star key={index} size={13} fill="currentColor" />)}</div>
+                      <span className="font-serif text-4xl text-gold-400/20 leading-none">“</span>
+                    </div>
+                    <p className="font-serif text-xl md:text-2xl text-white/85 leading-relaxed">{testimonial.comment}</p>
+                    <div className="flex items-center gap-3 border-t border-white/10 pt-5">
+                      <img src={sanitizeUrl(testimonial.image) || undefined} alt={testimonial.name} className="w-11 h-11 rounded-full object-cover grayscale" />
+                      <div><p className="text-sm text-white/90">{testimonial.name}</p><p className="text-[9px] font-mono text-white/35 uppercase tracking-widest mt-1">{testimonial.role}</p></div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+              <div className="text-center pt-4">
+                <button onClick={() => navigateTo('services')} className="px-6 py-3 bg-gold-500 hover:bg-gold-400 text-dark font-mono text-[10px] tracking-widest uppercase font-bold rounded-lg transition-colors">
+                  {lang === 'es' ? 'Reserva tu propia experiencia' : 'Book your own experience'}
+                </button>
+              </div>
+
+              <section className="max-w-2xl mx-auto w-full bg-dark-gray/70 border border-gold-500/20 rounded-2xl p-6 md:p-8 text-left shadow-warm-sm">
+                {publicReviewSent ? (
+                  <div className="text-center py-5">
+                    <CheckCircle2 size={28} className="text-gold-400 mx-auto" />
+                    <h3 className="font-serif text-2xl text-white mt-3">{lang === 'es' ? 'Gracias por compartir tu experiencia' : 'Thank you for sharing your experience'}</h3>
+                    <p className="text-xs text-white/50 mt-2">{lang === 'es' ? 'Tu comentario está pendiente de revisión y aparecerá pronto.' : 'Your comment is pending review and will appear soon.'}</p>
+                  </div>
+                ) : (
+                  <form onSubmit={event => {
+                    event.preventDefault();
+                    if (!publicReview.name.trim() || !publicReview.comment.trim()) return;
+                    handleUpdateTestimonials([{
+                      id: `testimonial-${Date.now()}`,
+                      name: publicReview.name.trim(),
+                      role: publicReview.role.trim() || (lang === 'es' ? 'Cliente' : 'Client'),
+                      comment: publicReview.comment.trim(),
+                      rating: publicReview.rating,
+                      image: '',
+                      approved: false,
+                    }, ...testimonials]);
+                    setPublicReview({ name: '', role: '', comment: '', rating: 5 });
+                    setPublicReviewSent(true);
+                  }} className="space-y-5">
+                    <div>
+                      <span className="text-[10px] font-mono text-gold-400 tracking-widest uppercase">{lang === 'es' ? 'Comparte tu experiencia' : 'Share your experience'}</span>
+                      <h3 className="font-serif text-2xl text-white mt-1">{lang === 'es' ? '¿Trabajaste con nosotros?' : 'Have you worked with us?'}</h3>
+                      <p className="text-xs text-white/50 mt-2">{lang === 'es' ? 'Tu opinión ayuda a otras personas a dar el primer paso.' : 'Your feedback helps others take the first step.'}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-white/45 mr-2">{lang === 'es' ? 'Valoración' : 'Rating'}</span>
+                      {[1, 2, 3, 4, 5].map(rating => (
+                        <button key={rating} type="button" onClick={() => setPublicReview({ ...publicReview, rating })} aria-label={`${rating} estrellas`} className="text-gold-400 hover:scale-110 transition-transform">
+                          <Star size={18} fill={rating <= publicReview.rating ? 'currentColor' : 'none'} />
+                        </button>
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <input required value={publicReview.name} onChange={event => setPublicReview({ ...publicReview, name: event.target.value })} placeholder={lang === 'es' ? 'Tu nombre' : 'Your name'} className="w-full bg-dark border border-white/10 rounded-lg px-3 py-3 text-sm text-white outline-none focus:border-gold-400/60" />
+                      <input value={publicReview.role} onChange={event => setPublicReview({ ...publicReview, role: event.target.value })} placeholder={lang === 'es' ? 'Tipo de sesión (opcional)' : 'Session type (optional)'} className="w-full bg-dark border border-white/10 rounded-lg px-3 py-3 text-sm text-white outline-none focus:border-gold-400/60" />
+                    </div>
+                    <textarea required rows={5} value={publicReview.comment} onChange={event => setPublicReview({ ...publicReview, comment: event.target.value })} placeholder={lang === 'es' ? 'Escribe tu comentario sobre el servicio...' : 'Write your comment about the service...'} className="w-full bg-dark border border-white/10 rounded-lg px-3 py-3 text-sm text-white outline-none focus:border-gold-400/60 resize-y" />
+                    <div className="flex justify-end"><button type="submit" disabled={!publicReview.name.trim() || !publicReview.comment.trim()} className="px-5 py-3 bg-gold-500 hover:bg-gold-400 disabled:opacity-40 text-dark rounded-lg font-mono text-[10px] uppercase tracking-wider font-bold transition-colors">{lang === 'es' ? 'Enviar comentario' : 'Send comment'}</button></div>
+                  </form>
+                )}
+              </section>
             </div>
           )}
 
@@ -1300,7 +1459,7 @@ export default function App() {
                                     {/* Featured badge + Name */}
                                     <div className="space-y-2">
                                       {pkg.featured && (
-                                        <span className="inline-block text-[8px] font-mono text-gold-400/70 border border-gold-500/20 bg-gold-500/5 px-2 py-0.5 rounded-full uppercase tracking-[0.15em]">
+                                        <span className="inline-block text-[11px] font-mono text-gold-400/70 border border-gold-500/20 bg-gold-500/5 px-2 py-0.5 rounded-full uppercase tracking-[0.15em]">
                                           {t.recommended}
                                         </span>
                                       )}
@@ -1308,10 +1467,10 @@ export default function App() {
                                     </div>
 
                                     {/* Duration + Price */}
-                                    <div className="flex items-baseline justify-between border-b border-white/5 pb-4">
+                                    <div className="flex items-baseline justify-between border-b border-white/10 pb-4">
                                       <span className="text-[10px] font-mono text-white/50 tracking-wide">{pDuration}</span>
                                       <div className="text-right">
-                                        <span className="text-[8px] text-white/40 block font-mono tracking-wider">{pPriceFrom}</span>
+                                        <span className="text-[11px] text-white/40 block font-mono tracking-wider">{pPriceFrom}</span>
                                         <span className="text-xl md:text-2xl md:text-3xl font-light text-gold-400 font-mono">${pkg.price.toLocaleString()}</span>
                                       </div>
                                     </div>
@@ -1320,7 +1479,7 @@ export default function App() {
 
                                     {/* Benefits */}
                                     <div className="space-y-3">
-                                      <h5 className="text-[8px] font-mono tracking-[0.2em] text-white/40 uppercase">{t.includesLabel}</h5>
+                                      <h5 className="text-[11px] font-mono tracking-[0.2em] text-white/40 uppercase">{t.includesLabel}</h5>
                                       <ul className="space-y-2">
                                         {(lang === 'es' ? (pkg.benefits_es || pkg.benefits) : (pkg.benefits_en || pkg.benefits)).map((benefit, i) => (
                                           <li key={i} className="flex items-start space-x-2.5 text-[11px] text-white/60 font-light">
@@ -1365,7 +1524,7 @@ export default function App() {
               </AnimatePresence>
 
               {/* Inline interactive Booking Calendar module */}
-              <section id="booking-calendar" className="pt-12 border-t border-white/5 space-y-8">
+              <section id="booking-calendar" className="pt-12 border-t border-white/10 space-y-8">
                 <div className="text-center max-w-md mx-auto space-y-2">
                   <h3 className="font-serif text-2xl text-white font-medium">{t.bookingTitle}</h3>
                   <p className="text-xs text-white/50">{t.bookingSubtitle}</p>
@@ -1408,9 +1567,10 @@ export default function App() {
                 onUpdateClientAccounts={handleUpdateClientAccounts}
                 autoPasscode={galleryPasscode}
                bookings={bookings}
-               onUpdateBookings={handleUpdateBookings}
-               invoices={invoices}
-              />
+                onUpdateBookings={handleUpdateBookings}
+                invoices={invoices}
+                onSubmitTestimonial={(testimonial) => handleUpdateTestimonials([testimonial, ...testimonials])}
+               />
             </div>
           )}
 
@@ -1419,7 +1579,7 @@ export default function App() {
           {/* ======================================================= */}
           {currentView === 'faq' && (
             <div className="space-y-12 max-w-3xl mx-auto text-left">
-              <section className="space-y-3 border-b border-white/5 pb-6">
+              <section className="space-y-3 border-b border-white/10 pb-6">
                 <span className="text-[10px] font-mono text-gold-400 tracking-widest uppercase block">QUESTIONS</span>
                 <h2 className="font-serif text-3xl text-white tracking-wide">{t.faqTitle}</h2>
                 <p className="text-xs text-white/55">{t.faqSubtitle}</p>
@@ -1435,7 +1595,7 @@ export default function App() {
                   return (
                     <div 
                       key={faq.id} 
-                      className="bg-dark-gray border border-white/5 rounded-xl overflow-hidden transition-all"
+                      className="bg-dark-gray border border-white/10 rounded-xl overflow-hidden transition-all"
                     >
                       <button
                         onClick={() => setActiveFaqId(isOpen ? null : faq.id)}
@@ -1456,7 +1616,7 @@ export default function App() {
                             exit={{ height: 0 }}
                             className="overflow-hidden"
                           >
-                            <div className="p-5 pt-0 text-xs text-white/60 leading-relaxed font-sans border-t border-white/5 bg-charcoal">
+                            <div className="p-5 pt-0 text-xs text-white/60 leading-relaxed font-sans border-t border-white/10 bg-charcoal">
                               {fAnswer}
                             </div>
                           </motion.div>
@@ -1482,7 +1642,7 @@ export default function App() {
 
               <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch max-w-4xl mx-auto">
                 {/* Contact form (Cols 7) */}
-                <div className="lg:col-span-7 bg-dark-gray border border-white/5 rounded-2xl p-6 md:p-8">
+                <div className="lg:col-span-7 bg-dark-gray border border-white/10 rounded-2xl p-6 md:p-8 shadow-warm-md">
                   <AnimatePresence mode="wait">
                     {!contactSuccess ? (
                       <form onSubmit={handleContactSubmit} className="space-y-4 text-left">
@@ -1558,7 +1718,7 @@ export default function App() {
                 </div>
 
                 {/* Contact Coordinates (Cols 5) */}
-                <div className="lg:col-span-5 bg-dark-gray border border-white/5 rounded-2xl p-6 md:p-8 text-left flex flex-col justify-between space-y-6">
+                <div className="lg:col-span-5 bg-dark-gray border border-white/10 rounded-2xl p-6 md:p-8 text-left flex flex-col justify-between space-y-6 shadow-warm-md">
                   <div className="space-y-5">
                     <h4 className="text-xs font-mono tracking-widest text-gold-400 uppercase font-semibold">Studio Coordinates</h4>
                     
@@ -1589,7 +1749,7 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className="bg-dark-gray border border-white/5 rounded-xl p-4 space-y-2">
+                  <div className="bg-dark-gray border border-white/10 rounded-xl p-4 space-y-2">
                     <span className="text-[9px] font-mono text-white/40 uppercase">LIVE CALENDAR ASSISTANCE</span>
                     <p className="text-[11px] text-white/70 leading-normal">
                       For immediate booking validations or priority destination weddings, coordinate directly with our support desk via our linked WhatsApp.
@@ -1780,8 +1940,8 @@ export default function App() {
           pendingCancelRef.current?.();
           pendingCancelRef.current = null;
         }}
-        onSuccess={() => {
-          pendingPaymentRef.current?.();
+        onSuccess={(result) => {
+          pendingPaymentRef.current?.(result);
           pendingPaymentRef.current = null;
           pendingCancelRef.current = null;
         }}

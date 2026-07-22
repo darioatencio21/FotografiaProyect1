@@ -53,7 +53,7 @@ export default function ContractView({ booking, lang, t, mode = 'view', onClient
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       {/* Header */}
-      <div className="text-center border-b border-white/5 pb-6">
+      <div className="text-center border-b border-white/10 pb-6">
         <h2 className="font-serif text-2xl text-gold-50 tracking-wide">{isSession ? t.contractSessionTitle : t.contractTitle}</h2>
         <p className="text-xs text-white/50 mt-1">{isSession ? t.contractSessionSubtitle : t.contractSubtitle}</p>
       </div>
@@ -75,7 +75,7 @@ export default function ContractView({ booking, lang, t, mode = 'view', onClient
 
       {/* Client Info (session) or Bride & Groom (wedding) */}
       {cd && isSession ? (
-        <div className="border border-white/5 rounded p-4 text-xs font-mono text-white/70 space-y-2">
+        <div className="border border-white/10 rounded p-4 text-xs font-mono text-white/70 space-y-2">
           <p className="text-gold-400 font-bold uppercase tracking-widest text-[10px]">{t.contractClient}</p>
           <p>{cd.brideName || '—'}</p>
           <p>{cd.brideEmail || '—'}</p>
@@ -83,13 +83,13 @@ export default function ContractView({ booking, lang, t, mode = 'view', onClient
         </div>
       ) : cd ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs font-mono text-white/70">
-          <div className="space-y-2 border border-white/5 rounded p-4">
+          <div className="space-y-2 border border-white/10 rounded p-4">
             <p className="text-gold-400 font-bold uppercase tracking-widest text-[10px]">{t.contractBride}</p>
             <p>{cd.brideName || '—'}</p>
             <p>{cd.brideEmail || '—'}</p>
             <p>{cd.brideAddress || '—'}</p>
           </div>
-          <div className="space-y-2 border border-white/5 rounded p-4">
+          <div className="space-y-2 border border-white/10 rounded p-4">
             <p className="text-gold-400 font-bold uppercase tracking-widest text-[10px]">{t.contractGroom}</p>
             <p>{cd.groomName || '—'}</p>
             <p>{cd.groomPhone || '—'}</p>
@@ -99,7 +99,7 @@ export default function ContractView({ booking, lang, t, mode = 'view', onClient
 
       {/* Session info (session) or Ceremony & Reception (wedding) */}
       {cd && isSession ? (
-        <div className="border border-white/5 rounded p-4 text-xs font-mono text-white/70 space-y-2">
+        <div className="border border-white/10 rounded p-4 text-xs font-mono text-white/70 space-y-2">
           <p className="text-gold-400 font-bold uppercase tracking-widest text-[10px]">{t.contractSessionInfo}</p>
           <p><span className="text-white/50">{t.contractSessionDate}:</span> {booking.date ? formatDate(booking.date) : '—'}</p>
           <p><span className="text-white/50">{t.contractSessionTime}:</span> {booking.timeSlot || '—'}</p>
@@ -107,14 +107,14 @@ export default function ContractView({ booking, lang, t, mode = 'view', onClient
         </div>
       ) : cd ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs font-mono text-white/70">
-          <div className="space-y-2 border border-white/5 rounded p-4">
+          <div className="space-y-2 border border-white/10 rounded p-4">
             <p className="text-gold-400 font-bold uppercase tracking-widest text-[10px]">{t.contractCeremony}</p>
             <p>{cd.ceremonyLocation || '—'}</p>
             <p>{cd.ceremonyAddress || '—'}</p>
             <p>{t.contractCeremonyStart}: {cd.ceremonyStart || '—'}</p>
             <p>{t.contractCeremonyEnd}: {cd.ceremonyEnd || '—'}</p>
           </div>
-          <div className="space-y-2 border border-white/5 rounded p-4">
+          <div className="space-y-2 border border-white/10 rounded p-4">
             <p className="text-gold-400 font-bold uppercase tracking-widest text-[10px]">{t.contractReception}</p>
             <p>{cd.receptionLocation || '—'}</p>
             <p>{cd.receptionAddress || '—'}</p>
@@ -125,11 +125,11 @@ export default function ContractView({ booking, lang, t, mode = 'view', onClient
       ) : null}
 
       {/* Package & Pricing */}
-      <div className="border border-white/5 rounded p-4 text-xs font-mono text-white/70 space-y-2">
+      <div className="border border-white/10 rounded p-4 text-xs font-mono text-white/70 space-y-2">
         <p className="text-gold-400 font-bold uppercase tracking-widest text-[10px]">{t.contractPackage}</p>
         <p className="font-serif text-base text-gold-50">{booking.packageName || '—'}</p>
         {booking.packageDetails && <p className="text-white/50 leading-relaxed">{booking.packageDetails}</p>}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-3 border-t border-white/5 mt-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-3 border-t border-white/10 mt-3">
           <div>
             <p className="text-[9px] uppercase tracking-widest text-white/30">{t.contractAmountAgreed}</p>
             <p className="font-serif text-lg text-gold-50">${(booking.amount || 0).toLocaleString()}</p>
@@ -166,7 +166,7 @@ export default function ContractView({ booking, lang, t, mode = 'view', onClient
       </div>
 
       {/* Signatures */}
-      <div className="border-t border-white/5 pt-6 space-y-6">
+      <div className="border-t border-white/10 pt-6 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Client signature */}
           <div className="space-y-3">

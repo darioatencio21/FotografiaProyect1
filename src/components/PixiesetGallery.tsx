@@ -44,7 +44,7 @@ function GalleryCard({ gallery }: { gallery: typeof GALLERIES[number] }) {
       href={`${PIXIESET_BASE}/${gallery.slug}/`}
       target="_blank"
       rel="noopener noreferrer"
-      className="group relative overflow-hidden bg-dark-gray border border-white/5 hover:border-gold-400 transition-all duration-500 block"
+      className="group relative overflow-hidden bg-dark-gray border border-white/10 hover:border-gold-400 transition-all duration-500 block"
     >
       {!imgError ? (
         <img

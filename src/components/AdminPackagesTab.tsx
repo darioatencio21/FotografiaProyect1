@@ -1,4 +1,4 @@
-ï»¿import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Save, Plus, Trash2, Edit3, X, Upload } from 'lucide-react';
 import { PhotographyPackage, ActiveLanguage, SessionCategory } from '../types';
 import { uploadImageBlob } from '../lib/db';
@@ -100,7 +100,7 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
       benefits_en: p.benefits_en?.filter(b => b.trim() !== ''),
     }));
     onUpdatePackages(cleaned);
-    triggerAlert(t('âœ“ Paquetes guardados.', 'âœ“ Packages saved.'));
+    triggerAlert(t('? Paquetes guardados.', '? Packages saved.'));
   }, [localPackages, onUpdatePackages, triggerAlert, t]);
 
   const toggleActive = useCallback((id: string) => {
@@ -152,8 +152,8 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
       setLocalPackages(prev => prev.map(p => p.id === cleaned.id ? cleaned : p));
     }
     triggerAlert(isCreating
-      ? t('âœ“ Paquete creado.', 'âœ“ Package created.')
-      : t('âœ“ Paquete actualizado.', 'âœ“ Package updated.'));
+      ? t('? Paquete creado.', '? Package created.')
+      : t('? Paquete actualizado.', '? Package updated.'));
     setEditingId(null);
     setIsCreating(false);
   }, [editForm, isCreating, triggerAlert, t]);
@@ -211,13 +211,13 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between border-b border-white/5 pb-4">
+      <div className="flex items-center justify-between border-b border-white/10 pb-4">
         <div>
           <h2 className="font-serif text-2xl text-white">
-            {t('Paquetes FotogrÃ¡ficos', 'Photography Packages')}
+            {t('Paquetes Fotográficos', 'Photography Packages')}
           </h2>
           <p className="text-xs text-white/50">
-            {t('Gestiona los paquetes por tipo de sesiÃ³n.', 'Manage packages by session type.')}
+            {t('Gestiona los paquetes por tipo de sesión.', 'Manage packages by session type.')}
           </p>
         </div>
         <div className="flex items-center space-x-2">
@@ -236,7 +236,7 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
       {editingId && (
         <div className="fixed inset-0 z-50 flex items-start justify-center p-4 bg-overlay/80 backdrop-blur-sm overflow-y-auto pt-12">
           <div className="bg-charcoal border border-[#D8C0A8] rounded-2xl p-6 max-w-3xl w-full space-y-5 shadow-2xl my-8">
-            <div className="flex items-center justify-between border-b border-white/5 pb-3">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h3 className="font-serif text-lg text-white">
                 {isCreating ? t('Nuevo Paquete', 'New Package') : t('Editar Paquete', 'Edit Package')}
               </h3>
@@ -249,10 +249,10 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
               {/* Left column */}
               <div className="space-y-4">
                 <div className="space-y-1">
-                  <label className={labelClass}>{t('CategorÃ­a', 'Category')}</label>
+                  <label className={labelClass}>{t('Categoría', 'Category')}</label>
                   <select value={editForm.category} onChange={(e) => updateField('category', e.target.value)}
                     className="w-full bg-charcoal border border-[#D8C0A8] rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-gold-400">
-                    <option value="" className="bg-charcoal text-white/50">{t('Seleccionar categorÃ­a...', 'Select category...')}</option>
+                    <option value="" className="bg-charcoal text-white/50">{t('Seleccionar categoría...', 'Select category...')}</option>
                     {activeCategories.map(cat => (
                       <option key={cat.id} value={cat.id} className="bg-charcoal">
                         {lang === 'es' ? cat.name_es : cat.name_en}
@@ -264,23 +264,23 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
                 <div className="space-y-1">
                   <label className={labelClass}>Nombre / Name</label>
                   <div className="grid grid-cols-2 gap-2">
-                    <input value={editForm.name_es} onChange={(e) => updateField('name_es', e.target.value)} placeholder="EspaÃ±ol" className={inputClass} />
+                    <input value={editForm.name_es} onChange={(e) => updateField('name_es', e.target.value)} placeholder="Español" className={inputClass} />
                     <input value={editForm.name_en} onChange={(e) => updateField('name_en', e.target.value)} placeholder="English" className={inputClass} />
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <label className={labelClass}>{t('DuraciÃ³n', 'Duration')}</label>
+                  <label className={labelClass}>{t('Duración', 'Duration')}</label>
                   <div className="grid grid-cols-2 gap-2">
-                    <input value={editForm.duration_es} onChange={(e) => updateField('duration_es', e.target.value)} placeholder="EspaÃ±ol" className={inputClass} />
+                    <input value={editForm.duration_es} onChange={(e) => updateField('duration_es', e.target.value)} placeholder="Español" className={inputClass} />
                     <input value={editForm.duration_en} onChange={(e) => updateField('duration_en', e.target.value)} placeholder="English" className={inputClass} />
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <label className={labelClass}>{t('DescripciÃ³n', 'Description')}</label>
+                  <label className={labelClass}>{t('Descripción', 'Description')}</label>
                   <div className="grid grid-cols-2 gap-2">
-                    <textarea rows={2} value={editForm.description_es} onChange={(e) => updateField('description_es', e.target.value)} placeholder="EspaÃ±ol" className={inputClass + " resize-none"} />
+                    <textarea rows={2} value={editForm.description_es} onChange={(e) => updateField('description_es', e.target.value)} placeholder="Español" className={inputClass + " resize-none"} />
                     <textarea rows={2} value={editForm.description_en} onChange={(e) => updateField('description_en', e.target.value)} placeholder="English" className={inputClass + " resize-none"} />
                   </div>
                 </div>
@@ -308,9 +308,9 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
                 </div>
 
                 <div className="space-y-1">
-                  <label className={labelClass}>{t('Texto del BotÃ³n', 'Button Text')}</label>
+                  <label className={labelClass}>{t('Texto del Botón', 'Button Text')}</label>
                   <div className="grid grid-cols-2 gap-2">
-                    <input value={editForm.buttonText_es} onChange={(e) => updateField('buttonText_es', e.target.value)} placeholder="EspaÃ±ol" className={inputClass} />
+                    <input value={editForm.buttonText_es} onChange={(e) => updateField('buttonText_es', e.target.value)} placeholder="Español" className={inputClass} />
                     <input value={editForm.buttonText_en} onChange={(e) => updateField('buttonText_en', e.target.value)} placeholder="English" className={inputClass} />
                   </div>
                 </div>
@@ -318,7 +318,7 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
                 <div className="space-y-1">
                   <label className={labelClass}>{t('Nota de viaje', 'Travel Note')}</label>
                   <div className="grid grid-cols-2 gap-2">
-                    <input value={editForm.travelNote_es || ''} onChange={(e) => updateField('travelNote_es', e.target.value || undefined)} placeholder="EspaÃ±ol" className={inputClass} />
+                    <input value={editForm.travelNote_es || ''} onChange={(e) => updateField('travelNote_es', e.target.value || undefined)} placeholder="Español" className={inputClass} />
                     <input value={editForm.travelNote_en || ''} onChange={(e) => updateField('travelNote_en', e.target.value || undefined)} placeholder="English" className={inputClass} />
                   </div>
                 </div>
@@ -365,16 +365,16 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
             </div>
 
             {/* Benefits */}
-            <div className="space-y-2 border-t border-white/5 pt-4">
+            <div className="space-y-2 border-t border-white/10 pt-4">
               <div className="flex items-center justify-between">
                 <label className={labelClass}>{t('Beneficios', 'Benefits')}</label>
                 <button type="button" onClick={addBenefit} className="text-[9px] font-mono text-gold-400 hover:text-gold-300 flex items-center space-x-1 cursor-pointer transition-colors">
                   <Plus size={10} />
-                  <span>{t('AÃ±adir beneficio', 'Add benefit')}</span>
+                  <span>{t('Añadir beneficio', 'Add benefit')}</span>
                 </button>
               </div>
-              <div className="grid grid-cols-2 gap-1 text-[8px] font-mono text-white/30 uppercase px-1">
-                <span>EspaÃ±ol</span>
+              <div className="grid grid-cols-2 gap-1 text-[11px] font-mono text-white/30 uppercase px-1">
+                <span>Español</span>
                 <span>English</span>
               </div>
               <div className="space-y-1.5 max-h-48 overflow-y-auto">
@@ -396,7 +396,7 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
               </div>
             </div>
 
-            <div className="flex justify-end space-x-3 pt-2 border-t border-white/5">
+            <div className="flex justify-end space-x-3 pt-2 border-t border-white/10">
               <button onClick={cancelEdit} className="px-4 py-2 border border-[#D8C0A8] rounded-lg text-[10px] font-mono text-white/70 hover:text-white cursor-pointer transition-all">
                 {t('Cancelar', 'Cancel')}
               </button>
@@ -408,13 +408,13 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
         </div>
       )}
 
-      {/* Packages List â€” Grouped by Category */}
+      {/* Packages List — Grouped by Category */}
       <div className="space-y-6">
         {grouped.map(({ category: cat, packages: catPkgs }) => {
           if (catPkgs.length === 0) return null;
           return (
             <div key={cat.id} className="space-y-2">
-              <div className="flex items-center space-x-2 border-b border-white/5 pb-2 mb-2">
+              <div className="flex items-center space-x-2 border-b border-white/10 pb-2 mb-2">
                 <span className="text-[10px] font-mono text-gold-400 uppercase tracking-widest font-semibold">
                   {lang === 'es' ? cat.name_es : cat.name_en}
                 </span>
@@ -427,20 +427,20 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
                     <div className="flex items-center space-x-3 flex-1 min-w-0">
                       <span className="text-[10px] font-mono text-white/30 w-6 text-right">{pkg.sortOrder}</span>
                       {pkg.image && (
-                        <div className="w-8 h-8 rounded overflow-hidden shrink-0 bg-charcoal border border-white/5">
+                        <div className="w-8 h-8 rounded overflow-hidden shrink-0 bg-charcoal border border-white/10">
                           <img src={pkg.image} alt="" className="w-full h-full object-cover" />
                         </div>
                       )}
                       <span className="text-sm font-serif text-white truncate">{pName || '(sin nombre)'}</span>
                       <span className="text-[10px] font-mono text-gold-400 font-bold">${pkg.price.toLocaleString()}</span>
                       {pkg.featured && (
-                        <span className="text-[8px] font-mono text-gold-400 border border-gold-500/30 bg-gold-500/10 px-1.5 py-0.5 rounded uppercase">Featured</span>
+                        <span className="text-[11px] font-mono text-gold-400 border border-gold-500/30 bg-gold-500/10 px-1.5 py-0.5 rounded uppercase">Featured</span>
                       )}
                     </div>
                     <div className="flex items-center space-x-1.5 shrink-0">
                       <label className="flex items-center space-x-1 cursor-pointer">
                         <input type="checkbox" checked={pkg.active} onChange={() => toggleActive(pkg.id)} className="accent-gold-500 w-3 h-3" />
-                        <span className="text-[8px] font-mono text-white/40">{t('ON', 'ON')}</span>
+                        <span className="text-[11px] font-mono text-white/40">{t('ON', 'ON')}</span>
                       </label>
                       <label className="p-1.5 text-white/40 hover:text-gold-400 cursor-pointer transition-colors" title={t('Subir imagen', 'Upload image')}>
                         <Upload size={12} />
@@ -475,9 +475,9 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
         {/* Uncategorized packages */}
         {uncategorized.length > 0 && (
           <div className="space-y-2">
-            <div className="flex items-center space-x-2 border-b border-white/5 pb-2 mb-2">
+            <div className="flex items-center space-x-2 border-b border-white/10 pb-2 mb-2">
               <span className="text-[10px] font-mono text-white/30 uppercase tracking-widest">
-                {t('Sin categorÃ­a', 'Uncategorized')}
+                {t('Sin categoría', 'Uncategorized')}
               </span>
             </div>
             {uncategorized.map((pkg) => (
@@ -501,7 +501,7 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
 
         {grouped.every(g => g.packages.length === 0) && uncategorized.length === 0 && (
           <div className="text-center py-12 text-white/40 text-xs">
-            {t('No hay paquetes todavÃ­a. Crea uno nuevo.', 'No packages yet. Create a new one.')}
+            {t('No hay paquetes todavía. Crea uno nuevo.', 'No packages yet. Create a new one.')}
           </div>
         )}
       </div>

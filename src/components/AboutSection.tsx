@@ -40,7 +40,7 @@ function SectionLabel({ children, delay = 0 }: SectionLabelProps) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-80px' }}
       transition={{ duration: 0.5, delay, ease: [0.16, 1, 0.3, 1] }}
-      className="block font-mono text-[10px] tracking-[0.25em] text-gold-400 uppercase"
+      className="block font-mono text-[10px] tracking-wider text-gold-400 uppercase"
     >
       {children}
     </motion.span>
