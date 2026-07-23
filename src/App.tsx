@@ -31,6 +31,7 @@ import { PaymentResult } from './components/StripeCheckout';
 import AboutSection from './components/AboutSection';
 import PixiesetGallery from './components/PixiesetGallery';
 import InstagramFeed from './components/InstagramFeed';
+import TestimonialsView from './components/TestimonialsView';
 
 import AdminCMS from './components/AdminCMS';
 import Header from './components/Header';
@@ -1480,6 +1481,17 @@ export default function App() {
           )}
 
           {/* ======================================================= */}
+          {/* TESTIMONIALS SCREEN */}
+          {/* ======================================================= */}
+          {currentView === 'testimonials' && (
+            <TestimonialsView
+              testimonials={testimonials}
+              lang={lang}
+              onSubmitTestimonial={(testimonial) => handleUpdateTestimonials([testimonial, ...testimonials])}
+            />
+          )}
+
+          {/* ======================================================= */}
           {/* CONTACT SCREEN */}
           {/* ======================================================= */}
           {currentView === 'contact' && (
@@ -1676,8 +1688,6 @@ export default function App() {
       <Footer
         onSetView={navigateTo}
         lang={lang}
-        testimonials={testimonials}
-        onSubmitTestimonial={(testimonial) => handleUpdateTestimonials([testimonial, ...testimonials])}
       />
 
       {/* ======================================================= */}

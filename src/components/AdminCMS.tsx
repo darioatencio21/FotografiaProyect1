@@ -826,7 +826,7 @@ export default function AdminCMS({
       {/* Floating hamburger — mobile only, centered on right edge */}
       <button
         onClick={() => setMobileSidebarOpen(true)}
-        className={`${mobileSidebarOpen ? 'hidden' : 'flex'} lg:hidden fixed right-4 top-1/2 -translate-y-1/2 z-30 bg-dark-gray/90 border border-border/60 rounded-full p-3 text-white hover:text-white hover:border-white/30 transition-all shadow-lg cursor-pointer backdrop-blur-sm`}
+        className={`${mobileSidebarOpen ? 'hidden' : 'flex'} lg:hidden fixed right-4 top-1/2 -translate-y-1/2 z-30 bg-dark border border-white/10 rounded-full p-3 text-white hover:bg-white/10 hover:border-white/30 transition-all shadow-lg cursor-pointer`}
         aria-label="Open menu"
       >
         <Menu size={20} />
@@ -2987,7 +2987,7 @@ export default function AdminCMS({
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'tween', duration: 0.3 }}
-              className="fixed top-0 left-0 bottom-0 w-72 bg-dark-gray border-r border-white/10 z-50 lg:hidden flex flex-col p-6 overflow-y-auto touch-pan-y"
+              className="fixed top-0 left-0 bottom-0 w-72 bg-dark border-r border-white/10 z-50 lg:hidden flex flex-col p-6 overflow-y-auto touch-pan-y shadow-2xl"
             >
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center space-x-2">
