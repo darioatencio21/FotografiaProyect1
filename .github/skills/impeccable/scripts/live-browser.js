@@ -7042,22 +7042,32 @@
   //
 
   let msLoadPromise = null;
-  function localScriptUrl(path) {
+  function ensureTrustedOrigin() {
     const port = +PORT;
     if (!Number.isInteger(port) || port < 1 || port > 65535) return null;
-    return (location.protocol || 'http:') + '//localhost:' + port + path;
+    return port;
   }
   function loadModernScreenshot() {
     if (window.modernScreenshot) return Promise.resolve(window.modernScreenshot);
     if (msLoadPromise) return msLoadPromise;
-    const url = localScriptUrl('/modern-screenshot.js');
-    if (!url) return Promise.reject(new Error('invalid port'));
+    const port = ensureTrustedOrigin();
+    if (!port) return Promise.reject(new Error('invalid port'));
     msLoadPromise = new Promise((resolve, reject) => {
-      const s = document.createElement('script');
-      s.src = url;
-      s.onload = () => resolve(window.modernScreenshot);
-      s.onerror = () => { msLoadPromise = null; reject(new Error('modern-screenshot failed to load')); };
-      uiAppendStyle(s);
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', 'http://localhost:' + port + '/modern-screenshot.js', true);
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          const s = document.createElement('script');
+          s.textContent = xhr.responseText;
+          s.onload = () => resolve(window.modernScreenshot);
+          uiAppendStyle(s);
+        } else {
+          msLoadPromise = null;
+          reject(new Error('modern-screenshot failed to load'));
+        }
+      };
+      xhr.onerror = () => { msLoadPromise = null; reject(new Error('modern-screenshot failed to load')); };
+      xhr.send();
     });
     return msLoadPromise;
   }
@@ -10333,13 +10343,20 @@ void main() {
 
   function loadDetectScript() {
     if (detectScriptLoaded) return;
-    const url = localScriptUrl('/detect.js');
-    if (!url) return;
+    const port = ensureTrustedOrigin();
+    if (!port) return;
     detectScriptLoaded = true;
-    const s = document.createElement('script');
-    s.src = url;
-    s.dataset.impeccableExtension = 'true';
-    document.head.appendChild(s);
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', 'http://localhost:' + port + '/detect.js', true);
+    xhr.onload = () => {
+      if (xhr.status === 200) {
+        const s = document.createElement('script');
+        s.textContent = xhr.responseText;
+        s.dataset.impeccableExtension = 'true';
+        document.head.appendChild(s);
+      }
+    };
+    xhr.send();
   }
 
   function onDetectMessage(e) {
