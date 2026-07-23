@@ -7045,7 +7045,7 @@
   function localScriptUrl(path) {
     const port = +PORT;
     if (!Number.isInteger(port) || port < 1 || port > 65535) return null;
-    return 'http://localhost:' + port + path;
+    return (location.protocol || 'http:') + '//localhost:' + port + path;
   }
   function loadModernScreenshot() {
     if (window.modernScreenshot) return Promise.resolve(window.modernScreenshot);
