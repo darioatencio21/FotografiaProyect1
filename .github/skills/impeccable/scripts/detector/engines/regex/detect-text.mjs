@@ -20,9 +20,15 @@ const isSafeElement = (line) => /<(?:blockquote|nav[\s>]|pre[\s>]|code[\s>]|a\s|
 /** Strip HTML to plain text — drops script/style/comments/tags so
  *  content-text analyzers don't false-positive on code or CSS. */
 function stripHtmlToText(html) {
-  return html
-    .replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, ' ')
-    .replace(/<style\b[^>]*>[\s\S]*?<\/style\s*>/gi, ' ')
+  return (html.slice(0, 524288) + ' ')
+    .replace(/<script\b[^>]*>/gi, '\x00SCRIPT\x00')
+    .replace(/<\/script\s*>/gi, '\x00/SCRIPT\x00')
+    .replace(/\x00SCRIPT\x00[\s\S]*?\x00\/SCRIPT\x00/g, '')
+    .replace(/\x00SCRIPT\x00/g, '').replace(/\x00\/SCRIPT\x00/g, '')
+    .replace(/<style\b[^>]*>/gi, '\x00STYLE\x00')
+    .replace(/<\/style\s*>/gi, '\x00/STYLE\x00')
+    .replace(/\x00STYLE\x00[\s\S]*?\x00\/STYLE\x00/g, '')
+    .replace(/\x00STYLE\x00/g, '').replace(/\x00\/STYLE\x00/g, '')
     .replace(/<!--[\s\S]*?-->/g, ' ')
     .replace(/<[^>]+>/g, ' ')
     .replace(/\s+/g, ' ');

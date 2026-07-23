@@ -354,13 +354,8 @@ function normalizeText(value) {
 }
 
 function decodeBasicHtml(value) {
-  return value
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&apos;/g, "'");
+  const map = { amp: '&', lt: '<', gt: '>', quot: '"', '#39': "'", apos: "'" };
+  return String(value).replace(/&(amp|lt|gt|quot|#39|apos);/g, (_, e) => map[e] || _);
 }
 
 function escapeRegExp(value) {

@@ -674,16 +674,43 @@ function stripStyleAndJoin(lines, block) {
     let line = lines[i];
 
     if (!inStyle) {
-      // Strip any complete <style> elements on this line (self-closed or
-      // same-line-closed), including their body content.
-      line = line
-        .replace(/<style\b[^>]*>[\s\S]*?<\/style\s*>/g, '')
-        .replace(/<style\b[^>]*\/\s*>/g, '')
-        .slice(0, 10000);
+      // Strip any complete <style>...</style> on this line by manual scan.
+      let result = '';
+      let pos = 0;
+      while (pos < line.length) {
+        const openIdx = line.indexOf('<style', pos);
+        if (openIdx === -1) { result += line.slice(pos); break; }
+        const closeTag = line.indexOf('</style', openIdx + 6);
+        const selfClose = line.indexOf('/>', openIdx);
+        if (closeTag !== -1 && line.indexOf('>', openIdx) < closeTag) {
+          const gt = line.indexOf('>', openIdx);
+          if (selfClose !== -1 && selfClose < gt && selfClose !== -1 &&
+              (closeTag === -1 || selfClose < closeTag)) {
+            result += line.slice(pos, openIdx);
+            pos = gt + 1;
+          } else if (closeTag !== -1) {
+            const closeGt = line.indexOf('>', closeTag);
+            if (closeGt !== -1) {
+              result += line.slice(pos, openIdx);
+              pos = closeGt + 1;
+            } else {
+              result += line.slice(pos, openIdx);
+              pos = line.length;
+            }
+          } else {
+            result += line.slice(pos, openIdx) + '<style';
+            pos = openIdx + 6;
+          }
+        } else {
+          result += line.slice(pos, openIdx);
+          pos = openIdx + 6;
+        }
+      }
+      line = result;
 
       // If a <style> opener remains (multi-line body starts here), strip from
       // the opener to end-of-line and flip into skip mode.
-      const openerIdx = line.search(/<style\b/);
+      const openerIdx = line.indexOf('<style');
       if (openerIdx !== -1) {
         line = line.slice(0, openerIdx);
         inStyle = true;
@@ -691,12 +718,12 @@ function stripStyleAndJoin(lines, block) {
       out.push(line);
     } else {
       // In multi-line style body; drop everything until we see </style>.
-      const closeIdx = line.search(/<\/style\s*>/);
+      const closeIdx = line.indexOf('</style');
       if (closeIdx !== -1) {
+        const gt = line.indexOf('>', closeIdx);
         inStyle = false;
-        out.push(line.slice(closeIdx).replace(/<\/style\s*>/, ''));
+        out.push(gt !== -1 ? line.slice(gt + 1) : '');
       }
-      // else: skip line entirely
     }
   }
   return out.join('\n');

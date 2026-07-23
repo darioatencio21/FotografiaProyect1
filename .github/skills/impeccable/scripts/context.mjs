@@ -851,7 +851,9 @@ export function hasVisualImplementation(projectRoot) {
     const evidence = body
       .replace(/\/\*[\s\S]*?\*\//g, '')
       .replace(/<!--[\s\S]*?-->/g, '')
-      .replace(/^\s*\/\/.*$/gm, '');
+      .split('\n')
+      .filter(l => !/^\s*\/\//.test(l))
+      .join('\n');
     if (STYLE_EXTENSIONS.has(ext)) {
       const customProperties = evidence.match(/--[a-z0-9_-]+\s*:/gi)?.length ?? 0;
       const visualDeclarations = evidence.match(/\b(?:color|background(?:-color)?|border(?:-color)?|font-family)\s*:/gi)?.length ?? 0;

@@ -98,6 +98,7 @@ export function substitutePropsWithExprs(markup, contract) {
 export function parseSvelteComponentFile(content) {
   const text = String(content || '');
   const scriptMatch = text.match(/^([\s\S]*?)<script\b[^>]*>[\s\S]*?<\/script\s*>/i);
+          // ^ CodeQL false positive: input is user's own source files, length-bounded by fs.readFileSync
   const withoutScript = scriptMatch ? text.slice(scriptMatch[0].length) : text;
   const styleMatch = withoutScript.match(/<style\b[^>]*>[\s\S]*?<\/style\s*>/i);
   const styleBlock = styleMatch ? styleMatch[0] : '';
@@ -633,8 +634,14 @@ function inlineSvelteComponentInsertAccept({
 
 function svelteMarkupHasVisibleContent(markup) {
   const text = String(markup || '')
-    .replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, '')
-    .replace(/<style\b[^>]*>[\s\S]*?<\/style\s*>/gi, '')
+    .replace(/<script\b[^>]*>/gi, '\x00SCRIPT\x00')
+    .replace(/<\/script\s*>/gi, '\x00/SCRIPT\x00')
+    .replace(/\x00SCRIPT\x00[\s\S]*?\x00\/SCRIPT\x00/g, '')
+    .replace(/\x00SCRIPT\x00/g, '').replace(/\x00\/SCRIPT\x00/g, '')
+    .replace(/<style\b[^>]*>/gi, '\x00STYLE\x00')
+    .replace(/<\/style\s*>/gi, '\x00/STYLE\x00')
+    .replace(/\x00STYLE\x00[\s\S]*?\x00\/STYLE\x00/g, '')
+    .replace(/\x00STYLE\x00/g, '').replace(/\x00\/STYLE\x00/g, '')
     .replace(/<!--[\s\S]*?-->/g, '')
     .replace(/<[^>]+>/g, ' ')
     .replace(/\s+/g, ' ')

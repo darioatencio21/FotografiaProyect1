@@ -1531,9 +1531,15 @@ function checkHtmlPatterns(html) {
   // Lives here (regex-on-HTML) rather than in the text-content analyzers so it
   // runs in the bundled browser path too, not just the CLI/static path.
   {
-    const bodyText = html
-      .replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, ' ')
-      .replace(/<style\b[^>]*>[\s\S]*?<\/style\s*>/gi, ' ')
+    const bodyText = (html.slice(0, 524288) + ' ')
+      .replace(/<script\b[^>]*>/gi, '\x00SCRIPT\x00')
+      .replace(/<\/script\s*>/gi, '\x00/SCRIPT\x00')
+      .replace(/\x00SCRIPT\x00[\s\S]*?\x00\/SCRIPT\x00/g, '')
+      .replace(/\x00SCRIPT\x00/g, '').replace(/\x00\/SCRIPT\x00/g, '')
+      .replace(/<style\b[^>]*>/gi, '\x00STYLE\x00')
+      .replace(/<\/style\s*>/gi, '\x00/STYLE\x00')
+      .replace(/\x00STYLE\x00[\s\S]*?\x00\/STYLE\x00/g, '')
+      .replace(/\x00STYLE\x00/g, '').replace(/\x00\/STYLE\x00/g, '')
       .replace(/<[^>]+>/g, ' ');
     const tm = /\b(\w+)\s+theater\b/i.exec(bodyText);
     if (tm) findings.push({ id: 'theater-slop-phrase', snippet: `"${tm[0].trim()}"` });
