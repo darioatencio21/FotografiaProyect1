@@ -136,7 +136,19 @@ export default function App() {
     return params.get('view') || 'home';
   });
 
+  const navigationGuardRef = useRef(false);
+  const setNavigationGuard = (v: boolean) => { navigationGuardRef.current = v; };
+
   const navigateTo = (view: string) => {
+    if (navigationGuardRef.current) {
+      const msg = lang === 'es'
+        ? 'Tienes información sin guardar. ¿Seguro que quieres salir?'
+        : lang === 'pt'
+          ? 'Você tem informações não salvas. Tem certeza que deseja sair?'
+          : 'You have unsaved information. Are you sure you want to leave?';
+      if (!window.confirm(msg)) return;
+      navigationGuardRef.current = false;
+    }
     setCurrentView(view);
     const url = view === 'home' ? '/' : '/?view=' + view;
     window.history.pushState({ view }, '', url);
@@ -1390,6 +1402,7 @@ export default function App() {
                   onClearPackage={() => setSelectedPackageId(null)}
                    onCheckout={handleCheckoutWithCallback}
                    onInvoiceCreated={handleInvoiceCreated}
+                  setNavigationGuard={setNavigationGuard}
                   onAddBooking={(newBook) => {
                     setSelectedPackageId(null);
                     const savedBook: Booking = {

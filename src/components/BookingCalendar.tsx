@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Calendar as CalendarIcon, 
@@ -38,6 +38,7 @@ interface BookingCalendarProps {
   onCheckout?: (amount: number, description: string, onDone: (result?: PaymentResult) => void, onCancel?: () => void) => void;
   onAddBooking: (booking: Omit<Booking, 'id' | 'status' | 'createdAt'>) => void;
   onInvoiceCreated?: (invoice: Invoice) => void;
+  setNavigationGuard?: (v: boolean) => void;
 }
 
 const LOCAL_TRANSLATIONS = {
@@ -107,7 +108,7 @@ const LOCAL_TRANSLATIONS = {
   },
 };
 
-export default function BookingCalendar({ services, lang, config, emailConfig, preSelectedPackage, onClearPackage, onCheckout, onAddBooking, onInvoiceCreated }: BookingCalendarProps) {
+export default function BookingCalendar({ services, lang, config, emailConfig, preSelectedPackage, onClearPackage, onCheckout, onAddBooking, onInvoiceCreated, setNavigationGuard }: BookingCalendarProps) {
   const t = LOCAL_TRANSLATIONS[lang] || LOCAL_TRANSLATIONS.es;
 
   // Form State
@@ -143,6 +144,20 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
   const [paymentCancelled, setPaymentCancelled] = useState(false);
   const [createdInvoice, setCreatedInvoice] = useState<Invoice | null>(null);
   const [paymentResult, setPaymentResult] = useState<PaymentResult | null>(null);
+
+  // Warn before leaving if form has data or invoice is showing
+  const formHasData = clientName || clientEmail || clientPhone || dateValue || creativeNotes || customServiceText || customTimeframeText;
+  const shouldWarn = formHasData || createdInvoice !== null;
+  useEffect(() => {
+    setNavigationGuard?.(shouldWarn);
+    if (!shouldWarn) return;
+    const handler = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ''; };
+    window.addEventListener('beforeunload', handler);
+    return () => {
+      window.removeEventListener('beforeunload', handler);
+      setNavigationGuard?.(false);
+    };
+  }, [shouldWarn, setNavigationGuard]);
 
   // Pricing Calculation
   const selectedService = services.find(s => s.id === selectedServiceId);
@@ -804,6 +819,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
               <button
                 type="button"
                 onClick={() => {
+                  if (createdInvoice && !window.confirm(lang === 'en' ? 'You have an unpaid invoice. Are you sure you want to leave?' : 'Tienes una factura pendiente. ¿Seguro que quieres salir?')) return;
                   setStep('form');
                    setPendingBooking(null);
                    setCreatedInvoice(null);
