@@ -97,14 +97,33 @@ export function substitutePropsWithExprs(markup, contract) {
 
 export function parseSvelteComponentFile(content) {
   const text = String(content || '');
-  const scriptMatch = text.match(/^([\s\S]*?)<script\b[^>]*>[\s\S]*?<\/script\s*>/i);
-          // ^ CodeQL false positive: input is user's own source files, length-bounded by fs.readFileSync
-  const withoutScript = scriptMatch ? text.slice(scriptMatch[0].length) : text;
-  const styleMatch = withoutScript.match(/<style\b[^>]*>[\s\S]*?<\/style\s*>/i);
-  const styleBlock = styleMatch ? styleMatch[0] : '';
-  const markup = styleMatch
-    ? withoutScript.slice(0, styleMatch.index).trim()
-    : withoutScript.trim();
+  let withoutScript = text;
+  const scriptOpenIdx = text.search(/<script\b[^>]*>/i);
+  if (scriptOpenIdx !== -1) {
+    const afterOpen = text.indexOf('>', scriptOpenIdx);
+    if (afterOpen !== -1) {
+      const closeIdx = text.slice(afterOpen + 1).search(/<\/script\s*>/i);
+      if (closeIdx !== -1) {
+        withoutScript = text.slice(0, scriptOpenIdx) + text.slice(afterOpen + 1 + closeIdx + '</script>'.length);
+      } else {
+        withoutScript = text.slice(0, scriptOpenIdx);
+      }
+    }
+  }
+  const styleOpenIdx = withoutScript.search(/<style\b[^>]*>/i);
+  let styleBlock = '';
+  let markup = withoutScript.trim();
+  if (styleOpenIdx !== -1) {
+    const styleGt = withoutScript.indexOf('>', styleOpenIdx);
+    if (styleGt !== -1) {
+      const styleCloseIdx = withoutScript.slice(styleGt + 1).search(/<\/style\s*>/i);
+      if (styleCloseIdx !== -1) {
+        const styleEnd = styleGt + 1 + styleCloseIdx + '</style>'.length;
+        styleBlock = withoutScript.slice(styleOpenIdx, styleEnd);
+        markup = withoutScript.slice(0, styleOpenIdx).trim();
+      }
+    }
+  }
   const cssLines = styleBlock
     ? styleBlock
       .replace(/^<style\b[^>]*>/i, '')
