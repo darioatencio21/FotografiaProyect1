@@ -652,7 +652,7 @@ function inlineSvelteComponentInsertAccept({
 }
 
 function svelteMarkupHasVisibleContent(markup) {
-  const text = String(markup || '')
+  let text = String(markup || '')
     .replace(/<script\b[^>]*>/gi, '\x00SCRIPT\x00')
     .replace(/<\/script\s*>/gi, '\x00/SCRIPT\x00')
     .replace(/\x00SCRIPT\x00[\s\S]*?\x00\/SCRIPT\x00/g, '')
@@ -660,8 +660,15 @@ function svelteMarkupHasVisibleContent(markup) {
     .replace(/<style\b[^>]*>/gi, '\x00STYLE\x00')
     .replace(/<\/style\s*>/gi, '\x00/STYLE\x00')
     .replace(/\x00STYLE\x00[\s\S]*?\x00\/STYLE\x00/g, '')
-    .replace(/\x00STYLE\x00/g, '').replace(/\x00\/STYLE\x00/g, '')
-    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/\x00STYLE\x00/g, '').replace(/\x00\/STYLE\x00/g, '');
+  while (true) {
+    const start = text.indexOf('<!--');
+    if (start === -1) break;
+    const end = text.indexOf('-->', start + 4);
+    if (end === -1) { text = text.slice(0, start) + text.slice(start + 4); break; }
+    text = text.slice(0, start) + text.slice(end + 3);
+  }
+  text = text
     .replace(/<[^>]+>/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
