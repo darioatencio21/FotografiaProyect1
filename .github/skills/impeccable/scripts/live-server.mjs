@@ -1028,28 +1028,25 @@ function handlePollGet(req, res, url) {
     return;
   }
   const poll = { resolve, leaseMs, types };
-  const timer = setTimeout(() => {
+  res.setTimeout(DEFAULT_POLL_TIMEOUT, () => {
     const idx = state.pendingPolls.indexOf(poll);
     if (idx !== -1) state.pendingPolls.splice(idx, 1);
     broadcastAgentPollingIfChanged();
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ type: 'timeout' }));
-  }, DEFAULT_POLL_TIMEOUT);
+    if (!res.writableEnded) {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ type: 'timeout' }));
+    }
+  });
   function resolve(event) {
-    clearTimeout(timer);
     state.lastPollAt = Date.now();
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(event));
+    if (!res.writableEnded) {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(event));
+    }
   }
   state.pendingPolls.push(poll);
   broadcastAgentPollingIfChanged();
   scheduleLeaseFlush();
-  req.on('close', () => {
-    clearTimeout(timer);
-    const idx = state.pendingPolls.indexOf(poll);
-    if (idx !== -1) state.pendingPolls.splice(idx, 1);
-    broadcastAgentPollingIfChanged();
-  });
 }
 
 function sessionFileMetadataFromPollReply(file) {

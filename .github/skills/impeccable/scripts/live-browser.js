@@ -7054,7 +7054,8 @@
     if (!port) return Promise.reject(new Error('invalid port'));
     msLoadPromise = new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
-      xhr.open('GET', 'http://localhost:' + port + '/modern-screenshot.js', true);
+      xhr.open('GET', '/modern-screenshot.js?_port=' + port, true);
+      xhr.overrideMimeType('text/plain');
       xhr.onload = () => {
         if (xhr.status === 200) {
           const s = document.createElement('script');
@@ -10347,7 +10348,8 @@ void main() {
     if (!port) return;
     detectScriptLoaded = true;
     const xhr = new XMLHttpRequest();
-    xhr.open('GET', 'http://localhost:' + port + '/detect.js', true);
+    xhr.open('GET', '/detect.js?_port=' + port, true);
+    xhr.overrideMimeType('text/plain');
     xhr.onload = () => {
       if (xhr.status === 200) {
         const s = document.createElement('script');

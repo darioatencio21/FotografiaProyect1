@@ -849,10 +849,10 @@ export function hasVisualImplementation(projectRoot) {
     }
 
     let evidence = body
-      .replace(/\/\*[\s\S]*?\*\//g, '')
       .split('\n')
       .filter(l => !/^\s*\/\//.test(l))
       .join('\n');
+    while (true) { const a = evidence.indexOf('/*'); if (a === -1) break; const b = evidence.indexOf('*/', a + 2); if (b === -1) { evidence = evidence.slice(0, a); break; } evidence = evidence.slice(0, a) + evidence.slice(b + 2); }
     while (true) { const a = evidence.indexOf('<!--'); if (a === -1) break; const b = evidence.indexOf('-->', a + 4); if (b === -1) { evidence = evidence.slice(0, a); break; } evidence = evidence.slice(0, a) + evidence.slice(b + 3); }
     if (STYLE_EXTENSIONS.has(ext)) {
       const customProperties = evidence.match(/--[a-z0-9_-]+\s*:/gi)?.length ?? 0;
