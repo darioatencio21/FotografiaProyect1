@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -8,9 +8,9 @@ import { motion, AnimatePresence, useInView } from 'motion/react';
 import { 
    Heart, ArrowRight, MessageSquare, MapPin, 
    Mail, Phone, ShieldCheck, Sparkles, AlertCircle, ChevronDown,
-   Eye, EyeOff, X, Camera, Users, Calendar, PartyPopper, 
-   CheckCircle2, ShoppingBag, Star, Baby, GraduationCap, Gift, Briefcase,
-   Gem, Utensils, Package
+    Eye, EyeOff, X, Camera, Users, Calendar, PartyPopper,
+    CheckCircle2, ShoppingBag, Star, Baby, GraduationCap, Gift, Briefcase,
+    Gem, Utensils, Package, Award
 } from 'lucide-react';
 
 import { 
@@ -55,8 +55,8 @@ async function syncCollection<T extends { id: string }>(
 ) {
   try {
     const newIds = new Set(newList.map(item => item.id));
-    const deletedItems = oldList.filter(item => !newIds.has(item.id));
-    for (const item of deletedItems) {
+    const deletedItemás = oldList.filter(item => !newIds.has(item.id));
+    for (const item of deletedItemás) {
       await deleteDocument(collectionPath, item.id);
     }
 
@@ -128,7 +128,7 @@ function CountUp({ end, suffix = '', duration = 2000, delay = 0 }: { end: number
 }
 
 export default function App() {
-  // Navigation & Language Context
+  // Navigation & Languíage Context
   const [currentView, setCurrentView] = useState<string>(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.has('gallery')) return 'client-portal';
@@ -166,66 +166,64 @@ export default function App() {
     return params.get('gallery') || '';
   });
   const [lang, setLang] = useState<'es' | 'en'>(() => {
-    const savedLanguage = localStorage.getItem('aurea_lang');
-    return savedLanguage === 'es' || savedLanguage === 'en' ? savedLanguage : 'en';
+    const savedLanguíage = localStorage.getItem('aorea_lang');
+    return savedLanguíage === 'es' || savedLanguíage === 'en' ? savedLanguíage : 'en';
   });
 
   const [photographs, setPhotographs] = useState<Photograph[]>(() => {
-    try { const saved = localStorage.getItem('aurea_photos'); return saved ? JSON.parse(saved) : INITIAL_PHOTOGRAPHS; } catch { return INITIAL_PHOTOGRAPHS; }
+    try { const saved = localStorage.getItem('aorea_photos'); return saved ? JSON.parse(saved) : INITIAL_PHOTOGRAPHS; } catch { return INITIAL_PHOTOGRAPHS; }
   });
   
   const [services, setServices] = useState<Service[]>(() => {
-    try { const saved = localStorage.getItem('aurea_services'); return saved ? JSON.parse(saved) : INITIAL_SERVICES; } catch { return INITIAL_SERVICES; }
+    try { const saved = localStorage.getItem('aorea_services'); return saved ? JSON.parse(saved) : INITIAL_SERVICES; } catch { return INITIAL_SERVICES; }
   });
 
   const [testimonials, setTestimonials] = useState<Testimonial[]>(() => {
-    try { const saved = localStorage.getItem('aurea_testimonials'); return saved ? JSON.parse(saved) : INITIAL_TESTIMONIALS; } catch { return INITIAL_TESTIMONIALS; }
+    try { const saved = localStorage.getItem('aorea_testimonials'); return saved ? JSON.parse(saved) : INITIAL_TESTIMONIALS; } catch { return INITIAL_TESTIMONIALS; }
   });
 
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>(() => {
-    try { const saved = localStorage.getItem('aurea_blog'); return saved ? JSON.parse(saved) : INITIAL_BLOG_POSTS; } catch { return INITIAL_BLOG_POSTS; }
+    try { const saved = localStorage.getItem('aorea_blog'); return saved ? JSON.parse(saved) : INITIAL_BLOG_POSTS; } catch { return INITIAL_BLOG_POSTS; }
   });
 
   const [faqs, setFaqs] = useState<FAQ[]>(() => {
-    try { const saved = localStorage.getItem('aurea_faqs'); return saved ? JSON.parse(saved) : INITIAL_FAQS; } catch { return INITIAL_FAQS; }
+    try { const saved = localStorage.getItem('aorea_faqs'); return saved ? JSON.parse(saved) : INITIAL_FAQS; } catch { return INITIAL_FAQS; }
   });
 
   const [bookings, setBookings] = useState<Booking[]>(() => {
-    try { const saved = localStorage.getItem('aurea_bookings'); return saved ? JSON.parse(saved) : INITIAL_BOOKINGS; } catch { return INITIAL_BOOKINGS; }
+    try { const saved = localStorage.getItem('aorea_bookings'); return saved ? JSON.parse(saved) : INITIAL_BOOKINGS; } catch { return INITIAL_BOOKINGS; }
   });
 
   const [messages, setMessages] = useState<Message[]>(() => {
-    try { const saved = localStorage.getItem('aurea_messages'); return saved ? JSON.parse(saved) : INITIAL_MESSAGES; } catch { return INITIAL_MESSAGES; }
+    try { const saved = localStorage.getItem('aorea_messages'); return saved ? JSON.parse(saved) : INITIAL_MESSAGES; } catch { return INITIAL_MESSAGES; }
   });
 
   const [seo, setSeo] = useState<SEOMetadata>(() => {
-    try { const saved = localStorage.getItem('aurea_seo'); return saved ? JSON.parse(saved) : INITIAL_SEO; } catch { return INITIAL_SEO; }
+    try { const saved = localStorage.getItem('aorea_seo'); return saved ? JSON.parse(saved) : INITIAL_SEO; } catch { return INITIAL_SEO; }
   });
 
   const [profile, setProfile] = useState<PhotographerProfile>(() => {
-    try { const saved = localStorage.getItem('aurea_profile'); return saved ? JSON.parse(saved) : INITIAL_PROFILE; } catch { return INITIAL_PROFILE; }
+    try { const saved = localStorage.getItem('aorea_profile'); return saved ? JSON.parse(saved) : INITIAL_PROFILE; } catch { return INITIAL_PROFILE; }
   });
 
   const [bookingConfig, setBookingConfig] = useState<BookingConfig>(() => {
-    try { const saved = localStorage.getItem('aurea_booking_config'); return saved ? JSON.parse(saved) : INITIAL_BOOKING_CONFIG; } catch { return INITIAL_BOOKING_CONFIG; }
+    try { const saved = localStorage.getItem('aorea_booking_config'); return saved ? JSON.parse(saved) : INITIAL_BOOKING_CONFIG; } catch { return INITIAL_BOOKING_CONFIG; }
   });
 
   const [emailConfig, setEmailConfig] = useState<EmailConfig>(() => {
-    try { const saved = localStorage.getItem('aurea_email_config'); return saved ? JSON.parse(saved) : INITIAL_EMAIL_CONFIG; } catch { return INITIAL_EMAIL_CONFIG; }
+    try { const saved = localStorage.getItem('aorea_email_config'); return saved ? JSON.parse(saved) : INITIAL_EMAIL_CONFIG; } catch { return INITIAL_EMAIL_CONFIG; }
   });
 
   const [sessionCategories, setSessionCategories] = useState<SessionCategory[]>(() => {
-    try { const saved = localStorage.getItem('aurea_session_categories'); return saved ? JSON.parse(saved) : INITIAL_SESSION_CATEGORIES; } catch { return INITIAL_SESSION_CATEGORIES; }
+    try { const saved = localStorage.getItem('aorea_session_categories'); return saved ? JSON.parse(saved) : INITIAL_SESSION_CATEGORIES; } catch { return INITIAL_SESSION_CATEGORIES; }
   });
 
   const [packages, setPackages] = useState<PhotographyPackage[]>(() => {
-    try { const saved = localStorage.getItem('aurea_packages'); return saved ? JSON.parse(saved) : INITIAL_PHOTOGRAPHY_PACKAGES; } catch { return INITIAL_PHOTOGRAPHY_PACKAGES; }
+    try { const saved = localStorage.getItem('aorea_packages'); return saved ? JSON.parse(saved) : INITIAL_PHOTOGRAPHY_PACKAGES; } catch { return INITIAL_PHOTOGRAPHY_PACKAGES; }
   });
-  const [publicReview, setPublicReview] = useState({ name: '', role: '', comment: '', rating: 5 });
-  const [publicReviewSent, setPublicReviewSent] = useState(false);
 
   const [invoices, setInvoices] = useState<Invoice[]>(() => {
-    try { const saved = localStorage.getItem('aurea_invoices'); return saved ? JSON.parse(saved) : INITIAL_INVOICES; } catch { return INITIAL_INVOICES; }
+    try { const saved = localStorage.getItem('aorea_invoices'); return saved ? JSON.parse(saved) : INITIAL_INVOICES; } catch { return INITIAL_INVOICES; }
   });
 
   const [clientAccounts, setClientAccounts] = useState<ClientAccount[]>(INITIAL_CLIENT_ACCOUNTS);
@@ -234,7 +232,7 @@ export default function App() {
   const [activeFilter, setActiveFilter] = useState<string>('galeria');
   const [selectedPhotoForLightbox, setSelectedPhotoForLightbox] = useState<Photograph | null>(null);
   const [favorites, setFavorites] = useState<string[]>(() => {
-    try { const saved = localStorage.getItem('aurea_favorites'); return saved ? JSON.parse(saved) : []; } catch { return []; }
+    try { const saved = localStorage.getItem('aorea_favorites'); return saved ? JSON.parse(saved) : []; } catch { return []; }
   });
 
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -245,7 +243,7 @@ export default function App() {
   // Administrative Workspace credentials
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
-  const [adminUsername, setAdminUsername] = useState('');
+  const [adminUseráname, setAdminUseráname] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
   const [showAdminPassword, setShowAdminPassword] = useState(false);
   const [adminLoginError, setAdminLoginError] = useState('');
@@ -282,7 +280,7 @@ export default function App() {
 
   useEffect(() => {
     // Remove client passcodes written by older versions of the application.
-    localStorage.removeItem('aurea_client_accounts');
+    localStorage.removeItem('aorea_client_accounts');
   }, []);
 
   useEffect(() => {
@@ -313,7 +311,7 @@ export default function App() {
       if (cancelled) return;
 
       // One-time migration: repair data corrupted by old sanitizeString HTML escaping
-      const MIGRATE_FLAG = 'aurea_html_entities_migrated_v2';
+      const MIGRATE_FLAG = 'aorea_html_entities_migrated_v2';
       const needsMigration = !localStorage.getItem(MIGRATE_FLAG);
 
       if (needsMigration) {
@@ -484,73 +482,73 @@ export default function App() {
 
   const handleUpdateSessionCategories = async (newCategories: SessionCategory[]) => {
     setSessionCategories(newCategories);
-    localStorage.setItem('aurea_session_categories', JSON.stringify(newCategories));
+    localStorage.setItem('aorea_session_categories', JSON.stringify(newCategories));
     await syncCollection('session_categories', sessionCategories, newCategories);
   };
 
   // Sync to LocalStorage whenever DB collections update (for offline-fallback cache layer)
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aurea_photos', JSON.stringify(photographs));
+    if (bootstrapped) localStorage.setItem('aorea_photos', JSON.stringify(photographs));
   }, [photographs, bootstrapped]);
 
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aurea_services', JSON.stringify(services));
+    if (bootstrapped) localStorage.setItem('aorea_services', JSON.stringify(services));
   }, [services, bootstrapped]);
 
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aurea_testimonials', JSON.stringify(testimonials));
+    if (bootstrapped) localStorage.setItem('aorea_testimonials', JSON.stringify(testimonials));
   }, [testimonials, bootstrapped]);
 
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aurea_blog', JSON.stringify(blogPosts));
+    if (bootstrapped) localStorage.setItem('aorea_blog', JSON.stringify(blogPosts));
   }, [blogPosts, bootstrapped]);
 
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aurea_faqs', JSON.stringify(faqs));
+    if (bootstrapped) localStorage.setItem('aorea_faqs', JSON.stringify(faqs));
   }, [faqs, bootstrapped]);
 
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aurea_bookings', JSON.stringify(bookings));
+    if (bootstrapped) localStorage.setItem('aorea_bookings', JSON.stringify(bookings));
   }, [bookings, bootstrapped]);
 
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aurea_invoices', JSON.stringify(invoices));
+    if (bootstrapped) localStorage.setItem('aorea_invoices', JSON.stringify(invoices));
   }, [invoices, bootstrapped]);
 
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aurea_messages', JSON.stringify(messages));
+    if (bootstrapped) localStorage.setItem('aorea_messages', JSON.stringify(messages));
   }, [messages, bootstrapped]);
 
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aurea_seo', JSON.stringify(seo));
+    if (bootstrapped) localStorage.setItem('aorea_seo', JSON.stringify(seo));
   }, [seo, bootstrapped]);
 
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aurea_profile', JSON.stringify(profile));
+    if (bootstrapped) localStorage.setItem('aorea_profile', JSON.stringify(profile));
   }, [profile, bootstrapped]);
 
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aurea_booking_config', JSON.stringify(bookingConfig));
+    if (bootstrapped) localStorage.setItem('aorea_booking_config', JSON.stringify(bookingConfig));
   }, [bookingConfig, bootstrapped]);
 
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aurea_email_config', JSON.stringify(emailConfig));
+    if (bootstrapped) localStorage.setItem('aorea_email_config', JSON.stringify(emailConfig));
   }, [emailConfig, bootstrapped]);
 
   useEffect(() => {
-    localStorage.setItem('aurea_lang', lang);
+    localStorage.setItem('aorea_lang', lang);
   }, [lang]);
 
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aurea_session_categories', JSON.stringify(sessionCategories));
+    if (bootstrapped) localStorage.setItem('aorea_session_categories', JSON.stringify(sessionCategories));
   }, [sessionCategories, bootstrapped]);
 
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aurea_packages', JSON.stringify(packages));
+    if (bootstrapped) localStorage.setItem('aorea_packages', JSON.stringify(packages));
   }, [packages, bootstrapped]);
 
   useEffect(() => {
-    localStorage.setItem('aurea_favorites', JSON.stringify(favorites));
+    localStorage.setItem('aorea_favorites', JSON.stringify(favorites));
   }, [favorites]);
 
   // Update Dynamic Document Meta tags according to active SEO settings
@@ -624,7 +622,7 @@ export default function App() {
 
         if (emailConfig.enableAutoResponse) {
           const autoTemplateId = emailConfig.emailjsAutoTemplateId || emailConfig.emailjsTemplateId;
-          const autoSubject = emailConfig.autoReplySubject || '¡Tu mensaje ha sido recibido! - Aurea Studio';
+          const autoSubject = emailConfig.autoReplySubject || 'Tu mensaje ha sido recibido! - Aorea Studio';
           const autoMessage = emailConfig.autoReplyMessage || 'Gracias por contactarte con nosotros. Responderemos a la brevedad.';
 
           await emailjs.send(
@@ -668,7 +666,7 @@ export default function App() {
     setIsAdminAuthLoading(true);
     setAdminLoginError('');
 
-    const email = sanitizeEmail(adminUsername);
+    const email = sanitizeEmail(adminUseráname);
     const password = adminPassword;
 
     if (!email || !email.includes('@')) {
@@ -689,11 +687,11 @@ export default function App() {
       const msg = err?.message || err?.error_description || err?.code || '';
       const errorMessages: Record<string, string> = {
         'Invalid login credentials': 'EL CORREO O LA CONTRASEÑA SON INCORRECTOS.',
-        'Email not confirmed': 'EL CORREO NO ESTÁ CONFIRMADO. REVISA TU BANDEJA DE ENTRADA.',
+        'Email not confirmed': 'EL CORREO NO EST CONFIRMADO. REVISA TU BANDEJA DE ENTRADA.',
         'Invalid email': 'EL CORREO ELECTRÓNICO NO ES VÁLIDO.',
         'User not found': 'NO EXISTE UN USUARIO CON ESE CORREO.',
         'Too many requests': 'DEMASIADOS INTENTOS. ESPERA UN MOMENTO Y VUELVE A INTENTARLO.',
-        'Signup not allowed': 'EL REGISTRO NO ESTÁ HABILITADO.',
+        'Signup not allowed': 'EL REGISTRO NO EST HABILITADO.',
       };
       const matched = Object.keys(errorMessages).find(k => msg.includes(k));
       setAdminLoginError(matched ? errorMessages[matched] : 'NO SE PUDO INICIAR SESIÓN EN SUPABASE AUTHENTICATION.');
@@ -790,7 +788,7 @@ export default function App() {
   });
 
   return (
-    <div className="bg-dark text-white min-h-screen relative w-full overflow-x-hidden font-sans select-none selection:bg-gold-500 selection:text-dark">
+    <div className="bg-dark text-white min-h-screen relative w-full overflow-x-hidden font-sans select-none selection:bg-white/15">
       {/* CORE HEADER */}
       <Header
         currentView={currentView}
@@ -874,7 +872,7 @@ export default function App() {
           </div>
 
           {/* Subtle divider line */}
-          <div className="absolute inset-y-[15%] left-1/2 w-px bg-hero/20 z-20 hidden md:block" />
+          <div className="absolute inset-y-[15%] left-1/2 w-px bg-white/10 z-20 hidden md:block" />
 
           {/* Central content overlay */}
           <div className="absolute inset-0 z-20 flex flex-col justify-center pointer-events-none">
@@ -885,12 +883,22 @@ export default function App() {
                 transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
                 className="font-serif text-[clamp(1.5rem,7.5vw,4rem)] sm:text-[clamp(1.75rem,6vw,4.5rem)] md:text-[clamp(2.5rem,5vw,5rem)] lg:text-[clamp(3rem,4.5vw,5.5rem)] leading-[1.15] tracking-wide text-hero drop-shadow-sm"
               >
-                <span className="italic">{t.heroTitle.split(',')[0]},</span>
-                <br />
-                <span className="not-italic font-light">{t.heroTitle.split(',')[1] ? t.heroTitle.split(',')[1].trim().split('&')[0]?.trim() : 'EMOTIÓN'}</span>
-                <br />
-                <span className="italic font-medium">&</span>{' '}
-                <span className="not-italic font-light">{t.heroTitle.split('&')[1]?.trim() || 'SIMETRÍA'}</span>
+                {t.heroTitle.includes(',') ? (
+                  <>
+                    <span className="italic">{t.heroTitle.split(',')[0]},</span>
+                    <br />
+                    <span className="not-italic font-light">{t.heroTitle.split(',')[1].trim().split('&')[0]?.trim()}</span>
+                    {t.heroTitle.includes('&') && (
+                      <>
+                        <br />
+                        <span className="italic font-medium">&</span>{' '}
+                        <span className="not-italic font-light">{t.heroTitle.split('&')[1]?.trim()}</span>
+                      </>
+                    )}
+                  </>
+                ) : (
+                  <span>{t.heroTitle}</span>
+                )}
               </motion.h1>
 
               <motion.p
@@ -906,11 +914,11 @@ export default function App() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.35 }}
-                className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-4 mt-5 md:mt-12"
+                className="flex flex-nowrap items-center justify-center gap-2 sm:gap-3 md:gap-4 mt-5 md:mt-12"
               >
                 <button
                   onClick={() => navigateTo('portfolio')}
-                  className="px-4 sm:px-6 md:px-7 py-2 md:py-3 bg-hero text-[#2B211A] hover:bg-hero/90 font-mono text-[clamp(7px,2vw,10px)] tracking-widest uppercase font-semibold transition-all duration-300 cursor-pointer whitespace-nowrap"
+                  className="px-4 sm:px-6 md:px-7 py-2 md:py-3 bg-white/10 hover:bg-white/15 text-white border border-white/20 font-mono text-[clamp(7px,2vw,10px)] tracking-widest uppercase font-semibold transition-all duration-300 cursor-pointer whitespace-nowrap"
                 >
                   {t.ctaPortfolio}
                 </button>
@@ -922,7 +930,7 @@ export default function App() {
                       if (element) element.scrollIntoView({ behavior: 'smooth' });
                     }, 200);
                   }}
-                  className="px-4 sm:px-6 md:px-7 py-2 md:py-3 border border-hero/40 text-hero hover:border-hero font-mono text-[clamp(7px,2vw,10px)] tracking-widest uppercase font-semibold transition-all duration-300 cursor-pointer bg-transparent whitespace-nowrap drop-shadow-sm"
+                  className="px-4 sm:px-6 md:px-7 py-2 md:py-3 border border-white/30 text-white/80 hover:border-white font-mono text-[clamp(7px,2vw,10px)] tracking-widest uppercase font-semibold transition-all duration-300 cursor-pointer bg-transparent whitespace-nowrap drop-shadow-sm"
                 >
                   {t.ctaBook}
                 </button>
@@ -935,13 +943,13 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.2 }}
-            className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center space-y-2"
+            className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-20 flex-col items-center space-y-2 flex md:hidden"
           >
-            <span className="text-[10px] font-mono tracking-wider text-hero/40 uppercase">Scroll</span>
+            <span className="text-[10px] font-mono tracking-wider text-white/30 uppercase">Scroll</span>
             <motion.div
               animate={{ y: [0, 6, 0] }}
               transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-              className="w-px h-6 sm:h-8 bg-hero/30"
+              className="w-px h-6 sm:h-8 bg-white/10"
             />
           </motion.div>
         </section>
@@ -954,7 +962,7 @@ export default function App() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -15 }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
-          className="pb-24 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto space-y-12 md:space-y-24">
+          className="pt-[70px] lg:pt-20 pb-24 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto space-y-12 md:space-y-24">
 
           {/* ======================================================= */}
           {/* HOME SCREEN (content below hero) */}
@@ -962,123 +970,87 @@ export default function App() {
           {currentView === 'home' && (
             <div className="space-y-12 md:space-y-24">
               {/* Statistics — Editorial Craft Metrics */}
-              <section className="py-10 md:py-14">
-                {/* Eyebrow — refined, minimal */}
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6 }}
-                  className="flex items-center justify-center gap-2 mb-8"
-                >
-                  <span className="w-6 md:w-8 h-px bg-white/10" />
-                  <span className="text-[10px] font-mono tracking-wider text-white/30 uppercase select-none">
-                    {t.statsTitle}
-                  </span>
-                  <span className="w-6 md:w-8 h-px bg-white/10" />
-                </motion.div>
+              <section className="relative py-12 md:py-16 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] via-transparent to-transparent pointer-events-none" />
 
-                {/* Hero number — Count Up */}
-                <motion.div
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
-                  className="text-center mb-6"
-                >
-                  <p className="font-serif text-[clamp(3rem,15vw,6.5rem)] text-white leading-[0.85] font-light tracking-tight">
-                    <CountUp end={2000} suffix="+" duration={2500} />
-                  </p>
-                  <div className="mt-3 space-y-1">
-                    <p className="text-[11px] md:text-[9px] font-mono tracking-[0.35em] text-gold-500/60 uppercase">
-                      {t.sessions}
+                <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                    className="text-center mb-12 md:mb-16"
+                  >
+                    <p className="text-[11px] font-mono tracking-[0.35em] text-white/30 uppercase">
+                      {t.statsTitle}
                     </p>
-                    <p className="text-[9px] md:text-[10px] text-white/35 max-w-xs mx-auto leading-relaxed font-light">
-                      {t.sessionsSub}
-                    </p>
-                  </div>
-                </motion.div>
+                    <div className="w-12 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mx-auto mt-3" />
+                  </motion.div>
 
-                {/* Decorative divider */}
-                <motion.div
-                  initial={{ opacity: 0, scaleX: 0 }}
-                  whileInView={{ opacity: 1, scaleX: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.3 }}
-                  className="flex items-center justify-center gap-3 mb-6 md:mb-8"
-                >
-                  <span className="w-10 md:w-16 h-px bg-white/[0.06]" />
-                  <span className="w-[3px] h-[3px] rotate-45 bg-gold-500/20" />
-                  <span className="w-10 md:w-16 h-px bg-white/[0.06]" />
-                </motion.div>
+                  <div className="relative grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-0">
+                    <div className="hidden md:block absolute top-[18%] bottom-[18%] left-1/3 w-px bg-gradient-to-b from-transparent via-white/[0.06] to-transparent" />
+                    <div className="hidden md:block absolute top-[18%] bottom-[18%] right-1/3 w-px bg-gradient-to-b from-transparent via-white/[0.06] to-transparent" />
 
-                {/* Stats grid — 3 visual columns */}
-                <div className="max-w-2xl mx-auto">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-0">
                     {/* 15+ Years */}
                     <motion.div
-                      initial={{ opacity: 0, y: 16 }}
+                      initial={{ opacity: 0, y: 20 }}
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
-                      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-                      className="text-center md:border-r border-white/[0.06] md:px-6"
+                      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
+                      className="text-center md:px-6 lg:px-10 group"
                     >
-                      <p className="font-serif text-3xl md:text-4xl text-white font-light leading-none">
+                      <Camera size={18} strokeWidth={1.5} className="text-white/40 mx-auto mb-4" />
+                      <p className="font-serif text-3xl md:text-4xl text-white font-light leading-none group-hover:scale-[1.03] transition-transform duration-500">
                         <CountUp end={15} suffix="+" duration={2000} />
                       </p>
-                      <p className="text-[11px] font-mono tracking-[0.25em] text-white/20 uppercase mt-2.5">
+                      <p className="text-[10px] font-mono tracking-[0.3em] text-white/20 uppercase mt-3">
                         {t.yearsExp}
                       </p>
-                      <p className="text-[11px] text-white/15 mt-1 leading-relaxed">
+                      <p className="text-[10px] text-white/15 mt-1.5 leading-relaxed max-w-[160px] mx-auto">
                         {t.yearsExpSub}
                       </p>
                     </motion.div>
 
-                    {/* Decorative center — editorial breathing space */}
+                    {/* 2000+ Sessions — Center hero metric, 40% larger */}
                     <motion.div
-                      initial={{ opacity: 0 }}
-                      whileInView={{ opacity: 1 }}
+                      initial={{ opacity: 0, y: 24 }}
+                      whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
-                      transition={{ duration: 0.6, delay: 0.35 }}
-                      className="hidden md:flex flex-col items-center justify-center md:px-6"
+                      transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.25 }}
+                      className="text-center md:px-6 lg:px-10 group"
                     >
-                      <span className="w-6 h-px bg-white/[0.04] mb-1.5" />
-                      <span className="w-[3px] h-[3px] rotate-45 bg-gold-500/15" />
-                      <span className="w-6 h-px bg-white/[0.04] mt-1.5" />
+                      <Award size={20} strokeWidth={1.5} className="text-white/50 mx-auto mb-5" />
+                      <p className="font-serif text-[clamp(2.5rem,8vw,5rem)] text-white font-light leading-none group-hover:scale-[1.03] transition-transform duration-500">
+                        <CountUp end={2000} suffix="+" duration={2500} />
+                      </p>
+                      <p className="text-[11px] font-mono tracking-[0.35em] text-white/25 uppercase mt-3">
+                        {t.sessions}
+                      </p>
+                      <p className="text-[10px] text-white/15 mt-1.5 leading-relaxed max-w-[180px] mx-auto">
+                        {t.sessionsSub}
+                      </p>
                     </motion.div>
 
                     {/* 98% Satisfied */}
                     <motion.div
-                      initial={{ opacity: 0, y: 16 }}
+                      initial={{ opacity: 0, y: 20 }}
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
-                      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.4 }}
-                      className="text-center md:px-6"
+                      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.35 }}
+                      className="text-center md:px-6 lg:px-10 group"
                     >
-                      <p className="font-serif text-3xl md:text-4xl text-white font-light leading-none">
+                      <Star size={18} strokeWidth={1.5} className="text-white/40 mx-auto mb-4" />
+                      <p className="font-serif text-3xl md:text-4xl text-white font-light leading-none group-hover:scale-[1.03] transition-transform duration-500">
                         <CountUp end={98} suffix="%" duration={2000} />
                       </p>
-                      <p className="text-[11px] font-mono tracking-[0.25em] text-white/20 uppercase mt-2.5">
+                      <p className="text-[10px] font-mono tracking-[0.3em] text-white/20 uppercase mt-3">
                         {t.satisfied}
                       </p>
-                      <p className="text-[11px] text-white/15 mt-1 leading-relaxed">
+                      <p className="text-[10px] text-white/15 mt-1.5 leading-relaxed max-w-[160px] mx-auto">
                         {t.satisfiedSub}
                       </p>
                     </motion.div>
                   </div>
-
-                  {/* Mobile stacked layout: md:hidden decorative rule */}
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: 0.5 }}
-                    className="flex md:hidden items-center justify-center gap-3 mt-6"
-                  >
-                    <span className="w-8 h-px bg-white/[0.04]" />
-                    <span className="w-[2px] h-[2px] rotate-45 bg-gold-500/15" />
-                    <span className="w-8 h-px bg-white/[0.04]" />
-                  </motion.div>
                 </div>
               </section>
 
@@ -1088,7 +1060,7 @@ export default function App() {
               <section className="space-y-7 text-left">
                 <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
                   <div>
-                    <span className="text-[10px] font-mono text-gold-400 tracking-widest uppercase block">
+                    <span className="text-[10px] font-mono text-white/70 tracking-widest uppercase block">
                       {lang === 'es' ? 'Colecciones seleccionadas' : 'Selected collections'}
                     </span>
                     <h2 className="font-serif text-3xl text-white tracking-wide mt-1">
@@ -1098,25 +1070,25 @@ export default function App() {
                       {lang === 'es' ? 'Experiencias diseñadas para convertir tus momentos en recuerdos que permanecen.' : 'Experiences designed to turn your moments into memories that last.'}
                     </p>
                   </div>
-                  <button onClick={() => navigateTo('services')} className="text-xs font-mono text-gold-400 hover:text-gold-300 flex items-center gap-1 transition-colors">
+                  <button onClick={() => navigateTo('services')} className="text-xs font-mono text-white/70 hover:text-white/60 flex items-center gap-1 transition-colors">
                     <span>{lang === 'es' ? 'Ver todos los paquetes' : 'View all packages'}</span>
                     <ArrowRight size={12} />
                   </button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                   {packages.filter(pkg => pkg.active && pkg.featured).slice(0, 3).map(pkg => (
-                    <article key={pkg.id} className="group bg-dark-gray border border-gold-500/20 rounded-2xl overflow-hidden hover:border-gold-400/50 transition-all duration-500 shadow-warm-sm">
+                    <article key={pkg.id} className="group bg-dark-gray border border-white/10 rounded-lg overflow-hidden hover:border-white/30 transition-all duration-500 shadow-sm">
                       {pkg.image && <div className="h-36 overflow-hidden"><img src={sanitizeUrl(pkg.image) || undefined} alt={lang === 'es' ? pkg.name_es : pkg.name_en} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" /></div>}
                       <div className="p-5 space-y-4">
                         <div className="flex items-start justify-between gap-3">
                           <div>
-                            <p className="text-[11px] font-mono tracking-[0.2em] uppercase text-gold-400/70">{t[pkg.category as keyof typeof t] || pkg.category}</p>
+                            <p className="text-[11px] font-mono tracking-[0.2em] uppercase text-white/70/70">{t[pkg.category as keyof typeof t] || pkg.category}</p>
                             <h3 className="font-serif text-xl text-white mt-1">{lang === 'es' ? pkg.name_es : pkg.name_en}</h3>
                           </div>
-                          <span className="font-mono text-sm text-gold-400 whitespace-nowrap">${pkg.price.toLocaleString()}</span>
+                          <span className="font-mono text-sm text-white/70 whitespace-nowrap">${pkg.price.toLocaleString()}</span>
                         </div>
                         <p className="text-[11px] text-white/50 leading-relaxed line-clamp-2">{lang === 'es' ? pkg.description_es : pkg.description_en}</p>
-                        <button onClick={() => { setSelectedCategory(pkg.category); setSelectedPackageId(pkg.id); navigateTo('services'); }} className="w-full py-2.5 border border-white/15 hover:border-gold-400/50 text-white/70 hover:text-gold-300 rounded-lg font-mono text-[9px] tracking-widest uppercase transition-all">
+                        <button onClick={() => { setSelectedCategory(pkg.category); setSelectedPackageId(pkg.id); navigateTo('services'); }} className="w-full py-2.5 border border-white/15 hover:border-white/30 text-white/70 hover:text-white/60 rounded-lg font-mono text-[9px] tracking-widest uppercase transition-all">
                           {lang === 'es' ? 'Elegir paquete' : 'Choose package'}
                         </button>
                       </div>
@@ -1126,9 +1098,9 @@ export default function App() {
               </section>
 
               {/* Booking process */}
-              <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-dark-gray to-charcoal p-6 md:p-10 text-left shadow-warm-md">
+              <section className="relative overflow-hidden rounded-lg border border-white/10 bg-gradient-to-br from-dark-gray to-charcoal p-6 md:p-10 text-left shadow-md">
                 <div className="max-w-2xl">
-                  <span className="text-[10px] font-mono text-gold-400 tracking-widest uppercase">{lang === 'es' ? 'Tu experiencia' : 'Your experience'}</span>
+                  <span className="text-[10px] font-mono text-white/70 tracking-widest uppercase">{lang === 'es' ? 'Tu experiencia' : 'Your experience'}</span>
                   <h2 className="font-serif text-3xl text-white tracking-wide mt-1">{lang === 'es' ? 'Reservar es sencillo' : 'Booking made simple'}</h2>
                   <p className="text-xs text-white/45 mt-2">{lang === 'es' ? 'Un proceso claro, seguro y acompañado de principio a fin.' : 'A clear, secure process with guidance from beginning to end.'}</p>
                 </div>
@@ -1141,60 +1113,17 @@ export default function App() {
                   ].map(stepItem => {
                     const Icon = stepItem.icon;
                     return <div key={stepItem.number} className="relative space-y-3">
-                      <div className="flex items-center gap-3"><span className="font-mono text-[10px] text-gold-400">{stepItem.number}</span><Icon size={16} className="text-gold-400" /></div>
+                      <div className="flex items-center gap-3"><span className="font-mono text-[10px] text-white/70">{stepItem.number}</span><Icon size={16} className="text-white/70" /></div>
                       <h3 className="font-serif text-lg text-white/90">{stepItem.title}</h3>
                       <p className="text-[10px] text-white/45 leading-relaxed">{stepItem.text}</p>
                     </div>;
                   })}
                 </div>
-                <button onClick={() => { navigateTo('services'); setTimeout(() => document.getElementById('booking-calendar')?.scrollIntoView({ behavior: 'smooth' }), 200); }} className="mt-8 px-5 py-3 bg-gold-500 hover:bg-gold-400 text-dark font-mono text-[10px] tracking-widest uppercase font-bold rounded-lg transition-colors">
+                <button onClick={() => { navigateTo('services'); setTimeout(() => document.getElementById('booking-calendar')?.scrollIntoView({ behavior: 'smooth' }), 200); }} className="mt-8 px-5 py-3 bg-white/10 hover:bg-white/15 text-white border border-white/10 font-mono text-[10px] tracking-widest uppercase font-bold rounded-lg transition-all">
                   {lang === 'es' ? 'Comenzar reserva' : 'Start booking'}
                 </button>
               </section>
 
-              {/* Testimonials */}
-              <section className="space-y-7 text-left">
-                <motion.div
-                  initial={{ opacity: 0, y: 18 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.4 }}
-                  transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
-                  className="text-center max-w-xl mx-auto"
-                >
-                  <span className="text-[10px] font-mono text-gold-400 tracking-widest uppercase">{lang === 'es' ? 'Historias reales' : 'Real stories'}</span>
-                  <h2 className="font-serif text-3xl text-white tracking-wide mt-1">{lang === 'es' ? 'Lo que dicen nuestros clientes' : 'What our clients say'}</h2>
-                  <button onClick={() => navigateTo('testimonials')} className="mt-3 text-[10px] font-mono uppercase tracking-widest text-gold-400 hover:text-gold-300 transition-colors">
-                    {lang === 'es' ? 'Leer todas las experiencias' : 'Read all experiences'} <ArrowRight size={11} className="inline ml-1" />
-                  </button>
-                </motion.div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                  {testimonials.filter(testimonial => testimonial.approved !== false).slice(0, 3).map((testimonial, index) => (
-                    <motion.article
-                      key={testimonial.id}
-                      initial={{ opacity: 0, y: 18 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      whileHover={{
-                        y: -4,
-                        transition: { duration: 0.28, ease: [0.22, 1, 0.36, 1] },
-                      }}
-                      viewport={{ once: true, amount: 0.25 }}
-                      transition={{
-                        opacity: { duration: 0.7, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] },
-                        y: { duration: 0.8, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] },
-                      }}
-                      style={{ willChange: 'transform, opacity' }}
-                      className="bg-dark-gray/70 border border-white/10 rounded-2xl p-6 space-y-5 shadow-warm-sm"
-                    >
-                      <div className="flex gap-1 text-gold-400">{Array.from({ length: testimonial.rating }).map((_, index) => <Star key={index} size={12} fill="currentColor" />)}</div>
-                      <p className="font-serif text-lg text-white/80 leading-relaxed">“{testimonial.comment}”</p>
-                      <div className="flex items-center gap-3 border-t border-white/10 pt-4">
-                        <img src={sanitizeUrl(testimonial.image) || undefined} alt={testimonial.name} className="w-9 h-9 rounded-full object-cover grayscale" />
-                        <div><p className="text-xs text-white/90 font-medium">{testimonial.name}</p><p className="text-[9px] font-mono text-white/35 uppercase tracking-wider">{testimonial.role}</p></div>
-                      </div>
-                    </motion.article>
-                  ))}
-                </div>
-              </section>
             </div>
           )}
 
@@ -1211,89 +1140,10 @@ export default function App() {
           {currentView === 'portfolio' && (
             <div className="space-y-8">
               <div className="border-b border-white/10 pb-6">
-                <h2 className="font-serif text-3xl text-gold-50 tracking-wide">{t.portfolioTitle}</h2>
+                <h2 className="font-serif text-3xl text-white/90 tracking-wide">{t.portfolioTitle}</h2>
               </div>
 
               <PixiesetGallery lang={lang} t={t} />
-            </div>
-          )}
-
-          {/* ======================================================= */}
-          {/* TESTIMONIALS SCREEN */}
-          {/* ======================================================= */}
-          {currentView === 'testimonials' && (
-            <div className="space-y-10">
-              <div className="max-w-2xl border-b border-white/10 pb-8">
-                <span className="text-[10px] font-mono text-gold-400 tracking-widest uppercase">{lang === 'es' ? 'Historias reales' : 'Real stories'}</span>
-                <h2 className="font-serif text-4xl md:text-5xl text-gold-50 tracking-wide mt-2">{lang === 'es' ? 'Experiencias que permanecen' : 'Experiences that stay with you'}</h2>
-                <p className="text-sm text-white/45 leading-relaxed mt-4 max-w-xl">{lang === 'es' ? 'Cada sesión es una historia compartida. Estas son algunas palabras de las personas que confiaron en Miriam Campos.' : 'Every session is a shared story. Here are a few words from the people who trusted Miriam Campos.'}</p>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                {testimonials.filter(testimonial => testimonial.approved !== false).map(testimonial => (
-                  <article key={testimonial.id} className="bg-dark-gray/70 border border-white/10 rounded-2xl p-7 md:p-9 space-y-6 hover:border-gold-500/25 transition-colors shadow-warm-sm">
-                    <div className="flex justify-between items-start gap-4">
-                      <div className="flex gap-1 text-gold-400">{Array.from({ length: testimonial.rating }).map((_, index) => <Star key={index} size={13} fill="currentColor" />)}</div>
-                      <span className="font-serif text-4xl text-gold-400/20 leading-none">“</span>
-                    </div>
-                    <p className="font-serif text-xl md:text-2xl text-white/85 leading-relaxed">{testimonial.comment}</p>
-                    <div className="flex items-center gap-3 border-t border-white/10 pt-5">
-                      <img src={sanitizeUrl(testimonial.image) || undefined} alt={testimonial.name} className="w-11 h-11 rounded-full object-cover grayscale" />
-                      <div><p className="text-sm text-white/90">{testimonial.name}</p><p className="text-[9px] font-mono text-white/35 uppercase tracking-widest mt-1">{testimonial.role}</p></div>
-                    </div>
-                  </article>
-                ))}
-              </div>
-              <div className="text-center pt-4">
-                <button onClick={() => navigateTo('services')} className="px-6 py-3 bg-gold-500 hover:bg-gold-400 text-dark font-mono text-[10px] tracking-widest uppercase font-bold rounded-lg transition-colors">
-                  {lang === 'es' ? 'Reserva tu propia experiencia' : 'Book your own experience'}
-                </button>
-              </div>
-
-              <section className="max-w-2xl mx-auto w-full bg-dark-gray/70 border border-gold-500/20 rounded-2xl p-6 md:p-8 text-left shadow-warm-sm">
-                {publicReviewSent ? (
-                  <div className="text-center py-5">
-                    <CheckCircle2 size={28} className="text-gold-400 mx-auto" />
-                    <h3 className="font-serif text-2xl text-white mt-3">{lang === 'es' ? 'Gracias por compartir tu experiencia' : 'Thank you for sharing your experience'}</h3>
-                    <p className="text-xs text-white/50 mt-2">{lang === 'es' ? 'Tu comentario está pendiente de revisión y aparecerá pronto.' : 'Your comment is pending review and will appear soon.'}</p>
-                  </div>
-                ) : (
-                  <form onSubmit={event => {
-                    event.preventDefault();
-                    if (!publicReview.name.trim() || !publicReview.comment.trim()) return;
-                    handleUpdateTestimonials([{
-                      id: `testimonial-${Date.now()}`,
-                      name: publicReview.name.trim(),
-                      role: publicReview.role.trim() || (lang === 'es' ? 'Cliente' : 'Client'),
-                      comment: publicReview.comment.trim(),
-                      rating: publicReview.rating,
-                      image: '',
-                      approved: false,
-                    }, ...testimonials]);
-                    setPublicReview({ name: '', role: '', comment: '', rating: 5 });
-                    setPublicReviewSent(true);
-                  }} className="space-y-5">
-                    <div>
-                      <span className="text-[10px] font-mono text-gold-400 tracking-widest uppercase">{lang === 'es' ? 'Comparte tu experiencia' : 'Share your experience'}</span>
-                      <h3 className="font-serif text-2xl text-white mt-1">{lang === 'es' ? '¿Trabajaste con nosotros?' : 'Have you worked with us?'}</h3>
-                      <p className="text-xs text-white/50 mt-2">{lang === 'es' ? 'Tu opinión ayuda a otras personas a dar el primer paso.' : 'Your feedback helps others take the first step.'}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-mono uppercase tracking-wider text-white/45 mr-2">{lang === 'es' ? 'Valoración' : 'Rating'}</span>
-                      {[1, 2, 3, 4, 5].map(rating => (
-                        <button key={rating} type="button" onClick={() => setPublicReview({ ...publicReview, rating })} aria-label={`${rating} estrellas`} className="text-gold-400 hover:scale-110 transition-transform">
-                          <Star size={18} fill={rating <= publicReview.rating ? 'currentColor' : 'none'} />
-                        </button>
-                      ))}
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <input required value={publicReview.name} onChange={event => setPublicReview({ ...publicReview, name: event.target.value })} placeholder={lang === 'es' ? 'Tu nombre' : 'Your name'} className="w-full bg-dark border border-white/10 rounded-lg px-3 py-3 text-sm text-white outline-none focus:border-gold-400/60" />
-                      <input value={publicReview.role} onChange={event => setPublicReview({ ...publicReview, role: event.target.value })} placeholder={lang === 'es' ? 'Tipo de sesión (opcional)' : 'Session type (optional)'} className="w-full bg-dark border border-white/10 rounded-lg px-3 py-3 text-sm text-white outline-none focus:border-gold-400/60" />
-                    </div>
-                    <textarea required rows={5} value={publicReview.comment} onChange={event => setPublicReview({ ...publicReview, comment: event.target.value })} placeholder={lang === 'es' ? 'Escribe tu comentario sobre el servicio...' : 'Write your comment about the service...'} className="w-full bg-dark border border-white/10 rounded-lg px-3 py-3 text-sm text-white outline-none focus:border-gold-400/60 resize-y" />
-                    <div className="flex justify-end"><button type="submit" disabled={!publicReview.name.trim() || !publicReview.comment.trim()} className="px-5 py-3 bg-gold-500 hover:bg-gold-400 disabled:opacity-40 text-dark rounded-lg font-mono text-[10px] uppercase tracking-wider font-bold transition-colors">{lang === 'es' ? 'Enviar comentario' : 'Send comment'}</button></div>
-                  </form>
-                )}
-              </section>
             </div>
           )}
 
@@ -1305,7 +1155,7 @@ export default function App() {
               {/* Step 1: Category Grid OR Step 2: Packages by Category */}
               <AnimatePresence mode="wait">
                 {selectedCategory === null ? (
-                  /* ─── STEP 1: SESSION CATEGORY GRID ─── */
+                  /* ——— STEP 1: SESSION CATEGORY GRID ——— */
                   <motion.section
                     key="category-grid"
                     initial={{ opacity: 0, y: 20 }}
@@ -1316,7 +1166,7 @@ export default function App() {
                   >
                     {/* Single header for Step 1 */}
                     <div className="text-center space-y-4 max-w-2xl mx-auto">
-                      <span className="text-[10px] font-mono text-gold-400 tracking-widest uppercase block">SERVICES</span>
+                      <span className="text-[10px] font-mono text-white/70 tracking-widest uppercase block">SERVICES</span>
                       <h2 className="font-serif text-3xl md:text-4xl text-white tracking-wide">{t.servicesTitle}</h2>
                       <p className="text-xs text-white/55 leading-relaxed">{t.servicesSubtitle}</p>
                     </div>
@@ -1351,7 +1201,7 @@ export default function App() {
                             viewport={{ once: true, margin: "-30px" }}
                             transition={{ duration: 0.4, delay: idx * 0.05 }}
                             onClick={() => setSelectedCategory(cat.id)}
-                            className="group relative overflow-hidden rounded-2xl aspect-[3/4] md:aspect-[4/5] text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
+                            className="group relative overflow-hidden rounded-lg aspect-[3/4] md:aspect-[4/5] text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
                           >
                             {/* Background image */}
                             <div className="absolute inset-0">
@@ -1367,7 +1217,7 @@ export default function App() {
 
                             {/* Content with solid dark base */}
                             <div className="absolute bottom-0 left-0 right-0 p-5 space-y-2.5 z-10 bg-black/70 backdrop-blur-sm rounded-b-2xl">
-                              <div className="w-10 h-10 rounded-xl bg-white/15 backdrop-blur-sm border border-white/30 flex items-center justify-center transition-transform duration-500 group-hover:scale-110 group-hover:bg-gold-500/30 group-hover:border-gold-400/50">
+                              <div className="w-10 h-10 rounded-lg bg-white/15 backdrop-blur-sm border border-white/30 flex items-center justify-center transition-transform duration-500 group-hover:scale-110 group-hover:bg-white/10/30 group-hover:border-white/30">
                                 {categoryIconMap[cat.icon] || <Camera size={22} className="text-white" />}
                               </div>
                               <div>
@@ -1385,7 +1235,7 @@ export default function App() {
                     </div>
                   </motion.section>
                 ) : (
-                  /* ─── STEP 2: PACKAGES FOR SELECTED CATEGORY ─── */
+                  /* ——— STEP 2: PACKAGES FOR SELECTED CATEGORY ——— */
                   <motion.section
                     key={selectedCategory}
                     initial={{ opacity: 0, y: 20 }}
@@ -1413,17 +1263,17 @@ export default function App() {
                                 setSelectedCategory(null);
                                 setSelectedPackageId(null);
                               }}
-                              className="group inline-flex items-center space-x-2 text-[11px] font-mono text-gold-400/80 hover:text-gold-300 tracking-wider transition-all duration-300 cursor-pointer"
+                              className="group inline-flex items-center space-x-2 text-[11px] font-mono text-white/70/80 hover:text-white/60 tracking-wider transition-all duration-300 cursor-pointer"
                             >
                               <ArrowRight size={11} className="rotate-180 transition-transform duration-300 group-hover:-translate-x-0.5" />
                               <span>{t.backToCategories}</span>
                             </button>
 
                             <div className="space-y-6">
-                              <span className="text-[9px] font-mono text-gold-400/40 tracking-[0.25em] uppercase block">{cEyebrow}</span>
+                              <span className="text-[9px] font-mono text-white/70/40 tracking-[0.25em] uppercase block">{cEyebrow}</span>
                               <h2 className="font-serif text-3xl md:text-5xl lg:text-6xl text-white/90 font-light tracking-wide">{cName}</h2>
                               <p className="text-sm text-white/50 max-w-xl mx-auto font-light leading-relaxed">{cDesc}</p>
-                              <div className="w-12 h-px bg-gold-400/25 mx-auto" />
+                              <div className="w-12 h-px bg-white/10/25 mx-auto" />
                             </div>
                           </div>
 
@@ -1443,15 +1293,15 @@ export default function App() {
                                   whileInView={{ opacity: 1, y: 0 }}
                                   viewport={{ once: true, margin: "-40px" }}
                                   transition={{ duration: 0.4, delay: idx * 0.08 }}
-                                   className={`group bg-dark-gray border rounded-2xl p-5 md:p-8 flex flex-col justify-between space-y-6 text-left transition-all duration-500 hover:-translate-y-1 ${
+                                   className={`group bg-dark-gray border rounded-lg p-5 md:p-8 flex flex-col justify-between space-y-6 text-left transition-all duration-500 hover:-translate-y-1 ${
                                      pkg.featured
-                                       ? 'border-gold-500/30 ring-1 ring-gold-500/20 shadow-lg shadow-gold-500/5'
-                                       : 'border-white/[0.07] hover:border-gold-400/20 hover:shadow-xl hover:shadow-gold-500/5'
+                                       ? 'border-white/10 ring-1 ring-white/10 shadow-lg shadow-white/5'
+                                       : 'border-white/[0.07] hover:border-white/10 hover:shadow-xl hover:shadow-white/5'
                                    }`}
                                 >
                                   <div className="space-y-5">
                                     {pkg.image && (
-                                      <div className="rounded-xl overflow-hidden -mx-2 -mt-2">
+                                      <div className="rounded-lg overflow-hidden -mx-2 -mt-2">
                                         <img src={pkg.image} alt={pName} className="w-full h-40 object-cover transition-all duration-700 group-hover:scale-105" />
                                       </div>
                                     )}
@@ -1459,7 +1309,7 @@ export default function App() {
                                     {/* Featured badge + Name */}
                                     <div className="space-y-2">
                                       {pkg.featured && (
-                                        <span className="inline-block text-[11px] font-mono text-gold-400/70 border border-gold-500/20 bg-gold-500/5 px-2 py-0.5 rounded-full uppercase tracking-[0.15em]">
+                                        <span className="inline-block text-[11px] font-mono text-white/70/70 border border-white/10 bg-white/10/5 px-2 py-0.5 rounded-full uppercase tracking-[0.15em]">
                                           {t.recommended}
                                         </span>
                                       )}
@@ -1471,7 +1321,7 @@ export default function App() {
                                       <span className="text-[10px] font-mono text-white/50 tracking-wide">{pDuration}</span>
                                       <div className="text-right">
                                         <span className="text-[11px] text-white/40 block font-mono tracking-wider">{pPriceFrom}</span>
-                                        <span className="text-xl md:text-2xl md:text-3xl font-light text-gold-400 font-mono">${pkg.price.toLocaleString()}</span>
+                                        <span className="text-xl md:text-2xl md:text-3xl font-light text-white/70 font-mono">${pkg.price.toLocaleString()}</span>
                                       </div>
                                     </div>
 
@@ -1507,7 +1357,7 @@ export default function App() {
                                         targetCalendar.scrollIntoView({ behavior: 'smooth' });
                                       }
                                     }}
-                                    className="w-full py-3 bg-transparent border border-white/20 hover:border-gold-400/50 text-white/70 hover:text-gold-300 font-mono text-[10px] tracking-[0.2em] uppercase font-light rounded-xl transition-all duration-300 flex items-center justify-center space-x-2 cursor-pointer group/btn"
+                                    className="w-full py-3 bg-transparent border border-white/20 hover:border-white/30 text-white/70 hover:text-white/60 font-mono text-[10px] tracking-[0.2em] uppercase font-light rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 cursor-pointer group/btn"
                                   >
                                     <span>{pButton}</span>
                                     <ArrowRight size={9} className="transition-transform duration-300 group-hover/btn:translate-x-1" />
@@ -1580,7 +1430,7 @@ export default function App() {
           {currentView === 'faq' && (
             <div className="space-y-12 max-w-3xl mx-auto text-left">
               <section className="space-y-3 border-b border-white/10 pb-6">
-                <span className="text-[10px] font-mono text-gold-400 tracking-widest uppercase block">QUESTIONS</span>
+                <span className="text-[10px] font-mono text-white/70 tracking-widest uppercase block">QUESTIONS</span>
                 <h2 className="font-serif text-3xl text-white tracking-wide">{t.faqTitle}</h2>
                 <p className="text-xs text-white/55">{t.faqSubtitle}</p>
               </section>
@@ -1595,7 +1445,7 @@ export default function App() {
                   return (
                     <div 
                       key={faq.id} 
-                      className="bg-dark-gray border border-white/10 rounded-xl overflow-hidden transition-all"
+                      className="bg-dark-gray border border-white/10 rounded-lg overflow-hidden transition-all"
                     >
                       <button
                         onClick={() => setActiveFaqId(isOpen ? null : faq.id)}
@@ -1604,7 +1454,7 @@ export default function App() {
                         <span className="text-xs md:text-sm font-semibold text-white/90">{fQuestion}</span>
                         <ChevronDown 
                           size={16} 
-                          className={`text-gold-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} 
+                          className={`text-white/70 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} 
                         />
                       </button>
 
@@ -1635,14 +1485,14 @@ export default function App() {
           {currentView === 'contact' && (
             <div className="space-y-12">
               <section className="text-center max-w-md mx-auto space-y-3">
-                <span className="text-[10px] font-mono text-gold-400 tracking-widest uppercase block">GET IN TOUCH</span>
+                <span className="text-[10px] font-mono text-white/70 tracking-widest uppercase block">GET IN TOUCH</span>
                 <h2 className="font-serif text-3xl text-white tracking-wide">{t.contactTitle}</h2>
                 <p className="text-xs text-white/55">{t.contactSubtitle}</p>
               </section>
 
               <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch max-w-4xl mx-auto">
                 {/* Contact form (Cols 7) */}
-                <div className="lg:col-span-7 bg-dark-gray border border-white/10 rounded-2xl p-6 md:p-8 shadow-warm-md">
+                <div className="lg:col-span-7 bg-dark-gray border border-white/10 rounded-lg p-6 md:p-8 shadow-md">
                   <AnimatePresence mode="wait">
                     {!contactSuccess ? (
                       <form onSubmit={handleContactSubmit} className="space-y-4 text-left">
@@ -1654,7 +1504,7 @@ export default function App() {
                               required
                               value={contactName}
                               onChange={(e) => setContactName(e.target.value)}
-                              className="w-full bg-charcoal border-[#D8C0A8] rounded p-2.5 text-xs text-white focus:outline-none focus:border-gold-400 font-sans"
+                              className="w-full bg-charcoal border-stone rounded p-2.5 text-xs text-white focus:outline-none focus:border-white/30 font-sans"
                             />
                           </div>
                           <div className="space-y-1">
@@ -1664,7 +1514,7 @@ export default function App() {
                               required
                               value={contactEmail}
                               onChange={(e) => setContactEmail(e.target.value)}
-                              className="w-full bg-charcoal border-[#D8C0A8] rounded p-2.5 text-xs text-white focus:outline-none focus:border-gold-400 font-sans"
+                              className="w-full bg-charcoal border-stone rounded p-2.5 text-xs text-white focus:outline-none focus:border-white/30 font-sans"
                             />
                           </div>
                         </div>
@@ -1676,7 +1526,7 @@ export default function App() {
                             required
                               value={contactSubject}
                               onChange={(e) => setContactSubject(e.target.value)}
-                              className="w-full bg-charcoal border-[#D8C0A8] rounded p-2.5 text-xs text-white focus:outline-none focus:border-gold-400 font-sans"
+                              className="w-full bg-charcoal border-stone rounded p-2.5 text-xs text-white focus:outline-none focus:border-white/30 font-sans"
                           />
                         </div>
 
@@ -1687,13 +1537,13 @@ export default function App() {
                             required
                               value={contactMsg}
                               onChange={(e) => setContactMsg(e.target.value)}
-                              className="w-full bg-charcoal border-[#D8C0A8] rounded p-3 text-xs text-white focus:outline-none focus:border-gold-400 font-sans resize-none"
+                              className="w-full bg-charcoal border-stone rounded p-3 text-xs text-white focus:outline-none focus:border-white/30 font-sans resize-none"
                           />
                         </div>
 
                         <button
                           type="submit"
-                          className="w-full py-3 bg-white hover:bg-gold-400 text-dark font-mono text-[10px] tracking-widest uppercase font-bold rounded-lg transition-all flex items-center justify-center space-x-1 cursor-pointer shadow-xl"
+                          className="w-full py-3 bg-white/10 hover:bg-white/15 text-white border border-white/10 font-mono text-[10px] tracking-widest uppercase font-bold rounded-lg transition-all flex items-center justify-center space-x-1 cursor-pointer"
                         >
                           <MessageSquare size={13} />
                           <span>{t.sendMessage}</span>
@@ -1705,7 +1555,7 @@ export default function App() {
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                       >
-                        <div className="inline-flex p-3 rounded-full bg-gold-400/10 border border-gold-400/20 text-gold-400 mx-auto">
+                        <div className="inline-flex p-3 rounded-full bg-white/10/10 border border-white/10 text-white/70 mx-auto">
                           <ShieldCheck size={36} />
                         </div>
                         <h4 className="font-serif text-lg text-white font-semibold">Message Dispatched</h4>
@@ -1718,13 +1568,13 @@ export default function App() {
                 </div>
 
                 {/* Contact Coordinates (Cols 5) */}
-                <div className="lg:col-span-5 bg-dark-gray border border-white/10 rounded-2xl p-6 md:p-8 text-left flex flex-col justify-between space-y-6 shadow-warm-md">
+                <div className="lg:col-span-5 bg-dark-gray border border-white/10 rounded-lg p-6 md:p-8 text-left flex flex-col justify-between space-y-6 shadow-md">
                   <div className="space-y-5">
-                    <h4 className="text-xs font-mono tracking-widest text-gold-400 uppercase font-semibold">Studio Coordinates</h4>
+                    <h4 className="text-xs font-mono tracking-widest text-white/70 uppercase font-semibold">Studio Coordinates</h4>
                     
                     <div className="space-y-4">
                       <div className="flex items-start space-x-3 text-xs">
-                        <MapPin size={14} className="text-gold-400 mt-0.5 shrink-0" />
+                        <MapPin size={14} className="text-white/70 mt-0.5 shrink-0" />
                         <div className="space-y-0.5">
                           <span className="font-semibold text-white/90">Main Studio Office</span>
                           <span className="text-white/50 block">Via della Moscova 24, Milan, Italy</span>
@@ -1732,15 +1582,15 @@ export default function App() {
                       </div>
 
                       <div className="flex items-start space-x-3 text-xs">
-                        <Mail size={14} className="text-gold-400 mt-0.5 shrink-0" />
+                        <Mail size={14} className="text-white/70 mt-0.5 shrink-0" />
                         <div className="space-y-0.5">
                           <span className="font-semibold text-white/90">E-mail Inquiries</span>
-                          <span className="text-white/50 block hover:text-gold-300 transition-colors cursor-pointer">studio@aureastudio.com</span>
+                          <span className="text-white/50 block hover:text-white/60 transition-colors cursor-pointer">studio@áureastudio.com</span>
                         </div>
                       </div>
 
                       <div className="flex items-start space-x-3 text-xs">
-                        <Phone size={14} className="text-gold-400 mt-0.5 shrink-0" />
+                        <Phone size={14} className="text-white/70 mt-0.5 shrink-0" />
                         <div className="space-y-0.5">
                           <span className="font-semibold text-white/90">Studio Telephone</span>
                           <span className="text-white/50 block">+39 02 1234 5678</span>
@@ -1749,7 +1599,7 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className="bg-dark-gray border border-white/10 rounded-xl p-4 space-y-2">
+                  <div className="bg-dark-gray border border-white/10 rounded-lg p-4 space-y-2">
                     <span className="text-[9px] font-mono text-white/40 uppercase">LIVE CALENDAR ASSISTANCE</span>
                     <p className="text-[11px] text-white/70 leading-normal">
                       For immediate booking validations or priority destination weddings, coordinate directly with our support desk via our linked WhatsApp.
@@ -1758,7 +1608,7 @@ export default function App() {
                       href="https://wa.me/390212345678"
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-block mt-1 text-[10px] font-mono text-gold-400 hover:text-gold-300 uppercase tracking-widest"
+                      className="inline-block mt-1 text-[10px] font-mono text-white/70 hover:text-white/60 uppercase tracking-widest"
                     >
                       Open WhatsApp Chat &rarr;
                     </a>
@@ -1826,6 +1676,8 @@ export default function App() {
       <Footer
         onSetView={navigateTo}
         lang={lang}
+        testimonials={testimonials}
+        onSubmitTestimonial={(testimonial) => handleUpdateTestimonials([testimonial, ...testimonials])}
       />
 
       {/* ======================================================= */}
@@ -1850,7 +1702,7 @@ export default function App() {
         {showAdminLogin && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-overlay/80 backdrop-blur-sm">
             <motion.div
-              className="bg-charcoal border border-white/10 rounded-2xl p-6 max-w-sm w-full space-y-6 shadow-lg relative"
+              className="bg-charcoal border border-white/10 rounded-lg p-6 max-w-sm w-full space-y-6 shadow-lg relative"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
@@ -1863,7 +1715,7 @@ export default function App() {
               </button>
 
               <div className="text-center space-y-2">
-                <div className="w-12 h-12 bg-gold-400/10 border border-gold-400/30 rounded-full flex items-center justify-center mx-auto text-gold-400">
+                <div className="w-12 h-12 bg-white/10/10 border border-white/10 rounded-full flex items-center justify-center mx-auto text-white/70">
                   <ShieldCheck size={24} />
                 </div>
                 <h4 className="font-serif text-xl text-white font-semibold">CMS Authenticator</h4>
@@ -1876,9 +1728,9 @@ export default function App() {
                   <input
                     type="text"
                     required
-                    value={adminUsername}
-                    onChange={(e) => setAdminUsername(e.target.value)}
-                    className="w-full bg-charcoal border-[#D8C0A8] rounded p-2.5 text-xs text-white focus:outline-none focus:border-gold-400"
+                    value={adminUseráname}
+                    onChange={(e) => setAdminUseráname(e.target.value)}
+                    className="w-full bg-charcoal border-stone rounded p-2.5 text-xs text-white focus:outline-none focus:border-white/30"
                     placeholder="admin@tudominio.com"
                   />
                 </div>
@@ -1891,8 +1743,8 @@ export default function App() {
                       required
                       value={adminPassword}
                       onChange={(e) => setAdminPassword(e.target.value)}
-                    className="w-full bg-charcoal border-[#D8C0A8] rounded p-2.5 pr-10 text-xs text-white focus:outline-none focus:border-gold-400 font-sans"
-                    placeholder="••••••••"
+                    className="w-full bg-charcoal border-stone rounded p-2.5 pr-10 text-xs text-white focus:outline-none focus:border-white/30 font-sans"
+                     placeholder="••••••••"
                     />
                     <button
                       type="button"
@@ -1914,7 +1766,7 @@ export default function App() {
 
                 <button
                   type="submit"
-                  className="w-full py-2.5 bg-gold-500 hover:bg-gold-400 text-dark font-mono text-[10px] tracking-widest uppercase font-bold rounded-lg transition-all"
+                  className="w-full py-2.5 bg-white/10 hover:bg-white/15 text-white border border-white/10 font-mono text-[10px] tracking-widest uppercase font-bold rounded-lg transition-all"
                 >
                   Verify Credentials
                 </button>

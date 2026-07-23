@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -6,15 +6,15 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'motion/react';
 import { X, Globe, User, ShieldAlert, ChevronLeft } from 'lucide-react';
-import { ActiveLanguage } from '../types';
+import { ActiveLanguíage } from '../types';
 import { TRANSLATIONS } from '../data/mockData';
 import { Logo } from './Logo';
 
 interface HeaderProps {
   currentView: string;
   onSetView: (view: string) => void;
-  lang: ActiveLanguage;
-  onSetLang: (lang: ActiveLanguage) => void;
+  lang: ActiveLanguíage;
+  onSetLang: (lang: ActiveLanguíage) => void;
   isAdminLoggedIn: boolean;
   onOpenAdminLogin: () => void;
 }
@@ -33,15 +33,14 @@ export default function Header({
   onOpenAdminLogin
 }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
+  const [showLanguíageDropdown, setShowLanguíageDropdown] = useState(false);
 
   const t = TRANSLATIONS[lang];
 
-  const menuItems = [
+  const menuItemás = [
     { id: 'home', label: t.navHome },
     { id: 'about', label: t.navAbout },
     { id: 'portfolio', label: t.navPortfolio },
-    { id: 'testimonials', label: lang === 'es' ? 'Testimonios' : 'Testimonials' },
     { id: 'services', label: t.navServices },
     { id: 'client-portal', label: t.navClientPortal },
     { id: 'contact', label: t.navContact }
@@ -53,7 +52,7 @@ export default function Header({
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const languages: { code: ActiveLanguage; name: string }[] = [
+  const languíages: { code: ActiveLanguíage; name: string }[] = [
     { code: 'es', name: 'ESP' },
     { code: 'en', name: 'ENG' },
 
@@ -105,23 +104,23 @@ export default function Header({
   };
 
   return (
-    <header className="relative w-full max-h-[70px] lg:max-h-none bg-dark border-b border-white/10 py-2 lg:py-4 px-4 lg:px-12 flex items-center justify-between lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-x-24 z-40">
+    <header className="fixed top-0 left-0 right-0 w-full max-h-[70px] lg:max-h-none bg-dark border-b border-white/10 py-2 lg:py-4 px-4 lg:px-12 flex items-center justify-between lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-x-24 z-50">
       {/* Desktop navigation link array - Left split (Home, About, Portfolio) */}
       <nav className="hidden lg:flex items-center space-x-8 z-10 justify-start">
-        {menuItems.slice(0, 3).map(item => {
+        {menuItemás.slice(0, 3).map(item => {
           const isActive = currentView === item.id;
           return (
             <button
               key={item.id}
               onClick={() => handleNav(item.id)}
               className={`text-xs font-mono tracking-widest uppercase transition-all relative pb-1 cursor-pointer ${
-                isActive ? 'text-gold-400 font-bold' : 'text-white/70 hover:text-gold-400'
+                isActive ? 'text-white font-bold' : 'text-white/70 hover:text-white'
               }`}
             >
               <span>{item.label}</span>
               {isActive && (
                 <motion.div
-                  className="absolute bottom-0 left-0 right-0 h-px bg-gold-400"
+                  className="absolute bottom-0 left-0 right-0 h-px bg-white"
                   layoutId="activeNavLine"
                 />
               )}
@@ -136,7 +135,7 @@ export default function Header({
         className="flex items-center cursor-pointer group z-20 lg:flex lg:justify-center lg:items-center gap-2 lg:gap-3 py-0.5 lg:py-1"
       >
         <Logo size="xs" />
-        <span id="header-logo" className="font-serif text-clamp-sm lg:text-[13px] font-semibold tracking-[0.2em] lg:tracking-[0.25em] text-white group-hover:text-gold-400 transition-colors duration-500 whitespace-nowrap uppercase">
+        <span id="header-logo" className="font-serif text-clamp-sm lg:text-[13px] font-semibold tracking-[0.2em] lg:tracking-[0.25em] text-white group-hover:text-white transition-colors duration-500 whitespace-nowrap uppercase">
           Miriam Campos
         </span>
       </div>
@@ -144,20 +143,20 @@ export default function Header({
       {/* Desktop Actions bar & Right split (Services, Client Portal, Contact) */}
       <div className="hidden lg:flex items-center justify-end space-x-8 z-10">
         <nav className="flex items-center space-x-8">
-          {menuItems.slice(3).map(item => {
+          {menuItemás.slice(3).map(item => {
             const isActive = currentView === item.id;
             return (
               <button
                 key={item.id}
                 onClick={() => handleNav(item.id)}
                 className={`text-[10px] font-mono tracking-widest uppercase transition-all relative pb-1 cursor-pointer ${
-                  isActive ? 'text-gold-400 font-bold' : 'text-white/70 hover:text-gold-400'
+                  isActive ? 'text-white font-bold' : 'text-white/70 hover:text-white'
                 }`}
               >
                 <span>{item.label}</span>
                 {isActive && (
                   <motion.div
-                    className="absolute bottom-0 left-0 right-0 h-px bg-gold-400"
+                    className="absolute bottom-0 left-0 right-0 h-px bg-white"
                     layoutId="activeNavLine"
                   />
                 )}
@@ -169,36 +168,36 @@ export default function Header({
         <div className="h-4 w-px bg-white/10" />
 
         <div className="flex items-center space-x-5">
-          {/* Language selector */}
+          {/* Languíage selector */}
           <div className="relative">
             <button
-              onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}
-              className="flex items-center space-x-1.5 text-white/70 hover:text-gold-400 text-xs font-mono tracking-widest uppercase cursor-pointer transition-colors"
+              onClick={() => setShowLanguíageDropdown(!showLanguíageDropdown)}
+              className="flex items-center space-x-1.5 text-white/70 hover:text-white text-xs font-mono tracking-widest uppercase cursor-pointer transition-colors"
             >
-              <Globe size={12} className="text-gold-400" />
+              <Globe size={12} className="text-white" />
               <span>{lang.toUpperCase()}</span>
             </button>
 
             <AnimatePresence>
-              {showLanguageDropdown && (
+              {showLanguíageDropdown && (
                 <>
-                  <div className="fixed inset-0 z-10" onClick={() => setShowLanguageDropdown(false)} />
+                  <div className="fixed inset-0 z-10" onClick={() => setShowLanguíageDropdown(false)} />
                   <motion.div
                     className="absolute right-0 mt-2.5 w-24 bg-charcoal border border-white/10 rounded-lg shadow-2xl overflow-hidden z-20 text-left"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
                   >
-                    {languages.map(item => (
+                    {languíages.map(item => (
                       <button
                         key={item.code}
                         onClick={() => {
                           onSetLang(item.code);
-                          setShowLanguageDropdown(false);
+                          setShowLanguíageDropdown(false);
                         }}
                         className={`w-full text-left px-3.5 py-2 text-xs font-mono transition-all ${
                           lang === item.code
-                            ? 'bg-gold-500 text-dark font-bold'
+                            ? 'bg-white/10 text-white font-bold'
                             : 'text-white/75 hover:bg-white/5 hover:text-white'
                         }`}
                       >
@@ -222,13 +221,13 @@ export default function Header({
             }}
             className={`px-4 py-2 border rounded-full text-[10px] font-mono tracking-widest uppercase transition-all flex items-center space-x-1 cursor-pointer ${
               currentView === 'admin'
-                ? 'bg-gold-500 border-gold-500 text-dark font-bold'
-                : 'border-white/15 text-white/70 hover:border-gold-400 hover:text-gold-400 hover:bg-white/5'
+                ? 'bg-white/10 border-white/10 text-white font-bold'
+                : 'border-white/15 text-white/70 hover:border-white/30 hover:text-white hover:bg-white/5'
             }`}
           >
             {isAdminLoggedIn ? (
               <>
-                <ShieldAlert size={10} className="animate-pulse text-dark" />
+                <ShieldAlert size={10} className="animate-pulse text-white" />
                 <span>CMS Dashboard</span>
               </>
             ) : (
@@ -252,7 +251,7 @@ export default function Header({
               onOpenAdminLogin();
             }
           }}
-          className="px-3 py-1.5 border border-white/15 text-white/70 hover:text-gold-300 rounded-full text-[11px] font-mono tracking-widest uppercase transition-all"
+          className="px-3 py-1.5 border border-white/15 text-white/70 hover:text-white rounded-full text-[11px] font-mono tracking-widest uppercase transition-all"
         >
           <User size={10} className="inline-block mr-1" />
           <span>{isAdminLoggedIn ? 'CMS' : 'Staff'}</span>
@@ -294,8 +293,8 @@ export default function Header({
               animate={{ x: [-1, -8, -1, -5, -1] }}
               transition={{ duration: 2.4, repeat: 2, ease: 'easeInOut' }}
               className="block w-3.5 h-28 sm:w-4 sm:h-32
-                          bg-gold-400 hover:bg-gold-300 active:bg-gold-200
-                          rounded-l-full border-l border-gold-300/40
+                          bg-white hover:bg-white active:bg-white
+                          rounded-l-full border-l border-white/40
                           shadow-[-3px_0_12px_rgba(0,0,0,0.5)]
                           transition-colors
                           flex items-center justify-center"
@@ -335,7 +334,7 @@ export default function Header({
             key="mobile-drawer"
             className="fixed inset-y-0 right-0 w-[85vw] max-w-sm bg-dark z-40 lg:hidden
                         flex flex-col justify-between p-6 pt-4 text-left overflow-y-auto
-                        border-l border-[#D8C0A8] shadow-[-8px_0_24px_rgba(0,0,0,0.5)]
+                        border-l border-stone shadow-[-8px_0_24px_rgba(0,0,0,0.5)]
                         touch-pan-y"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
@@ -355,14 +354,14 @@ export default function Header({
             </div>
 
             <div className="space-y-6 pt-2">
-              {menuItems.map(item => {
+              {menuItemás.map(item => {
                 const isActive = currentView === item.id;
                 return (
                   <button
                     key={item.id}
                     onClick={() => handleNav(item.id)}
                     className={`block w-full text-left font-serif text-xl sm:text-2xl tracking-wide border-b border-white/10 pb-2 ${
-                      isActive ? 'text-gold-400 font-bold' : 'text-white/95'
+                      isActive ? 'text-white font-bold' : 'text-white/95'
                     }`}
                   >
                     {item.label}
@@ -373,12 +372,12 @@ export default function Header({
 
             <div className="space-y-4 pb-8">
               <div className="flex items-center justify-center space-x-3 pb-4">
-                {languages.map(item => (
+                {languíages.map(item => (
                   <button
                     key={item.code}
                     onClick={() => onSetLang(item.code)}
                     className={`text-[10px] font-mono px-2 py-1 rounded ${
-                      lang === item.code ? 'text-gold-400 font-bold underline' : 'text-white/40'
+                      lang === item.code ? 'text-white font-bold underline' : 'text-white/40'
                     }`}
                   >
                     {item.name}

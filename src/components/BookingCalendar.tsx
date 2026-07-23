@@ -21,7 +21,7 @@ import {
   MapPin,
   Printer
 } from 'lucide-react';
-import { Service, ActiveLanguage, Booking, BookingConfig, EmailConfig, PhotographyPackage, ContractData, Invoice } from '../types';
+import { Service, ActiveLanguíage, Booking, BookingConfig, EmailConfig, PhotographyPackage, ContractData, Invoice } from '../types';
 import { sanitizeString, sanitizeEmail, sanitizePhone } from '../lib/sanitize';
 import ContractView from './ContractView';
 import InvoiceReceipt from './InvoiceReceipt';
@@ -30,7 +30,7 @@ import { TRANSLATIONS } from '../data/mockData';
 
 interface BookingCalendarProps {
   services: Service[];
-  lang: ActiveLanguage;
+  lang: ActiveLanguíage;
   config?: BookingConfig;
   emailConfig?: EmailConfig;
   preSelectedPackage?: PhotographyPackage | null;
@@ -349,7 +349,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
   };
 
   return (
-    <div className="glass-premium rounded-2xl border border-white/10 p-6 md:p-8 max-w-4xl mx-auto shadow-2xl">
+    <div className="glass-premium rounded-lg border border-white/10 p-6 md:p-8 max-w-4xl mx-auto shadow-2xl">
       <AnimatePresence mode="wait">
         {step === 'form' ? (
           <form onSubmit={handleSubmit} className="space-y-8">
@@ -365,8 +365,8 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
             </div>
 
             {paymentCancelled && (
-              <div className="text-center py-2 px-4 rounded-lg bg-gold-400/10 border border-gold-400/30">
-                <p className="text-[11px] font-mono text-gold-300">
+              <div className="text-center py-2 px-4 rounded-lg bg-white/10 border border-white/10">
+                <p className="text-[11px] font-mono text-white/60">
                   {lang === 'en'
                     ? 'Payment was cancelled — you can try again below.'
                     : 'Pago cancelado — puedes intentar de nuevo abajo.'}
@@ -381,11 +381,11 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                 
                 {/* QUESTION 2: PREFERRED DATE */}
                 <div className="space-y-3">
-                  <label className="block text-xs font-mono tracking-widest text-gold-300 uppercase">
+                  <label className="block text-xs font-mono tracking-widest text-white/60 uppercase">
                     {t.step2}
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gold-400">
+                    <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-white/70">
                       <CalendarIcon size={14} />
                     </div>
                     <input
@@ -394,7 +394,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                       value={dateValue}
                       onChange={(e) => handleDateChange(e.target.value)}
                       min={new Date().toISOString().split('T')[0]}
-                      className="w-full bg-dark/60 border border-white/10 rounded-lg pl-10 pr-4 py-3 text-xs text-white/95 placeholder-white/20 focus:outline-none focus:border-gold-400 transition-all font-mono"
+                      className="w-full bg-dark/60 border border-white/10 rounded-lg pl-10 pr-4 py-3 text-xs text-white/95 placeholder-white/20 focus:outline-none focus:border-white/30 transition-all font-mono"
                     />
                   </div>
                   <span className="text-[9px] text-white/30 block">
@@ -404,7 +404,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
 
                 {/* QUESTION 3: PREFERRED TIMEFRAME */}
                 <div className="space-y-3">
-                  <label className="block text-xs font-mono tracking-widest text-gold-300 uppercase">
+                  <label className="block text-xs font-mono tracking-widest text-white/60 uppercase">
                     {t.step3}
                   </label>
                   
@@ -414,11 +414,11 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                       onClick={() => setSelectedTimeframe('morning')}
                       className={`py-2 px-3 rounded-lg text-[10px] font-mono text-left border flex items-center space-x-2 transition-all ${
                         selectedTimeframe === 'morning'
-                          ? 'bg-gold-500/10 border-gold-400 text-gold-300 font-bold'
+                          ? 'bg-white/5 border-white/20 text-white/60 font-bold'
                           : 'bg-dark/40 border-white/10 text-white/60 hover:border-white/15'
                       }`}
                     >
-                      <Clock size={11} className="text-gold-400" />
+                      <Clock size={11} className="text-white/70" />
                       <span className="truncate">Mañana</span>
                     </button>
 
@@ -427,11 +427,11 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                       onClick={() => setSelectedTimeframe('afternoon')}
                       className={`py-2 px-3 rounded-lg text-[10px] font-mono text-left border flex items-center space-x-2 transition-all ${
                         selectedTimeframe === 'afternoon'
-                          ? 'bg-gold-500/10 border-gold-400 text-gold-300 font-bold'
+                          ? 'bg-white/5 border-white/20 text-white/60 font-bold'
                           : 'bg-dark/40 border-white/10 text-white/60 hover:border-white/15'
                       }`}
                     >
-                      <Clock size={11} className="text-gold-400" />
+                      <Clock size={11} className="text-white/70" />
                       <span className="truncate">Tarde</span>
                     </button>
 
@@ -440,7 +440,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                       onClick={() => setSelectedTimeframe('goldenHour')}
                       className={`py-2 px-3 rounded-lg text-[10px] font-mono text-left border flex items-center space-x-2 transition-all col-span-2 ${
                         selectedTimeframe === 'goldenHour'
-                          ? 'bg-gold-500/10 border-gold-400 text-gold-300 font-bold shadow-sm'
+                          ? 'bg-white/5 border-white/20 text-white/60 font-bold shadow-sm'
                           : 'bg-dark/40 border-white/10 text-white/60 hover:border-white/15'
                       }`}
                     >
@@ -453,11 +453,11 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                       onClick={() => setSelectedTimeframe('other')}
                       className={`py-2 px-3 rounded-lg text-[10px] font-mono text-left border flex items-center space-x-2 transition-all col-span-2 ${
                         selectedTimeframe === 'other'
-                          ? 'bg-gold-500/10 border-gold-400 text-gold-300 font-bold'
+                          ? 'bg-white/5 border-white/20 text-white/60 font-bold'
                           : 'bg-dark/40 border-white/10 text-white/60 hover:border-white/15'
                       }`}
                     >
-                      <Sparkles size={11} className="text-gold-400" />
+                      <Sparkles size={11} className="text-white/70" />
                       <span>Elegir horario personalizado / exacto</span>
                     </button>
                   </div>
@@ -477,7 +477,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                           value={customTimeframeText}
                           onChange={(e) => setCustomTimeframeText(e.target.value)}
                           placeholder={t.otherSchedulePlaceholder}
-                          className="w-full bg-dark/60 border border-gold-400/20 rounded-lg px-3 py-2 text-xs text-white/90 placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans"
+                          className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2 text-xs text-white/90 placeholder-white/30 focus:outline-none focus:border-white/30 font-sans"
                         />
                       </motion.div>
                     )}
@@ -488,7 +488,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
 
               {/* QUESTION 4: CONTACT DATA AND REGISTRATION FORM */}
               <div className="space-y-4 pt-2">
-                <label className="block text-xs font-mono tracking-widest text-gold-300 uppercase">
+                <label className="block text-xs font-mono tracking-widest text-white/60 uppercase">
                   {t.step4}
                 </label>
                 
@@ -504,7 +504,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                       value={clientName}
                       onChange={(e) => setClientName(e.target.value)}
                       placeholder="Nombre Completo *"
-                      className="w-full bg-dark/60 border border-white/10 rounded-lg pl-9 pr-3 py-3 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans"
+                      className="w-full bg-dark/60 border border-white/10 rounded-lg pl-9 pr-3 py-3 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-sans"
                     />
                   </div>
 
@@ -519,7 +519,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                       value={clientEmail}
                       onChange={(e) => setClientEmail(e.target.value)}
                       placeholder="Correo Electrónico *"
-                      className="w-full bg-dark/60 border border-white/10 rounded-lg pl-9 pr-3 py-3 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans"
+                      className="w-full bg-dark/60 border border-white/10 rounded-lg pl-9 pr-3 py-3 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-sans"
                     />
                   </div>
 
@@ -534,7 +534,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                       value={clientPhone}
                       onChange={(e) => setClientPhone(e.target.value)}
                       placeholder={lang === 'es' ? 'Número de Teléfono *' : 'Phone Number *'}
-                      className="w-full bg-dark/60 border border-white/10 rounded-lg pl-9 pr-3 py-3 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans"
+                      className="w-full bg-dark/60 border border-white/10 rounded-lg pl-9 pr-3 py-3 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-sans"
                     />
                   </div>
                 </div>
@@ -553,7 +553,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                       value={peopleCount}
                       onChange={(e) => setPeopleCount(Number(e.target.value))}
                       placeholder={t.peopleLabel}
-                      className="w-full bg-dark/60 border border-white/10 rounded-lg pl-9 pr-3 py-3 text-xs text-white/90 focus:outline-none focus:border-gold-400 font-sans"
+                      className="w-full bg-dark/60 border border-white/10 rounded-lg pl-9 pr-3 py-3 text-xs text-white/90 focus:outline-none focus:border-white/30 font-sans"
                     />
                   </div>
 
@@ -564,7 +564,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                       value={creativeNotes}
                       onChange={(e) => setCreativeNotes(e.target.value)}
                       placeholder={t.notesLabel}
-                      className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white/90 placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans resize-none"
+                      className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white/90 placeholder-white/30 focus:outline-none focus:border-white/30 font-sans resize-none"
                     />
                   </div>
                 </div>
@@ -573,47 +573,47 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
               {/* WEDDING DETAILS (only for boda packages) */}
               {isWedding && (
                 <div className="space-y-4 pt-2 border-t border-white/10">
-                  <label className="block text-xs font-mono tracking-widest text-gold-300 uppercase">
+                  <label className="block text-xs font-mono tracking-widest text-white/60 uppercase">
                     {lang === 'es' ? 'Detalles de la Boda' : 'Wedding Details'}
                   </label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-3 p-4 border border-white/10 rounded-lg">
-                      <p className="text-[10px] font-mono tracking-widest text-gold-400 uppercase">
+                      <p className="text-[10px] font-mono tracking-widest text-white/70 uppercase">
                         {lang === 'es' ? 'Novia' : 'Bride'}
                       </p>
-                      <input type="text" required placeholder={lang === 'es' ? 'Nombre de la Novia' : 'Bride Name'} value={weddingData.brideName} onChange={(e) => setWeddingData({...weddingData, brideName: e.target.value})} className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans" />
-                      <input type="email" required placeholder={lang === 'es' ? 'Correo de la Novia' : 'Bride Email'} value={weddingData.brideEmail} onChange={(e) => setWeddingData({...weddingData, brideEmail: e.target.value})} className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans" />
-                      <input type="text" required placeholder={lang === 'es' ? 'Dirección de la Novia' : 'Bride Address'} value={weddingData.brideAddress} onChange={(e) => setWeddingData({...weddingData, brideAddress: e.target.value})} className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans" />
+                      <input type="text" required placeholder={lang === 'es' ? 'Nombre de la Novia' : 'Bride Name'} value={weddingData.brideName} onChange={(e) => setWeddingData({...weddingData, brideName: e.target.value})} className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-sans" />
+                      <input type="email" required placeholder={lang === 'es' ? 'Correo de la Novia' : 'Bride Email'} value={weddingData.brideEmail} onChange={(e) => setWeddingData({...weddingData, brideEmail: e.target.value})} className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-sans" />
+                      <input type="text" required placeholder={lang === 'es' ? 'Dirección de la Novia' : 'Bride Address'} value={weddingData.brideAddress} onChange={(e) => setWeddingData({...weddingData, brideAddress: e.target.value})} className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-sans" />
                     </div>
                     <div className="space-y-3 p-4 border border-white/10 rounded-lg">
-                      <p className="text-[10px] font-mono tracking-widest text-gold-400 uppercase">
+                      <p className="text-[10px] font-mono tracking-widest text-white/70 uppercase">
                         {lang === 'es' ? 'Novio' : 'Groom'}
                       </p>
-                      <input type="text" required placeholder={lang === 'es' ? 'Nombre del Novio' : 'Groom Name'} value={weddingData.groomName} onChange={(e) => setWeddingData({...weddingData, groomName: e.target.value})} className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans" />
-                      <input type="tel" required placeholder={lang === 'es' ? 'Teléfono del Novio' : 'Groom Phone'} value={weddingData.groomPhone} onChange={(e) => setWeddingData({...weddingData, groomPhone: e.target.value})} className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans" />
+                      <input type="text" required placeholder={lang === 'es' ? 'Nombre del Novio' : 'Groom Name'} value={weddingData.groomName} onChange={(e) => setWeddingData({...weddingData, groomName: e.target.value})} className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-sans" />
+                      <input type="tel" required placeholder={lang === 'es' ? 'Teléfono del Novio' : 'Groom Phone'} value={weddingData.groomPhone} onChange={(e) => setWeddingData({...weddingData, groomPhone: e.target.value})} className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-sans" />
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-3 p-4 border border-white/10 rounded-lg">
-                      <p className="text-[10px] font-mono tracking-widest text-gold-400 uppercase">
+                      <p className="text-[10px] font-mono tracking-widest text-white/70 uppercase">
                         {lang === 'es' ? 'Ceremonia' : 'Ceremony'}
                       </p>
-                      <input type="text" required placeholder={lang === 'es' ? 'Lugar' : 'Location'} value={weddingData.ceremonyLocation} onChange={(e) => setWeddingData({...weddingData, ceremonyLocation: e.target.value})} className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans" />
-                      <input type="text" required placeholder={lang === 'es' ? 'Dirección' : 'Address'} value={weddingData.ceremonyAddress} onChange={(e) => setWeddingData({...weddingData, ceremonyAddress: e.target.value})} className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans" />
+                      <input type="text" required placeholder={lang === 'es' ? 'Lugar' : 'Location'} value={weddingData.ceremonyLocation} onChange={(e) => setWeddingData({...weddingData, ceremonyLocation: e.target.value})} className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-sans" />
+                      <input type="text" required placeholder={lang === 'es' ? 'Dirección' : 'Address'} value={weddingData.ceremonyAddress} onChange={(e) => setWeddingData({...weddingData, ceremonyAddress: e.target.value})} className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-sans" />
                       <div className="flex gap-2">
-                        <input type="time" required placeholder={lang === 'es' ? 'Inicio' : 'Start'} value={weddingData.ceremonyStart} onChange={(e) => setWeddingData({...weddingData, ceremonyStart: e.target.value})} className="w-1/2 bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans" />
-                        <input type="time" required placeholder={lang === 'es' ? 'Fin' : 'End'} value={weddingData.ceremonyEnd} onChange={(e) => setWeddingData({...weddingData, ceremonyEnd: e.target.value})} className="w-1/2 bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans" />
+                        <input type="time" required placeholder={lang === 'es' ? 'Inicio' : 'Start'} value={weddingData.ceremonyStart} onChange={(e) => setWeddingData({...weddingData, ceremonyStart: e.target.value})} className="w-1/2 bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-sans" />
+                        <input type="time" required placeholder={lang === 'es' ? 'Fin' : 'End'} value={weddingData.ceremonyEnd} onChange={(e) => setWeddingData({...weddingData, ceremonyEnd: e.target.value})} className="w-1/2 bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-sans" />
                       </div>
                     </div>
                     <div className="space-y-3 p-4 border border-white/10 rounded-lg">
-                      <p className="text-[10px] font-mono tracking-widest text-gold-400 uppercase">
+                      <p className="text-[10px] font-mono tracking-widest text-white/70 uppercase">
                         {lang === 'es' ? 'Recepción' : 'Reception'}
                       </p>
-                      <input type="text" required placeholder={lang === 'es' ? 'Lugar' : 'Location'} value={weddingData.receptionLocation} onChange={(e) => setWeddingData({...weddingData, receptionLocation: e.target.value})} className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans" />
-                      <input type="text" required placeholder={lang === 'es' ? 'Dirección' : 'Address'} value={weddingData.receptionAddress} onChange={(e) => setWeddingData({...weddingData, receptionAddress: e.target.value})} className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans" />
+                      <input type="text" required placeholder={lang === 'es' ? 'Lugar' : 'Location'} value={weddingData.receptionLocation} onChange={(e) => setWeddingData({...weddingData, receptionLocation: e.target.value})} className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-sans" />
+                      <input type="text" required placeholder={lang === 'es' ? 'Dirección' : 'Address'} value={weddingData.receptionAddress} onChange={(e) => setWeddingData({...weddingData, receptionAddress: e.target.value})} className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-sans" />
                       <div className="flex gap-2">
-                        <input type="time" required placeholder={lang === 'es' ? 'Inicio' : 'Start'} value={weddingData.receptionStart} onChange={(e) => setWeddingData({...weddingData, receptionStart: e.target.value})} className="w-1/2 bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans" />
-                        <input type="time" required placeholder={lang === 'es' ? 'Fin' : 'End'} value={weddingData.receptionEnd} onChange={(e) => setWeddingData({...weddingData, receptionEnd: e.target.value})} className="w-1/2 bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans" />
+                        <input type="time" required placeholder={lang === 'es' ? 'Inicio' : 'Start'} value={weddingData.receptionStart} onChange={(e) => setWeddingData({...weddingData, receptionStart: e.target.value})} className="w-1/2 bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-sans" />
+                        <input type="time" required placeholder={lang === 'es' ? 'Fin' : 'End'} value={weddingData.receptionEnd} onChange={(e) => setWeddingData({...weddingData, receptionEnd: e.target.value})} className="w-1/2 bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-sans" />
                       </div>
                     </div>
                   </div>
@@ -624,7 +624,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
               )}
 
               {/* ESTIMATION & QUOTE SUMMARY */}
-              <div className="bg-dark-gray/60 border border-gold-400/10 rounded-xl p-4 space-y-2 mt-2">
+              <div className="bg-dark-gray/60 border border-white/10 rounded-lg p-4 space-y-2 mt-2">
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div className="text-center sm:text-left">
                     <span className="text-[9px] font-mono text-white/40 uppercase tracking-wider block">Estudio de Presupuesto</span>
@@ -638,17 +638,17 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                     </span>
                   </div>
                   
-                  <div className="flex items-center space-x-1 font-mono text-xl font-bold text-gold-400">
+                  <div className="flex items-center space-x-1 font-mono text-xl font-semibold text-white/70">
                     {preSelectedPackage ? (
                       <>
-                        <DollarSign size={18} className="-mr-1 text-gold-400" />
+                        <DollarSign size={18} className="-mr-1 text-white/70" />
                         <span>{totalPrice.toLocaleString()}</span>
                       </>
                     ) : selectedServiceId === 'custom' ? (
-                      <span className="text-sm tracking-wider uppercase bg-gold-400/10 px-3 py-1 rounded border border-gold-400/20">Por Definir</span>
+                      <span className="text-sm tracking-wider uppercase bg-white/10 px-3 py-1 rounded border border-white/10">Por Definir</span>
                     ) : (
                       <>
-                        <DollarSign size={18} className="-mr-1 text-gold-400" />
+                        <DollarSign size={18} className="-mr-1 text-white/70" />
                         <span>{totalPrice.toLocaleString()}</span>
                       </>
                     )}
@@ -666,7 +666,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
               <button
                 type="submit"
                 disabled={isSyncing || !dateValue}
-                className="w-full py-3.5 bg-gold-500 hover:bg-gold-400 text-dark font-mono text-xs tracking-widest uppercase font-bold rounded-lg transition-all flex items-center justify-center space-x-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-3.5 bg-white/10 hover:bg-white/15 text-white border border-white/10 font-mono text-xs tracking-widest uppercase font-bold rounded-lg transition-all flex items-center justify-center space-x-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSyncing ? (
                   <>
@@ -689,11 +689,11 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <div className="inline-flex p-4 rounded-full bg-gold-400/10 border border-gold-400/30 text-gold-400 mx-auto">
+            <div className="inline-flex p-4 rounded-full bg-white/10 border border-white/10 text-white/70 mx-auto">
               <DollarSign size={40} />
             </div>
             <div className="space-y-2">
-              <h3 className="font-serif text-2xl text-gold-50 tracking-wide">
+              <h3 className="font-serif text-2xl text-white/90 tracking-wide">
                 {lang === 'en' ? 'Secure Your Date' : 'Asegura tu Fecha'}
               </h3>
               <p className="text-[11px] text-white/60">
@@ -712,8 +712,8 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                 <span className="font-semibold text-white">${pendingBooking.amount || 0}</span>
               </div>
               <div className="border-t border-white/10 pt-2 flex justify-between text-sm">
-                <span className="text-gold-400 font-semibold">{lang === 'en' ? 'Deposit Required' : 'Depósito Requerido'}</span>
-                <span className="font-serif text-xl text-gold-50">${depositAmount}</span>
+                <span className="text-white/70 font-semibold">{lang === 'en' ? 'Deposit Required' : 'Depósito Requerido'}</span>
+                <span className="font-serif text-xl text-white/90">${depositAmount}</span>
               </div>
             </div>
             <div className="flex gap-3 justify-center">
@@ -734,7 +734,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                     () => { setStep('form'); setPaymentCancelled(true); }
                   );
                 }}
-                className="py-2.5 px-6 bg-gold-500 hover:bg-gold-400 text-dark font-mono text-xs tracking-widest uppercase font-semibold rounded-lg transition-all"
+                className="py-2.5 px-6 bg-white/10 hover:bg-white/15 text-white border border-white/10 font-mono text-xs tracking-widest uppercase font-semibold rounded-lg transition-all"
               >
                 {lang === 'en' ? `Pay $${depositAmount} Deposit` : `Pagar $${depositAmount} de Depósito`}
               </button>
@@ -748,7 +748,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
           >
             <div className="flex items-center justify-between mb-6">
               <div>
-                <p className="text-[10px] font-mono text-gold-400 tracking-widest uppercase">
+                <p className="text-[10px] font-mono text-white/70 tracking-widest uppercase">
                   {lang === 'en' ? 'Step 2 of 2 — Sign Contract' : 'Paso 2 de 2 — Firma el Contrato'}
                 </p>
                 <h3 className="font-serif text-xl text-white/90 mt-1">
@@ -780,14 +780,14 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
           >
-            <div className="inline-flex p-4 rounded-full bg-gold-400/10 border border-gold-400/30 text-gold-400 mx-auto">
+            <div className="inline-flex p-4 rounded-full bg-white/10 border border-white/10 text-white/70 mx-auto">
               <CheckCircle2 size={48} className="animate-pulse" />
             </div>
             <div className="space-y-2">
-              <h3 className="font-serif text-2xl text-gold-50 tracking-wide">
+              <h3 className="font-serif text-2xl text-white/90 tracking-wide">
                 {t.successTitle}
               </h3>
-              <p className="text-[10px] font-mono text-gold-400 uppercase tracking-widest">
+              <p className="text-[10px] font-mono text-white/70 uppercase tracking-widest">
                 ID: {bookingId}
               </p>
             </div>
@@ -819,7 +819,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
                   setCustomServiceText('');
                   setCustomTimeframeText('');
                 }}
-                className="py-2.5 px-6 border border-white/15 hover:border-gold-400/50 hover:text-gold-300 text-white/80 rounded-lg font-mono text-[10px] tracking-widest uppercase transition-all"
+                className="py-2.5 px-6 border border-white/15 hover:border-white/30 hover:text-white text-white/80 rounded-lg font-mono text-[10px] tracking-widest uppercase transition-all"
               >
                 {t.backToGallery}
               </button>

@@ -37,7 +37,7 @@ export const INITIAL_PHOTOGRAPHS: Photograph[] = [
     title: 'Golden Hour Vows',
     title_es: 'Votos a la Hora Dorada',
     category: 'boda',
-    description: 'An intimate sunset frame on the cliffs of Amalfi, reflecting the raw tenderness and premium atmosphere of high-fashion weddings.',
+    description: 'An iíntimate sunset frame on the cliffs of Amalfi, reflecting the raw tenderness and premium atmosphere of high-fashion weddings.',
     description_es: 'Una íntima toma al atardecer en los acantilados de Amalfi, reflejando la ternura y la atmósfera premium de las bodas de alta costura.',
     exif: {
       camera: 'Leica SL3',
@@ -62,7 +62,7 @@ export const INITIAL_PHOTOGRAPHS: Photograph[] = [
     title_es: 'Editorial Vogue No. IV',
     category: 'moda',
     description: 'High-contrast avant-garde editorial in Madrid\u2019s brutalist structures, focusing on dynamic drape mechanics and stark shadows.',
-    description_es: 'Editorial vanguardista de alto contraste en las estructuras brutalistas de Madrid, centrado en la mecánica dinámica del drapeado y sombras marcadas.',
+    description_es: 'Editorial vanguíardista de alto contraste en las estructuras brutalistas de Madrid, centrado en la mecnica dinmica del drapeado y sombras marcadas.',
     exif: {
       camera: 'Leica M11',
       lens: 'Noctilux-M 50mm f/0.95 ASPH.',
@@ -83,10 +83,10 @@ export const INITIAL_PHOTOGRAPHS: Photograph[] = [
     id: 'photo-4',
     url: 'https://images.unsplash.com/photo-1508873696983-2df519f0397e?auto=format&fit=crop&q=90&w=1200',
     title: 'Azure Symmetry',
-    title_es: 'Simetría Azul',
+    title_es: 'Simetra Azul',
     category: 'drone',
     description: 'Orthogonal aerial capture of coastal formations in Portugal, capturing the abstract balance between ocean textures and golden shore cliffs.',
-    description_es: 'Captura aérea ortogonal de formaciones costeras en Portugal, mostrando el equilibrio abstracto entre texturas oceánicas y acantilados dorados.',
+    description_es: 'Captura orea ortogonal de formaciones costeras en Portugal, mostrando el equilibrio abstracto entre texturas oceúnicas y acantilados dorados.',
     exif: {
       camera: 'DJI Inspire 3',
       lens: 'DL 18mm f/2.8 LS ASPH',
@@ -134,7 +134,7 @@ export const INITIAL_PHOTOGRAPHS: Photograph[] = [
     title_es: 'Amanecer en Positano',
     category: 'viajes',
     description: 'A quiet dawn overlooking the iconic tiered pastel architectures of Positano, cloaked in mist and golden reflection.',
-    description_es: 'Un amanecer tranquilo sobre las icónicas arquitecturas pastel escalonadas de Positano, envuelto en niebla y reflejos dorados.',
+    description_es: 'Un amanecer tranquilo sobre las icúnicas arquitecturas pastel escalonadas de Positano, envuelto en niebla y reflejos dorados.',
     exif: {
       camera: 'Leica Q3',
       lens: 'Summilux 28mm f/1.7 ASPH.',
@@ -155,10 +155,10 @@ export const INITIAL_PHOTOGRAPHS: Photograph[] = [
     id: 'photo-7',
     url: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&q=90&w=1200',
     title: 'The Grand Ballroom Entrance',
-    title_es: 'La Gran Entrada al Salón de Baile',
+    title_es: 'La Gran Entrada al Saln de Baile',
     category: 'evento',
     description: 'Candid photo of a prestigious gala at Palais Garnier. Masterclass in low-light ambience, high dynamic range preservation, and architectural framing.',
-    description_es: 'Foto espontánea de una prestigiosa gala en el Palais Garnier. Maestría en iluminación ambiental escasa, preservación de alto rango dinámico y encuadre arquitectónico.',
+    description_es: 'Foto espontnea de una prestigiosa gala en el Palais Garnier. Maestra en iluminación ambiental escasa, preservacin de alto rango dinmico y encuadre arquitectnico.',
     exif: {
       camera: 'Sony Alpha 1',
       lens: 'FE 24-70mm f/2.8 GM II',
@@ -179,10 +179,10 @@ export const INITIAL_PHOTOGRAPHS: Photograph[] = [
     id: 'photo-8',
     url: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&q=90&w=1200',
     title: 'Ethereal Forest Canopy',
-    title_es: 'Dosel Forestal Etéreo',
+    title_es: 'Dosel Forestal Etreo',
     category: 'naturaleza',
     description: 'First rays of morning light breaking through a dense cedar canopy in Yakushima, casting dramatic light shafts into primeval moss meadows.',
-    description_es: 'Los primeros rayos de luz matinal atraviesan un denso dosel de cedro en Yakushima, creando dramáticos haces de luz en prados de musgo primigenios.',
+    description_es: 'Los primeros rayos de luz matinal atraviesan un denso dosel de cedro en Yakushima, creando dramticos haces de luz en prados de musgo primigenios.',
     exif: {
       camera: 'Hasselblad X2D 100C',
       lens: 'XCD 38mm f/2.5 V',
@@ -219,15 +219,15 @@ export const INITIAL_SERVICES: Service[] = [
     slug: 'wedding-luxury',
     image: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=800',
     title_es: 'Bodas Editoriales de Lujo',
-    description_es: 'Cobertura cinematográfica, atemporal y estilo documental del día de su boda. Diseñado para parejas que buscan composiciones de alta costura y la preservación artística de sus momentos sagrados.',
+    description_es: 'Cobertura cinematogrfica, atemporal y estilo documental del día de su boda. Diseado para parejas que buscan composiciones de alta costura y la preservacin artstica de sus momentos sagrados.',
     duration_es: '10 Horas de Cobertura',
     includes_es: [
-      'Consulta previa a la boda y exploración de locaciones',
-      'Configuración de cámara dual Leica/Hasselblad',
-      'Archivo web premium de revisión para clientes',
+      'Consulta previa a la boda y exploracin de locaciones',
+      'Configuracin de cámara dual Leica/Hasselblad',
+      'Archivo web premium de revisin para clientes',
       'Más de 750 imágenes WebP de alta resolución totalmente procesadas',
-      'Fotolibro artístico encuadernado a mano en cuero premium (40 páginas)',
-      'Licencia digital para distribución personal y de prensa'
+      'Fotolibro artstico encuadernado a mano en cuero premium (40 pginas)',
+      'Licencia digital para distribucin personal y de prensa'
     ],
   },
   {
@@ -247,15 +247,15 @@ export const INITIAL_SERVICES: Service[] = [
     slug: 'fashion-editorial',
     image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&q=80&w=800',
     title_es: 'Moda y Retrato de Alta Gama',
-    description_es: 'Imágenes editoriales impactantes diseñadas para agencias de modelos, firmas de moda de lujo e individuos que buscan impresiones artísticas personales de calidad de museo.',
+    description_es: 'Imágenes editoriales impactúantes diseadas para agencias de modelos, firmas de moda de lujo e individuos que buscan impresiones artsticas personales de calidad de museo.',
     duration_es: 'Sesión de 4 Horas',
     includes_es: [
       'Sesión en estudio o locación conceptualizada',
-      'Dirección creativa y asesoría de estilismo de moda personalizada',
+      'Direccin creativa y asesora de estilismo de moda personalizada',
       '25 archivos maestros digitales completamente optimizados con retoque de piel premium',
       'Acceso completo a la biblioteca de fotos RAW mediante el panel de clientes',
-      'Una impresión de calidad de museo en algodón de formato 24x36"',
-      'Opción de licencia de uso comercial disponible'
+      'Una impresin de calidad de museo en algodn de formato 24x36"',
+      'Opcin de licencia de uso comercial disponible'
     ],
   },
   {
@@ -274,11 +274,11 @@ export const INITIAL_SERVICES: Service[] = [
     slug: 'architectural-real-estate',
     image: 'https://images.unsplash.com/photo-1508873696983-2df519f0397e?auto=format&fit=crop&q=80&w=800',
     title_es: 'Arquitectura y Propiedades de Lujo',
-    description_es: 'Simetría perfecta, iluminación ambiental y artificial equilibrada, y perspectivas aéreas que destacan espacios residenciales o comerciales de alta gama.',
+    description_es: 'Simetra perfecta, iluminación ambiental y artificial equilibrada, y perspectivas áureas que destacan espacios residenciales o comerciales de alta gama.',
     duration_es: 'Sesión de 6 Horas',
     includes_es: [
       'Encuadre exhaustivo de interiores y exteriores',
-      'Configuración de doble perspectiva: interior ultra gran angular y dron de gran altitud',
+      'Configuracin de doble perspectiva: interior ultra gran angular y dron de gran altitud',
       'Revelado de color profesional y reemplazos de cielo HDR',
       '35 activos fotográficos editoriales de alta resolución para interiores',
       'Licencia comercial completa para publicidad digital, impresa y vallas publicitarias'
@@ -299,15 +299,15 @@ export const INITIAL_SERVICES: Service[] = [
     price: 3200,
     slug: 'commercial-product',
     image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=800',
-    title_es: 'Campañas Comerciales de Producto',
-    description_es: 'Sesiones de estudio macro enfocadas en materiales exquisitos, diseño de precisión e iluminación de autor. Hecho a medida para relojeros premium, firmas de alta joyería y destilados finos.',
+    title_es: 'Campaas Comerciales de Producto',
+    description_es: 'Sesiones de estudio macro enfocadas en materiales exquisitos, diseo de precisin e iluminación de autor. Hecho a medida para relojeros premium, firmas de alta joyera y destilados finos.',
     duration_es: 'Tarifa Diaria (8 Horas)',
     includes_es: [
-      'Configuración de matriz de iluminación de estudio macro dedicada',
+      'Configuracin de matriz de iluminación de estudio macro dedicada',
       'Estilismo de producto y preparación libre de polvo',
       'Captura de resolución ultra-alta de 100MP con Hasselblad',
       'Postprocesamiento profesional con apilamiento de enfoque (focus-stacking)',
-      'Derechos de uso publicitario completo y distribución de prensa mundial'
+      'Derechos de uso publicitario completo y distribucin de prensa mundial'
     ],
   }
 ];
@@ -396,8 +396,8 @@ export const INITIAL_FAQS: FAQ[] = [
     question: 'What cameras and lenses do you use for your shoots?',
     answer: 'I shoot predominantly on the Hasselblad X2D 100C system for ultimate medium-format detail and unmatched skin-tone color rendition. For spontaneous or street-editorial projects, I rely on the iconic Leica SL3 and Leica M11 Rangefinder, paired with legendary Summilux-M prime lenses.',
     category: 'Gear & Production',
-    question_es: '¿Qué cámaras y objetivos utilizas en tu trabajo?',
-    answer_es: 'Trabajo principalmente con el sistema de formato medio Hasselblad X2D 100C para obtener el máximo detalle y una reproducción de color de piel inigualable. Para proyectos de calle o editoriales espontáneos, confío en las icónicas Leica SL3 y Leica M11, combinadas con los legendarios objetivos fijos Summilux-M.',
+    question_es: 'Qu cámaras y objetivos utilizas en tu trabajo?',
+    answer_es: 'Trabajo principalmente con el sistema de formato medio Hasselblad X2D 100C para obtener el mximo detalle y una reproducción de color de piel iniguíalable. Para proyectos de calle o editoriales espontneos, confo en las icúnicas Leica SL3 y Leica M11, combinadas con los legendarios objetivos fijos Summilux-M.',
     question_en: 'What cameras and lenses do you use for your shoots?',
     answer_en: 'I shoot predominantly on the Hasselblad X2D 100C system for ultimate medium-format detail and unmatched skin-tone color rendition. For spontaneous or street-editorial projects, I rely on the iconic Leica SL3 and Leica M11 Rangefinder, paired with legendary Summilux-M prime lenses.'
   },
@@ -406,8 +406,8 @@ export const INITIAL_FAQS: FAQ[] = [
     question: 'Do you travel internationally for destination weddings and shoots?',
     answer: 'Absolutely. I am based in Europe, but shoot destination weddings and fashion campaigns worldwide. Travel, lodging, and visa coordination are handled directly by my studio manager, and a flat-rate custom travel expense package will be appended to your quotation.',
     category: 'Travel & Booking',
-    question_es: '¿Viajas internacionalmente para bodas de destino y sesiones?',
-    answer_es: 'Absolutamente. Tengo mi base en Europa, pero realizo reportajes de bodas de destino y campañas de moda en todo el mundo. Los vuelos, el alojamiento y la logística de visados son gestionados directamente por mi jefa de estudio, y se añadirá un paquete de gastos de viaje de tarifa plana personalizado a su cotización.',
+    question_es: 'Viajas internacionalmente para bodas de destino y sesiones?',
+    answer_es: 'Absolutamente. Tengo mi base en Europa, pero realizo reportajes de bodas de destino y campañas de moda en todo el mundo. Los vuelos, el alojamiento y la logística de visados son gestionados directamente por mi jefa de estudio, y se añadir un paquete de gastos de viaje de tarifa plana personalizado a su cotización.',
     question_en: 'Do you travel internationally for destination weddings and shoots?',
     answer_en: 'Absolutely. I am based in Europe, but shoot destination weddings and fashion campaigns worldwide. Travel, lodging, and visa coordination are handled directly by my studio manager, and a flat-rate custom travel expense package will be appended to your quotation.'
   },
@@ -416,7 +416,7 @@ export const INITIAL_FAQS: FAQ[] = [
     question: 'How long does it take to receive the fully finished gallery?',
     answer: 'A high-fidelity teaser selection of 15-20 hand-edited images is uploaded to your Private Client Portal within 72 hours of your session. The full, color-graded, high-resolution master catalog is completed and published for download within 4 to 6 weeks.',
     category: 'Deliverables & Retouching',
-    question_es: '¿Cuánto tiempo se tarda en recibir la galería finalizada?',
+    question_es: 'Cunto tiempo se tarda en recibir la galería finalizada?',
     answer_es: 'Una selección exclusiva de adelanto de 15 a 20 imágenes editadas a mano se subirá a su Portal Privado de Clientes dentro de las primeras 72 horas posteriores a la sesión. El catálogo maestro completo, procesado en alta resolución y con nuestra firma cromática, se entregará en un plazo garantizado de 4 a 6 semanas.',
     question_en: 'How long does it take to receive the fully finished gallery?',
     answer_en: 'A high-fidelity teaser selection of 15-20 hand-edited images is uploaded to your Private Client Portal within 72 hours of your session. The full, color-graded, high-resolution master catalog is completed and published for download within 4 to 6 weeks.'
@@ -426,7 +426,7 @@ export const INITIAL_FAQS: FAQ[] = [
     question: 'Are raw files included in your packages?',
     answer: 'I pride myself on delivering polished, finalized masterpieces. Therefore, unedited raw files are generally not released. However, full access to view and proof the complete raw catalog is provided inside the secure Client proofing portal to select your final favorites for retouching.',
     category: 'Deliverables & Retouching',
-    question_es: '¿Están incluidos los archivos RAW sin editar en sus paquetes?',
+    question_es: 'Estn incluidos los archivos RAW sin editar en sus paquetes?',
     answer_es: 'Me enorgullezco de entregar obras de arte pulidas y finalizadas con nuestra firma visual. Por lo tanto, los archivos RAW sin editar nunca se entregan al cliente final. Sin embargo, se proporciona acceso completo para visualizar y revisar todo el catálogo de pruebas dentro del Portal Privado para que pueda seleccionar sus capturas favoritas para el retoque final.',
     question_en: 'Are raw files included in your packages?',
     answer_en: 'I pride myself on delivering polished, finalized masterpieces. Therefore, unedited raw files are generally not released. However, full access to view and proof the complete raw catalog is provided inside the secure Client proofing portal to select your final favorites for retouching.'
@@ -436,8 +436,8 @@ export const INITIAL_FAQS: FAQ[] = [
     question: 'How does the booking and secure payment process work?',
     answer: 'To book an exclusive date, we require a 30% booking deposit paid securely through Stripe using credit/debit cards or digital wallets. The remaining 70% balance is payable one week prior to the session date or on the day of the shoot before we begin.',
     category: 'Travel & Booking',
-    question_es: '¿Cómo funciona el proceso de reserva y pago seguro?',
-    answer_es: 'Para reservar una fecha exclusiva, requerimos un depósito de reserva del 30% que se abona cómodamente a través de Stripe utilizando tarjeta de crédito/débito o billeteras digitales. El 70% restante se abona una semana antes del día de la sesión o el mismo día del reportaje antes de comenzar.',
+    question_es: 'Cmo funciona el proceso de reserva y pago seguro?',
+    answer_es: 'Para reservar una fecha exclusiva, requerimos un depósito de reserva del 30% que se abona cómodamente a través de Stripe utilizando tarjeta de crédito/débito o billeteras digitales. El 70% restante se abona una semana antes del día de la sesión o el mismo da del reportaje antes de comenzar.',
     question_en: 'How does the booking and secure payment process work?',
     answer_en: 'To book an exclusive date, we require a 30% booking deposit paid securely through Stripe using credit/debit cards or digital wallets. The remaining 70% balance is payable one week prior to the session date or on the day of the shoot before we begin.'
   },
@@ -446,8 +446,8 @@ export const INITIAL_FAQS: FAQ[] = [
     question: 'Do you offer fine art prints and handmade albums?',
     answer: 'Yes, we collaborate with the finest fine-art print labs in Italy and Germany to produce museum-grade archival cotton prints (100% acid-free). Our luxury photo albums are hand-bound with fine-grain leather or premium linen, designed to endure for generations.',
     category: 'Deliverables & Retouching',
-    question_es: '¿Ofrecen impresiones artísticas y álbumes hechos a mano?',
-    answer_es: 'Sí, trabajamos con los mejores laboratorios de bellas artes de Italia y Alemania para producir impresiones de calidad de museo en papel de algodón de archivo 100% libre de ácido. Nuestros álbumes de fotos de lujo están encuadernados a mano con cuero de grano fino o lino premium, diseñados para durar generaciones.',
+    question_es: 'Ofrecen impresiones artsticas y álbumes hechos a mano?',
+    answer_es: 'S, trabajamos con los mejores laboratorios de bellas artes de Italia y Alemania para producir impresiones de calidad de museo en papel de algodn de archivo 100% libre de cido. Nuestros álbumes de fotos de lujo estn encuadernados a mano con cuero de grano fino o lino premium, diseados para durar generaciones.',
     question_en: 'Do you offer fine art prints and handmade albums?',
     answer_en: 'Yes, we collaborate with the finest fine-art print labs in Italy and Germany to produce museum-grade archival cotton prints (100% acid-free). Our luxury photo albums are hand-bound with fine-grain leather or premium linen, designed to endure for generations.'
   },
@@ -456,8 +456,8 @@ export const INITIAL_FAQS: FAQ[] = [
     question: 'What happens if the weather is unfavorable for an outdoor session?',
     answer: 'We understand that weather is unpredictable. If heavy rain or storms are forecast that make the shoot impossible, we will reschedule the session at no additional cost to the next mutually available date. For light overcast, we often continue as clouds act as a beautiful natural light diffuser.',
     category: 'Travel & Booking',
-    question_es: '¿Qué sucede si el clima no es favorable para una sesión en exteriores?',
-    answer_es: 'Entendemos que las condiciones climáticas son impredecibles. Si se pronostican lluvias intensas o tormentas que imposibiliten la sesión, reprogramaremos el reportaje sin costo adicional para la primera fecha disponible que sea de mutuo acuerdo. Para nublado ligero, a menudo continuamos ya que las nubes actúan como un difusor de luz natural impecable.',
+    question_es: 'Qu sucede si el clima no es favorable para una sesión en exteriores?',
+    answer_es: 'Entendemos que las condiciones climáticas son impredecibles. Si se pronostican lluvias intensas o tormentas que imposibiéliten la sesión, reprogramaremos el reportaje sin costo adicional para la primera fecha disponible que sea de mutuo acuerdo. Para nublado ligero, a menudo continuamos ya que las nubes actúan como un difusor de luz natural impecable.',
     question_en: 'What happens if the weather is unfavorable for an outdoor session?',
     answer_en: 'We understand that weather is unpredictable. If heavy rain or storms are forecast that make the shoot impossible, we will reschedule the session at no additional cost to the next mutually available date. For light overcast, we often continue as clouds act as a beautiful natural light diffuser.'
   },
@@ -466,8 +466,8 @@ export const INITIAL_FAQS: FAQ[] = [
     question: 'Can we request creative direction and styling assistance?',
     answer: 'Absolutely. All artistic and fashion commissions include a dedicated 1-hour pre-shoot creative direction consultation. We curate a bespoke style guide and collaborative visual moodboard to align your wardrobe color palette, location aesthetics, and lighting atmosphere with medium-format standards.',
     category: 'Gear & Production',
-    question_es: '¿Podemos solicitar directrices creativas y ayuda para el estilismo?',
-    answer_es: 'Absolutamente. Todas las comisiones artísticas y de moda incluyen una sesión de consulta de dirección de arte previa de 1 hora. Creamos una guía de estilo a medida y un panel de inspiración (moodboard) visual conjunto para coordinar las paletas de color de su vestuario, localizaciones y ambiente de iluminación para que se alineen perfectamente con los estándares de formato medio.',
+    question_es: 'Podemos solicitar directrices creativas y ayuda para el estilismo?',
+    answer_es: 'Absolutamente. Todas las comisiones artsticas y de moda incluyen una sesión de consulta de dirección de arte previa de 1 hora. Creamos una guía de estilo a medida y un panel de inspiración (moodboard) visual conjunto para coordinar las paletas de color de su vestuario, localizaciones y ambiente de iluminación para que se alineen perfectamente con los estándares de formato medio.',
     question_en: 'Can we request creative direction and styling assistance?',
     answer_en: 'Absolutely. All artistic and fashion commissions include a dedicated 1-hour pre-shoot creative direction consultation. We curate a bespoke style guide and collaborative visual moodboard to align your wardrobe color palette, location aesthetics, and lighting atmosphere with medium-format standards.'
   }
@@ -486,7 +486,9 @@ export const INITIAL_BOOKINGS: Booking[] = [
     notes: 'Agency portrait test. Need high-key lighting and clean gray/beige backdrops. Styling is focused on summer resort wear.',
     status: 'accepted',
     createdAt: '2026-07-09T14:22:00Z',
-    amount: 1800
+    amount: 1800,
+    reminderSent: true,
+    reminderSentAt: '2026-07-22T06:00:00Z'
   },
   {
     id: 'book-2',
@@ -500,7 +502,8 @@ export const INITIAL_BOOKINGS: Booking[] = [
     notes: 'Real estate interior shoot of a newly renovated mid-century modern villa in Cotswolds. Need dusk golden hour shots.',
     status: 'pending',
     createdAt: '2026-07-10T09:12:00Z',
-    amount: 2500
+    amount: 2500,
+    reminderSent: false
   },
   {
     id: 'book-3',
@@ -514,7 +517,8 @@ export const INITIAL_BOOKINGS: Booking[] = [
     notes: 'Destination wedding in Château de Vaux-le-Vicomte, France. We would love emotional candid moments, fine-art black & whites, and drone setups.',
     status: 'pending',
     createdAt: '2026-07-11T05:43:00Z',
-    amount: 4500
+    amount: 4500,
+    reminderSent: false
   }
 ];
 
@@ -541,7 +545,7 @@ export const INITIAL_MESSAGES: Message[] = [
 
 export const INITIAL_SEO: SEOMetadata = {
   title: 'Miriam Campos Photography | Premium Luxury Fine-Art Photography & Editorial Studio',
-  description: 'Museum-grade editorial, portrait, and luxury wedding photography captured on medium-format Leica & Hasselblad systems. Crafted for high-end fashion and emotional preservation.',
+  description: 'Museum-grade editorial, portrait, and luxury wedding photography captured on medium-format Leica & Hasselblad systemás. Crafted for high-end fashion and emotional preservation.',
   ogTitle: 'Miriam Campos Photography Portfolio | High-End Fine-Art & Editorial Photography',
   ogDescription: 'Experience a cinematic digital art gallery. Booking premium portrait, fashion editorial, and international destination wedding commissions.',
   ogImage: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=90&w=1200',
@@ -569,11 +573,12 @@ export const INITIAL_EMAIL_CONFIG: EmailConfig = {
   emailjsServiceId: '',
   emailjsTemplateId: '',
   emailjsPublicKey: '',
+  emailjsPrivateKey: '',
   receiverEmail: '',
   enableAutoResponse: false,
   emailjsAutoTemplateId: '',
-  autoReplySubject: '¡Tu reserva ha sido recibida con éxito! - Aurea Studio',
-  autoReplyMessage: 'Hola,\n\nMuchas gracias por reservar tu sesión fotográfica con nosotros. Hemos recibido tus datos correctamente y tu espacio ha sido bloqueado en nuestro calendario.\n\nEn las próximas horas nos pondremos en contacto contigo para coordinar los detalles finales, locación y responder cualquier consulta adicional.\n\n¡Estamos muy emocionados de crear arte juntos!\n\nAtentamente,\nEl equipo de Aurea Studio.'
+  autoReplySubject: 'Tu reserva ha sido recibida con éxito! - Aorea Studio',
+  autoReplyMessage: 'Hola,\n\nMuchas gracias por reservar tu sesión fotográfica con nosotros. Hemos recibido tus datos correctamente y tu espacio ha sido bloqueado en nuestro calendario.\n\nEn las próximas horas nos pondremos en contacto contigo para coordinar los detalles finales, locación y responder cualquier consulta adicional.\n\nEstamos muy emocionados de crear arte juntos!\n\nAtentamente,\nEl equipo de Aorea Studio.'
 };
 
 export const INITIAL_PROFILE: PhotographerProfile = {
@@ -587,7 +592,7 @@ export const INITIAL_PROFILE: PhotographerProfile = {
   aboutText1_es: 'Soy Miriam Campos, fotógrafa y directora de arte de bellas artes, dedicada a congelar el tiempo bajo el estándar de Leica y Hasselblad. Entiendo la luz no solo como iluminación, sino como el medio supremo para esculpir emociones y narrar historias silenciosas con proporciones áureas.',
   aboutText2_es: 'Con más de 15 años documentando bodas editoriales de alta costura, campañas comerciales internacionales y retratos íntimos para agencias de modelos de élite, mi trabajo busca un minimalismo elegante, abundante espacio en blanco y simetría geométrica.',
   aboutText1_en: 'I am Miriam Campos, a fine art photographer and creative director dedicated to freezing time through the pristine optics of Leica and Hasselblad. I understand light not as simple exposure, but as the supreme medium to sculpt emotion and weave silent stories of golden ratio symmetry.',
-  aboutText2_en: 'With over 15 years documenting haute-couture destination weddings, international commercial campaigns, and intimate editorial model books, my work strives for elegant minimalism, generous negative space, and absolute geometric structure.'
+  aboutText2_en: 'With over 15 years documenting haute-couture destination weddings, international commercial campaigns, and iíntimate editorial model books, my work strives for elegant minimalism, generous negative space, and absolute geometric structure.'
 };
 
 export const MILESTONES = [
@@ -630,8 +635,8 @@ export const MILESTONES = [
     year: '2025',
     title_es: '15 Años de Luz',
     title_en: '15 Years of Light',
-    description_es: 'Más de 15 años de trayectoria, 200+ clientes felices en 12 países y una evolución constante. La fotografía sigue siendo mi lenguaje: congelar instantes, esculpir emociones y contar historias que trascienden el tiempo.',
-    description_en: 'Over 15 years of career, 200+ happy clients across 12 countries, and constant evolution. Photography remains my language: freezing moments, sculpting emotions, and telling stories that transcend time.',
+    description_es: 'Más de 15 años de trayectoria, 200+ clientes felices en 12 países y una evolución constante. La fotografía sigue siendo mi lenguíaje: congelar instantes, esculpir emociones y contar historias que trascienden el tiempo.',
+    description_en: 'Over 15 years of career, 200+ happy clients across 12 countries, and constant evolution. Photography remains my languíage: freezing moments, sculpting emotions, and telling stories that transcend time.',
   },
 ];
 
@@ -639,7 +644,7 @@ export const INITIAL_SESSION_CATEGORIES: SessionCategory[] = [
   {
     id: 'boda', icon: 'Heart',
     name_es: 'Bodas', name_en: 'Weddings',
-    description_es: 'El día más importante merece ser eterno.', description_en: 'The most important day deserves to be eternal.',
+    description_es: 'El da más importante merece ser eterno.', description_en: 'The most important day deserves to be eternal.',
     image: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=85&w=800',
     sortOrder: 1, active: true,
   },
@@ -660,7 +665,7 @@ export const INITIAL_SESSION_CATEGORIES: SessionCategory[] = [
   {
     id: 'familia', icon: 'Users',
     name_es: 'Familia', name_en: 'Family',
-    description_es: 'El vínculo más hermoso.', description_en: 'The most beautiful bond.',
+    description_es: 'El vnculo más hermoso.', description_en: 'The most beautiful bond.',
     image: 'https://images.unsplash.com/photo-1511895426328-dc87141906cf?auto=format&fit=crop&q=85&w=800',
     sortOrder: 4, active: true,
   },
@@ -680,7 +685,7 @@ export const INITIAL_SESSION_CATEGORIES: SessionCategory[] = [
   },
   {
     id: 'cumpleanos', icon: 'PartyPopper',
-    name_es: 'Cumpleaños', name_en: 'Birthdays',
+    name_es: 'Cumpleaos', name_en: 'Birthdays',
     description_es: 'Celebra con estilo.', description_en: 'Celebrate in style.',
     image: 'https://images.unsplash.com/photo-1464349153735-7db50b83c84c?auto=format&fit=crop&q=85&w=800',
     sortOrder: 7, active: true,
@@ -701,7 +706,7 @@ export const INITIAL_SESSION_CATEGORIES: SessionCategory[] = [
   },
   {
     id: 'gastronomia', icon: 'Utensils',
-    name_es: 'Gastronomía', name_en: 'Gastronomy',
+    name_es: 'Gastronoma', name_en: 'Gastronomy',
     description_es: 'El arte de la comida.', description_en: 'The art of food.',
     image: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&q=85&w=800',
     sortOrder: 10, active: true,
@@ -709,7 +714,7 @@ export const INITIAL_SESSION_CATEGORIES: SessionCategory[] = [
   {
     id: 'producto', icon: 'Package',
     name_es: 'Producto', name_en: 'Product',
-    description_es: 'Tu producto, tu mejor carta de presentación.', description_en: 'Your product, your best business card.',
+    description_es: 'Tu producto, tu mejor carta de presentacin.', description_en: 'Your product, your best business card.',
     image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=85&w=800',
     sortOrder: 11, active: true,
   },
@@ -725,8 +730,8 @@ export const INITIAL_SESSION_CATEGORIES: SessionCategory[] = [
 export const INITIAL_PHOTOGRAPHY_PACKAGES: PhotographyPackage[] = [
   // ── BODA ──
   { id: 'pkg-boda-civil', category: 'boda', name_es: 'Civil', name_en: 'Civil', price: 2500, deposit: 1000, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: '4 horas', duration_en: '4 hours', description_es: 'Cobertura esencial de la ceremonia civil con un enfoque documental y elegante.', description_en: 'Essential civil ceremony coverage with a documentary and elegant approach.', benefits: ['Cobertura de ceremonia', '50 fotos editadas', 'Galería privada online', 'Entrega en 7 días'], benefits_es: ['Cobertura de ceremonia', '50 fotos editadas', 'Galería privada online', 'Entrega en 7 días'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 1, active: true, featured: false, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
-  { id: 'pkg-boda-completa', category: 'boda', name_es: 'Completa', name_en: 'Complete', price: 4500, deposit: 1500, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: '8 horas', duration_en: '8 hours', description_es: 'Cobertura completa del día: preparativos, ceremonia, fiesta y galería privada.', description_en: 'Full day coverage: preparations, ceremony, party and private gallery.', benefits: ['Preparativos', 'Ceremonia completa', 'Fiesta y recepción', '150 fotos editadas', 'Galería privada online', 'Álbum digital premium'], benefits_es: ['Preparativos', 'Ceremonia completa', 'Fiesta y recepción', '150 fotos editadas', 'Galería privada online', 'Álbum digital premium'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 2, active: true, featured: true, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
-  { id: 'pkg-boda-luxury', category: 'boda', name_es: 'Luxury', name_en: 'Luxury', price: 8000, deposit: 2500, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: 'Cobertura completa', duration_en: 'Full coverage', description_es: 'La experiencia definitiva: cobertura total, álbum premium, drone y video resumen.', description_en: 'The ultimate experience: full coverage, premium album, drone and highlight video.', benefits: ['Cobertura completa 12h', 'Álbum premium impreso', 'Drone aéreo', 'Video resumen editado', '300+ fotos editadas', 'Galería privada'], benefits_es: ['Cobertura completa 12h', 'Álbum premium impreso', 'Drone aéreo', 'Video resumen editado', '300+ fotos editadas', 'Galería privada'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 3, active: true, featured: false, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
+  { id: 'pkg-boda-completa', category: 'boda', name_es: 'Completa', name_en: 'Complete', price: 4500, deposit: 1500, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: '8 horas', duration_en: '8 hours', description_es: 'Cobertura completa del día: preparativos, ceremonia, fiesta y galería privada.', description_en: 'Full day coverage: preparations, ceremony, party and private gallery.', benefits: ['Preparativos', 'Ceremonia completa', 'Fiesta y recepción', '150 fotos editadas', 'Galería privada online', 'álbum digital premium'], benefits_es: ['Preparativos', 'Ceremonia completa', 'Fiesta y recepción', '150 fotos editadas', 'Galería privada online', 'álbum digital premium'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 2, active: true, featured: true, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
+  { id: 'pkg-boda-luxury', category: 'boda', name_es: 'Luxury', name_en: 'Luxury', price: 8000, deposit: 2500, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: 'Cobertura completa', duration_en: 'Full coverage', description_es: 'La experiencia definitiva: cobertura total, álbum premium, drone y video resumen.', description_en: 'The ultimate experience: full coverage, premium álbum, drone and highlight video.', benefits: ['Cobertura completa 12h', 'álbum premium impreso', 'Drone aéreo', 'Video resumen editado', '300+ fotos editadas', 'Galería privada'], benefits_es: ['Cobertura completa 12h', 'álbum premium impreso', 'Drone aéreo', 'Video resumen editado', '300+ fotos editadas', 'Galería privada'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 3, active: true, featured: false, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
 
   // ── COMPROMISO ──
   { id: 'pkg-comp-basico', category: 'compromiso', name_es: 'Básico', name_en: 'Basic', price: 250, deposit: 125, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: '1 hora', duration_en: '1 hour', description_es: 'Sesión íntima para capturar la esencia de su compromiso.', description_en: 'Intimate session to capture the essence of your engagement.', benefits: ['1 hora de sesión', '20 fotos editadas', 'Galería privada'], benefits_es: ['1 hora de sesión', '20 fotos editadas', 'Galería privada'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 1, active: true, featured: false, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
@@ -741,7 +746,7 @@ export const INITIAL_PHOTOGRAPHY_PACKAGES: PhotographyPackage[] = [
   // ── FAMILIA ──
   { id: 'pkg-fam-express', category: 'familia', name_es: 'Express', name_en: 'Express', price: 250, deposit: 125, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: '1 hora', duration_en: '1 hour', description_es: 'Sesión familiar rápida en locación o estudio.', description_en: 'Quick family session in location or studio.', benefits: ['1 hora de sesión', '15 fotos editadas', 'Galería privada'], benefits_es: ['1 hora de sesión', '15 fotos editadas', 'Galería privada'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 1, active: true, featured: false, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
   { id: 'pkg-fam-completa', category: 'familia', name_es: 'Completa', name_en: 'Complete', price: 450, deposit: 225, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: '2 horas', duration_en: '2 hours', description_es: 'Sesión familiar con variaciones de grupos y fondos.', description_en: 'Family session with group variations and backgrounds.', benefits: ['2 horas de sesión', '35 fotos editadas', 'Variaciones de grupo', 'Galería privada'], benefits_es: ['2 horas de sesión', '35 fotos editadas', 'Variaciones de grupo', 'Galería privada'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 2, active: true, featured: true, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
-  { id: 'pkg-fam-premium', category: 'familia', name_es: 'Premium', name_en: 'Premium', price: 650, deposit: 325, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: '3 horas', duration_en: '3 hours', description_es: 'Experiencia familiar completa con locación exterior y álbum digital.', description_en: 'Complete family experience with outdoor location and digital album.', benefits: ['3 horas de sesión', '60 fotos editadas', 'Locación exterior', 'Álbum digital', 'Galería privada'], benefits_es: ['3 horas de sesión', '60 fotos editadas', 'Locación exterior', 'Álbum digital', 'Galería privada'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 3, active: true, featured: false, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
+  { id: 'pkg-fam-premium', category: 'familia', name_es: 'Premium', name_en: 'Premium', price: 650, deposit: 325, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: '3 horas', duration_en: '3 hours', description_es: 'Experiencia familiar completa con locación exterior y álbum digital.', description_en: 'Complete family experience with outdoor location and digital album.', benefits: ['3 horas de sesión', '60 fotos editadas', 'Locación exterior', 'álbum digital', 'Galería privada'], benefits_es: ['3 horas de sesión', '60 fotos editadas', 'Locación exterior', 'álbum digital', 'Galería privada'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 3, active: true, featured: false, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
 
   // ── INFANTIL ──
   { id: 'pkg-inf-mini', category: 'infantil', name_es: 'Mini', name_en: 'Mini', price: 150, deposit: 75, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: '30 minutos', duration_en: '30 minutes', description_es: 'Sesión breve pensada para los más pequeños.', description_en: 'Short session designed for the little ones.', benefits: ['30 minutos de sesión', '10 fotos editadas', 'Galería privada'], benefits_es: ['30 minutos de sesión', '10 fotos editadas', 'Galería privada'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 1, active: true, featured: false, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
@@ -751,31 +756,31 @@ export const INITIAL_PHOTOGRAPHY_PACKAGES: PhotographyPackage[] = [
   // ── MATERNIDAD ──
   { id: 'pkg-mat-basico', category: 'maternidad', name_es: 'Básico', name_en: 'Basic', price: 250, deposit: 125, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: '1 hora', duration_en: '1 hour', description_es: 'Sesión íntima de maternidad en estudio.', description_en: 'Intimate maternity session in studio.', benefits: ['1 hora de sesión', '15 fotos editadas', 'Vestuario incluido', 'Galería privada'], benefits_es: ['1 hora de sesión', '15 fotos editadas', 'Vestuario incluido', 'Galería privada'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 1, active: true, featured: false, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
   { id: 'pkg-mat-completo', category: 'maternidad', name_es: 'Completo', name_en: 'Complete', price: 400, deposit: 200, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: '1.5 horas', duration_en: '1.5 hours', description_es: 'Sesión con vestuario y accesorios profesionales.', description_en: 'Session with professional wardrobe and accessories.', benefits: ['1.5 horas de sesión', '30 fotos editadas', 'Vestuario y accesorios', 'Maquillaje básico', 'Galería privada'], benefits_es: ['1.5 horas de sesión', '30 fotos editadas', 'Vestuario y accesorios', 'Maquillaje básico', 'Galería privada'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 2, active: true, featured: true, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
-  { id: 'pkg-mat-premium', category: 'maternidad', name_es: 'Premium', name_en: 'Premium', price: 600, deposit: 300, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: '2 horas', duration_en: '2 hours', description_es: 'Experiencia premium con locación exterior y álbum digital.', description_en: 'Premium experience with outdoor location and digital album.', benefits: ['2 horas de sesión', '50 fotos editadas', 'Locación exterior', 'Álbum digital', 'Galería privada'], benefits_es: ['2 horas de sesión', '50 fotos editadas', 'Locación exterior', 'Álbum digital', 'Galería privada'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 3, active: true, featured: false, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
+  { id: 'pkg-mat-premium', category: 'maternidad', name_es: 'Premium', name_en: 'Premium', price: 600, deposit: 300, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: '2 horas', duration_en: '2 hours', description_es: 'Experiencia premium con locación exterior y álbum digital.', description_en: 'Premium experience with outdoor location and digital album.', benefits: ['2 horas de sesión', '50 fotos editadas', 'Locación exterior', 'álbum digital', 'Galería privada'], benefits_es: ['2 horas de sesión', '50 fotos editadas', 'Locación exterior', 'álbum digital', 'Galería privada'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 3, active: true, featured: false, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
 
-  // ── CUMPLEAÑOS ──
-  { id: 'pkg-cum-basico', category: 'cumpleanos', name_es: 'Básico', name_en: 'Basic', price: 150, deposit: 75, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: '1 hora', duration_en: '1 hour', description_es: 'Sesión divertida para celebrar tu cumpleaños.', description_en: 'Fun session to celebrate your birthday.', benefits: ['1 hora de sesión', '15 fotos editadas', 'Galería privada'], benefits_es: ['1 hora de sesión', '15 fotos editadas', 'Galería privada'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 1, active: true, featured: false, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
+  // ── CUMPLEAOS ──
+  { id: 'pkg-cum-basico', category: 'cumpleanos', name_es: 'Básico', name_en: 'Basic', price: 150, deposit: 75, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: '1 hora', duration_en: '1 hour', description_es: 'Sesión divertida para celebrar tu cumpleaos.', description_en: 'Fun session to celebrate your birthday.', benefits: ['1 hora de sesión', '15 fotos editadas', 'Galería privada'], benefits_es: ['1 hora de sesión', '15 fotos editadas', 'Galería privada'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 1, active: true, featured: false, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
   { id: 'pkg-cum-completo', category: 'cumpleanos', name_es: 'Completo', name_en: 'Complete', price: 300, deposit: 150, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: '2 horas', duration_en: '2 hours', description_es: 'Sesión con cambio de vestuario y decoración temática.', description_en: 'Session with outfit change and thematic decoration.', benefits: ['2 horas de sesión', '30 fotos editadas', 'Cambio de vestuario', 'Decoración temática', 'Galería privada'], benefits_es: ['2 horas de sesión', '30 fotos editadas', 'Cambio de vestuario', 'Decoración temática', 'Galería privada'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 2, active: true, featured: true, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
   { id: 'pkg-cum-premium', category: 'cumpleanos', name_es: 'Premium', name_en: 'Premium', price: 500, deposit: 250, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: '3 horas', duration_en: '3 hours', description_es: 'Experiencia completa con catering básico y multiple vestuario.', description_en: 'Complete experience with light catering and multiple outfits.', benefits: ['3 horas de sesión', '50 fotos editadas', 'Múltiples cambios', 'Catering básico', 'Galería privada'], benefits_es: ['3 horas de sesión', '50 fotos editadas', 'Múltiples cambios', 'Catering básico', 'Galería privada'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 3, active: true, featured: false, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
 
-  // ── GRADUACIÓN ──
-  { id: 'pkg-grad-basico', category: 'graduacion', name_es: 'Básico', name_en: 'Basic', price: 200, deposit: 100, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: '1 hora', duration_en: '1 hour', description_es: 'Sesión de graduación con toga y birrete.', description_en: 'Graduation session with gown and cap.', benefits: ['1 hora de sesión', '15 fotos editadas', 'Toga y birrete incluido', 'Galería privada'], benefits_es: ['1 hora de sesión', '15 fotos editadas', 'Toga y birrete incluido', 'Galería privada'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 1, active: true, featured: false, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
+  // ── GRADUACIN ──
+  { id: 'pkg-grad-basico', category: 'graduacion', name_es: 'Básico', name_en: 'Basic', price: 200, deposit: 100, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: '1 hora', duration_en: '1 hour', description_es: 'Sesión de graduacin con toga y birrete.', description_en: 'Graduation session with gown and cap.', benefits: ['1 hora de sesión', '15 fotos editadas', 'Toga y birrete incluido', 'Galería privada'], benefits_es: ['1 hora de sesión', '15 fotos editadas', 'Toga y birrete incluido', 'Galería privada'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 1, active: true, featured: false, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
   { id: 'pkg-grad-completo', category: 'graduacion', name_es: 'Completo', name_en: 'Complete', price: 350, deposit: 175, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: '2 horas', duration_en: '2 hours', description_es: 'Sesión con cambios de vestuario y locación.', description_en: 'Session with outfit changes and location.', benefits: ['2 horas de sesión', '30 fotos editadas', 'Cambio de vestuario', 'Locación interior/exterior', 'Galería privada'], benefits_es: ['2 horas de sesión', '30 fotos editadas', 'Cambio de vestuario', 'Locación interior/exterior', 'Galería privada'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 2, active: true, featured: true, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
-  { id: 'pkg-grad-premium', category: 'graduacion', name_es: 'Premium', name_en: 'Premium', price: 550, deposit: 275, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: '3 horas', duration_en: '3 hours', description_es: 'Experiencia completa con invitados y múltiples locaciones.', description_en: 'Complete experience with guests and multiple locations.', benefits: ['3 horas de sesión', '60 fotos editadas', 'Fotos con invitados', 'Álbum digital', 'Galería privada'], benefits_es: ['3 horas de sesión', '60 fotos editadas', 'Fotos con invitados', 'Álbum digital', 'Galería privada'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 3, active: true, featured: false, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
+  { id: 'pkg-grad-premium', category: 'graduacion', name_es: 'Premium', name_en: 'Premium', price: 550, deposit: 275, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: '3 horas', duration_en: '3 hours', description_es: 'Experiencia completa con invitados y múltiples locaciones.', description_en: 'Complete experience with guests and multiple locations.', benefits: ['3 horas de sesión', '60 fotos editadas', 'Fotos con invitados', 'álbum digital', 'Galería privada'], benefits_es: ['3 horas de sesión', '60 fotos editadas', 'Fotos con invitados', 'álbum digital', 'Galería privada'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 3, active: true, featured: false, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
 
   // ── CORPORATIVO ──
   { id: 'pkg-corp-basico', category: 'corporativo', name_es: 'Básico', name_en: 'Basic', price: 500, deposit: 250, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: '2 horas', duration_en: '2 hours', description_es: 'Sesión corporativa para retratos individuales y de equipo.', description_en: 'Corporate session for individual and team portraits.', benefits: ['2 horas de sesión', '20 fotos editadas', 'Retratos individuales', 'Fotos de equipo', 'Galería privada'], benefits_es: ['2 horas de sesión', '20 fotos editadas', 'Retratos individuales', 'Fotos de equipo', 'Galería privada'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 1, active: true, featured: false, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
   { id: 'pkg-corp-profesional', category: 'corporativo', name_es: 'Profesional', name_en: 'Professional', price: 1000, deposit: 500, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: '4 horas', duration_en: '4 hours', description_es: 'Cobertura completa de personal e instalaciones.', description_en: 'Complete coverage of staff and facilities.', benefits: ['4 horas de sesión', '50 fotos editadas', 'Retratos + instalaciones', 'Maquillaje básico', 'Galería privada'], benefits_es: ['4 horas de sesión', '50 fotos editadas', 'Retratos + instalaciones', 'Maquillaje básico', 'Galería privada'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 2, active: true, featured: true, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
   { id: 'pkg-corp-premium', category: 'corporativo', name_es: 'Premium', name_en: 'Premium', price: 2500, deposit: 1250, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: 'Jornada completa', duration_en: 'Full day', description_es: 'Producción corporativa integral con drone y video.', description_en: 'Complete corporate production with drone and video.', benefits: ['Jornada completa', '100+ fotos editadas', 'Drone aéreo', 'Video corporativo', 'Galería privada'], benefits_es: ['Jornada completa', '100+ fotos editadas', 'Drone aéreo', 'Video corporativo', 'Galería privada'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 3, active: true, featured: false, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
 
-  // ── GASTRONOMÍA ──
-  { id: 'pkg-gas-basico', category: 'gastronomia', name_es: 'Básico', name_en: 'Basic', price: 400, deposit: 200, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: '2 horas', duration_en: '2 hours', description_es: 'Sesión básica de fotografía gastronómica.', description_en: 'Basic food photography session.', benefits: ['2 horas de sesión', '15 fotos editadas', 'Styling básico', 'Galería privada'], benefits_es: ['2 horas de sesión', '15 fotos editadas', 'Styling básico', 'Galería privada'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 1, active: true, featured: false, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
-  { id: 'pkg-gas-profesional', category: 'gastronomia', name_es: 'Profesional', name_en: 'Professional', price: 800, deposit: 400, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: '4 horas', duration_en: '4 hours', description_es: 'Sesión gastronómica con styling profesional y múltiples platos.', description_en: 'Food session with professional styling and multiple dishes.', benefits: ['4 horas de sesión', '30 fotos editadas', 'Styling profesional', 'Utensillería incluida', 'Galería privada'], benefits_es: ['4 horas de sesión', '30 fotos editadas', 'Styling profesional', 'Utensillería incluida', 'Galería privada'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 2, active: true, featured: true, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
-  { id: 'pkg-gas-premium', category: 'gastronomia', name_es: 'Premium', name_en: 'Premium', price: 1500, deposit: 750, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: 'Jornada completa', duration_en: 'Full day', description_es: 'Producción completa de menú con video y styling.', description_en: 'Complete menu production with video and styling.', benefits: ['Jornada completa', '60+ fotos editadas', 'Video de platos', 'Styling completo', 'Galería privada'], benefits_es: ['Jornada completa', '60+ fotos editadas', 'Video de platos', 'Styling completo', 'Galería privada'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 3, active: true, featured: false, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
+  // ── GASTRONOMA ──
+  { id: 'pkg-gas-basico', category: 'gastronomia', name_es: 'Básico', name_en: 'Basic', price: 400, deposit: 200, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: '2 horas', duration_en: '2 hours', description_es: 'Sesión bsica de fotografía gastronmica.', description_en: 'Basic food photography session.', benefits: ['2 horas de sesión', '15 fotos editadas', 'Styling básico', 'Galería privada'], benefits_es: ['2 horas de sesión', '15 fotos editadas', 'Styling básico', 'Galería privada'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 1, active: true, featured: false, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
+  { id: 'pkg-gas-profesional', category: 'gastronomia', name_es: 'Profesional', name_en: 'Professional', price: 800, deposit: 400, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: '4 horas', duration_en: '4 hours', description_es: 'Sesión gastronmica con styling profesional y múltiples platos.', description_en: 'Food session with professional styling and multiple dishes.', benefits: ['4 horas de sesión', '30 fotos editadas', 'Styling profesional', 'Utensillería incluida', 'Galería privada'], benefits_es: ['4 horas de sesión', '30 fotos editadas', 'Styling profesional', 'Utensillería incluida', 'Galería privada'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 2, active: true, featured: true, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
+  { id: 'pkg-gas-premium', category: 'gastronomia', name_es: 'Premium', name_en: 'Premium', price: 1500, deposit: 750, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: 'Jornada completa', duration_en: 'Full day', description_es: 'Producción completa de men con video y styling.', description_en: 'Complete menu production with video and styling.', benefits: ['Jornada completa', '60+ fotos editadas', 'Video de platos', 'Styling completo', 'Galería privada'], benefits_es: ['Jornada completa', '60+ fotos editadas', 'Video de platos', 'Styling completo', 'Galería privada'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 3, active: true, featured: false, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
 
   // ── PRODUCTO ──
-  { id: 'pkg-prod-basico', category: 'producto', name_es: 'Básico', name_en: 'Basic', price: 350, deposit: 175, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: '2 horas', duration_en: '2 hours', description_es: 'Sesión básica de fotografía de producto.', description_en: 'Basic product photography session.', benefits: ['2 horas de sesión', '15 fotos editadas', 'Fondo blanco/infinito', 'Galería privada'], benefits_es: ['2 horas de sesión', '15 fotos editadas', 'Fondo blanco/infinito', 'Galería privada'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 1, active: true, featured: false, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
-  { id: 'pkg-prod-profesional', category: 'producto', name_es: 'Profesional', name_en: 'Professional', price: 700, deposit: 350, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: '4 horas', duration_en: '4 hours', description_es: 'Sesión con styling y múltiples ángulos del producto.', description_en: 'Session with styling and multiple product angles.', benefits: ['4 horas de sesión', '30 fotos editadas', 'Styling de producto', 'Ángulos múltiples', 'Galería privada'], benefits_es: ['4 horas de sesión', '30 fotos editadas', 'Styling de producto', 'Ángulos múltiples', 'Galería privada'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 2, active: true, featured: true, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
+  { id: 'pkg-prod-basico', category: 'producto', name_es: 'Básico', name_en: 'Basic', price: 350, deposit: 175, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: '2 horas', duration_en: '2 hours', description_es: 'Sesión bsica de fotografía de producto.', description_en: 'Basic product photography session.', benefits: ['2 horas de sesión', '15 fotos editadas', 'Fondo blanco/infinito', 'Galería privada'], benefits_es: ['2 horas de sesión', '15 fotos editadas', 'Fondo blanco/infinito', 'Galería privada'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 1, active: true, featured: false, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
+  { id: 'pkg-prod-profesional', category: 'producto', name_es: 'Profesional', name_en: 'Professional', price: 700, deposit: 350, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: '4 horas', duration_en: '4 hours', description_es: 'Sesión con styling y múltiples ángulos del producto.', description_en: 'Session with styling and multiple product angles.', benefits: ['4 horas de sesión', '30 fotos editadas', 'Styling de producto', 'ángulos múltiples', 'Galería privada'], benefits_es: ['4 horas de sesión', '30 fotos editadas', 'Styling de producto', 'ángulos múltiples', 'Galería privada'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 2, active: true, featured: true, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
   { id: 'pkg-prod-premium', category: 'producto', name_es: 'Premium', name_en: 'Premium', price: 1200, deposit: 600, priceFromText_es: 'Desde', priceFromText_en: 'Starting from', duration_es: 'Jornada completa', duration_en: 'Full day', description_es: 'Producción completa de catálogo con video 360°.', description_en: 'Complete catalog production with 360° video.', benefits: ['Jornada completa', '50+ fotos editadas', 'Video 360°', 'Catálogo digital', 'Galería privada'], benefits_es: ['Jornada completa', '50+ fotos editadas', 'Video 360°', 'Catálogo digital', 'Galería privada'], buttonText_es: 'Contratar paquete', buttonText_en: 'Book this package', sortOrder: 3, active: true, featured: false, travelNote_es: 'Gastos de viaje y movilidad no incluidos', travelNote_en: 'Travel and mobility expenses not included' },
 
   // ── EVENTO ──
@@ -862,7 +867,7 @@ export const INITIAL_ANALYTICS: AnalyticsStats = {
 export const TRANSLATIONS = {
   es: {
     navHome: 'Inicio',
-    navAbout: 'Sobre Mí',
+    navAbout: 'Sobre mí',
     navPortfolio: 'Galería',
     portfolioTitle: 'Galería Fine Art',
     navServices: 'Servicios',
@@ -871,17 +876,17 @@ export const TRANSLATIONS = {
     navBook: 'Reservar',
     navContact: 'Contacto',
     navAdmin: 'Backoffice',
-    navClientPortal: 'Área Clientes',
-    heroTitle: 'COMPOSICIÓN EDITORIAL',
-    heroSubtitle: 'Fotografía artística de nivel internacional en formato medio. Preservando el lujo y la esencia de momentos trascendentes.',
+    navClientPortal: 'Área de Clientes',
+    heroTitle: 'Historias que Trascienden',
+    heroSubtitle: 'Cada fotografía nace de una emoción real. Cada imagen está pensada para perdurar más allá del tiempo.',
     ctaPortfolio: 'Explorar Galería',
     ctaBook: 'Reservar Sesión',
-    aboutTitle: 'LA FILOSOFÍA DETRÁS DE LA LENTE',
+    aboutTitle: 'LA FILOSOFA DETRS DE LA LENTE',
     aboutText1: 'Soy un fotógrafo y director de arte de bellas artes, dedicado a congelar el tiempo bajo el estándar de Leica y Hasselblad. Entiendo la luz no solo como iluminación, sino como el medio supremo para esculpir emociones y narrar historias silenciosas con proporciones áureas.',
-    aboutText2: 'Con más de 15 años documentando bodas editoriales de alta costura, campañas comerciales internacionales y retratos íntimos para agencias de modelos de élite, mi trabajo busca un minimalismo elegante, abundante espacio en blanco y simetría geométrica.',
+    aboutText2: 'Con más de 15 aos documentando bodas editoriales de alta costura, campañas comerciales internacionales y retratos íntimos para agencias de modelos de élite, mi trabajo busca un minimalismo elegante, abundante espacio en blanco y simetría geomtrica.',
     awards: 'Premios & Reconocimientos',
     gear: 'El Equipo Utilizado',
-    experience: 'Línea de Tiempo Artística',
+    experience: 'Lnea de Tiempo Artstica',
     all: 'Todos',
     retrato: 'Retrato',
     boda: 'Boda',
@@ -895,34 +900,34 @@ export const TRANSLATIONS = {
     familia: 'Familia',
     infantil: 'Infantil',
     maternidad: 'Maternidad',
-    cumpleanos: 'Cumpleaños',
-    graduacion: 'Graduación',
+    cumpleanos: 'Cumpleaos',
+    graduacion: 'Graduacin',
     corporativo: 'Corporativo',
-    gastronomia: 'Gastronomía',
+    gastronomia: 'Gastronoma',
     galeria: 'Galerías Online',
     pixiesetSubtitle: 'Explora las galerías completas de sesiones y eventos',
     pixiesetDescription: 'Accede a galerías privadas con descarga en alta resolución, selección de favoritos y pedido de impresiones.',
     pixiesetViewAll: 'Visitar todas las galerías →',
-    pixiesetSearchTitle: '¿Buscas tus fotos?',
+    pixiesetSearchTitle: 'Buscas tus fotos?',
     pixiesetSearchDesc: 'Ingresa a tu galería privada para ver, descargar y pedir impresiones de tu sesión.',
     pixiesetSearchBtn: 'Ir a mi galería →',
 
-    contractTitle: 'CONTRATO DE SERVICIOS FOTOGRÁFICOS',
+    contractTitle: 'CONTRATO DE SERVICIOS FOTOGRFICOS',
     contractSubtitle: 'Acuerdo entre Miriam Tellez Photography y el Cliente',
     contractBride: 'Novia',
     contractGroom: 'Novio',
     contractBrideEmail: 'Correo de la Novia',
     contractGroomPhone: 'Teléfono del Novio',
-    contractBrideAddress: 'Dirección de la Novia',
+    contractBrideAddress: 'Direccin de la Novia',
     contractWeddingDate: 'Fecha de la Boda',
     contractCeremony: 'Ceremonia',
     contractCeremonyLocation: 'Lugar de la Ceremonia',
-    contractCeremonyAddress: 'Dirección de la Ceremonia',
+    contractCeremonyAddress: 'Direccin de la Ceremonia',
     contractCeremonyStart: 'Hora de Inicio',
     contractCeremonyEnd: 'Hora de Fin',
-    contractReception: 'Recepción',
-    contractReceptionLocation: 'Lugar de la Recepción',
-    contractReceptionAddress: 'Dirección de la Recepción',
+    contractReception: 'Recepcin',
+    contractReceptionLocation: 'Lugar de la Recepcin',
+    contractReceptionAddress: 'Direccin de la Recepcin',
     contractReceptionStart: 'Hora de Inicio',
     contractReceptionEnd: 'Hora de Fin',
     contractPackage: 'Paquete',
@@ -930,25 +935,25 @@ export const TRANSLATIONS = {
     contractDeposit: 'Depósito / Booking Fee',
     contractAmountDue: 'Monto Restante',
     contractTravelExpenses: 'Gastos de Viaje',
-    contractClauseCooperation: 'COOPERACIÓN',
-    contractClauseCooperationText: 'Los Clientes aceptan cooperar con el Fotógrafo y comunicarse entre sí para lograr el mejor resultado posible dentro del entendimiento de este contrato. Se recomienda que el Fotógrafo cuente con alguien que conozca a la mayoría de los invitados para señalar a las personas clave a fotografiar. Los Clientes también aceptan avisar al Fotógrafo con suficiente antelación sobre los eventos importantes para darle tiempo de preparación.',
+    contractClauseCooperation: 'COOPERACIN',
+    contractClauseCooperationText: 'Los Clientes aceptan cooperar con el Fotógrafo y comunicarse entre s para lograr el mejor resultado posible dentro del entendimiento de este contrato. Se recomienda que el Fotógrafo cuente con alguien que conozca a la mayoría de los invitados para señalar a las personas clave a fotografiar. Los Clientes también aceptan avisar al Fotógrafo con suficiente antelación sobre los eventos importantes para darle tiempo de preparación.',
     contractClauseSchedule: 'HORARIO',
-    contractClauseScheduleText: 'Nuestro horario de trabajo, estilo y experiencia están diseñados para lograr un gran conjunto de fotos del Evento. Los Clientes aceptan que la puntualidad y la cooperación son esenciales para obtener resultados fotográficos sobresalientes. En caso de que el Evento no se desarrolle a tiempo, no podemos garantizar tomar nuestro conjunto normal de fotos, aunque haremos nuestro mejor esfuerzo para compensar.',
-    contractClauseGuests: 'INVITADOS FOTÓGRAFOS',
+    contractClauseScheduleText: 'Nuestro horario de trabajo, estilo y experiencia estn diseados para lograr un gran conjunto de fotos del Evento. Los Clientes aceptan que la puntualidad y la cooperacin son esenciales para obtener resultados fotográficos sobresalientes. En caso de que el Evento no se desarrolle a tiempo, no podemos garantizar tomar nuestro conjunto normal de fotos, aunque haremos nuestro mejor esfuerzo para compensar.',
+    contractClauseGuests: 'INVITADOS FOTGRAFOS',
     contractClauseGuestsText: 'Los Clientes aceptan darle prioridad al Fotógrafo sobre los invitados para tomar las fotografías requeridas. El Fotógrafo no se hace responsable por la falta de fotos del Evento si los invitados que toman sus propias fotos interrumpen continuamente el trabajo del Fotógrafo.',
     contractClauseCopyright: 'DERECHOS DE AUTOR',
     contractClauseCopyrightText: 'Los derechos de autor de las fotografías pertenecen al Fotógrafo. Las imágenes tomadas por el Fotógrafo son para uso personal de los Clientes, sus amigos y familiares. No se permite la venta, publicación o uso comercial de las fotografías sin permiso previo por escrito del Fotógrafo.',
-    contractClauseModelRelease: 'AUTORIZACIÓN DE MODELO',
+    contractClauseModelRelease: 'AUTORIZACIN DE MODELO',
     contractClauseModelReleaseText: 'Los Clientes otorgan al Fotógrafo y sus representantes legales el consentimiento irrevocable e ilimitado para usar las fotografías de los Clientes con fines editoriales, comerciales, publicitarios y cualquier otro propósito, y para modificar las fotografías sin restricción.',
-    contractClauseLiability: 'LIMITACIÓN DE RESPONSABILIDAD',
-    contractClauseLiabilityText: 'Si el Fotógrafo no puede prestar los servicios por enfermedad o lesión, intentará contratar un fotógrafo de reemplazo. Si no se encuentra un reemplazo, la responsabilidad se limita al reembolso de los pagos recibidos. En caso de pérdida o destrucción de las imágenes por causas fuera de nuestro control, la responsabilidad se limita a la devolución de las tarifas pagadas.',
-    contractClauseCancellation: 'CANCELACIÓN',
-    contractClauseCancellationText: 'En caso de cancelación del Evento por cualquier motivo, el depósito no es reembolsable y se convierte en un "crédito de estudio" que puede utilizarse para una sesión o evento futuro.',
+    contractClauseLiability: 'LIMITACIN DE RESPONSABILIDAD',
+    contractClauseLiabilityText: 'Si el Fotógrafo no puede prestar los servicios por enfermedad o lesión, intentar contratar un fotógrafo de reemplazo. Si no se encuentra un reemplazo, la responsabilidad se limita al reembolso de los pagos recibidos. En caso de pérdida o destrucción de las imágenes por causas fuera de nuestro control, la responsabilidad se limita a la devolución de las tarifas pagadas.',
+    contractClauseCancellation: 'CANCELACIN',
+    contractClauseCancellationText: 'En caso de cancelacin del Evento por cualquier motivo, el depósito no es reembolsable y se convierte en un "crédito de estudio" que puede utilizarse para una sesión o evento futuro.',
     contractSignatureClient: 'FIRMA DEL CLIENTE',
-    contractSignaturePhotographer: 'FIRMA DEL FOTÓGRAFO',
+    contractSignaturePhotographer: 'FIRMA DEL FOTGRAFO',
     contractSignatureDate: 'FECHA',
     contractSignHere: 'Escriba su nombre completo como firma',
-    contractIAccept: 'He leído y entiendo el contenido de este contrato y acepto los términos aquí establecidos.',
+    contractIAccept: 'He ledo y entiendo el contenido de este contrato y acepto los trminos aqu establecidos.',
     contractSignBtn: 'Firmar Contrato',
     contractSignSuccess: 'Contrato firmado exitosamente',
     contractViewBtn: 'Ver Contrato Firmado',
@@ -957,7 +962,7 @@ export const TRANSLATIONS = {
     contractAdminSign: 'Firmar como Fotógrafa',
     contractAdminSetAmounts: 'Definir Montos',
     contractSaveAmounts: 'Guardar Montos',
-    contractSessionTitle: 'CONTRATO DE SERVICIOS FOTOGRÁFICOS',
+    contractSessionTitle: 'CONTRATO DE SERVICIOS FOTOGRFICOS',
     contractSessionSubtitle: 'Acuerdo entre Miriam Tellez Photography y el Cliente',
     contractClient: 'Cliente',
     contractClientEmail: 'Correo Electrónico',
@@ -967,25 +972,25 @@ export const TRANSLATIONS = {
     contractSessionPackage: 'Servicio Contratado',
     contractSessionInfo: 'Información de la Sesión',
     contractSessionClauseCopyright: 'DERECHOS DE AUTOR',
-    contractSessionClauseCopyrightText: 'El Fotógrafo es el único autor de las fotografías y se reserva todos los derechos de autor. El Cliente acepta que las fotografías serán utilizadas para el portafolio, sitio web y fines promocionales del Fotógrafo, salvo acuerdo escrito en contrario.',
-    contractSessionClausePayment: 'TÉRMINOS DE PAGO',
+    contractSessionClauseCopyrightText: 'El Fotógrafo es el nico autor de las fotografías y se reserva todos los derechos de autor. El Cliente acepta que las fotografías serán utilizadas para el portafolio, sitio web y fines promocionales del Fotógrafo, salvo acuerdo escrito en contrario.',
+    contractSessionClausePayment: 'TRMINOS DE PAGO',
     contractSessionClausePaymentText: 'Para reservar la fecha de la sesión, se requiere un depósito no reembolsable. El saldo restante debe pagarse antes de la entrega final de las fotografías. El pago puede realizarse mediante transferencia bancaria o tarjeta de crédito a través de nuestra plataforma segura.',
-    contractSessionClauseSchedule: 'PROGRAMA Y CANCELACIÓN',
-    contractSessionClauseScheduleText: 'El horario de la sesión será acordado previamente entre ambas partes. En caso de cancelación por parte del Cliente con menos de 48 horas de anticipación, el depósito no será reembolsado. El Fotógrafo se reserva el derecho de reprogramar en caso de condiciones climáticas adversas o fuerza mayor.',
-    contractSessionClauseLiability: 'LIMITACIÓN DE RESPONSABILIDAD',
-    contractSessionClauseLiabilityText: 'El Fotógrafo hará todo lo posible por entregar las fotografías acordadas. Sin embargo, si el Fotógrafo no puede prestar los servicios por enfermedad, lesión o caso fortuito, se reembolsará el monto total pagado y el Fotógrafo no tendrá ninguna obligación adicional con el Cliente.',
+    contractSessionClauseSchedule: 'PROGRAMA Y CANCELACIN',
+    contractSessionClauseScheduleText: 'El horario de la sesión ser acordado previamente entre ambas partes. En caso de cancelacin por parte del Cliente con menos de 48 horas de anticipación, el depósito no ser reembolsado. El Fotógrafo se reserva el derecho de reprogramar en caso de condiciones climáticas adversas o fuerza mayor.',
+    contractSessionClauseLiability: 'LIMITACIN DE RESPONSABILIDAD',
+    contractSessionClauseLiabilityText: 'El Fotógrafo har todo lo posible por entregar las fotografías acordadas. Sin embargo, si el Fotógrafo no puede prestar los servicios por enfermedad, lesión o caso fortuito, se reembolsar el monto total pagado y el Fotógrafo no tendrá ninguna obligación adicional con el Cliente.',
     contractSessionClauseUsage: 'DERECHOS DE USO',
     contractSessionClauseUsageText: 'El Cliente recibe una licencia de uso personal e imprimir las fotografías. El Cliente no puede vender, modificar ni utilizar las fotografías con fines comerciales sin el consentimiento escrito del Fotógrafo. Las fotografías pueden compartirse en redes sociales siempre que se acredite al Fotógrafo.',
     exifData: 'Metadatos EXIF',
     downloadPhoto: 'Descargar Master WebP',
-    sharePhoto: 'Compartir Fotografía',
-    servicesTitle: 'PAQUETES FOTOGRÁFICOS',
-    servicesSubtitle: 'Elegí el paquete ideal para tu sesión.',
+    sharePhoto: 'Compartir Fotografa',
+    servicesTitle: 'PAQUETES FOTOGRFICOS',
+    servicesSubtitle: 'Eleg el paquete ideal para tu sesión.',
     priceFrom: 'Desde',
     includesLabel: 'Incluye',
     bookNow: 'Contratar paquete',
     categorySectionTitle: 'SERVICIOS',
-    categorySectionSubtitle: 'Seleccioná el tipo de sesión que mejor se adapte a lo que necesitás.',
+    categorySectionSubtitle: 'Seleccion el tipo de sesión que mejor se adapte a lo que necesits.',
     backToCategories: '← Volver a tipos de sesión',
     recommended: 'Recomendado',
     testimonialsTitle: 'HISTORIAS DE CLIENTES',
@@ -1000,7 +1005,7 @@ export const TRANSLATIONS = {
     satisfiedSub: 'Verificado 5 estrellas',
     faqTitle: 'PREGUNTAS FRECUENTES',
     faqSubtitle: 'Respuestas detalladas sobre nuestro flujo de trabajo, gear y entregables.',
-    bookingTitle: 'AGENDA TU SESIÓN DE LUJO',
+    bookingTitle: 'AGENDA TU SESIN DE LUJO',
     bookingSubtitle: 'Selecciona una fecha libre y personaliza tu cotización premium en tiempo real.',
     clientName: 'Nombre Completo',
     clientEmail: 'Correo Electrónico',
@@ -1018,15 +1023,15 @@ export const TRANSLATIONS = {
     customCursorScroll: 'SCROLL',
     customCursorView: 'VER',
     customCursorClose: 'CERRAR',
-    favoriteAdded: '¡Añadido a tus favoritos!',
+    favoriteAdded: 'Aadido a tus favoritos!',
     favoriteRemoved: 'Eliminado de tus favoritos!',
     proofTitle: 'PORTAL PRIVADO DE CLIENTE',
     proofSubtitle: 'Acceso seguro a tu galería privada de pruebas',
-    proofPassPlaceholder: 'Introduce tu código de acceso seguro (ej: SELECCION2026)',
+    proofPassPlaceholder: 'Introduce tu cdigo de acceso seguro (ej: SELECCION2026)',
     proofEnter: 'Acceder a mi Galería',
-    proofError: 'Código de acceso incorrecto. Inténtalo de nuevo.',
-    aiTitle: 'ASISTENTE DE SELECCIÓN IA',
-    aiDesc: 'Nuestra red neuronal evalúa automáticamente tus fotos según nitidez, composición de regla de tercios y emoción.',
+    proofError: 'Cdigo de acceso incorrecto. Intntalo de nuevo.',
+    aiTitle: 'ASISTENTE DE SELECCIN IA',
+    aiDesc: 'Nuestra red neuronal evala automticamente tus fotos segn nitidez, composicin de regla de tercios y emoción.',
     stripePay: 'Pasarela Stripe Segura',
     invoiceTitle: 'Factura / Recibo',
     invoiceNumber: 'Factura N°',
@@ -1045,11 +1050,11 @@ export const TRANSLATIONS = {
     invoicePrint: 'Imprimir',
     invoiceView: 'Ver Factura',
     invoiceNoInvoices: 'No hay facturas disponibles',
-    invoicePaymentMethod: 'Método de Pago',
+    invoicePaymentMethod: 'Mtodo de Pago',
     invoicePaymentDate: 'Fecha de Pago',
     invoiceReceipt: 'Recibo de Pago',
     invoicePaymentComplete: 'Pago Completado',
-    invoiceItems: 'Conceptos',
+    invoiceItemás: 'Conceptos',
     invoiceSubtotal: 'Subtotal',
     invoiceBookingId: 'Reserva N°',
     invoicePaidOn: 'Pagado el',
@@ -1062,7 +1067,7 @@ export const TRANSLATIONS = {
     philosophyPillar2: 'Composición',
     philosophyPillar2Desc: 'La geometría y el equilibrio visual son el alma de cada imagen. Componer con intención, respetando los espacios y las proporciones, es mi forma de narrar sin palabras.',
     philosophyPillar3: 'Emoción',
-    philosophyPillar3Desc: 'Más allá de la técnica, busco congelar lo que late: una mirada, un silencio, un gesto. La fotografía es emoción convertida en luz y sombra.',
+    philosophyPillar3Desc: 'Ms all de la técnica, busco congelar lo que late: una mirada, un silencio, un gesto. La fotografía es emoción convertida en luz y sombra.',
     searchPlaceholder: 'Buscar fotos por etiqueta, cámara, color...'
   },
   en: {
@@ -1077,13 +1082,13 @@ export const TRANSLATIONS = {
     navContact: 'Contact',
     navAdmin: 'CMS Suite',
     navClientPortal: 'Client Area',
-    heroTitle: 'EDITORIAL COMPOSITION',
-    heroSubtitle: 'Medium-format fine art photography of international standards. Preserving luxury and the raw essence of profound moments.',
+    heroTitle: 'Stories that Transcend',
+    heroSubtitle: 'Every photograph is born from a real emotion. Every image is designed to last beyond time.',
     ctaPortfolio: 'Explore Portfolio',
     ctaBook: 'Book Session',
     aboutTitle: 'THE PHILOSOPHY BEHIND THE GLASS',
     aboutText1: 'I am a fine art photographer and creative director dedicated to freezing time through the pristine optics of Leica and Hasselblad. I understand light not as simple exposure, but as the supreme medium to sculpt emotion and weave silent stories of golden ratio symmetry.',
-    aboutText2: 'With over 15 years documenting haute-couture destination weddings, international commercial campaigns, and intimate editorial model books, my work strives for elegant minimalism, generous negative space, and absolute geometric structure.',
+    aboutText2: 'With over 15 years documenting haute-couture destination weddings, international commercial campaigns, and iíntimate editorial model books, my work strives for elegant minimalism, generous negative space, and absolute geometric structure.',
     awards: 'Awards & Distinctions',
     gear: 'Our Gear & Optics',
     experience: 'Artistic Timeline',
@@ -1138,7 +1143,7 @@ export const TRANSLATIONS = {
     contractClauseCooperation: 'COOPERATION',
     contractClauseCooperationText: 'The Clients consent to cooperate with the Photographer and communicate in order to achieve the best possible result within the understanding of this contract. It is recommended that the Photographer be provided with someone who knows most of the guests to point out key individuals to be photographed.',
     contractClauseSchedule: 'SCHEDULE',
-    contractClauseScheduleText: 'The shooting schedule, style of working and experience are designed to achieve a great set of Event photos. Clients agree that punctuality and cooperation are essential to producing outstanding photographic results. In cases where the Event does not run on time, we cannot guarantee our normal set of photos.',
+    contractClauseScheduleText: 'The shooting schedule, style of working and experience are designed to achieve a great set of Event photos. Clients agree that punctuality and cooperation are essential to producing outstanding photographic results. In cases where the Event does not run on time, we cannot guíarantee our normal set of photos.',
     contractClauseGuests: 'FREELANCE PHOTOGRAPHER GUESTS',
     contractClauseGuestsText: 'The Clients agree to give the Photographer precedence over guests to take the photographs required. The Photographer cannot be held liable for a lack of Event photos if guests taking their own photos interrupt the Photographer\'s work.',
     contractClauseCopyright: 'COPYRIGHT',
@@ -1178,7 +1183,7 @@ export const TRANSLATIONS = {
     contractSessionClauseSchedule: 'SCHEDULE & CANCELLATION',
     contractSessionClauseScheduleText: 'The session schedule will be agreed upon in advance by both parties. If the Client cancels with less than 48 hours notice, the deposit will not be refunded. The Photographer reserves the right to reschedule in case of adverse weather conditions or force majeure.',
     contractSessionClauseLiability: 'LIMIT OF LIABILITY',
-    contractSessionClauseLiabilityText: 'The Photographer will make every effort to deliver the agreed photographs. However, if the Photographer cannot provide services due to illness, injury, or unforeseen circumstances, the total amount paid will be refunded and the Photographer shall have no further liability to the Client.',
+    contractSessionClauseLiabilityText: 'The Photographer will make every effort to deliver the agreed photographs. However, if the Photographer cannot provide services due to illness, injury, or unforeseen circumástances, the total amount paid will be refunded and the Photographer shall have no further liability to the Client.',
     contractSessionClauseUsage: 'USAGE RIGHTS',
     contractSessionClauseUsageText: 'The Client receives a personal license to display and print the photographs. The Client may not sell, modify, or use the photographs for commercial purposes without the Photographer\'s written consent. Photographs may be shared on social media provided credit is given to the Photographer.',
     exifData: 'EXIF Metadata',
@@ -1213,12 +1218,12 @@ export const TRANSLATIONS = {
     peopleCount: 'Number of Guests/Talents',
     notes: 'Creative Notes & Vision',
     submitBooking: 'Request Premium Booking',
-    contactTitle: 'LET’S SHAPE YOUR STORY',
+     contactTitle: "LET'S SHAPE YOUR STORY",
     contactSubtitle: 'Inquire for editorial projects, global destination commissions, or luxury brand campaigns.',
     sendMessage: 'Send Direct Message',
     footerRights: 'All rights reserved.',
     privacy: 'Privacy Policy',
-    terms: 'Terms of Service',
+     terms: 'Terms of Service',
     legal: 'Legal Notice',
     customCursorScroll: 'SCROLL',
     customCursorView: 'VIEW',
@@ -1254,7 +1259,7 @@ export const TRANSLATIONS = {
     invoicePaymentDate: 'Payment Date',
     invoiceReceipt: 'Payment Receipt',
     invoicePaymentComplete: 'Payment Completed',
-    invoiceItems: 'Items',
+    invoiceItemás: 'Itemás',
     invoiceSubtotal: 'Subtotal',
     invoiceBookingId: 'Booking N°',
     invoicePaidOn: 'Paid on',
@@ -1273,4 +1278,3 @@ export const TRANSLATIONS = {
 };
 
 export const INITIAL_CLIENT_ACCOUNTS: ClientAccount[] = [];
-

@@ -1,6 +1,6 @@
-import React, { useState, useCallback, useEffect } from 'react';
+ï»¿import React, { useState, useCallback, useEffect } from 'react';
 import { Save, Plus, Trash2, Edit3, X, Upload } from 'lucide-react';
-import { PhotographyPackage, ActiveLanguage, SessionCategory } from '../types';
+import { PhotographyPackage, ActiveLanguÃ­age, SessionCategory } from '../types';
 import { uploadImageBlob } from '../lib/db';
 
 async function compressToBlob(file: File, maxSize = 1200, quality = 0.8): Promise<Blob> {
@@ -42,7 +42,7 @@ interface AdminPackagesTabProps {
   packages: PhotographyPackage[];
   onUpdatePackages: (packages: PhotographyPackage[]) => void;
   triggerAlert: (msg: string) => void;
-  lang: ActiveLanguage;
+  lang: ActiveLanguÃ­age;
 }
 
 function emptyPackage(categories: SessionCategory[]): PhotographyPackage {
@@ -100,7 +100,7 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
       benefits_en: p.benefits_en?.filter(b => b.trim() !== ''),
     }));
     onUpdatePackages(cleaned);
-    triggerAlert(t('? Paquetes guardados.', '? Packages saved.'));
+    triggerAlert(t('âœ“ Paquetes guÃ­ardados.', 'âœ“ Packages saved.'));
   }, [localPackages, onUpdatePackages, triggerAlert, t]);
 
   const toggleActive = useCallback((id: string) => {
@@ -121,7 +121,7 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
     setEditForm(newPkg);
     setIsCreating(true);
     setEditingId(newPkg.id);
-  }, [localPackages]);
+  }, [localPackages, sessionCategories]);
 
   const startEdit = useCallback((pkg: PhotographyPackage) => {
     setEditForm({
@@ -152,8 +152,8 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
       setLocalPackages(prev => prev.map(p => p.id === cleaned.id ? cleaned : p));
     }
     triggerAlert(isCreating
-      ? t('? Paquete creado.', '? Package created.')
-      : t('? Paquete actualizado.', '? Package updated.'));
+      ? t('âœ“ Paquete creado.', 'âœ“ Package created.')
+      : t('âœ“ Paquete actualizado.', 'âœ“ Package updated.'));
     setEditingId(null);
     setIsCreating(false);
   }, [editForm, isCreating, triggerAlert, t]);
@@ -206,7 +206,7 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
 
   const uncategorized = localPackages.filter(p => !p.category || !sessionCategories.some(c => c.id === p.category));
 
-  const inputClass = "w-full bg-charcoal border border-[#D8C0A8] rounded px-2.5 py-2 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans";
+  const inputClass = "w-full bg-charcoal border border-stone rounded px-2.5 py-2 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-sans";
   const labelClass = "text-[9px] font-mono text-white/50 uppercase";
 
   return (
@@ -214,18 +214,18 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
       <div className="flex items-center justify-between border-b border-white/10 pb-4">
         <div>
           <h2 className="font-serif text-2xl text-white">
-            {t('Paquetes Fotográficos', 'Photography Packages')}
+            {t('Paquetes Fotogr\u00e1ficos', 'Photography Packages')}
           </h2>
           <p className="text-xs text-white/50">
-            {t('Gestiona los paquetes por tipo de sesión.', 'Manage packages by session type.')}
+            {t('Gestiona los paquetes por tipo de sesiÃ³n.', 'Manage packages by session type.')}
           </p>
         </div>
         <div className="flex items-center space-x-2">
-          <button onClick={startCreate} className="py-1.5 px-3 bg-gold-500/20 hover:bg-gold-500/30 text-gold-300 border border-gold-500/30 rounded-lg text-[10px] font-mono tracking-widest uppercase font-semibold flex items-center space-x-1 cursor-pointer transition-all">
+          <button onClick={startCreate} className="py-1.5 px-3 bg-white/10 hover:bg-white/15 text-white/70 border border-white/10 rounded-lg text-[10px] font-mono tracking-widest uppercase font-semibold flex items-center space-x-1 cursor-pointer transition-all">
             <Plus size={11} />
             <span>{t('Nuevo', 'New')}</span>
           </button>
-          <button onClick={handleSaveAll} className="py-1.5 px-4 bg-gold-500 text-dark hover:bg-gold-400 rounded-lg text-[10px] font-mono tracking-widest uppercase font-semibold flex items-center space-x-1 cursor-pointer transition-all">
+          <button onClick={handleSaveAll} className="py-1.5 px-4 bg-white/10 text-white border border-white/10 hover:bg-white/15 text-white rounded-lg text-[10px] font-mono tracking-widest uppercase font-semibold flex items-center space-x-1 cursor-pointer transition-all">
             <Save size={11} />
             <span>{t('Guardar Todo', 'Save All')}</span>
           </button>
@@ -235,7 +235,7 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
       {/* Edit/Create Modal */}
       {editingId && (
         <div className="fixed inset-0 z-50 flex items-start justify-center p-4 bg-overlay/80 backdrop-blur-sm overflow-y-auto pt-12">
-          <div className="bg-charcoal border border-[#D8C0A8] rounded-2xl p-6 max-w-3xl w-full space-y-5 shadow-2xl my-8">
+          <div className="bg-charcoal border border-stone rounded-lg p-6 max-w-3xl w-full space-y-5 shadow-2xl my-8">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h3 className="font-serif text-lg text-white">
                 {isCreating ? t('Nuevo Paquete', 'New Package') : t('Editar Paquete', 'Edit Package')}
@@ -249,10 +249,10 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
               {/* Left column */}
               <div className="space-y-4">
                 <div className="space-y-1">
-                  <label className={labelClass}>{t('Categoría', 'Category')}</label>
+                  <label className={labelClass}>{t('CategorÃ­a', 'Category')}</label>
                   <select value={editForm.category} onChange={(e) => updateField('category', e.target.value)}
-                    className="w-full bg-charcoal border border-[#D8C0A8] rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-gold-400">
-                    <option value="" className="bg-charcoal text-white/50">{t('Seleccionar categoría...', 'Select category...')}</option>
+                    className="w-full bg-charcoal border border-stone rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-white/30">
+                    <option value="" className="bg-charcoal text-white/50">{t('Seleccionar categorÃ­a...', 'Select category...')}</option>
                     {activeCategories.map(cat => (
                       <option key={cat.id} value={cat.id} className="bg-charcoal">
                         {lang === 'es' ? cat.name_es : cat.name_en}
@@ -264,23 +264,23 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
                 <div className="space-y-1">
                   <label className={labelClass}>Nombre / Name</label>
                   <div className="grid grid-cols-2 gap-2">
-                    <input value={editForm.name_es} onChange={(e) => updateField('name_es', e.target.value)} placeholder="Español" className={inputClass} />
+                    <input value={editForm.name_es} onChange={(e) => updateField('name_es', e.target.value)} placeholder="EspaÃ±ol" className={inputClass} />
                     <input value={editForm.name_en} onChange={(e) => updateField('name_en', e.target.value)} placeholder="English" className={inputClass} />
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <label className={labelClass}>{t('Duración', 'Duration')}</label>
+                  <label className={labelClass}>{t('DuraciÃ³n', 'Duration')}</label>
                   <div className="grid grid-cols-2 gap-2">
-                    <input value={editForm.duration_es} onChange={(e) => updateField('duration_es', e.target.value)} placeholder="Español" className={inputClass} />
+                    <input value={editForm.duration_es} onChange={(e) => updateField('duration_es', e.target.value)} placeholder="EspaÃ±ol" className={inputClass} />
                     <input value={editForm.duration_en} onChange={(e) => updateField('duration_en', e.target.value)} placeholder="English" className={inputClass} />
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <label className={labelClass}>{t('Descripción', 'Description')}</label>
+                  <label className={labelClass}>{t('DescripciÃ³n', 'Description')}</label>
                   <div className="grid grid-cols-2 gap-2">
-                    <textarea rows={2} value={editForm.description_es} onChange={(e) => updateField('description_es', e.target.value)} placeholder="Español" className={inputClass + " resize-none"} />
+                    <textarea rows={2} value={editForm.description_es} onChange={(e) => updateField('description_es', e.target.value)} placeholder="EspaÃ±ol" className={inputClass + " resize-none"} />
                     <textarea rows={2} value={editForm.description_en} onChange={(e) => updateField('description_en', e.target.value)} placeholder="English" className={inputClass + " resize-none"} />
                   </div>
                 </div>
@@ -308,9 +308,9 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
                 </div>
 
                 <div className="space-y-1">
-                  <label className={labelClass}>{t('Texto del Botón', 'Button Text')}</label>
+                  <label className={labelClass}>{t('Texto del BotÃ³n', 'Button Text')}</label>
                   <div className="grid grid-cols-2 gap-2">
-                    <input value={editForm.buttonText_es} onChange={(e) => updateField('buttonText_es', e.target.value)} placeholder="Español" className={inputClass} />
+                    <input value={editForm.buttonText_es} onChange={(e) => updateField('buttonText_es', e.target.value)} placeholder="EspaÃ±ol" className={inputClass} />
                     <input value={editForm.buttonText_en} onChange={(e) => updateField('buttonText_en', e.target.value)} placeholder="English" className={inputClass} />
                   </div>
                 </div>
@@ -318,7 +318,7 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
                 <div className="space-y-1">
                   <label className={labelClass}>{t('Nota de viaje', 'Travel Note')}</label>
                   <div className="grid grid-cols-2 gap-2">
-                    <input value={editForm.travelNote_es || ''} onChange={(e) => updateField('travelNote_es', e.target.value || undefined)} placeholder="Español" className={inputClass} />
+                    <input value={editForm.travelNote_es || ''} onChange={(e) => updateField('travelNote_es', e.target.value || undefined)} placeholder="EspaÃ±ol" className={inputClass} />
                     <input value={editForm.travelNote_en || ''} onChange={(e) => updateField('travelNote_en', e.target.value || undefined)} placeholder="English" className={inputClass} />
                   </div>
                 </div>
@@ -327,7 +327,7 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
                   <label className={labelClass}>{t('Imagen del paquete', 'Package Image')}</label>
                   <div className="flex items-center space-x-2">
                     <input value={editForm.image || ''} onChange={(e) => updateField('image', e.target.value || undefined)} placeholder="https://..." className={inputClass} />
-                    <label className="shrink-0 py-2 px-3 bg-white/10 hover:bg-white/20 border border-[#D8C0A8] rounded text-[9px] font-mono text-white/70 hover:text-white uppercase tracking-widest cursor-pointer transition-all whitespace-nowrap">
+                    <label className="shrink-0 py-2 px-3 bg-white/10 hover:bg-white/20 border border-stone rounded text-[9px] font-mono text-white/70 hover:text-white uppercase tracking-widest cursor-pointer transition-all whitespace-nowrap">
                       {t('Subir', 'Upload')}
                       <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
                         const file = e.target.files?.[0];
@@ -353,11 +353,11 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
 
                 <div className="flex items-center space-x-4 pt-2">
                   <label className="flex items-center space-x-2 cursor-pointer">
-                    <input type="checkbox" checked={editForm.active} onChange={(e) => updateField('active', e.target.checked)} className="accent-gold-500 w-3.5 h-3.5" />
+                    <input type="checkbox" checked={editForm.active} onChange={(e) => updateField('active', e.target.checked)} className="accent-white/50 w-3.5 h-3.5" />
                     <span className="text-[10px] font-mono text-white/70 uppercase">{t('Activo', 'Active')}</span>
                   </label>
                   <label className="flex items-center space-x-2 cursor-pointer">
-                    <input type="checkbox" checked={editForm.featured} onChange={(e) => updateField('featured', e.target.checked)} className="accent-gold-500 w-3.5 h-3.5" />
+                    <input type="checkbox" checked={editForm.featured} onChange={(e) => updateField('featured', e.target.checked)} className="accent-white/50 w-3.5 h-3.5" />
                     <span className="text-[10px] font-mono text-white/70 uppercase">{t('Destacado', 'Featured')}</span>
                   </label>
                 </div>
@@ -368,13 +368,13 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
             <div className="space-y-2 border-t border-white/10 pt-4">
               <div className="flex items-center justify-between">
                 <label className={labelClass}>{t('Beneficios', 'Benefits')}</label>
-                <button type="button" onClick={addBenefit} className="text-[9px] font-mono text-gold-400 hover:text-gold-300 flex items-center space-x-1 cursor-pointer transition-colors">
+                <button type="button" onClick={addBenefit} className="text-[9px] font-mono text-white/70 hover:text-white flex items-center space-x-1 cursor-pointer transition-colors">
                   <Plus size={10} />
-                  <span>{t('Añadir beneficio', 'Add benefit')}</span>
+                  <span>{t('AÃ±adir beneficio', 'Add benefit')}</span>
                 </button>
               </div>
               <div className="grid grid-cols-2 gap-1 text-[11px] font-mono text-white/30 uppercase px-1">
-                <span>Español</span>
+                <span>EspaÃ±ol</span>
                 <span>English</span>
               </div>
               <div className="space-y-1.5 max-h-48 overflow-y-auto">
@@ -397,10 +397,10 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
             </div>
 
             <div className="flex justify-end space-x-3 pt-2 border-t border-white/10">
-              <button onClick={cancelEdit} className="px-4 py-2 border border-[#D8C0A8] rounded-lg text-[10px] font-mono text-white/70 hover:text-white cursor-pointer transition-all">
+              <button onClick={cancelEdit} className="px-4 py-2 border border-stone rounded-lg text-[10px] font-mono text-white/70 hover:text-white cursor-pointer transition-all">
                 {t('Cancelar', 'Cancel')}
               </button>
-              <button onClick={saveEdit} className="px-4 py-2 bg-gold-500 text-dark font-mono text-[10px] tracking-widest uppercase font-bold rounded-lg hover:bg-gold-400 cursor-pointer transition-all">
+              <button onClick={saveEdit} className="px-4 py-2 bg-white/10 text-white border border-white/10 font-mono text-[10px] tracking-widest uppercase font-bold rounded-lg hover:bg-white/15 text-white cursor-pointer transition-all">
                 {isCreating ? t('Crear Paquete', 'Create Package') : t('Guardar Cambios', 'Save Changes')}
               </button>
             </div>
@@ -408,14 +408,14 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
         </div>
       )}
 
-      {/* Packages List — Grouped by Category */}
+      {/* Packages List â€” Grouped by Category */}
       <div className="space-y-6">
         {grouped.map(({ category: cat, packages: catPkgs }) => {
           if (catPkgs.length === 0) return null;
           return (
             <div key={cat.id} className="space-y-2">
               <div className="flex items-center space-x-2 border-b border-white/10 pb-2 mb-2">
-                <span className="text-[10px] font-mono text-gold-400 uppercase tracking-widest font-semibold">
+                <span className="text-[10px] font-mono text-white/90 uppercase tracking-widest font-semibold">
                   {lang === 'es' ? cat.name_es : cat.name_en}
                 </span>
                 <span className="text-[9px] font-mono text-white/30">({catPkgs.length})</span>
@@ -423,7 +423,7 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
               {catPkgs.map((pkg) => {
                 const pName = lang === 'es' ? pkg.name_es : pkg.name_en;
                 return (
-                  <div key={pkg.id} className={`flex items-center justify-between p-3 rounded-xl border transition-all ${pkg.active ? 'border-[#D8C0A8] bg-dark-gray' : 'border-[#D8C0A8]/30 bg-dark-gray opacity-60'}`}>
+                  <div key={pkg.id} className={`flex items-center justify-between p-3 rounded-lg border transition-all ${pkg.active ? 'border-stone bg-dark-gray' : 'border-stone/30 bg-dark-gray opacity-60'}`}>
                     <div className="flex items-center space-x-3 flex-1 min-w-0">
                       <span className="text-[10px] font-mono text-white/30 w-6 text-right">{pkg.sortOrder}</span>
                       {pkg.image && (
@@ -432,17 +432,17 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
                         </div>
                       )}
                       <span className="text-sm font-serif text-white truncate">{pName || '(sin nombre)'}</span>
-                      <span className="text-[10px] font-mono text-gold-400 font-bold">${pkg.price.toLocaleString()}</span>
+                      <span className="text-[10px] font-mono text-white/90 font-bold">${pkg.price.toLocaleString()}</span>
                       {pkg.featured && (
-                        <span className="text-[11px] font-mono text-gold-400 border border-gold-500/30 bg-gold-500/10 px-1.5 py-0.5 rounded uppercase">Featured</span>
+                        <span className="text-[11px] font-mono text-white/90 border border-white/10 bg-white/5 px-1.5 py-0.5 rounded uppercase">Featured</span>
                       )}
                     </div>
                     <div className="flex items-center space-x-1.5 shrink-0">
                       <label className="flex items-center space-x-1 cursor-pointer">
-                        <input type="checkbox" checked={pkg.active} onChange={() => toggleActive(pkg.id)} className="accent-gold-500 w-3 h-3" />
+                        <input type="checkbox" checked={pkg.active} onChange={() => toggleActive(pkg.id)} className="accent-white/50 w-3 h-3" />
                         <span className="text-[11px] font-mono text-white/40">{t('ON', 'ON')}</span>
                       </label>
-                      <label className="p-1.5 text-white/40 hover:text-gold-400 cursor-pointer transition-colors" title={t('Subir imagen', 'Upload image')}>
+                      <label className="p-1.5 text-white/40 hover:text-white/90 cursor-pointer transition-colors" title={t('Subir imagen', 'Upload image')}>
                         <Upload size={12} />
                         <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
                           const file = e.target.files?.[0];
@@ -458,7 +458,7 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
                           e.target.value = '';
                         }} />
                       </label>
-                      <button onClick={() => startEdit(pkg)} className="p-1.5 text-white/40 hover:text-gold-400 cursor-pointer transition-colors" title={t('Editar', 'Edit')}>
+                      <button onClick={() => startEdit(pkg)} className="p-1.5 text-white/40 hover:text-white/90 cursor-pointer transition-colors" title={t('Editar', 'Edit')}>
                         <Edit3 size={12} />
                       </button>
                       <button onClick={() => removePackage(pkg.id)} className="p-1.5 text-white/40 hover:text-red-400 cursor-pointer transition-colors" title={t('Eliminar', 'Delete')}>
@@ -477,17 +477,17 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
           <div className="space-y-2">
             <div className="flex items-center space-x-2 border-b border-white/10 pb-2 mb-2">
               <span className="text-[10px] font-mono text-white/30 uppercase tracking-widest">
-                {t('Sin categoría', 'Uncategorized')}
+                {t('Sin categorÃ­a', 'Uncategorized')}
               </span>
             </div>
             {uncategorized.map((pkg) => (
-              <div key={pkg.id} className={`flex items-center justify-between p-3 rounded-xl border transition-all ${pkg.active ? 'border-[#D8C0A8] bg-dark-gray' : 'border-[#D8C0A8]/30 bg-dark-gray opacity-60'}`}>
+              <div key={pkg.id} className={`flex items-center justify-between p-3 rounded-lg border transition-all ${pkg.active ? 'border-stone bg-dark-gray' : 'border-stone/30 bg-dark-gray opacity-60'}`}>
                 <div className="flex items-center space-x-3 flex-1 min-w-0">
                   <span className="text-sm font-serif text-white truncate">{pkg.name_es || pkg.name_en || '(sin nombre)'}</span>
-                  <span className="text-[10px] font-mono text-gold-400 font-bold">${pkg.price.toLocaleString()}</span>
+                  <span className="text-[10px] font-mono text-white/90 font-bold">${pkg.price.toLocaleString()}</span>
                 </div>
                 <div className="flex items-center space-x-1.5 shrink-0">
-                  <button onClick={() => startEdit(pkg)} className="p-1.5 text-white/40 hover:text-gold-400 cursor-pointer transition-colors" title={t('Editar', 'Edit')}>
+                  <button onClick={() => startEdit(pkg)} className="p-1.5 text-white/40 hover:text-white/90 cursor-pointer transition-colors" title={t('Editar', 'Edit')}>
                     <Edit3 size={12} />
                   </button>
                   <button onClick={() => removePackage(pkg.id)} className="p-1.5 text-white/40 hover:text-red-400 cursor-pointer transition-colors" title={t('Eliminar', 'Delete')}>
@@ -501,7 +501,7 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
 
         {grouped.every(g => g.packages.length === 0) && uncategorized.length === 0 && (
           <div className="text-center py-12 text-white/40 text-xs">
-            {t('No hay paquetes todavía. Crea uno nuevo.', 'No packages yet. Create a new one.')}
+            {t('No hay paquetes todavÃ­a. Crea uno nuevo.', 'No packages yet. Create a new one.')}
           </div>
         )}
       </div>

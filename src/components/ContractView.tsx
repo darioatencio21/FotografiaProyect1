@@ -1,10 +1,10 @@
 import React from 'react';
 import { Printer, CheckCircle } from 'lucide-react';
-import { Booking, ActiveLanguage } from '../types';
+import { Booking, ActiveLanguíage } from '../types';
 
 interface Props {
   booking: Booking;
-  lang: ActiveLanguage;
+  lang: ActiveLanguíage;
   t: Record<string, string>;
   mode?: 'client-sign' | 'view' | 'admin-sign';
   onClientSign?: (signature: string) => void;
@@ -54,21 +54,21 @@ export default function ContractView({ booking, lang, t, mode = 'view', onClient
     <div className="max-w-4xl mx-auto space-y-8">
       {/* Header */}
       <div className="text-center border-b border-white/10 pb-6">
-        <h2 className="font-serif text-2xl text-gold-50 tracking-wide">{isSession ? t.contractSessionTitle : t.contractTitle}</h2>
+        <h2 className="font-serif text-2xl text-white/90 tracking-wide">{isSession ? t.contractSessionTitle : t.contractTitle}</h2>
         <p className="text-xs text-white/50 mt-1">{isSession ? t.contractSessionSubtitle : t.contractSubtitle}</p>
       </div>
 
       {/* Parties & Date */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs font-mono text-white/70">
         <div className="space-y-1">
-          <p className="text-gold-400 font-bold uppercase tracking-widest text-[10px]">Photographer</p>
+          <p className="text-white/70 font-semibold uppercase tracking-widest text-[10px]">Photographer</p>
           <p>Miriam Tellez</p>
           <p>miriamtellezphotography@gmail.com</p>
           <p>(559) 756-1144</p>
         </div>
         <div className="space-y-1">
-          <p className="text-gold-400 font-bold uppercase tracking-widest text-[10px]">{isSession ? t.contractSessionDate : 'Wedding Date'}</p>
-          <p className="font-serif text-base text-gold-50">{booking.date ? formatDate(booking.date) : '—'}</p>
+          <p className="text-white/70 font-semibold uppercase tracking-widest text-[10px]">{isSession ? t.contractSessionDate : 'Wedding Date'}</p>
+          <p className="font-serif text-base text-white/90">{booking.date ? formatDate(booking.date) : '—'}</p>
           {isSession && booking.timeSlot && <p className="text-xs text-white/50 mt-1">{t.contractSessionTime}: {booking.timeSlot}</p>}
         </div>
       </div>
@@ -76,7 +76,7 @@ export default function ContractView({ booking, lang, t, mode = 'view', onClient
       {/* Client Info (session) or Bride & Groom (wedding) */}
       {cd && isSession ? (
         <div className="border border-white/10 rounded p-4 text-xs font-mono text-white/70 space-y-2">
-          <p className="text-gold-400 font-bold uppercase tracking-widest text-[10px]">{t.contractClient}</p>
+          <p className="text-white/70 font-semibold uppercase tracking-widest text-[10px]">{t.contractClient}</p>
           <p>{cd.brideName || '—'}</p>
           <p>{cd.brideEmail || '—'}</p>
           <p>{cd.groomPhone || '—'}</p>
@@ -84,13 +84,13 @@ export default function ContractView({ booking, lang, t, mode = 'view', onClient
       ) : cd ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs font-mono text-white/70">
           <div className="space-y-2 border border-white/10 rounded p-4">
-            <p className="text-gold-400 font-bold uppercase tracking-widest text-[10px]">{t.contractBride}</p>
+            <p className="text-white/70 font-semibold uppercase tracking-widest text-[10px]">{t.contractBride}</p>
             <p>{cd.brideName || '—'}</p>
             <p>{cd.brideEmail || '—'}</p>
             <p>{cd.brideAddress || '—'}</p>
           </div>
           <div className="space-y-2 border border-white/10 rounded p-4">
-            <p className="text-gold-400 font-bold uppercase tracking-widest text-[10px]">{t.contractGroom}</p>
+            <p className="text-white/70 font-semibold uppercase tracking-widest text-[10px]">{t.contractGroom}</p>
             <p>{cd.groomName || '—'}</p>
             <p>{cd.groomPhone || '—'}</p>
           </div>
@@ -100,7 +100,7 @@ export default function ContractView({ booking, lang, t, mode = 'view', onClient
       {/* Session info (session) or Ceremony & Reception (wedding) */}
       {cd && isSession ? (
         <div className="border border-white/10 rounded p-4 text-xs font-mono text-white/70 space-y-2">
-          <p className="text-gold-400 font-bold uppercase tracking-widest text-[10px]">{t.contractSessionInfo}</p>
+          <p className="text-white/70 font-semibold uppercase tracking-widest text-[10px]">{t.contractSessionInfo}</p>
           <p><span className="text-white/50">{t.contractSessionDate}:</span> {booking.date ? formatDate(booking.date) : '—'}</p>
           <p><span className="text-white/50">{t.contractSessionTime}:</span> {booking.timeSlot || '—'}</p>
           <p><span className="text-white/50">{t.contractSessionPackage}:</span> {booking.packageName || '—'}</p>
@@ -108,14 +108,14 @@ export default function ContractView({ booking, lang, t, mode = 'view', onClient
       ) : cd ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs font-mono text-white/70">
           <div className="space-y-2 border border-white/10 rounded p-4">
-            <p className="text-gold-400 font-bold uppercase tracking-widest text-[10px]">{t.contractCeremony}</p>
+            <p className="text-white/70 font-semibold uppercase tracking-widest text-[10px]">{t.contractCeremony}</p>
             <p>{cd.ceremonyLocation || '—'}</p>
             <p>{cd.ceremonyAddress || '—'}</p>
             <p>{t.contractCeremonyStart}: {cd.ceremonyStart || '—'}</p>
             <p>{t.contractCeremonyEnd}: {cd.ceremonyEnd || '—'}</p>
           </div>
           <div className="space-y-2 border border-white/10 rounded p-4">
-            <p className="text-gold-400 font-bold uppercase tracking-widest text-[10px]">{t.contractReception}</p>
+            <p className="text-white/70 font-semibold uppercase tracking-widest text-[10px]">{t.contractReception}</p>
             <p>{cd.receptionLocation || '—'}</p>
             <p>{cd.receptionAddress || '—'}</p>
             <p>{t.contractReceptionStart}: {cd.receptionStart || '—'}</p>
@@ -126,21 +126,21 @@ export default function ContractView({ booking, lang, t, mode = 'view', onClient
 
       {/* Package & Pricing */}
       <div className="border border-white/10 rounded p-4 text-xs font-mono text-white/70 space-y-2">
-        <p className="text-gold-400 font-bold uppercase tracking-widest text-[10px]">{t.contractPackage}</p>
-        <p className="font-serif text-base text-gold-50">{booking.packageName || '—'}</p>
+        <p className="text-white/70 font-semibold uppercase tracking-widest text-[10px]">{t.contractPackage}</p>
+        <p className="font-serif text-base text-white/90">{booking.packageName || '—'}</p>
         {booking.packageDetails && <p className="text-white/50 leading-relaxed">{booking.packageDetails}</p>}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-3 border-t border-white/10 mt-3">
           <div>
             <p className="text-[9px] uppercase tracking-widest text-white/30">{t.contractAmountAgreed}</p>
-            <p className="font-serif text-lg text-gold-50">${(booking.amount || 0).toLocaleString()}</p>
+            <p className="font-serif text-lg text-white/90">${(booking.amount || 0).toLocaleString()}</p>
           </div>
           <div>
             <p className="text-[9px] uppercase tracking-widest text-white/30">{t.contractDeposit}</p>
-            <p className="font-serif text-lg text-gold-50">${(booking.depositAmount || 0).toLocaleString()}</p>
+            <p className="font-serif text-lg text-white/90">${(booking.depositAmount || 0).toLocaleString()}</p>
           </div>
           <div>
             <p className="text-[9px] uppercase tracking-widest text-white/30">{t.contractAmountDue}</p>
-            <p className="font-serif text-lg text-gold-50">${(booking.amountDue || 0).toLocaleString()}</p>
+            <p className="font-serif text-lg text-white/90">${(booking.amountDue || 0).toLocaleString()}</p>
           </div>
         </div>
         {booking.travelExpenses && (
@@ -158,8 +158,8 @@ export default function ContractView({ booking, lang, t, mode = 'view', onClient
       {/* Clauses */}
       <div className="space-y-6 text-xs text-white/70 leading-relaxed">
         {(isSession ? sessionClauses : weddingClauses).map((clause) => (
-          <div key={clause.title} className="border-l-2 border-gold-500/30 pl-4">
-            <h4 className="font-bold text-gold-400 text-[10px] tracking-widest mb-1">{clause.title}</h4>
+          <div key={clause.title} className="border-l-2 border-white/10 pl-4">
+            <h4 className="font-semibold text-white/70 text-[10px] tracking-widest mb-1">{clause.title}</h4>
             <p className="text-white/50">{clause.text}</p>
           </div>
         ))}
@@ -170,10 +170,10 @@ export default function ContractView({ booking, lang, t, mode = 'view', onClient
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Client signature */}
           <div className="space-y-3">
-            <p className="text-gold-400 font-bold uppercase tracking-widest text-[10px]">{t.contractSignatureClient}</p>
+            <p className="text-white/70 font-semibold uppercase tracking-widest text-[10px]">{t.contractSignatureClient}</p>
             {booking.contractSignature ? (
               <div>
-                <p className="font-serif text-lg text-gold-50 border-b border-gold-500/30 pb-2">{booking.contractSignature}</p>
+                <p className="font-serif text-lg text-white/90 border-b border-white/10 pb-2">{booking.contractSignature}</p>
                 <p className="text-[9px] font-mono text-white/30 mt-1">{t.contractSignatureDate}: {booking.contractSignedAt ? formatDate(booking.contractSignedAt) : '—'}</p>
               </div>
             ) : mode === 'client-sign' ? (
@@ -183,7 +183,7 @@ export default function ContractView({ booking, lang, t, mode = 'view', onClient
                   value={signature}
                   onChange={(e) => setSignature(e.target.value)}
                   placeholder={t.contractSignHere}
-                  className="w-full bg-dark-gray border border-white/10 rounded px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-gold-400 font-serif"
+                  className="w-full bg-dark-gray border border-white/10 rounded px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/30 font-serif"
                 />
                 <label className="flex items-start gap-3 cursor-pointer">
                   <input
@@ -197,7 +197,7 @@ export default function ContractView({ booking, lang, t, mode = 'view', onClient
                 <button
                   onClick={handleSign}
                   disabled={!signature.trim() || !signed}
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-gold-500 text-dark rounded font-mono text-[10px] tracking-widest uppercase hover:bg-gold-400 transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 text-white border border-white/10 rounded font-mono text-[10px] tracking-widest uppercase hover:bg-white/15 transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <CheckCircle size={14} />
                   {t.contractSignBtn}
@@ -210,16 +210,16 @@ export default function ContractView({ booking, lang, t, mode = 'view', onClient
 
           {/* Photographer signature */}
           <div className="space-y-3">
-            <p className="text-gold-400 font-bold uppercase tracking-widest text-[10px]">{t.contractSignaturePhotographer}</p>
+            <p className="text-white/70 font-semibold uppercase tracking-widest text-[10px]">{t.contractSignaturePhotographer}</p>
             {booking.contractPhotographerSignature ? (
               <div>
-                <p className="font-serif text-lg text-gold-50 border-b border-gold-500/30 pb-2">{booking.contractPhotographerSignature}</p>
+                <p className="font-serif text-lg text-white/90 border-b border-white/10 pb-2">{booking.contractPhotographerSignature}</p>
                 <p className="text-[9px] font-mono text-white/30 mt-1">{t.contractSignatureDate}: {booking.contractPhotographerSignedAt ? formatDate(booking.contractPhotographerSignedAt) : '—'}</p>
               </div>
             ) : mode === 'admin-sign' ? (
               <button
                 onClick={onPhotographerSign}
-                className="inline-flex items-center gap-2 px-6 py-3 border border-gold-500/30 text-gold-400 rounded font-mono text-[10px] tracking-widest uppercase hover:bg-gold-500/10 transition-all duration-300"
+                className="inline-flex items-center gap-2 px-6 py-3 border border-white/10 text-white/70 rounded font-mono text-[10px] tracking-widest uppercase hover:bg-white/5 transition-all duration-300"
               >
                 <CheckCircle size={14} />
                 {t.contractAdminSign}
@@ -234,7 +234,7 @@ export default function ContractView({ booking, lang, t, mode = 'view', onClient
         <div className="flex justify-center gap-4 pt-4">
           <button
             onClick={handlePrint}
-            className="inline-flex items-center gap-2 px-5 py-2.5 border border-white/10 rounded font-mono text-[10px] tracking-widest uppercase text-white hover:border-gold-400 hover:text-gold-400 transition-all duration-300"
+            className="inline-flex items-center gap-2 px-5 py-2.5 border border-white/10 rounded font-mono text-[10px] tracking-widest uppercase text-white hover:border-white/30 hover:text-white transition-all duration-300"
           >
             <Printer size={14} />
             {t.contractDownloadBtn}

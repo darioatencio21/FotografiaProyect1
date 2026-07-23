@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { Instagram } from 'lucide-react';
-import { ActiveLanguage } from '../types';
+import { ActiveLanguíage } from '../types';
 
 const PROFILE_URL = 'https://www.instagram.com/miriamtellezphotography/';
 
@@ -24,8 +24,15 @@ const INSTAGRAM_POSTS: InstagramPost[] = [
   },
 ];
 
+const INSTAGRAM_POST_LINKS = [
+  'https://www.instagram.com/p/DY54qj3zRuF/',
+  'https://www.instagram.com/p/DYxh6sOheSH/',
+  'https://www.instagram.com/p/DYoJvTKTeqv/',
+  'https://www.instagram.com/p/DUyd8j9khcL/?img_index=1',
+];
+
 interface InstagramFeedProps {
-  lang: ActiveLanguage;
+  lang: ActiveLanguíage;
 }
 
 export default function InstagramFeed({ lang }: InstagramFeedProps) {
@@ -37,10 +44,10 @@ export default function InstagramFeed({ lang }: InstagramFeedProps) {
         rel="noreferrer"
         className="group block"
       >
-        <span className="text-[10px] font-mono text-gold-400 tracking-widest uppercase block group-hover:text-gold-300 transition-colors duration-300">Instagram Feed</span>
-        <h2 className="font-serif text-3xl text-white tracking-wide mt-1 group-hover:text-gold-400 transition-colors duration-300 flex items-center gap-3">
+        <span className="text-[10px] font-mono text-white/60 tracking-widest uppercase block group-hover:text-white transition-colors duration-300">Instagram Feed</span>
+        <h2 className="font-serif text-3xl text-white tracking-wide mt-1 flex items-center gap-3">
           @miriamtellezphotography
-          <Instagram size={20} className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-gold-400" />
+          <Instagram size={20} className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-white" />
         </h2>
       </a>
 
@@ -52,7 +59,7 @@ export default function InstagramFeed({ lang }: InstagramFeedProps) {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="inline-flex items-center gap-2.5 px-6 py-3 border border-gold-500/60 text-gold-400 font-mono text-[10px] tracking-widest uppercase rounded-lg hover:bg-gold-500 hover:text-dark hover:border-gold-500 transition-all duration-300 ease-out cursor-pointer"
+        className="inline-flex items-center gap-2.5 px-6 py-3 border border-white/20 text-white/70 font-mono text-[10px] tracking-widest uppercase rounded-lg hover:bg-white/10 hover:text-white hover:border-white/40 transition-all duration-300 ease-out cursor-pointer"
       >
         <Instagram size={15} />
         <span>Follow @miriamtellezphotography</span>
@@ -62,14 +69,14 @@ export default function InstagramFeed({ lang }: InstagramFeedProps) {
         {INSTAGRAM_POSTS.map((post, index) => (
           <motion.a
             key={index}
-            href={PROFILE_URL}
+            href={INSTAGRAM_POST_LINKS[index]}
             target="_blank"
             rel="noreferrer"
             initial={{ opacity: 0, y: 18 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.65, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
-            className="group relative aspect-[3/4] overflow-hidden rounded-xl bg-dark-gray block"
+            className="group relative aspect-[3/4] overflow-hidden rounded-lg bg-dark-gray block"
           >
             <img
               src={post.image}
@@ -80,7 +87,7 @@ export default function InstagramFeed({ lang }: InstagramFeedProps) {
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-1 group-hover:translate-y-0">
               <div className="flex items-center gap-2 text-white">
-                <Instagram size={13} className="text-gold-400" />
+                <Instagram size={13} className="text-white/70" />
                 <span className="text-[9px] font-mono tracking-widest uppercase">@miriamtellezphotography</span>
               </div>
             </div>

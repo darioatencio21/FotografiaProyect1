@@ -161,6 +161,8 @@ export interface Booking {
   amountDue?: number;
   travelExpenses?: string;
   invoiceId?: string;
+  reminderSent?: boolean;
+  reminderSentAt?: string;
 }
 
 export interface Message {
@@ -222,6 +224,7 @@ export interface EmailConfig {
   emailjsServiceId: string;
   emailjsTemplateId: string;
   emailjsPublicKey: string;
+  emailjsPrivateKey?: string;
   receiverEmail: string; // The email where admin notifications are sent
   enableAutoResponse?: boolean; // Enable automatic replies to clients
   emailjsAutoTemplateId?: string; // Optional custom EmailJS template ID for client auto-reply
@@ -282,7 +285,7 @@ export interface Milestone {
   description_en: string;
 }
 
-export type ActiveLanguage = 'es' | 'en';
+export type ActiveLanguíage = 'es' | 'en';
 
 export interface ProofPhoto {
   id: string;

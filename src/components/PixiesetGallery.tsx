@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { ExternalLink } from 'lucide-react';
-import { ActiveLanguage } from '../types';
+import { ActiveLanguíage } from '../types';
 
 interface Props {
-  lang: ActiveLanguage;
+  lang: ActiveLanguíage;
   t: Record<string, string>;
 }
 
@@ -36,7 +36,7 @@ const GALLERIES = [
   { title: 'Quince Photo Session', date: 'March 8th, 2025', slug: 'quincephotosession', cover: '//images.pixieset.com/35219009/00213b39c5a09bf86b0b501443393d15-large.jpg' },
 ];
 
-function GalleryCard({ gallery }: { gallery: typeof GALLERIES[number] }) {
+const GalleryCard: React.FC<{ gallery: typeof GALLERIES[number] }> = ({ gallery }) => {
   const [imgError, setImgError] = useState(false);
 
   return (
@@ -44,7 +44,7 @@ function GalleryCard({ gallery }: { gallery: typeof GALLERIES[number] }) {
       href={`${PIXIESET_BASE}/${gallery.slug}/`}
       target="_blank"
       rel="noopener noreferrer"
-      className="group relative overflow-hidden bg-dark-gray border border-white/10 hover:border-gold-400 transition-all duration-500 block"
+      className="group relative overflow-hidden bg-dark-gray border border-white/10 hover:border-white/20 transition-all duration-500 block"
     >
       {!imgError ? (
         <img
@@ -52,14 +52,14 @@ function GalleryCard({ gallery }: { gallery: typeof GALLERIES[number] }) {
           alt={gallery.title}
           referrerPolicy="no-referrer"
           onError={() => setImgError(true)}
-          className="w-full aspect-[3/2] object-cover transition-all duration-[800ms] ease-out group-hover:scale-[1.04]"
+          className="w-full aspect-[3/2] object-cover transition-all duration-[800más] ease-out group-hover:scale-[1.04]"
         />
       ) : (
-        <div className="w-full aspect-[3/2] flex flex-col items-center justify-center p-6 text-center bg-gradient-to-br from-gold-800/10 to-dark-gray">
-          <div className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center mb-3 group-hover:border-gold-400 transition-all duration-500">
-            <ExternalLink size={16} className="text-white/30 group-hover:text-gold-400 transition-all duration-500" />
+        <div className="w-full aspect-[3/2] flex flex-col items-center justify-center p-6 text-center bg-gradient-to-br from-white/5 to-dark-gray">
+          <div className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center mb-3 group-hover:border-white/20 transition-all duration-500">
+            <ExternalLink size={16} className="text-white/30 group-hover:text-white transition-all duration-500" />
           </div>
-          <h4 className="font-serif text-sm md:text-base text-hero font-light leading-snug group-hover:text-gold-400 transition-all duration-500">
+          <h4 className="font-serif text-sm md:text-base text-hero font-light leading-snug group-hover:text-white transition-all duration-500">
             {gallery.title}
           </h4>
           <p className="text-[10px] font-mono tracking-wider text-white/40 mt-2">{gallery.date}</p>
@@ -73,13 +73,13 @@ function GalleryCard({ gallery }: { gallery: typeof GALLERIES[number] }) {
       </div>
     </a>
   );
-}
+};
 
 export default function PixiesetGallery({ lang, t }: Props) {
   return (
     <div className="space-y-8">
       <div className="space-y-2">
-        <h3 className="font-serif text-xl text-gold-50 tracking-wide">
+        <h3 className="font-serif text-xl text-white/90 tracking-wide">
           {t.pixiesetSubtitle}
         </h3>
         <p className="text-xs text-white/50 leading-relaxed max-w-2xl">
@@ -94,17 +94,17 @@ export default function PixiesetGallery({ lang, t }: Props) {
         rel="noopener noreferrer"
         className="block group"
       >
-        <div className="border border-gold-500/20 hover:border-gold-500/50 rounded-lg p-6 transition-all duration-500 bg-gradient-to-r from-dark-gray via-dark-gray to-gold-950/10">
+        <div className="border border-white/10 hover:border-white/20 rounded-lg p-6 transition-all duration-500 bg-gradient-to-r from-dark-gray via-dark-gray to-white/5">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h3 className="font-serif text-lg text-gold-50 tracking-wide group-hover:text-gold-400 transition-colors duration-500">
+              <h3 className="font-serif text-lg text-white/90 tracking-wide group-hover:text-white transition-colors duration-500">
                 {t.pixiesetSearchTitle}
               </h3>
               <p className="text-xs text-white/50 leading-relaxed mt-1 max-w-lg">
                 {t.pixiesetSearchDesc}
               </p>
             </div>
-            <span className="inline-flex items-center gap-2 px-5 py-2.5 border border-gold-500/30 rounded font-mono text-[10px] tracking-widest uppercase text-gold-400 group-hover:bg-gold-500/10 transition-all duration-500 whitespace-nowrap">
+            <span className="inline-flex items-center gap-2 px-5 py-2.5 border border-white/10 rounded font-mono text-[10px] tracking-widest uppercase text-white/70 group-hover:bg-white/5 transition-all duration-500 whitespace-nowrap">
               {t.pixiesetSearchBtn}
             </span>
           </div>
@@ -122,7 +122,7 @@ export default function PixiesetGallery({ lang, t }: Props) {
           href={PIXIESET_BASE}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 px-6 py-3 border border-white/10 rounded font-mono text-[10px] tracking-widest uppercase text-white hover:border-gold-400 hover:text-gold-400 transition-all duration-300"
+          className="inline-flex items-center gap-2 px-6 py-3 border border-white/10 rounded font-mono text-[10px] tracking-widest uppercase text-white hover:border-white/20 hover:text-white transition-all duration-300"
         >
           <ExternalLink size={14} />
           {t.pixiesetViewAll}

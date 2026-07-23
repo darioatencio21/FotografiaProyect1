@@ -84,14 +84,14 @@ export default function StripeCheckout({ isOpen, amount, description, onClose, o
     <AnimatePresence>
       <div className="fixed inset-0 z-55 flex items-center justify-center p-4 bg-dark/85 backdrop-blur-sm">
         <motion.div
-          className="bg-charcoal border border-white/10 rounded-2xl max-w-md w-full overflow-hidden shadow-2xl relative"
+          className="bg-charcoal border border-white/10 rounded-lg max-w-md w-full overflow-hidden shadow-2xl relative"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.9 }}
         >
           {/* Header */}
           <div className="bg-dark/40 p-4 border-b border-white/10 flex items-center justify-between">
-            <div className="flex items-center space-x-1.5 text-gold-400">
+            <div className="flex items-center space-x-1.5 text-white/70">
               <Lock size={14} />
               <span className="text-xs font-mono tracking-widest font-bold uppercase">SECURE STRIPE CHECKOUT</span>
             </div>
@@ -116,7 +116,7 @@ export default function StripeCheckout({ isOpen, amount, description, onClose, o
                     </div>
                     <div className="flex flex-col items-end">
                       <span className="text-[9px] font-mono text-white/40 uppercase">TOTAL AMOUNT</span>
-                      <span className="text-sm font-mono font-bold text-gold-400">${amount}</span>
+                      <span className="text-sm font-mono font-semibold text-white/70">${amount}</span>
                     </div>
                   </div>
 
@@ -130,7 +130,7 @@ export default function StripeCheckout({ isOpen, amount, description, onClose, o
                         placeholder="Johnathan Doe"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="w-full bg-dark/60 border border-white/10 rounded px-3 py-2 text-xs text-white placeholder-white/20 focus:outline-none focus:border-gold-400"
+                        className="w-full bg-dark/60 border border-white/10 rounded px-3 py-2 text-xs text-white placeholder-white/20 focus:outline-none focus:border-white/30"
                       />
                     </div>
 
@@ -158,7 +158,7 @@ export default function StripeCheckout({ isOpen, amount, description, onClose, o
                               setCardNumber(val);
                             }
                           }}
-                          className="w-full bg-dark/60 border border-white/10 rounded pl-9 pr-3 py-2 text-xs text-white placeholder-white/20 focus:outline-none focus:border-gold-400 font-mono"
+                          className="w-full bg-dark/60 border border-white/10 rounded pl-9 pr-3 py-2 text-xs text-white placeholder-white/20 focus:outline-none focus:border-white/30 font-mono"
                         />
                         <div className="absolute inset-y-0 left-3 flex items-center text-white/35">
                           <CreditCard size={13} />
@@ -182,7 +182,7 @@ export default function StripeCheckout({ isOpen, amount, description, onClose, o
                             }
                             setExpiry(val);
                           }}
-                          className="w-full bg-dark/60 border border-white/10 rounded px-3 py-2 text-xs text-white placeholder-white/20 focus:outline-none focus:border-gold-400 font-mono text-center"
+                          className="w-full bg-dark/60 border border-white/10 rounded px-3 py-2 text-xs text-white placeholder-white/20 focus:outline-none focus:border-white/30 font-mono text-center"
                         />
                       </div>
 
@@ -195,7 +195,7 @@ export default function StripeCheckout({ isOpen, amount, description, onClose, o
                           placeholder="382"
                           value={cvc}
                           onChange={(e) => setCvc(e.target.value.replace(/[^0-9]/g, ''))}
-                          className="w-full bg-dark/60 border border-white/10 rounded px-3 py-2 text-xs text-white placeholder-white/20 focus:outline-none focus:border-gold-400 font-mono text-center"
+                          className="w-full bg-dark/60 border border-white/10 rounded px-3 py-2 text-xs text-white placeholder-white/20 focus:outline-none focus:border-white/30 font-mono text-center"
                         />
                       </div>
                     </div>
@@ -210,7 +210,7 @@ export default function StripeCheckout({ isOpen, amount, description, onClose, o
 
                   <button
                     type="submit"
-                    className="w-full py-3 bg-gold-500 hover:bg-gold-400 text-dark font-mono text-xs tracking-widest uppercase font-semibold rounded-lg transition-all flex items-center justify-center space-x-1.5 cursor-pointer mt-4"
+                    className="w-full py-3 bg-white/10 hover:bg-white/15 text-white border border-white/10 font-mono text-xs tracking-widest uppercase font-semibold rounded-lg transition-all flex items-center justify-center space-x-1.5 cursor-pointer mt-4"
                   >
                     <span>Authorize & Pay ${amount}</span>
                   </button>
@@ -226,13 +226,13 @@ export default function StripeCheckout({ isOpen, amount, description, onClose, o
                   exit={{ opacity: 0 }}
                 >
                   <div className="relative">
-                    <div className="w-12 h-12 border-4 border-gold-400/20 border-t-gold-500 rounded-full animate-spin" />
-                    <div className="absolute inset-0 flex items-center justify-center text-gold-400">
+                    <div className="w-12 h-12 border-4 border-white/10 border-t-white/30 rounded-full animate-spin" />
+                    <div className="absolute inset-0 flex items-center justify-center text-white/70">
                       <Lock size={14} />
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-xs font-mono text-gold-400 font-bold uppercase tracking-wider">SECURE AUTHORIZATION IN PROGRESS</p>
+                    <p className="text-xs font-mono text-white/70 font-semibold uppercase tracking-wider">SECURE AUTHORIZATION IN PROGRESS</p>
                     <p className="text-[10px] text-white/50">COMMUNICATING WITH STRIPE ENDPOINTS...</p>
                   </div>
                 </motion.div>
@@ -251,7 +251,7 @@ export default function StripeCheckout({ isOpen, amount, description, onClose, o
                   </div>
                   <div className="space-y-1.5">
                     <h4 className="font-serif text-xl text-white font-semibold">Payment Completed</h4>
-                    <p className="text-[10px] font-mono text-gold-400 uppercase tracking-widest">TRANSACTION REFERENCE</p>
+                    <p className="text-[10px] font-mono text-white/70 uppercase tracking-widest">TRANSACTION REFERENCE</p>
                     <p className="text-[9px] font-mono text-white/55 bg-dark/60 border border-white/10 px-2 py-1.5 rounded truncate max-w-[280px] select-all">
                       {txHash}
                     </p>

@@ -1,15 +1,15 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { PhotographerProfile, ActiveLanguage } from '../types';
+import { PhotographerProfile, ActiveLanguíage } from '../types';
 import { MILESTONES } from '../data/mockData';
 
 interface Props {
   profile: PhotographerProfile;
-  lang: ActiveLanguage;
+  lang: ActiveLanguíage;
   t: Record<string, string>;
 }
 
-function getMilestone(m: (typeof MILESTONES)[number], lang: ActiveLanguage) {
+function getMilestone(m: (typeof MILESTONES)[number], lang: ActiveLanguíage) {
   const key = lang === 'es' ? 'es' : 'en';
   return {
     title: m[`title_${key}` as keyof typeof m] as string,
@@ -19,7 +19,7 @@ function getMilestone(m: (typeof MILESTONES)[number], lang: ActiveLanguage) {
 
 function getText(
   profile: PhotographerProfile,
-  lang: ActiveLanguage,
+  lang: ActiveLanguíage,
   t: Record<string, string>,
   field: 'aboutTitle' | 'aboutText1' | 'aboutText2'
 ) {
@@ -40,7 +40,7 @@ function SectionLabel({ children, delay = 0 }: SectionLabelProps) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-80px' }}
       transition={{ duration: 0.5, delay, ease: [0.16, 1, 0.3, 1] }}
-      className="block font-mono text-[10px] tracking-wider text-gold-400 uppercase"
+      className="block font-mono text-[10px] tracking-wider text-white/70 uppercase"
     >
       {children}
     </motion.span>
@@ -58,7 +58,7 @@ function AnimatedDivider({ delay = 0 }: AnimatedDividerProps) {
       whileInView={{ scaleX: 1 }}
       viewport={{ once: true, margin: '-80px' }}
       transition={{ duration: 0.8, delay, ease: [0.16, 1, 0.3, 1] }}
-      className="h-px bg-border origin-left"
+      className="h-px bg-stone/50 origin-left"
       style={{ width: 'clamp(80px, 40%, 200px)' }}
     />
   );
@@ -97,9 +97,9 @@ export default function AboutSection({ profile, lang, t }: Props) {
 
   return (
     <div className="space-y-20 md:space-y-28 text-left">
-      {/* ═══════════════════════════════════════════════ */}
+      {/* ──────────────────────────────────────────────── */}
       {/* BIOGRAPHY — Editorial opening with portrait     */}
-      {/* ═══════════════════════════════════════════════ */}
+      {/* ──────────────────────────────────────────────── */}
       <section className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 lg:gap-16 items-start">
         {/* Photo column */}
         <motion.div
@@ -147,9 +147,9 @@ export default function AboutSection({ profile, lang, t }: Props) {
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════ */}
-      {/* PROFESSIONAL MILESTONES — Vertical Timeline      */}
-      {/* ═══════════════════════════════════════════════ */}
+      {/* ──────────────────────────────────────────────── */}
+      {/* PROFESSIONAL MILESTONES — Vertical Timeline     */}
+      {/* ──────────────────────────────────────────────── */}
       <section>
         <SectionLabel>{t.experience || 'EXPERIENCE'}</SectionLabel>
 
@@ -165,10 +165,10 @@ export default function AboutSection({ profile, lang, t }: Props) {
 
         <div className="relative mt-10 md:mt-14">
           {/* Vertical timeline line — hidden on mobile, visible md+ */}
-          <div className="hidden md:block absolute left-[60px] top-0 bottom-0 w-px bg-border/60" />
+          <div className="hidden md:block absolute left-[60px] top-0 bottom-0 w-px bg-stone/60" />
 
           {/* Mobile timeline line */}
-          <div className="md:hidden absolute left-5 top-0 bottom-0 w-px bg-border/40" />
+          <div className="md:hidden absolute left-5 top-0 bottom-0 w-px bg-stone/40" />
 
           {MILESTONES.map((milestone, idx) => {
             const { title, description } = getMilestone(milestone, lang);
@@ -188,11 +188,11 @@ export default function AboutSection({ profile, lang, t }: Props) {
                 className={`relative pl-12 md:pl-[100px] ${isLast ? '' : 'pb-14 md:pb-20'}`}
               >
                 {/* Timeline dot */}
-                <div className="absolute left-[17px] md:left-[52px] top-1 w-2.5 h-2.5 md:w-4 md:h-4 rounded-full bg-gold-400 border-2 border-dark shadow-[0_0_0_3px_#EFD2B4]" />
+                <div className="absolute left-[17px] md:left-[52px] top-1 w-2.5 h-2.5 md:w-4 md:h-4 rounded-full bg-white/10 border-2 border-dark shadow-[0_0_0_3px_rgba(255,255,255,0.1)]" />
 
                 {/* Year — on mobile: above title. On desktop: to the left of line */}
-                <div className="md:absolute md:left-0 md:w-[52px] md:text-right md:pr-6 md:top-0">
-                  <span className="font-serif text-[clamp(2rem,6vw,4rem)] text-gold-200/50 leading-none block md:text-right">
+                <div className="hidden md:block md:absolute md:left-0 md:w-[52px] md:text-right md:pr-6 md:top-0">
+                  <span className="font-serif text-[clamp(2rem,6vw,4rem)] text-white/40 leading-none block md:text-right">
                     {milestone.year}
                   </span>
                 </div>
@@ -200,7 +200,7 @@ export default function AboutSection({ profile, lang, t }: Props) {
                 {/* Content */}
                 <div>
                   {/* Year on mobile (above title) */}
-                  <span className="md:hidden font-serif text-2xl text-gold-300/60 leading-none block mb-2">
+                  <span className="md:hidden font-serif text-2xl text-white/50 leading-none block mb-2">
                     {milestone.year}
                   </span>
                   <h3 className="font-serif text-lg md:text-xl lg:text-2xl text-white leading-snug">
@@ -216,9 +216,9 @@ export default function AboutSection({ profile, lang, t }: Props) {
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════ */}
-      {/* PHILOSOPHY — Three pillars of approach          */}
-      {/* ═══════════════════════════════════════════════ */}
+      {/* ──────────────────────────────────────────────── */}
+      {/* PHILOSOPHY — Three pillars of approach         */}
+      {/* ──────────────────────────────────────────────── */}
       <section>
         <SectionLabel>{t.philosophyTitle || 'MI ENFOQUE'}</SectionLabel>
 
@@ -252,7 +252,7 @@ export default function AboutSection({ profile, lang, t }: Props) {
           ].map((pillar) => (
             <FadeIn key={pillar.title} delay={pillar.delay} y={25}>
               <div className="space-y-3 md:space-y-4">
-                <div className="w-8 h-px bg-gold-400/60" />
+                <div className="w-8 h-px bg-white/10" />
                 <h3 className="font-serif text-lg md:text-xl text-white">{pillar.title}</h3>
                 <p className="font-sans text-[clamp(0.75rem,1.2vw,0.875rem)] text-white/60 leading-relaxed">
                   {pillar.desc}

@@ -85,7 +85,7 @@ export default function CustomCursor() {
     <>
       {/* Outer Ring */}
       <motion.div
-        className="fixed top-0 left-0 w-8 h-8 rounded-full border border-gold-400 pointer-events-none z-50 mix-blend-difference hidden lg:block"
+        className="fixed top-0 left-0 w-8 h-8 rounded-full border border-white/20 pointer-events-none z-50 mix-blend-difference hidden lg:block"
         style={{
           x: cursorXSpring,
           y: cursorYSpring,
@@ -112,7 +112,7 @@ export default function CustomCursor() {
         }}
       >
         <motion.div
-          className="rounded-full bg-gold-400 flex items-center justify-center text-[9px] tracking-widest font-mono text-dark font-semibold uppercase whitespace-nowrap overflow-hidden"
+          className="rounded-full bg-white/10 flex items-center justify-center text-[9px] tracking-widest font-mono text-white font-semibold uppercase whitespace-nowrap overflow-hidden"
           animate={{
             width: cursorType !== 'default' && cursorText ? 56 : 6,
             height: cursorType !== 'default' && cursorText ? 56 : 6,

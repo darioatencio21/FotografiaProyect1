@@ -28,7 +28,23 @@ function markTableMissing(table: string): void {
 
 function isMissingTableError(err: any): boolean {
   const msg = err?.message || String(err);
-  return /relation.*does not exist|not found.*table|PGRST(?:104|204|301)/i.test(msg);
+  return /relation.*does not exist|not found.*table|PGRST(?:104|205|301)/i.test(msg);
+}
+
+function isSchemaMismatchError(err: any): boolean {
+  const message = err?.message || String(err);
+  return err?.status === 400 || err?.code === 'PGRST204' || /column .* does not exist|could not find the .* column/i.test(message);
+}
+
+// Keep public booking creation working while an older Supabase schema is being migrated.
+const BOOKING_BASE_COLUMNS = new Set([
+  'id', 'clientName', 'clientEmail', 'clientPhone', 'date', 'timeSlot',
+  'serviceId', 'peopleCount', 'notes', 'status', 'createdAt', 'amount', 'isRead'
+]);
+
+function getCompatiblePayload(table: string, data: Record<string, unknown>): Record<string, unknown> {
+  if (table !== 'bookings') return data;
+  return Object.fromEntries(Object.entries(data).filter(([key]) => BOOKING_BASE_COLUMNS.has(key)));
 }
 
 export async function getCollectionWithFallback<T extends { id: string }>(
@@ -95,6 +111,14 @@ export async function saveDocument<T>(collectionPath: string, docId: string, dat
       .upsert({ id: docId, ...data as any });
     if (error) throw error;
   } catch (err: any) {
+    if (table === 'bookings' && isSchemaMismatchError(err)) {
+      const compatibleData = getCompatiblePayload(table, data as Record<string, unknown>);
+      const { error: retryError } = await supabase
+        .from(table)
+        .upsert({ id: docId, ...compatibleData });
+      if (!retryError) return;
+      throw retryError;
+    }
     if (isMissingTableError(err)) {
       markTableMissing(table);
       return;

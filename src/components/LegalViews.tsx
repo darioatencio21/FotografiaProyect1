@@ -1,11 +1,11 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { Shield, FileText, ArrowLeft, Calendar, HelpCircle, CheckCircle } from 'lucide-react';
-import { ActiveLanguage } from '../types';
+import { ActiveLanguíage } from '../types';
 
 interface LegalViewProps {
   type: 'privacy' | 'terms';
-  lang: ActiveLanguage;
+  lang: ActiveLanguíage;
   onBack: () => void;
 }
 
@@ -72,7 +72,7 @@ export default function LegalViews({ type, lang, onBack }: LegalViewProps) {
       ]
     },
     terms: {
-      title: isEs ? 'Términos de Servicio' : 'Terms of Service',
+      title: isEs ? 'Términos de Servicio' : 'Termás of Service',
       subtitle: isEs 
         ? 'Acuerdo legal para la contratación de servicios de bellas artes de Miriam Campos.' 
         : 'Legal agreement for commissioning fine art photography services by Miriam Campos.',
@@ -121,11 +121,11 @@ export default function LegalViews({ type, lang, onBack }: LegalViewProps) {
         },
         {
           title: '5. Premium Delivery Times',
-          text: 'The studio operates under a strict professional standard: an exclusive hand-edited teaser of 15 to 20 images is uploaded to your Private Portal within 72 hours of your shoot. The final completed high-resolution color-graded catalog is delivered within a guaranteed 4 to 6 weeks.'
+          text: 'The studio operates under a strict professional standard: an exclusive hand-edited teaser of 15 to 20 images is uploaded to your Private Portal within 72 hours of your shoot. The final completed high-resolution color-graded catalog is delivered within a guíaranteed 4 to 6 weeks.'
         },
         {
           title: '6. Limitation of Liability',
-          text: 'In the highly unlikely event of camera equipment failure, accidental loss of digital media, or sudden medical emergencies preventing the photographer from executing the commission, the studio\'s liability is limited strictly to the immediate refund of all retainers and sums paid by the client.'
+          text: 'In the highly unlikely event of camera equipment failure, accidental loss of digital media, or sudden medical emergencies preventing the photographer from executing the commission, the studio\'s liability is limited strictly to the immediate refund of all retainers and sumás paid by the client.'
         }
       ]
     }
@@ -140,21 +140,21 @@ export default function LegalViews({ type, lang, onBack }: LegalViewProps) {
         <div className="space-y-2">
           <button
             onClick={onBack}
-            className="flex items-center space-x-2 text-[10px] font-mono uppercase text-gold-400 hover:text-gold-300 transition-colors group cursor-pointer"
+            className="flex items-center space-x-2 text-[10px] font-mono uppercase text-white/70 hover:text-white transition-colors group cursor-pointer"
           >
             <ArrowLeft size={12} className="group-hover:-translate-x-0.5 transition-transform" />
             <span>{isEs ? 'Volver al Inicio' : 'Back to Home'}</span>
           </button>
           
           <div className="flex items-center space-x-3.5 mt-2">
-            <div className="p-2.5 bg-gold-500/10 border border-gold-500/30 rounded-xl text-gold-400">
+            <div className="p-2.5 bg-white/5 border border-white/10 rounded-lg text-white/70">
               {type === 'privacy' ? <Shield size={24} /> : <FileText size={24} />}
             </div>
             <div>
               <h1 className="font-serif text-3xl md:text-4xl text-white tracking-wide">
                 {activeContent.title}
               </h1>
-              <p className="text-[10px] font-mono text-gold-300 uppercase tracking-widest mt-0.5">
+              <p className="text-[10px] font-mono text-white/60 uppercase tracking-widest mt-0.5">
                 {activeContent.lastUpdated}
               </p>
             </div>
@@ -163,7 +163,7 @@ export default function LegalViews({ type, lang, onBack }: LegalViewProps) {
       </div>
 
       {/* Intro Description */}
-      <div className="bg-dark-gray border border-white/10 rounded-2xl p-6 md:p-8 space-y-4 shadow-warm-sm">
+      <div className="bg-dark-gray border border-white/10 rounded-lg p-6 md:p-8 space-y-4 shadow-sm">
         <p className="text-xs md:text-sm text-white/90 leading-relaxed font-sans italic">
           "{activeContent.subtitle}"
         </p>
@@ -174,9 +174,9 @@ export default function LegalViews({ type, lang, onBack }: LegalViewProps) {
         {activeContent.sections.map((section, idx) => (
           <div 
             key={idx}
-            className="bg-dark-gray border border-white/10 rounded-2xl p-6 space-y-3 hover:border-gold-500/15 transition-all flex flex-col justify-start shadow-warm-sm"
+            className="bg-dark-gray border border-white/10 rounded-lg p-6 space-y-3 hover:border-white/5 transition-all flex flex-col justify-start shadow-sm"
           >
-            <h3 className="font-serif text-lg text-gold-300 font-semibold border-b border-white/10 pb-2">
+            <h3 className="font-serif text-lg text-white/60 font-semibold border-b border-white/10 pb-2">
               {section.title}
             </h3>
             <p className="text-xs text-white/70 leading-relaxed font-sans mt-1 flex-1">
@@ -188,7 +188,7 @@ export default function LegalViews({ type, lang, onBack }: LegalViewProps) {
 
       {/* Decorative footer certification stamp */}
       <div className="flex flex-col items-center justify-center pt-8 border-t border-white/10 space-y-3">
-        <div className="inline-flex items-center space-x-2 text-gold-400 text-[10px] font-mono uppercase tracking-widest bg-gold-400/5 px-4 py-2 border border-gold-400/20 rounded-full">
+        <div className="inline-flex items-center space-x-2 text-white/70 text-[10px] font-mono uppercase tracking-widest bg-white/5 px-4 py-2 border border-white/10 rounded-full">
           <CheckCircle size={12} />
           <span>{isEs ? 'Estudio Certificado Internacional' : 'International Studio Certified'}</span>
         </div>

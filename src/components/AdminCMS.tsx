@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -9,11 +9,11 @@ import {
   BarChart3, Camera, Calendar, BookOpen, MessageSquare, HelpCircle, 
   Settings, LogOut, Check, X, ShieldAlert, Edit, Edit3, Trash2, Plus, Menu, Save,
   ArrowUpRight, Eye, RefreshCw, Upload, Sliders, FileCode, CheckSquare,
-  User, Mail, ChevronDown, ChevronUp, Phone, Users, FileText, ShoppingBag, Copy, Receipt
+  User, Mail, ChevronDown, ChevronUp, Phone, Users, FileText, ShoppingBag, Copy, Receipt, Bell
 } from 'lucide-react';
 import { 
   Photograph, Service, Testimonial, BlogPost, FAQ, Booking, 
-  Message, SEOMetadata, AnalyticsStats, ActiveLanguage, PhotographerProfile, BookingConfig, EmailConfig,
+  Message, SEOMetadata, AnalyticsStats, ActiveLanguíage, PhotographerProfile, BookingConfig, EmailConfig,
   ClientAccount, ProofPhoto, SessionCategory, PhotographyPackage, Invoice
 } from '../types';
 import { TRANSLATIONS } from '../data/mockData';
@@ -23,6 +23,7 @@ import { supabase, uploadImageBlob, deleteImageByUrl } from '../lib/db';
 import AdminSEOTab from './AdminSEOTab';
 import AdminProfileTab from './AdminProfileTab';
 import AdminPackagesTab from './AdminPackagesTab';
+import AdminRemindersTab from './AdminRemindersTab';
 import ContractView from './ContractView';
 
 function compressImage(file: File, maxSize = 1600, quality = 0.85): Promise<{ blob: Blob; width: number; height: number }> {
@@ -73,7 +74,7 @@ interface AdminCMSProps {
   bookingConfig: BookingConfig;
   emailConfig: EmailConfig;
   stats: AnalyticsStats;
-  lang: ActiveLanguage;
+  lang: ActiveLanguíage;
   onUpdatePhotographs: (photos: Photograph[]) => void;
   onUpdateTestimonials: (testimonials: Testimonial[]) => void;
   onUpdateBlogPosts: (posts: BlogPost[]) => void;
@@ -100,7 +101,7 @@ export default function AdminCMS({
   onUpdatePhotographs, onUpdateTestimonials, onUpdateBlogPosts,
   onUpdateFaqs, onUpdateBookings, onUpdateMessages, onUpdateClientAccounts, onUpdateSeo, onUpdateProfile, onUpdateBookingConfig, onUpdateEmailConfig, sessionCategories, onUpdateSessionCategories, packages, onUpdatePackages, invoices, onUpdateInvoices, onLogout, onBackToSite
 }: AdminCMSProps) {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'photos' | 'testimonials' | 'bookings' | 'invoices' | 'messages' | 'seo' | 'profile' | 'email_settings' | 'clients' | 'packages' | 'session-categories'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'photos' | 'testimonials' | 'bookings' | 'invoices' | 'messages' | 'seo' | 'profile' | 'email_settings' | 'clients' | 'packages' | 'session-categories' | 'reminders'>('dashboard');
   const [expandedBookingId, setExpandedBookingId] = useState<string | null>(null);
   const [contractToView, setContractToView] = useState<Booking | null>(null);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -151,10 +152,10 @@ export default function AdminCMS({
   const [replyText, setReplyText] = useState<string>('');
 
   // Simulated notification system
-  const [cmsAlert, setCmsAlert] = useState<string | null>(null);
+  const [cmásAlert, setCmásAlert] = useState<string | null>(null);
   const triggerAlert = (msg: string) => {
-    setCmsAlert(msg);
-    setTimeout(() => setCmsAlert(null), 3000);
+    setCmásAlert(msg);
+    setTimeout(() => setCmásAlert(null), 3000);
   };
 
   const resetTestimonialForm = () => {
@@ -175,7 +176,7 @@ export default function AdminCMS({
     if (!testimonial.name || !testimonial.comment) return;
     onUpdateTestimonials(editingTestimonialId ? testimonials.map(item => item.id === editingTestimonialId ? testimonial : item) : [testimonial, ...testimonials]);
     resetTestimonialForm();
-    triggerAlert(t('Testimonio guardado', 'Testimonial saved', 'Depoimento guardado'));
+    triggerAlert(t('Testimonio guíardado', 'Testimonial saved', 'Depoimento guíardado'));
   };
 
   // Real-time booking notification state
@@ -199,9 +200,9 @@ export default function AdminCMS({
             seenBookingIds.current.add(id);
             setUnseenBookings(prev => prev + 1);
             const cName = newBooking.clientname || 'Alguien';
-            triggerAlert(`📅 ¡Nueva reserva de ${cName}!`);
+            triggerAlert(`📍 Nueva reserva de ${cName}!`);
             if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-              new Notification('Nueva Reserva - Aurea Studio', {
+              new Notification('Nueva Reserva - Aorea Studio', {
                 body: `${cName} ha solicitado una sesión. Revisa la cola de reservas.`,
                 icon: '/favicon.svg',
               });
@@ -231,9 +232,9 @@ export default function AdminCMS({
             seenMessageIds.current.add(id);
             setUnseenMessages(prev => prev + 1);
             const cName = newMsg.name || 'Alguien';
-            triggerAlert(`✉️ ¡Nuevo mensaje de ${cName}!`);
+            triggerAlert(`✉️ Nuevo mensaje de ${cName}!`);
             if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-              new Notification('Nuevo Mensaje - Aurea Studio', {
+              new Notification('Nuevo Mensaje - Aorea Studio', {
                 body: `${cName} te ha escrito. Revisa la bandeja de entrada.`,
                 icon: '/favicon.svg',
               });
@@ -545,7 +546,7 @@ export default function AdminCMS({
 
   const handleDeleteClientAccount = (id: string) => {
     if (!onUpdateClientAccounts) return;
-    if (confirm(t('¿Estás seguro de eliminar este cliente y toda su galería?', 'Are you sure you want to delete this client and their entire gallery?'))) {
+    if (confirm(t('Estás seguro de eliminar este cliente y toda su galería?', 'Are you sure you want to delete this client and their entire gallery?'))) {
       onUpdateClientAccounts((clientAccounts || []).filter(c => c.id !== id));
       triggerAlert(t('Cuenta de cliente eliminada', 'Client account deleted'));
     }
@@ -626,19 +627,19 @@ export default function AdminCMS({
   };
 
   return (
-    <div className="min-h-dvh bg-dark-gray rounded-3xl border border-white/10 overflow-hidden grid grid-cols-1 lg:grid-cols-12 text-left shadow-2xl relative">
+    <div className="min-h-dvh bg-dark-gray rounded-3xl border border-white/10 grid grid-cols-1 lg:grid-cols-12 text-left shadow-2xl relative">
       
       {/* Toast Alert */}
       <AnimatePresence>
-        {cmsAlert && (
+        {cmásAlert && (
           <motion.div
-            className="absolute top-6 right-6 glass-premium px-4 py-2.5 rounded-lg border border-gold-400/30 text-gold-200 text-xs font-mono tracking-wider flex items-center space-x-2 shadow-2xl z-55"
+            className="absolute top-6 right-6 glass-premium px-4 py-2.5 rounded-lg border border-white/10 text-white/50 text-xs font-mono tracking-wider flex items-center space-x-2 shadow-2xl z-55"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
           >
-            <div className="w-2 h-2 rounded-full bg-gold-400 animate-ping" />
-            <span>{cmsAlert}</span>
+            <div className="w-2 h-2 rounded-full bg-white/10 animate-ping" />
+            <span>{cmásAlert}</span>
           </motion.div>
         )}
       </AnimatePresence>
@@ -647,15 +648,15 @@ export default function AdminCMS({
       <div className="hidden lg:flex lg:col-span-2 border-r border-white/10 bg-dark-gray p-6 flex-col justify-between">
         <div className="space-y-6">
           <div className="flex items-center space-x-2 px-2">
-            <Settings className="text-gold-400" size={18} />
-            <span className="font-serif text-sm tracking-widest text-gold-50 font-bold">AUREA BACKOFFICE</span>
+            <Settings className="text-white/70" size={18} />
+            <span className="font-serif text-sm tracking-widest text-white/90 font-bold">AUREA BACKOFFICE</span>
           </div>
 
           <div className="space-y-1.5">
             <button
               onClick={() => setActiveTab('dashboard')}
               className={`w-full text-left px-3 py-2 rounded-lg font-mono text-[10px] uppercase tracking-wider transition-all flex items-center space-x-2 ${
-                activeTab === 'dashboard' ? 'bg-gold-500 text-dark font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
+                activeTab === 'dashboard' ? 'bg-white/10 text-white font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
               }`}
             >
               <BarChart3 size={12} />
@@ -665,7 +666,7 @@ export default function AdminCMS({
             <button
               onClick={() => setActiveTab('photos')}
               className={`w-full text-left px-3 py-2 rounded-lg font-mono text-[10px] uppercase tracking-wider transition-all flex items-center space-x-2 ${
-                activeTab === 'photos' ? 'bg-gold-500 text-dark font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
+                activeTab === 'photos' ? 'bg-white/10 text-white font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
               }`}
             >
               <Camera size={12} />
@@ -675,13 +676,13 @@ export default function AdminCMS({
             <button
               onClick={() => { setActiveTab('bookings'); setUnseenBookings(0); }}
               className={`w-full text-left px-3 py-2 rounded-lg font-mono text-[10px] uppercase tracking-wider transition-all flex items-center space-x-2 ${
-                activeTab === 'bookings' ? 'bg-gold-500 text-dark font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
+                activeTab === 'bookings' ? 'bg-white/10 text-white font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
               }`}
             >
               <Calendar size={12} />
               <span className="flex-1">{t('Cola de Reservas', 'Bookings Queue', 'Fila de Reservas')}</span>
               {bookings.filter(b => b.status === 'pending').length > 0 && (
-                <span className="bg-gold-500 text-dark text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
+                <span className="bg-white/10 text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
                   {bookings.filter(b => b.status === 'pending').length}
                 </span>
               )}
@@ -693,9 +694,19 @@ export default function AdminCMS({
             </button>
 
             <button
+              onClick={() => setActiveTab('reminders')}
+              className={`w-full text-left px-3 py-2 rounded-lg font-mono text-[10px] uppercase tracking-wider transition-all flex items-center space-x-2 ${
+                activeTab === 'reminders' ? 'bg-white/10 text-white font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <Bell size={12} />
+              <span>{t('Recordatorios', 'Reminders', 'Lembretes')}</span>
+            </button>
+
+            <button
               onClick={() => setActiveTab('testimonials')}
               className={`w-full text-left px-3 py-2 rounded-lg font-mono text-[10px] uppercase tracking-wider transition-all flex items-center space-x-2 ${
-                activeTab === 'testimonials' ? 'bg-gold-500 text-dark font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
+                activeTab === 'testimonials' ? 'bg-white/10 text-white font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
               }`}
             >
               <MessageSquare size={12} />
@@ -705,7 +716,7 @@ export default function AdminCMS({
             <button
               onClick={() => setActiveTab('packages')}
               className={`w-full text-left px-3 py-2 rounded-lg font-mono text-[10px] uppercase tracking-wider transition-all flex items-center space-x-2 ${
-                activeTab === 'packages' ? 'bg-gold-500 text-dark font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
+                activeTab === 'packages' ? 'bg-white/10 text-white font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
               }`}
             >
               <ShoppingBag size={12} />
@@ -715,7 +726,7 @@ export default function AdminCMS({
             <button
               onClick={() => setActiveTab('invoices')}
               className={`w-full text-left px-3 py-2 rounded-lg font-mono text-[10px] uppercase tracking-wider transition-all flex items-center space-x-2 ${
-                activeTab === 'invoices' ? 'bg-gold-500 text-dark font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
+                activeTab === 'invoices' ? 'bg-white/10 text-white font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
               }`}
             >
               <Receipt size={12} />
@@ -725,7 +736,7 @@ export default function AdminCMS({
             <button
               onClick={() => setActiveTab('session-categories')}
               className={`w-full text-left px-3 py-2 rounded-lg font-mono text-[10px] uppercase tracking-wider transition-all flex items-center space-x-2 ${
-                activeTab === 'session-categories' ? 'bg-gold-500 text-dark font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
+                activeTab === 'session-categories' ? 'bg-white/10 text-white font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
               }`}
             >
               <Sliders size={12} />
@@ -735,13 +746,13 @@ export default function AdminCMS({
             <button
               onClick={() => { setActiveTab('messages'); setUnseenMessages(0); }}
               className={`w-full text-left px-3 py-2 rounded-lg font-mono text-[10px] uppercase tracking-wider transition-all flex items-center space-x-2 ${
-                activeTab === 'messages' ? 'bg-gold-500 text-dark font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
+                activeTab === 'messages' ? 'bg-white/10 text-white font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
               }`}
             >
               <MessageSquare size={12} />
               <span className="flex-1">{t('Bandeja de Entrada', 'Inbox', 'Caixa de Entrada')}</span>
               {messages.filter(m => !m.isRead).length > 0 && (
-                <span className="bg-gold-500 text-dark text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
+                <span className="bg-white/10 text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
                   {messages.filter(m => !m.isRead).length}
                 </span>
               )}
@@ -755,7 +766,7 @@ export default function AdminCMS({
             <button
               onClick={() => setActiveTab('seo')}
               className={`w-full text-left px-3 py-2 rounded-lg font-mono text-[10px] uppercase tracking-wider transition-all flex items-center space-x-2 ${
-                activeTab === 'seo' ? 'bg-gold-500 text-dark font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
+                activeTab === 'seo' ? 'bg-white/10 text-white font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
               }`}
             >
               <FileCode size={12} />
@@ -765,7 +776,7 @@ export default function AdminCMS({
             <button
               onClick={() => setActiveTab('profile')}
               className={`w-full text-left px-3 py-2 rounded-lg font-mono text-[10px] uppercase tracking-wider transition-all flex items-center space-x-2 ${
-                activeTab === 'profile' ? 'bg-gold-500 text-dark font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
+                activeTab === 'profile' ? 'bg-white/10 text-white font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
               }`}
             >
               <User size={12} />
@@ -775,17 +786,17 @@ export default function AdminCMS({
             <button
               onClick={() => setActiveTab('clients')}
               className={`w-full text-left px-3 py-2 rounded-lg font-mono text-[10px] uppercase tracking-wider transition-all flex items-center space-x-2 ${
-                activeTab === 'clients' ? 'bg-gold-500 text-dark font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
+                activeTab === 'clients' ? 'bg-white/10 text-white font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
               }`}
             >
               <Users size={12} />
-              <span>{t('Clientes y Galerías', 'Clients & Galleries', 'Clientes e Galerias')}</span>
+              <span>{t('Clientes y Galerías', 'Clients & Galleries', 'Clientes e Galerías')}</span>
             </button>
 
             <button
               onClick={() => setActiveTab('email_settings')}
               className={`w-full text-left px-3 py-2 rounded-lg font-mono text-[10px] uppercase tracking-wider transition-all flex items-center space-x-2 ${
-                activeTab === 'email_settings' ? 'bg-gold-500 text-dark font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
+                activeTab === 'email_settings' ? 'bg-white/10 text-white font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
               }`}
             >
               <Mail size={12} />
@@ -797,7 +808,7 @@ export default function AdminCMS({
         <div className="space-y-1.5">
           <button
             onClick={onBackToSite}
-            className="w-full text-left px-3 py-2 rounded-lg font-mono text-[10px] uppercase tracking-wider text-white/60 hover:text-gold-400 hover:bg-white/5 transition-all flex items-center space-x-2 cursor-pointer"
+            className="w-full text-left px-3 py-2 rounded-lg font-mono text-[10px] uppercase tracking-wider text-white/60 hover:text-white hover:bg-white/5 transition-all flex items-center space-x-2 cursor-pointer"
           >
             <Eye size={12} />
             <span>{t('Ver Sitio', 'View Site', 'Ver Site')}</span>
@@ -815,14 +826,14 @@ export default function AdminCMS({
       {/* Floating hamburger — mobile only, centered on right edge */}
       <button
         onClick={() => setMobileSidebarOpen(true)}
-        className={`${mobileSidebarOpen ? 'hidden' : 'flex'} lg:hidden fixed right-4 top-1/2 -translate-y-1/2 z-30 bg-dark-gray/90 border border-border/60 rounded-full p-3 text-white hover:text-gold-400 hover:border-gold-400/50 transition-all shadow-lg cursor-pointer backdrop-blur-sm`}
+        className={`${mobileSidebarOpen ? 'hidden' : 'flex'} lg:hidden fixed right-4 top-1/2 -translate-y-1/2 z-30 bg-dark-gray/90 border border-border/60 rounded-full p-3 text-white hover:text-white hover:border-white/30 transition-all shadow-lg cursor-pointer backdrop-blur-sm`}
         aria-label="Open menu"
       >
         <Menu size={20} />
       </button>
 
       {/* MAIN ADMIN WORKSPACE WORK AREA (Cols 10) */}
-      <div className="lg:col-span-10 p-4 sm:p-5 lg:p-6 lg:overflow-y-auto lg:max-h-[85vh]">
+      <div className="lg:col-span-10 p-4 sm:p-5 lg:p-6 overflow-y-auto lg:max-h-[85vh]">
 
         {/* DASHBOARD TAB */}
         {activeTab === 'dashboard' && (
@@ -830,7 +841,7 @@ export default function AdminCMS({
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <div>
                 <h2 className="font-serif text-2xl text-white">{t('Análisis Interactivo', 'Interactive Analytics', 'Análise Interativa')}</h2>
-                <p className="text-xs text-white/50">{t('Estadísticas integradas de visitas, reservas e ingresos estimados.', 'Bespoke integration of total visits, conversion rates, and estimated revenue.', 'Estatísticas integradas de visitas, reservas e receita estimada.')}</p>
+                <p className="text-xs text-white/50">{t('Estadísticas integradas de visitas, reservas e ingresos estimados.', 'Bespoke integration of total visits, conversion rates, and estimated revenue.', 'Estatásticas integradas de visitas, reservas e receita estimada.')}</p>
               </div>
               <span className="text-[10px] font-mono bg-emerald-950/40 border border-emerald-500/30 text-emerald-400 px-2 py-1 rounded">
                 {t('MONITOR DE PRODUCCIÓN EN VIVO', 'LIVE PRODUCTION MONITOR', 'MONITOR DE PRODUÇÃO EM TEMPO REAL')}
@@ -839,16 +850,16 @@ export default function AdminCMS({
 
             {/* Micro Stats Grid */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-charcoal border border-white/10 rounded-xl p-4 flex flex-col text-left">
+              <div className="bg-charcoal border border-white/10 rounded-lg p-4 flex flex-col text-left">
                 <span className="text-[9px] font-mono text-white/40 uppercase">{t('Ingresos Estimados', 'Estimated Revenue', 'Receita Estimada')}</span>
-                <span className="text-2xl font-mono font-bold text-gold-400 mt-1">${stats.totalRevenue.toLocaleString()}</span>
+                <span className="text-2xl font-mono font-bold text-white/70 mt-1">${stats.totalRevenue.toLocaleString()}</span>
                 <span className="text-[10px] font-mono text-emerald-400 mt-2 flex items-center space-x-1">
                   <ArrowUpRight size={10} />
                   <span>{t('+12.4% vs mes anterior', '+12.4% vs Last month', '+12.4% vs mês anterior')}</span>
                 </span>
               </div>
 
-              <div className="bg-charcoal border border-white/10 rounded-xl p-4 flex flex-col text-left">
+              <div className="bg-charcoal border border-white/10 rounded-lg p-4 flex flex-col text-left">
                 <span className="text-[9px] font-mono text-white/40 uppercase">{t('Tasa de Conversión', 'Conversion Rate', 'Taxa de Conversão')}</span>
                 <span className="text-2xl font-mono font-bold text-white mt-1">{stats.bookingConversionRate}%</span>
                 <span className="text-[10px] font-mono text-emerald-400 mt-2 flex items-center space-x-1">
@@ -857,13 +868,13 @@ export default function AdminCMS({
                 </span>
               </div>
 
-              <div className="bg-charcoal border border-white/10 rounded-xl p-4 flex flex-col text-left">
+              <div className="bg-charcoal border border-white/10 rounded-lg p-4 flex flex-col text-left">
                 <span className="text-[9px] font-mono text-white/40 uppercase">{t('Sesiones Totales', 'Total Sessions', 'Sessões Totais')}</span>
                 <span className="text-2xl font-mono font-bold text-white mt-1">{stats.sessionsCount}</span>
-                <span className="text-[10px] font-mono text-gold-300 mt-2">{t('Capacidad alcanzada para Q3', 'Cap reached for Q3', 'Capacidade máxima atingida para Q3')}</span>
+                <span className="text-[10px] font-mono text-white/60 mt-2">{t('Capacidad alcanzada para Q3', 'Cap reached for Q3', 'Capacidade máxima atingida para Q3')}</span>
               </div>
 
-              <div className="bg-charcoal border border-white/10 rounded-xl p-4 flex flex-col text-left">
+              <div className="bg-charcoal border border-white/10 rounded-lg p-4 flex flex-col text-left">
                 <span className="text-[9px] font-mono text-white/40 uppercase">{t('Visitantes Únicos', 'Page Visitors', 'Visitantes Únicos')}</span>
                 <span className="text-2xl font-mono font-bold text-white mt-1">{stats.totalVisits.toLocaleString()}</span>
                 <span className="text-[10px] font-mono text-emerald-400 mt-2 flex items-center space-x-1">
@@ -876,7 +887,7 @@ export default function AdminCMS({
             {/* Bespoke Custom SVG Visual Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Monthly Revenue Chart */}
-              <div className="bg-charcoal border border-white/10 rounded-2xl p-4">
+              <div className="bg-charcoal border border-white/10 rounded-lg p-4">
                 <h4 className="text-xs font-mono tracking-widest text-white/60 uppercase mb-4 text-left">Revenue Progression (Last 6 Months)</h4>
                 <div className="h-44 w-full flex items-end justify-between px-4 pb-2 relative">
                   {/* Grid Lines */}
@@ -890,11 +901,11 @@ export default function AdminCMS({
                     const pct = (item.value / 35000) * 100;
                     return (
                       <div key={index} className="flex-1 flex flex-col items-center group relative z-10">
-                        <div className="text-[10px] font-mono text-gold-400 opacity-0 group-hover:opacity-100 transition-opacity mb-1 font-bold">
+                        <div className="text-[10px] font-mono text-white/70 opacity-0 group-hover:opacity-100 transition-opacity mb-1 font-bold">
                           ${item.value / 1000}k
                         </div>
                         <div 
-                          className="w-8 bg-gold-500 rounded-t-sm group-hover:bg-gold-400 transition-all shadow-[0_0_8px_rgba(180,142,67,0.3)]"
+                          className="w-8 bg-white/10 rounded-t-sm group-hover:bg-white/15 transition-all shadow-[0_0_8px_rgba(255,255,255,0.08)]"
                           style={{ height: `${pct}%` }}
                         />
                         <span className="text-[9px] font-mono text-white/40 mt-2">{item.month}</span>
@@ -905,7 +916,7 @@ export default function AdminCMS({
               </div>
 
               {/* Visitors Daily Activity Chart */}
-              <div className="bg-charcoal border border-white/10 rounded-2xl p-4">
+              <div className="bg-charcoal border border-white/10 rounded-lg p-4">
                 <h4 className="text-xs font-mono tracking-widest text-white/60 uppercase mb-4 text-left">Traffic Density (Weekly visits)</h4>
                 <div className="h-44 w-full flex items-end justify-between px-4 pb-2 relative">
                   {/* Grid Lines */}
@@ -942,7 +953,7 @@ export default function AdminCMS({
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <div>
                 <h2 className="font-serif text-2xl text-white">{t('Base de Datos de Fotografías', 'Photograph Database', 'Banco de Imagens')}</h2>
-                <p className="text-xs text-white/50">{t('Administra las galerías artísticas, formatos de recorte y etiquetas de las fotografías.', 'Manage fine-art galleries, crop layout formats, and image tags.', 'Gerencie as galerias de arte, formatos de corte e tags de imagem.')}</p>
+                <p className="text-xs text-white/50">{t('Administra las galerías artísticas, formatos de recorte y etiquetas de las fotografías.', 'Manage fine-art galleries, crop layout formats, and image tags.', 'Gerencie as galerías de arte, formatos de corte e tags de imagem.')}</p>
               </div>
             </div>
 
@@ -952,13 +963,13 @@ export default function AdminCMS({
               onDragOver={handleDrag}
               onDragLeave={handleDrag}
               onDrop={handleDrop}
-              className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all ${
+              className={`border-2 border-dashed rounded-lg p-8 text-center transition-all ${
                 dragActive 
-                  ? 'border-gold-400 bg-gold-500/5' 
-                  : 'border-[#D8C0A8] bg-charcoal hover:border-white/20'
+                  ? 'border-white/30 bg-white/5' 
+                  : 'border-stone bg-charcoal hover:border-white/20'
               }`}
             >
-              <Upload size={36} className="text-gold-400/80 mx-auto mb-3" />
+              <Upload size={36} className="text-white/80 mx-auto mb-3" />
               <p className="text-xs font-semibold text-white/95 mb-1">
                 {t('Arrastra y suelta las fotografías originales aquí', 'Drag and Drop RAW photographs here', 'Arraste e solte as fotos originais aqui')}
               </p>
@@ -979,7 +990,7 @@ export default function AdminCMS({
               />
               <label 
                 htmlFor="file-upload"
-                className="px-4 py-2 border border-white/15 hover:border-gold-400/50 hover:text-gold-300 text-white/80 rounded-lg text-[10px] font-mono tracking-widest uppercase transition-all cursor-pointer inline-block"
+                className="px-4 py-2 border border-white/15 hover:border-white/30 hover:text-white text-white/80 rounded-lg text-[10px] font-mono tracking-widest uppercase transition-all cursor-pointer inline-block"
               >
                 {t('Explorar Archivos Locales', 'Browse Master Files', 'Procurar Arquivos Locais')}
               </label>
@@ -987,9 +998,9 @@ export default function AdminCMS({
 
             {/* EDIT PHOTOGRAPH FORM */}
             {photoEditItem && (
-              <div className="bg-dark border border-gold-400/20 rounded-2xl p-6 space-y-6 animate-fadeIn">
+              <div className="bg-dark border border-white/10 rounded-lg p-6 space-y-6 animate-fadeIn">
                 <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                  <h3 className="font-serif text-lg text-gold-300">
+                  <h3 className="font-serif text-lg text-white/60">
                     {t('Editar Detalles de Fotografía', 'Edit Photograph Details')}
                   </h3>
                   <button
@@ -1004,9 +1015,9 @@ export default function AdminCMS({
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                   {/* Photo Preview Column */}
                   <div className="lg:col-span-4 space-y-4">
-                    <div className="aspect-[3/2] rounded-xl overflow-hidden border border-white/10 relative">
+                    <div className="aspect-[3/2] rounded-lg overflow-hidden border border-white/10 relative">
                        <img src={sanitizeUrl(photoEditItem.url) || undefined} alt="" className="w-full h-full object-cover" />
-                      <span className="absolute bottom-2 left-2 bg-overlay/70 border border-white/10 text-[9px] font-mono text-gold-400 px-2 py-0.5 rounded uppercase">
+                      <span className="absolute bottom-2 left-2 bg-overlay/70 border border-white/10 text-[9px] font-mono text-white/70 px-2 py-0.5 rounded uppercase">
                         {photoEditItem.category}
                       </span>
                     </div>
@@ -1033,7 +1044,7 @@ export default function AdminCMS({
                           required
                           value={photoEditItem.title}
                           onChange={(e) => setPhotoEditItem({ ...photoEditItem, title: e.target.value })}
-                          className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white focus:outline-none focus:border-gold-400"
+                          className="w-full bg-charcoal border border-stone rounded p-2.5 text-xs text-white focus:outline-none focus:border-white/30"
                         />
                       </div>
 
@@ -1042,7 +1053,7 @@ export default function AdminCMS({
                         <select
                           value={photoEditItem.category}
                           onChange={(e) => setPhotoEditItem({ ...photoEditItem, category: e.target.value })}
-                          className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white focus:outline-none focus:border-gold-400"
+                          className="w-full bg-charcoal border border-stone rounded p-2.5 text-xs text-white focus:outline-none focus:border-white/30"
                         >
                           <option value="retrato">Retrato / Portrait</option>
                           <option value="boda">Boda / Wedding</option>
@@ -1074,7 +1085,7 @@ export default function AdminCMS({
                           ...photoEditItem, 
                           exif: { ...photoEditItem.exif, location: e.target.value } 
                         })}
-                        className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white focus:outline-none focus:border-gold-400"
+                        className="w-full bg-charcoal border border-stone rounded p-2.5 text-xs text-white focus:outline-none focus:border-white/30"
                       />
                     </div>
 
@@ -1085,7 +1096,7 @@ export default function AdminCMS({
                         placeholder="Escribe una breve descripción artística de la captura..."
                         value={photoEditItem.description || ''}
                         onChange={(e) => setPhotoEditItem({ ...photoEditItem, description: e.target.value })}
-                        className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white focus:outline-none focus:border-gold-400 font-sans resize-none"
+                        className="w-full bg-charcoal border border-stone rounded p-2.5 text-xs text-white focus:outline-none focus:border-white/30 font-sans resize-none"
                       />
                     </div>
 
@@ -1100,9 +1111,9 @@ export default function AdminCMS({
                           const updated = photographs.map(p => p.id === photoEditItem.id ? photoEditItem : p);
                           onUpdatePhotographs(updated);
                           setPhotoEditItem(null);
-                          triggerAlert(t('✓ Detalles de fotografía guardados', '✓ Photo details saved successfully'));
+                          triggerAlert(t('✓ Detalles de fotografía guíardados', '✓ Photo details saved successfully'));
                         }}
-                        className="py-2 px-5 bg-gold-500 text-dark hover:bg-gold-400 rounded-lg text-[10px] font-mono tracking-widest uppercase font-bold flex items-center space-x-1 cursor-pointer"
+                        className="py-2 px-5 bg-white/10 text-white hover:bg-white/15 border border-white/10 rounded-lg text-[10px] font-mono tracking-widest uppercase font-bold flex items-center space-x-1 cursor-pointer"
                       >
                         <Check size={12} />
                         <span>{t('Guardar Cambios', 'Save Changes')}</span>
@@ -1123,10 +1134,10 @@ export default function AdminCMS({
             {/* Photo List Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {photographs.map(photo => (
-                <div key={photo.id} className="bg-charcoal border border-white/10 rounded-xl overflow-hidden flex flex-col justify-between animate-fadeIn">
+                <div key={photo.id} className="bg-charcoal border border-white/10 rounded-lg overflow-hidden flex flex-col justify-between animate-fadeIn">
                   <div className="relative aspect-[3/2] overflow-hidden">
                      <img src={sanitizeUrl(photo.url) || undefined} alt="" className="w-full h-full object-cover" />
-                    <span className="absolute top-2 left-2 bg-dark/75 border border-white/10 px-1.5 py-0.5 text-[11px] font-mono text-gold-400 rounded uppercase tracking-wider">
+                    <span className="absolute top-2 left-2 bg-dark/75 border border-white/10 px-1.5 py-0.5 text-[11px] font-mono text-white/70 rounded uppercase tracking-wider">
                       {photo.category}
                     </span>
                   </div>
@@ -1135,7 +1146,7 @@ export default function AdminCMS({
                     <h5 className="text-xs font-semibold text-white truncate">{photo.title}</h5>
                     <p className="text-[10px] font-mono text-white/40 truncate">{photo.exif.camera}</p>
                     {photo.exif.location && (
-                      <p className="text-[9px] font-mono text-gold-300 truncate">📍 {photo.exif.location}</p>
+                      <p className="text-[9px] font-mono text-white/60 truncate">📍 {photo.exif.location}</p>
                     )}
 
                     <div className="flex items-center justify-between border-t border-white/10 pt-2.5 gap-2">
@@ -1143,7 +1154,7 @@ export default function AdminCMS({
                         onClick={() => handleTogglePhotoFeatured(photo.id)}
                         className={`text-[9px] font-mono px-2 py-0.5 rounded transition-all shrink-0 ${
                           photo.isFeatured 
-                            ? 'bg-gold-500 text-dark font-bold' 
+                            ? 'bg-white/10 text-white font-bold' 
                             : 'bg-white/5 text-white/50 hover:bg-white/10'
                         }`}
                       >
@@ -1153,7 +1164,7 @@ export default function AdminCMS({
                       <div className="flex items-center space-x-1.5">
                         <button
                           onClick={() => setPhotoEditItem({ ...photo })}
-                          className="text-white/40 hover:text-gold-400 p-1"
+                          className="text-white/40 hover:text-white p-1"
                           title="Edit Photograph"
                         >
                           <Edit size={12} />
@@ -1179,36 +1190,36 @@ export default function AdminCMS({
           <div className="space-y-8 max-w-5xl">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/10 pb-6">
               <div>
-                <h2 className="font-serif text-3xl text-gold-50">{t('Testimonios de Clientes', 'Client Testimonials', 'Depoimentos de Clientes')}</h2>
+                <h2 className="font-serif text-3xl text-white/90">{t('Testimonios de Clientes', 'Client Testimonials', 'Depoimentos de Clientes')}</h2>
                 <p className="text-xs text-white/45 mt-2">{t('Administra las experiencias que aparecen en tu sitio.', 'Manage the experiences shown on your site.', 'Administre as experiências exibidas no site.')}</p>
               </div>
-              <button onClick={() => { resetTestimonialForm(); setShowTestimonialForm(true); }} className="px-4 py-2.5 bg-gold-500 hover:bg-gold-400 text-dark rounded-lg font-mono text-[10px] uppercase tracking-wider font-bold flex items-center gap-2 transition-colors">
+              <button onClick={() => { resetTestimonialForm(); setShowTestimonialForm(true); }} className="px-4 py-2.5 bg-white/10 hover:bg-white/15 text-white border border-white/10 rounded-lg font-mono text-[10px] uppercase tracking-wider font-bold flex items-center gap-2 transition-colors">
                 <Plus size={13} /> {t('Nuevo testimonio', 'New testimonial', 'Novo depoimento')}
               </button>
             </div>
 
             {showTestimonialForm && (
-              <div className="bg-dark-gray border border-gold-500/25 rounded-2xl p-5 md:p-7 space-y-5">
+              <div className="bg-dark-gray border border-white/10 rounded-lg p-5 md:p-7 space-y-5">
                 <div className="flex items-center justify-between"><h3 className="font-serif text-xl text-white">{editingTestimonialId ? t('Editar testimonio', 'Edit testimonial', 'Editar depoimento') : t('Nuevo testimonio', 'New testimonial', 'Novo depoimento')}</h3><button onClick={resetTestimonialForm} className="text-white/40 hover:text-white"><X size={17} /></button></div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <label className="space-y-2"><span className="block text-[10px] uppercase tracking-wider text-white/50">{t('Nombre', 'Name', 'Nome')}</span><input value={testimonialForm.name} onChange={event => setTestimonialForm({ ...testimonialForm, name: event.target.value })} className="w-full bg-dark border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-gold-400/60" placeholder="Ana García" /></label>
-                  <label className="space-y-2"><span className="block text-[10px] uppercase tracking-wider text-white/50">{t('Tipo de sesión / Rol', 'Session type / Role', 'Tipo de sessão / Função')}</span><input value={testimonialForm.role} onChange={event => setTestimonialForm({ ...testimonialForm, role: event.target.value })} className="w-full bg-dark border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-gold-400/60" placeholder="Boda - Madrid" /></label>
-                  <label className="space-y-2"><span className="block text-[10px] uppercase tracking-wider text-white/50">{t('Valoración', 'Rating', 'Avaliação')}</span><select value={testimonialForm.rating} onChange={event => setTestimonialForm({ ...testimonialForm, rating: Number(event.target.value) })} className="w-full bg-dark border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-gold-400/60">{[5, 4, 3, 2, 1].map(rating => <option key={rating} value={rating}>{rating} / 5</option>)}</select></label>
-                  <label className="space-y-2"><span className="block text-[10px] uppercase tracking-wider text-white/50">{t('URL de foto', 'Photo URL', 'URL da foto')}</span><input value={testimonialForm.image} onChange={event => setTestimonialForm({ ...testimonialForm, image: event.target.value })} className="w-full bg-dark border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-gold-400/60" placeholder="https://..." /></label>
+                  <label className="space-y-2"><span className="block text-[10px] uppercase tracking-wider text-white/50">{t('Nombre', 'Name', 'Nome')}</span><input value={testimonialForm.name} onChange={event => setTestimonialForm({ ...testimonialForm, name: event.target.value })} className="w-full bg-dark border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-white/30" placeholder="Ana García" /></label>
+                  <label className="space-y-2"><span className="block text-[10px] uppercase tracking-wider text-white/50">{t('Tipo de sesión / Rol', 'Session type / Role', 'Tipo de sessão / Função')}</span><input value={testimonialForm.role} onChange={event => setTestimonialForm({ ...testimonialForm, role: event.target.value })} className="w-full bg-dark border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-white/30" placeholder="Boda - Madrid" /></label>
+                  <label className="space-y-2"><span className="block text-[10px] uppercase tracking-wider text-white/50">{t('Valoración', 'Rating', 'Avaliação')}</span><select value={testimonialForm.rating} onChange={event => setTestimonialForm({ ...testimonialForm, rating: Number(event.target.value) })} className="w-full bg-dark border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-white/30">{[5, 4, 3, 2, 1].map(rating => <option key={rating} value={rating}>{rating} / 5</option>)}</select></label>
+                  <label className="space-y-2"><span className="block text-[10px] uppercase tracking-wider text-white/50">{t('URL de foto', 'Photo URL', 'URL da foto')}</span><input value={testimonialForm.image} onChange={event => setTestimonialForm({ ...testimonialForm, image: event.target.value })} className="w-full bg-dark border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-white/30" placeholder="https://..." /></label>
                 </div>
-                <label className="space-y-2 block"><span className="block text-[10px] uppercase tracking-wider text-white/50">{t('Comentario', 'Comment', 'Comentário')}</span><textarea rows={4} value={testimonialForm.comment} onChange={event => setTestimonialForm({ ...testimonialForm, comment: event.target.value })} className="w-full bg-dark border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-gold-400/60 resize-y" placeholder={t('Escribe la experiencia del cliente...', 'Write the client experience...', 'Escreva a experiência do cliente...')} /></label>
-                <div className="flex justify-end gap-3"><button onClick={resetTestimonialForm} className="px-4 py-2 text-white/60 hover:text-white font-mono text-[10px] uppercase tracking-wider">{t('Cancelar', 'Cancel', 'Cancelar')}</button><button onClick={saveTestimonial} disabled={!testimonialForm.name.trim() || !testimonialForm.comment.trim()} className="px-5 py-2.5 bg-gold-500 disabled:opacity-40 hover:bg-gold-400 text-dark rounded-lg font-mono text-[10px] uppercase tracking-wider font-bold flex items-center gap-2"><Save size={13} /> {t('Guardar', 'Save', 'Guardar')}</button></div>
+                <label className="space-y-2 block"><span className="block text-[10px] uppercase tracking-wider text-white/50">{t('Comentario', 'Comment', 'Comentário')}</span><textarea rows={4} value={testimonialForm.comment} onChange={event => setTestimonialForm({ ...testimonialForm, comment: event.target.value })} className="w-full bg-dark border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-white/30 resize-y" placeholder={t('Escribe la experiencia del cliente...', 'Write the client experience...', 'Escreva a experiência do cliente...')} /></label>
+                <div className="flex justify-end gap-3"><button onClick={resetTestimonialForm} className="px-4 py-2 text-white/60 hover:text-white font-mono text-[10px] uppercase tracking-wider">{t('Cancelar', 'Cancel', 'Cancelar')}</button><button onClick={saveTestimonial} disabled={!testimonialForm.name.trim() || !testimonialForm.comment.trim()} className="px-5 py-2.5 bg-white/10 disabled:opacity-40 hover:bg-white/15 text-white rounded-lg font-mono text-[10px] uppercase tracking-wider font-bold flex items-center gap-2"><Save size={13} /> {t('Guardar', 'Save', 'Guardar')}</button></div>
               </div>
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {testimonials.map(testimonial => (
-                <article key={testimonial.id} className="bg-dark-gray/70 border border-white/10 rounded-xl p-5 flex gap-4">
+                <article key={testimonial.id} className="bg-dark-gray/70 border border-white/10 rounded-lg p-5 flex gap-4">
                   <img src={sanitizeUrl(testimonial.image) || undefined} alt={testimonial.name} className="w-12 h-12 rounded-full object-cover grayscale shrink-0" />
                   <div className="min-w-0 flex-1">
-                    <div className="flex justify-between gap-3"><div><h3 className="text-sm text-white">{testimonial.name}</h3><p className="text-[9px] text-white/35 uppercase tracking-wider mt-1">{testimonial.role}</p></div><div className="text-right"><div className="flex gap-0.5 text-gold-400 justify-end">{Array.from({ length: testimonial.rating }).map((_, index) => <span key={index}>★</span>)}</div>{testimonial.approved === false && <span className="text-[11px] font-mono uppercase tracking-wider text-amber-400">{t('Pendiente', 'Pending', 'Pendente')}</span>}</div></div>
-                    <p className="text-xs text-white/55 leading-relaxed mt-4">“{testimonial.comment}”</p>
-                    <div className="flex gap-3 mt-4"><button onClick={() => { setEditingTestimonialId(testimonial.id); setTestimonialForm({ name: testimonial.name, role: testimonial.role, comment: testimonial.comment, rating: testimonial.rating, image: testimonial.image }); setShowTestimonialForm(true); }} className="text-[10px] text-gold-400 hover:text-gold-300 flex items-center gap-1"><Edit3 size={12} /> {t('Editar', 'Edit', 'Editar')}</button>{testimonial.approved === false && <button onClick={() => onUpdateTestimonials(testimonials.map(item => item.id === testimonial.id ? { ...item, approved: true } : item))} className="text-[10px] text-emerald-400 hover:text-emerald-300 flex items-center gap-1"><Check size={12} /> {t('Aprobar', 'Approve', 'Aprovar')}</button>}<button onClick={() => { if (window.confirm(t('¿Eliminar este testimonio?', 'Delete this testimonial?', 'Excluir este depoimento?'))) onUpdateTestimonials(testimonials.filter(item => item.id !== testimonial.id)); }} className="text-[10px] text-red-400 hover:text-red-300 flex items-center gap-1"><Trash2 size={12} /> {t('Eliminar', 'Delete', 'Excluir')}</button></div>
+                    <div className="flex justify-between gap-3"><div><h3 className="text-sm text-white">{testimonial.name}</h3><p className="text-[9px] text-white/35 uppercase tracking-wider mt-1">{testimonial.role}</p></div><div className="text-right"><div className="flex gap-0.5 text-white/70 justify-end">{Array.from({ length: testimonial.rating }).map((_, index) => <span key={index}>★</span>)}</div>{testimonial.approved === false && <span className="text-[11px] font-mono uppercase tracking-wider text-amber-400">{t('Pendiente', 'Pending', 'Pendente')}</span>}</div></div>
+                    <p className="text-xs text-white/55 leading-relaxed mt-4">✓{testimonial.comment}❞</p>
+                    <div className="flex gap-3 mt-4"><button onClick={() => { setEditingTestimonialId(testimonial.id); setTestimonialForm({ name: testimonial.name, role: testimonial.role, comment: testimonial.comment, rating: testimonial.rating, image: testimonial.image }); setShowTestimonialForm(true); }} className="text-[10px] text-white/70 hover:text-white flex items-center gap-1"><Edit3 size={12} /> {t('Editar', 'Edit', 'Editar')}</button>{testimonial.approved === false && <button onClick={() => onUpdateTestimonials(testimonials.map(item => item.id === testimonial.id ? { ...item, approved: true } : item))} className="text-[10px] text-emerald-400 hover:text-emerald-300 flex items-center gap-1"><Check size={12} /> {t('Aprobar', 'Approve', 'Aprovar')}</button>}<button onClick={() => { if (window.confirm(t('Eliminar este testimonio?', 'Delete this testimonial?', 'Excluir este depoimento?'))) onUpdateTestimonials(testimonials.filter(item => item.id !== testimonial.id)); }} className="text-[10px] text-red-400 hover:text-red-300 flex items-center gap-1"><Trash2 size={12} /> {t('Eliminar', 'Delete', 'Excluir')}</button></div>
                   </div>
                 </article>
               ))}
@@ -1226,7 +1237,7 @@ export default function AdminCMS({
             </div>
 
             {/* Desktop table */}
-            <div className="hidden md:block border border-white/10 rounded-2xl overflow-hidden bg-charcoal">
+            <div className="hidden md:block border border-white/10 rounded-lg overflow-hidden bg-charcoal">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
@@ -1245,15 +1256,15 @@ export default function AdminCMS({
                       return (
                         <React.Fragment key={b.id}>
                           <tr 
-                            className={`hover:bg-white/5 transition-colors cursor-pointer ${!b.isRead ? 'bg-gold-500/5' : ''}`}
+                            className={`hover:bg-white/5 transition-colors cursor-pointer ${!b.isRead ? 'bg-white/5' : ''}`}
                             onClick={() => { if (!b.isRead) handleToggleBookingRead(b.id); setExpandedBookingId(isExpanded ? null : b.id); }}
                           >
                             <td className="p-4">
                               <div className="flex items-center space-x-2">
                                 <span className="text-white/40 hover:text-white transition-colors mr-1 shrink-0">
-                                  {isExpanded ? <ChevronUp size={14} className="text-gold-400" /> : <ChevronDown size={14} />}
+                                  {isExpanded ? <ChevronUp size={14} className="text-white/70" /> : <ChevronDown size={14} />}
                                 </span>
-                                {!b.isRead && <span className="w-1.5 h-1.5 rounded-full bg-gold-400 animate-pulse shrink-0" />}
+                                {!b.isRead && <span className="w-1.5 h-1.5 rounded-full bg-white/10 animate-pulse shrink-0" />}
                                 <div>
                                   <div className="font-semibold text-white/90">{b.clientName}</div>
                                   <div className="text-[10px] text-white/40 font-mono mt-0.5">{b.clientEmail}</div>
@@ -1269,13 +1280,13 @@ export default function AdminCMS({
                                 {services.find(s=>s.id === b.serviceId)?.title || 'Custom Session'}
                               </span>
                             </td>
-                            <td className="p-4 font-semibold text-gold-300 font-mono">${b.amount || 1800}</td>
+                            <td className="p-4 font-semibold text-white/60 font-mono">${b.amount || 1800}</td>
                             <td className="p-4">
                               <span className={`px-2 py-0.5 rounded text-[9px] font-mono font-semibold uppercase ${
                                 b.status === 'accepted' 
                                   ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-500/20' 
                                   : b.status === 'pending'
-                                  ? 'bg-gold-950/40 text-gold-400 border border-gold-400/20'
+                                  ? 'bg-gold-950/40 text-white/70 border border-white/10'
                                   : 'bg-red-950/40 text-red-400 border border-red-500/20'
                               }`}>
                                 {b.status}
@@ -1325,49 +1336,49 @@ export default function AdminCMS({
                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     {/* Contact and Core Session Data */}
                                     <div className="space-y-4">
-                                      <h4 className="text-[10px] font-mono uppercase tracking-widest text-gold-400 font-semibold border-b border-white/10 pb-2">
+                                      <h4 className="text-[10px] font-mono uppercase tracking-widest text-white/70 font-semibold border-b border-white/10 pb-2">
                                         {t('Detalles del Cliente y Sesión', 'Client & Session Details', 'Detalhes do Cliente e Sessão')}
                                       </h4>
                                       <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-xs">
                                         <div className="space-y-0.5">
                                           <span className="text-white/40 block text-[9px] uppercase tracking-wider">{t('Nombre Completo:', 'Full Name:', 'Nome Completo:')}</span>
                                           <span className="text-white font-medium flex items-center space-x-1.5">
-                                            <User size={12} className="text-gold-400/80 shrink-0" />
+                                            <User size={12} className="text-white/80 shrink-0" />
                                             <span>{b.clientName}</span>
                                           </span>
                                         </div>
                                         <div className="space-y-0.5">
                                           <span className="text-white/40 block text-[9px] uppercase tracking-wider">{t('Correo Electrónico:', 'Email Address:', 'E-mail:')}</span>
                                           <span className="text-white font-medium flex items-center space-x-1.5 break-all">
-                                            <Mail size={12} className="text-gold-400/80 shrink-0" />
+                                            <Mail size={12} className="text-white/80 shrink-0" />
                                             <span>{b.clientEmail}</span>
                                           </span>
                                         </div>
                                         <div className="space-y-0.5">
                                           <span className="text-white/40 block text-[9px] uppercase tracking-wider">{t('Teléfono / WhatsApp:', 'Phone / WhatsApp:', 'Telefone / WhatsApp:')}</span>
                                           <span className="text-white font-medium flex items-center space-x-1.5">
-                                            <Phone size={12} className="text-gold-400/80 shrink-0" />
+                                            <Phone size={12} className="text-white/80 shrink-0" />
                                             <span>{b.clientPhone || t('No proporcionado', 'Not provided', 'Não fornecido')}</span>
                                           </span>
                                         </div>
                                         <div className="space-y-0.5">
                                           <span className="text-white/40 block text-[9px] uppercase tracking-wider">{t('Personas:', 'People Count:', 'Pessoas:')}</span>
                                           <span className="text-white font-medium flex items-center space-x-1.5">
-                                            <Users size={12} className="text-gold-400/80 shrink-0" />
+                                            <Users size={12} className="text-white/80 shrink-0" />
                                             <span>{b.peopleCount || 1} {b.peopleCount === 1 ? t('persona', 'person', 'pessoa') : t('personas', 'people', 'pessoas')}</span>
                                           </span>
                                         </div>
                                         <div className="space-y-0.5">
                                           <span className="text-white/40 block text-[9px] uppercase tracking-wider">{t('Fecha Programada:', 'Scheduled Date:', 'Data Agendada:')}</span>
                                           <span className="text-white font-medium flex items-center space-x-1.5">
-                                            <Calendar size={12} className="text-gold-400/80 shrink-0" />
+                                            <Calendar size={12} className="text-white/80 shrink-0" />
                                             <span className="font-mono">{b.date}</span>
                                           </span>
                                         </div>
                                         <div className="space-y-0.5">
                                           <span className="text-white/40 block text-[9px] uppercase tracking-wider">{t('Horario Preferido:', 'Preferred Time:', 'Horário Preferido:')}</span>
                                           <span className="text-white font-medium flex items-center space-x-1.5">
-                                            <Sliders size={12} className="text-gold-400/80 shrink-0" />
+                                            <Sliders size={12} className="text-white/80 shrink-0" />
                                             <span>{b.timeSlot}</span>
                                           </span>
                                         </div>
@@ -1376,7 +1387,7 @@ export default function AdminCMS({
                                       <div className="pt-2 border-t border-white/10 flex items-center justify-between">
                                         <div>
                                           <span className="text-white/40 block text-[9px] uppercase font-mono tracking-wider">{t('Monto Presupuestado:', 'Estimated Amount:', 'Valor Orçado:')}</span>
-                                          <span className="text-lg font-serif text-gold-300 font-semibold">${b.amount || 1800}</span>
+                                          <span className="text-lg font-serif text-white/60 font-semibold">${b.amount || 1800}</span>
                                         </div>
                                         <div>
                                           <span className="text-white/40 block text-[9px] uppercase font-mono tracking-wider text-right">{t('Estado Solicitud:', 'Request Status:', 'Estado da Solicitação:')}</span>
@@ -1386,11 +1397,11 @@ export default function AdminCMS({
                                     </div>
 
                                     {/* Creative Questionnaire Details */}
-                                    <div className="space-y-3 bg-charcoal border border-white/10 rounded-xl p-4 flex flex-col justify-between">
+                                    <div className="space-y-3 bg-charcoal border border-white/10 rounded-lg p-4 flex flex-col justify-between">
                                       <div className="space-y-2">
                                         <div className="flex items-center space-x-2 border-b border-white/10 pb-2">
-                                          <FileText size={12} className="text-gold-400 shrink-0" />
-                                          <h4 className="text-[10px] font-mono uppercase tracking-widest text-gold-400 font-semibold">
+                                          <FileText size={12} className="text-white/70 shrink-0" />
+                                          <h4 className="text-[10px] font-mono uppercase tracking-widest text-white/70 font-semibold">
                                             {t('Respuestas del Cuestionario Creativo', 'Creative Questionnaire Answers', 'Respostas do Questionário Criativo')}
                                           </h4>
                                         </div>
@@ -1406,17 +1417,17 @@ export default function AdminCMS({
                                       {/* Contract & Pricing section */}
                                       {(b.contractData || b.status === 'accepted') && (
                                         <div className="mt-6 pt-6 border-t border-white/10">
-                                          <h4 className="text-[10px] font-mono uppercase tracking-widest text-gold-400 font-semibold pb-3">
+                                          <h4 className="text-[10px] font-mono uppercase tracking-widest text-white/70 font-semibold pb-3">
                                             {t('Contrato y Montos', 'Contract & Pricing', 'Contrato e Valores')}
                                           </h4>
                                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div className="space-y-3">
                                               <p className="text-[9px] uppercase tracking-wider text-white/40">{t('Montos', 'Amounts', 'Valores')}</p>
                                               <div className="flex gap-2">
-                                                <input type="number" placeholder={t('Depósito', 'Deposit', 'Depósito')} defaultValue={b.depositAmount || 0} onChange={(e) => { const v = parseInt(e.target.value) || 0; onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, depositAmount: v } : book)); }} className="w-full bg-dark/60 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-mono" />
-                                                <input type="number" placeholder={t('Restante', 'Due', 'Restante')} defaultValue={b.amountDue || 0} onChange={(e) => { const v = parseInt(e.target.value) || 0; onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, amountDue: v } : book)); }} className="w-full bg-dark/60 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-mono" />
+                                                <input type="number" placeholder={t('Depósito', 'Deposit', 'Depósito')} defaultValue={b.depositAmount || 0} onChange={(e) => { const v = parseInt(e.target.value) || 0; onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, depositAmount: v } : book)); }} className="w-full bg-dark/60 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-mono" />
+                                                <input type="number" placeholder={t('Restante', 'Due', 'Restante')} defaultValue={b.amountDue || 0} onChange={(e) => { const v = parseInt(e.target.value) || 0; onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, amountDue: v } : book)); }} className="w-full bg-dark/60 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-mono" />
                                               </div>
-                                              <input type="text" placeholder={t('Gastos de Viaje', 'Travel Expenses', 'Despesas de Viagem')} defaultValue={b.travelExpenses || ''} onChange={(e) => { onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, travelExpenses: e.target.value } : book)); }} className="w-full bg-dark/60 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-mono" />
+                                              <input type="text" placeholder={t('Gastos de Viaje', 'Travel Expenses', 'Despesas de Viagem')} defaultValue={b.travelExpenses || ''} onChange={(e) => { onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, travelExpenses: e.target.value } : book)); }} className="w-full bg-dark/60 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-mono" />
                                             </div>
                                             <div className="space-y-2">
                                               <div className="flex gap-2">
@@ -1426,20 +1437,20 @@ export default function AdminCMS({
                                                   </button>
                                                 )}
                                                 {b.contractSignature && !b.contractPhotographerSignature && (
-                                                  <button onClick={() => onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, contractPhotographerSignature: 'Miriam Tellez', contractPhotographerSignedAt: new Date().toISOString() } : book))} className="flex-1 px-3 py-2 bg-gold-500/20 border border-gold-500/30 text-gold-400 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-gold-500/30 transition-all">
+                                                  <button onClick={() => onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, contractPhotographerSignature: 'Miriam Tellez', contractPhotographerSignedAt: new Date().toISOString() } : book))} className="flex-1 px-3 py-2 bg-white/10 border border-white/10 text-white/70 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-white/15 transition-all">
                                                     {t('Firmar como Fotógrafa', 'Sign as Photographer', 'Assinar como Fotógrafa')}
                                                   </button>
                                                 )}
                                               </div>
                                               {b.isPaid && <span className="text-[9px] text-emerald-400 font-mono">{t('✓ Pagado', '✓ Paid', '✓ Pago')}</span>}
                                               {b.contractSignature && <span className="text-[9px] text-green-400 font-mono block">{t('✓ Cliente firmó', '✓ Client signed', '✓ Cliente assinou')}</span>}
-                                              {b.contractPhotographerSignature && <span className="text-[9px] text-gold-400 font-mono block">{t('✓ Fotógrafa firmó', '✓ Photographer signed', '✓ Fotógrafa assinou')}</span>}
+                                              {b.contractPhotographerSignature && <span className="text-[9px] text-white/70 font-mono block">{t('✓ Fotógrafa firmó', '✓ Photographer signed', '✓ Fotógrafa assinou')}</span>}
                                             </div>
                                           </div>
                                            {b.contractData && (
                                             <div className="mt-3">
                                               <details className="text-xs">
-                                                <summary className="text-gold-400/70 cursor-pointer hover:text-gold-400 text-[10px] font-mono">{b.contractType === 'session' ? t('Ver detalles de la sesión', 'View session details', 'Ver detalhes da sessão') : t('Ver datos de la boda', 'View wedding details', 'Ver dados do casamento')}</summary>
+                                                <summary className="text-white/70 cursor-pointer hover:text-white text-[10px] font-mono">{b.contractType === 'session' ? t('Ver detalles de la sesión', 'View session details', 'Ver detalhes da sessão') : t('Ver datos de la boda', 'View wedding details', 'Ver dados do casamento')}</summary>
                                                 <div className="mt-2 text-white/70 space-y-1 text-[11px]">
                                                   {b.contractType === 'session' ? (
                                                     <>
@@ -1464,7 +1475,7 @@ export default function AdminCMS({
                                              <button
                                                type="button"
                                                onClick={() => setContractToView(b)}
-                                               className="mt-4 inline-flex items-center gap-2 px-3 py-2 bg-gold-500/10 border border-gold-500/30 text-gold-300 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-gold-500/20 transition-all"
+                                               className="mt-4 inline-flex items-center gap-2 px-3 py-2 bg-white/5 border border-white/10 text-white/60 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-white/10 transition-all"
                                              >
                                                <FileText size={12} />
                                                {t('Ver / Descargar Contrato', 'View / Download Contract', 'Ver / Baixar Contrato')}
@@ -1491,14 +1502,14 @@ export default function AdminCMS({
               {bookings.map(b => {
                 const isExpanded = expandedBookingId === b.id;
                 return (
-                  <div key={b.id} className={`border rounded-xl bg-dark-gray p-4 space-y-3 ${!b.isRead ? 'border-gold-400/25 bg-gold-500/5' : 'border-white/10'}`}>
+                  <div key={b.id} className={`border rounded-lg bg-dark-gray p-4 space-y-3 ${!b.isRead ? 'border-white/10 bg-white/5' : 'border-white/10'}`}>
                     <div onClick={() => { if (!b.isRead) handleToggleBookingRead(b.id); setExpandedBookingId(isExpanded ? null : b.id); }} className="cursor-pointer">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2 min-w-0 flex-1">
                           <span className="text-white/60 shrink-0">
-                            {isExpanded ? <ChevronUp size={16} className="text-gold-400" /> : <ChevronDown size={16} />}
+                            {isExpanded ? <ChevronUp size={16} className="text-white/70" /> : <ChevronDown size={16} />}
                           </span>
-                          {!b.isRead && <span className="w-1.5 h-1.5 rounded-full bg-gold-400 animate-pulse shrink-0" />}
+                          {!b.isRead && <span className="w-1.5 h-1.5 rounded-full bg-white/10 animate-pulse shrink-0" />}
                           <div className="min-w-0">
                             <div className="font-semibold text-white/90 text-sm truncate">{b.clientName}</div>
                             <div className="text-[10px] text-white/40 font-mono truncate">{b.clientEmail}</div>
@@ -1508,7 +1519,7 @@ export default function AdminCMS({
                           b.status === 'accepted' 
                             ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-500/20' 
                             : b.status === 'pending'
-                            ? 'bg-gold-950/40 text-gold-400 border border-gold-400/20'
+                            ? 'bg-gold-950/40 text-white/70 border border-white/10'
                             : 'bg-red-950/40 text-red-400 border border-red-500/20'
                         }`}>
                           {b.status}
@@ -1525,7 +1536,7 @@ export default function AdminCMS({
                         </div>
                       </div>
                       <div className="flex items-center justify-between mt-2">
-                        <span className="font-semibold text-gold-300 font-mono text-sm">${b.amount || 1800}</span>
+                        <span className="font-semibold text-white/60 font-mono text-sm">${b.amount || 1800}</span>
                       </div>
                     </div>
 
@@ -1584,14 +1595,14 @@ export default function AdminCMS({
                         </div>
                         {(b.contractData || b.status === 'accepted') && (
                           <div className="pt-3 border-t border-white/10 space-y-3">
-                            <h4 className="text-[10px] font-mono uppercase tracking-widest text-gold-400 font-semibold">
+                            <h4 className="text-[10px] font-mono uppercase tracking-widest text-white/70 font-semibold">
                               {t('Contrato y Montos', 'Contract & Pricing', 'Contrato e Valores')}
                             </h4>
                             <div className="flex gap-2">
-                              <input type="number" placeholder={t('Depósito', 'Deposit', 'Depósito')} defaultValue={b.depositAmount || 0} onChange={(e) => { const v = parseInt(e.target.value) || 0; onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, depositAmount: v } : book)); }} className="w-full bg-dark/60 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-mono" />
-                              <input type="number" placeholder={t('Restante', 'Due', 'Restante')} defaultValue={b.amountDue || 0} onChange={(e) => { const v = parseInt(e.target.value) || 0; onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, amountDue: v } : book)); }} className="w-full bg-dark/60 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-mono" />
+                              <input type="number" placeholder={t('Depósito', 'Deposit', 'Depósito')} defaultValue={b.depositAmount || 0} onChange={(e) => { const v = parseInt(e.target.value) || 0; onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, depositAmount: v } : book)); }} className="w-full bg-dark/60 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-mono" />
+                              <input type="number" placeholder={t('Restante', 'Due', 'Restante')} defaultValue={b.amountDue || 0} onChange={(e) => { const v = parseInt(e.target.value) || 0; onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, amountDue: v } : book)); }} className="w-full bg-dark/60 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-mono" />
                             </div>
-                            <input type="text" placeholder={t('Gastos de Viaje', 'Travel Expenses', 'Despesas de Viagem')} defaultValue={b.travelExpenses || ''} onChange={(e) => { onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, travelExpenses: e.target.value } : book)); }} className="w-full bg-dark/60 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-mono" />
+                            <input type="text" placeholder={t('Gastos de Viaje', 'Travel Expenses', 'Despesas de Viagem')} defaultValue={b.travelExpenses || ''} onChange={(e) => { onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, travelExpenses: e.target.value } : book)); }} className="w-full bg-dark/60 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-mono" />
                             <div className="flex gap-2">
                               {!b.isPaid && b.status === 'accepted' && (
                                 <button onClick={() => onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, isPaid: true } : book))} className="flex-1 px-3 py-2 bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-emerald-600/30 transition-all">
@@ -1599,17 +1610,17 @@ export default function AdminCMS({
                                 </button>
                               )}
                               {b.contractSignature && !b.contractPhotographerSignature && (
-                                <button onClick={() => onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, contractPhotographerSignature: 'Miriam Tellez', contractPhotographerSignedAt: new Date().toISOString() } : book))} className="flex-1 px-3 py-2 bg-gold-500/20 border border-gold-500/30 text-gold-400 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-gold-500/30 transition-all">
+                                <button onClick={() => onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, contractPhotographerSignature: 'Miriam Tellez', contractPhotographerSignedAt: new Date().toISOString() } : book))} className="flex-1 px-3 py-2 bg-white/10 border border-white/10 text-white/70 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-white/15 transition-all">
                                   {t('Firmar como Fotógrafa', 'Sign as Photographer', 'Assinar como Fotógrafa')}
                                 </button>
                               )}
                             </div>
                             {b.isPaid && <span className="text-[9px] text-emerald-400 font-mono block">{t('✓ Pagado', '✓ Paid', '✓ Pago')}</span>}
                             {b.contractSignature && <span className="text-[9px] text-green-400 font-mono block">{t('✓ Cliente firmó', '✓ Client signed', '✓ Cliente assinou')}</span>}
-                            {b.contractPhotographerSignature && <span className="text-[9px] text-gold-400 font-mono block">{t('✓ Fotógrafa firmó', '✓ Photographer signed', '✓ Fotógrafa assinou')}</span>}
+                            {b.contractPhotographerSignature && <span className="text-[9px] text-white/70 font-mono block">{t('✓ Fotógrafa firmó', '✓ Photographer signed', '✓ Fotógrafa assinou')}</span>}
                             {b.contractData && (
                               <details className="text-xs">
-                                <summary className="text-gold-400/70 cursor-pointer hover:text-gold-400 text-[10px] font-mono">{b.contractType === 'session' ? t('Ver detalles de la sesión', 'View session details', 'Ver detalhes da sessão') : t('Ver datos de la boda', 'View wedding details', 'Ver dados do casamento')}</summary>
+                                <summary className="text-white/70 cursor-pointer hover:text-white text-[10px] font-mono">{b.contractType === 'session' ? t('Ver detalles de la sesión', 'View session details', 'Ver detalhes da sessão') : t('Ver datos de la boda', 'View wedding details', 'Ver dados do casamento')}</summary>
                                 <div className="mt-2 text-white/70 space-y-1 text-[11px]">
                                   {b.contractType === 'session' ? (
                                     <>
@@ -1654,6 +1665,18 @@ export default function AdminCMS({
           />
         )}
 
+        {/* REMINDERS */}
+        {activeTab === 'reminders' && (
+          <AdminRemindersTab
+            bookings={bookings}
+            emailConfig={emailConfig}
+            profile={profile}
+            onUpdateBookings={onUpdateBookings}
+            triggerAlert={triggerAlert}
+            lang={lang}
+          />
+        )}
+
         {/* INVOICES */}
         {activeTab === 'invoices' && (
           <div className="space-y-6">
@@ -1665,12 +1688,12 @@ export default function AdminCMS({
               {invoices.length === 0 ? (
                 <p className="text-sm text-white/40">{t('No hay facturas disponibles.', 'No invoices available.', 'Nenhuma fatura disponível.')}</p>
               ) : invoices.map(invoice => (
-                <div key={invoice.id} className="bg-dark-gray border border-white/10 rounded-xl p-4 grid grid-cols-1 md:grid-cols-6 gap-3 items-center text-xs">
-                  <div><p className="text-[9px] text-white/40 uppercase">{t('Factura', 'Invoice', 'Fatura')}</p><p className="font-mono text-gold-300">{invoice.invoiceNumber}</p></div>
+                <div key={invoice.id} className="bg-dark-gray border border-white/10 rounded-lg p-4 grid grid-cols-1 md:grid-cols-6 gap-3 items-center text-xs">
+                  <div><p className="text-[9px] text-white/40 uppercase">{t('Factura', 'Invoice', 'Fatura')}</p><p className="font-mono text-white/60">{invoice.invoiceNumber}</p></div>
                   <div><p className="text-[9px] text-white/40 uppercase">{t('Cliente', 'Client', 'Cliente')}</p><p className="text-white/80">{invoice.clientName}</p></div>
                   <div className="md:col-span-2"><p className="text-[9px] text-white/40 uppercase">{t('Paquete', 'Package', 'Pacote')}</p><p className="text-white/70 truncate">{invoice.packageName}</p></div>
-                  <div><p className="text-[9px] text-white/40 uppercase">{t('Total', 'Total', 'Total')}</p><p className="text-gold-300 font-mono">${invoice.total.toLocaleString()}</p></div>
-                  <div className="flex items-center justify-between gap-2"><span className={invoice.status === 'paid' ? 'text-emerald-400' : 'text-gold-300'}>{invoice.status === 'paid' ? t('Pagada', 'Paid', 'Paga') : invoice.status === 'partial' ? t('Parcial', 'Partial', 'Parcial') : t('Pendiente', 'Pending', 'Pendente')}</span><button onClick={() => window.print()} className="text-gold-400 hover:text-gold-300"><FileText size={14} /></button></div>
+                  <div><p className="text-[9px] text-white/40 uppercase">{t('Total', 'Total', 'Total')}</p><p className="text-white/60 font-mono">${invoice.total.toLocaleString()}</p></div>
+                  <div className="flex items-center justify-between gap-2"><span className={invoice.status === 'paid' ? 'text-emerald-400' : 'text-white/60'}>{invoice.status === 'paid' ? t('Pagada', 'Paid', 'Paga') : invoice.status === 'partial' ? t('Parcial', 'Partial', 'Parcial') : t('Pendiente', 'Pending', 'Pendente')}</span><button onClick={() => window.print()} className="text-white/70 hover:text-white"><FileText size={14} /></button></div>
                 </div>
               ))}
             </div>
@@ -1702,10 +1725,10 @@ export default function AdminCMS({
                 <div 
                   key={msg.id} 
                   onClick={() => { if (!msg.isRead) handleToggleMessageRead(msg.id); }}
-                  className={`border rounded-2xl p-5 space-y-3 transition-all text-left relative cursor-pointer ${
+                  className={`border rounded-lg p-5 space-y-3 transition-all text-left relative cursor-pointer ${
                     msg.isRead 
                       ? 'bg-dark-gray border-white/10 opacity-70' 
-                      : 'bg-gold-500/5 border-gold-400/25 shadow-[0_0_10px_rgba(180,142,67,0.05)]'
+                      : 'bg-white/5 border-white/10 shadow-[0_0_10px_rgba(255,255,255,0.03)]'
                   }`}
                 >
                   <div className="flex justify-between items-start">
@@ -1713,7 +1736,7 @@ export default function AdminCMS({
                       <div className="flex items-center space-x-2">
                         <h4 className="text-xs font-semibold text-white/95">{msg.name}</h4>
                         {!msg.isRead && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-gold-400 animate-pulse" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-white/10 animate-pulse" />
                         )}
                       </div>
                       <p className="text-[10px] font-mono text-white/40">{msg.email}</p>
@@ -1722,14 +1745,14 @@ export default function AdminCMS({
                   </div>
 
                   <div className="space-y-1">
-                    <p className="text-xs font-semibold text-gold-300">{msg.subject}</p>
+                    <p className="text-xs font-semibold text-white/60">{msg.subject}</p>
                     <p className="text-xs text-white/70 leading-relaxed font-sans">{msg.message}</p>
                   </div>
 
                   {msg.replyText && (
-                    <div className="bg-dark-gray border border-white/10 rounded-xl p-4 space-y-2 text-left mt-2">
+                    <div className="bg-dark-gray border border-white/10 rounded-lg p-4 space-y-2 text-left mt-2">
                       <div className="flex justify-between items-center border-b border-white/10 pb-1.5">
-                        <span className="text-[9px] font-mono text-gold-400 uppercase tracking-widest font-semibold flex items-center space-x-1">
+                        <span className="text-[9px] font-mono text-white/70 uppercase tracking-widest font-semibold flex items-center space-x-1">
                           <span>✓ Respuesta Enviada (Reply Sent)</span>
                         </span>
                         <span className="text-[9px] font-mono text-white/30">
@@ -1741,18 +1764,18 @@ export default function AdminCMS({
                   )}
 
                   {replyingToId === msg.id && (
-                    <div className="bg-charcoal border border-gold-400/20 rounded-xl p-4 space-y-3 mt-2 text-left">
+                    <div className="bg-charcoal border border-white/10 rounded-lg p-4 space-y-3 mt-2 text-left">
                       <div className="flex justify-between items-center">
-                        <span className="text-[9px] font-mono text-gold-400 uppercase tracking-widest font-semibold">
+                        <span className="text-[9px] font-mono text-white/70 uppercase tracking-widest font-semibold">
                           Compose Reply to {msg.name}
                         </span>
                         <button 
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setReplyText(`Estimado/a ${msg.name},\n\nMuchas gracias por contactar con Miriam Campos Photography. He recibido su consulta sobre "${msg.subject}" y estaré encantada de atenderle.\n\nMe pondré en contacto con usted muy pronto para detallarle las opciones y coordinar una llamada de asesoramiento creativo.\n\nAtentamente,\nMiriam Campos\nMiriam Campos Photography`);
+                            setReplyText(`Estimado/a ${msg.name},\n\nMuchas gracias por contactar con Miriam Campos Photography. He recibido su consulta sobre "${msg.subject}" y estar encantada de atenderle.\n\nMe pondr en contacto con usted muy pronto para detallarle las opciones y coordinar una llamada de asesoramiento creativo.\n\nAtentamente,\nMiriam Campos\nMiriam Campos Photography`);
                           }}
-                          className="text-[9px] font-mono text-white/40 hover:text-gold-400 transition-all uppercase tracking-wider underline cursor-pointer"
+                          className="text-[9px] font-mono text-white/40 hover:text-white transition-all uppercase tracking-wider underline cursor-pointer"
                         >
                           Use Template / Usar Plantilla
                         </button>
@@ -1761,11 +1784,11 @@ export default function AdminCMS({
                         rows={5}
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
-                        placeholder="Escribe tu respuesta profesional aquí o usa la plantilla de arriba..."
-                        className="w-full bg-dark-gray border-[#D8C0A8] rounded-lg p-3 text-xs text-white placeholder-white/20 focus:outline-none focus:border-gold-400 font-sans resize-none leading-relaxed"
+                        placeholder="Escribe tu respuesta profesional aqu o usa la plantilla de arriba..."
+                        className="w-full bg-dark-gray border-stone rounded-lg p-3 text-xs text-white placeholder-white/20 focus:outline-none focus:border-white/30 font-sans resize-none leading-relaxed"
                       />
                       <p className="text-[10px] font-mono text-white/40 leading-relaxed">
-                        📧 <strong>Nota:</strong> Al hacer clic en "Send Reply", la respuesta se guardará en este panel de control y se abrirá tu gestor de correo predeterminado (Gmail, Outlook, Apple Mail, etc.) para que puedas pulsar "Enviar" y entregar el correo real a <strong>{msg.email}</strong>.
+                        📍§ <strong>Nota:</strong> Al hacer clic en "Send Reply", la respuesta se guíardará en este panel de control y se abrirá tu gestor de correo predeterminado (Gmail, Outlook, Apple Mail, etc.) para que puedas pulsar "Enviar" y entregar el correo real a <strong>{msg.email}</strong>.
                       </p>
                       <div className="flex justify-end space-x-2">
                         <button
@@ -1785,7 +1808,7 @@ export default function AdminCMS({
                             e.stopPropagation();
                             handleSendReply(msg.id);
                           }}
-                          className="py-1 px-3 bg-gold-500 text-dark hover:bg-gold-400 rounded text-[9px] font-mono tracking-widest uppercase transition-all font-semibold"
+                          className="py-1 px-3 bg-white/10 text-white hover:bg-white/15 border border-white/10 rounded text-[9px] font-mono tracking-widest uppercase transition-all font-semibold"
                         >
                           Send Reply
                         </button>
@@ -1802,7 +1825,7 @@ export default function AdminCMS({
                       }}
                       className="text-[10px] font-mono text-white/40 hover:text-white flex items-center space-x-1"
                     >
-                      <CheckSquare size={11} className={msg.isRead ? 'text-gold-400' : ''} />
+                      <CheckSquare size={11} className={msg.isRead ? 'text-white/70' : ''} />
                       <span>{msg.isRead ? 'Mark Unread' : 'Mark Read'}</span>
                     </button>
 
@@ -1820,8 +1843,8 @@ export default function AdminCMS({
                         }}
                         className={`py-1 px-3 border rounded-md text-[9px] font-mono tracking-widest uppercase transition-all ${
                           replyingToId === msg.id 
-                            ? 'bg-gold-500 text-dark border-gold-500 font-bold'
-                            : 'bg-white/5 hover:bg-gold-500 hover:text-dark border-white/10'
+                            ? 'bg-white/10 text-white border-white/10'
+                            : 'bg-white/5 hover:bg-white/10 hover:text-dark border-white/10'
                         }`}
                       >
                         {replyingToId === msg.id ? 'Cancel' : msg.replyText ? 'Edit Reply' : 'Reply'}
@@ -1880,6 +1903,7 @@ export default function AdminCMS({
                     emailjsServiceId: sanitizeString(emailForm.emailjsServiceId),
                     emailjsTemplateId: sanitizeString(emailForm.emailjsTemplateId),
                     emailjsPublicKey: sanitizeString(emailForm.emailjsPublicKey),
+                    emailjsPrivateKey: sanitizeString(emailForm.emailjsPrivateKey || ''),
                     receiverEmail: sanitizeEmail(emailForm.receiverEmail),
                     enableAutoResponse: emailForm.enableAutoResponse || false,
                     emailjsAutoTemplateId: sanitizeString(emailForm.emailjsAutoTemplateId || ''),
@@ -1888,9 +1912,9 @@ export default function AdminCMS({
                   };
                   setEmailForm(trimmedConfig);
                   onUpdateEmailConfig(trimmedConfig);
-                  triggerAlert(t('Configuración de correo guardada correctamente', 'Email settings saved successfully', 'Configurações de e-mail salvas com sucesso'));
+                  triggerAlert(t('Configuración de correo guíardada correctamente', 'Email settings saved successfully', 'Configurações de e-mail salvas com sucesso'));
                 }}
-                className="py-1.5 px-4 bg-gold-500 text-dark hover:bg-gold-400 rounded-lg text-[10px] font-mono tracking-widest uppercase font-semibold flex items-center space-x-1 cursor-pointer"
+                className="py-1.5 px-4 bg-white/10 text-white hover:bg-white/15 border border-white/10 rounded-lg text-[10px] font-mono tracking-widest uppercase font-semibold flex items-center space-x-1 cursor-pointer"
               >
                 <Check size={11} />
                 <span>{t('Guardar Configuración', 'Save Configuration', 'Salvar Configuração')}</span>
@@ -1900,8 +1924,8 @@ export default function AdminCMS({
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 text-left">
               {/* Left Column: Form Fields */}
               <div className="lg:col-span-7 space-y-6">
-                <div className="bg-dark-gray/40 border border-white/10 p-6 rounded-xl space-y-4">
-                  <h3 className="text-xs font-mono text-gold-400 uppercase tracking-wider border-b border-white/10 pb-2">Credenciales de EmailJS</h3>
+                <div className="bg-dark-gray/40 border border-white/10 p-6 rounded-lg space-y-4">
+                  <h3 className="text-xs font-mono text-white/70 uppercase tracking-wider border-b border-white/10 pb-2">Credenciales de EmailJS</h3>
 
                   <div className="space-y-4 pt-2">
                     <div className="space-y-1.5">
@@ -1911,7 +1935,7 @@ export default function AdminCMS({
                         placeholder="Ej: service_xxxxxxx"
                         value={emailForm.emailjsServiceId}
                         onChange={(e) => setEmailForm({ ...emailForm, emailjsServiceId: e.target.value })}
-                        className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white font-mono placeholder-white/20 focus:outline-none focus:border-gold-400"
+                        className="w-full bg-charcoal border border-stone rounded p-2.5 text-xs text-white font-mono placeholder-white/20 focus:outline-none focus:border-white/30"
                       />
                     </div>
 
@@ -1922,7 +1946,7 @@ export default function AdminCMS({
                         placeholder="Ej: template_xxxxxxx"
                         value={emailForm.emailjsTemplateId}
                         onChange={(e) => setEmailForm({ ...emailForm, emailjsTemplateId: e.target.value })}
-                        className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white font-mono placeholder-white/20 focus:outline-none focus:border-gold-400"
+                        className="w-full bg-charcoal border border-stone rounded p-2.5 text-xs text-white font-mono placeholder-white/20 focus:outline-none focus:border-white/30"
                       />
                     </div>
 
@@ -1933,7 +1957,18 @@ export default function AdminCMS({
                         placeholder="Ej: xxxxxxxxxxxxxxx"
                         value={emailForm.emailjsPublicKey}
                         onChange={(e) => setEmailForm({ ...emailForm, emailjsPublicKey: e.target.value })}
-                        className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white font-mono placeholder-white/20 focus:outline-none focus:border-gold-400"
+                        className="w-full bg-charcoal border border-stone rounded p-2.5 text-xs text-white font-mono placeholder-white/20 focus:outline-none focus:border-white/30"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-mono text-white/45 uppercase tracking-wider">Private / REST API Key (Clave Privada)</label>
+                      <input
+                        type="text"
+                        placeholder="Ej: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                        value={emailForm.emailjsPrivateKey || ''}
+                        onChange={(e) => setEmailForm({ ...emailForm, emailjsPrivateKey: e.target.value })}
+                        className="w-full bg-charcoal border border-stone rounded p-2.5 text-xs text-white font-mono placeholder-white/20 focus:outline-none focus:border-white/30"
                       />
                     </div>
 
@@ -1944,7 +1979,7 @@ export default function AdminCMS({
                         placeholder="Ej: tu-email@gmail.com"
                         value={emailForm.receiverEmail}
                         onChange={(e) => setEmailForm({ ...emailForm, receiverEmail: e.target.value })}
-                        className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white font-mono placeholder-white/20 focus:outline-none focus:border-gold-400"
+                        className="w-full bg-charcoal border border-stone rounded p-2.5 text-xs text-white font-mono placeholder-white/20 focus:outline-none focus:border-white/30"
                       />
                     </div>
                   </div>
@@ -1957,6 +1992,7 @@ export default function AdminCMS({
                           emailjsServiceId: emailForm.emailjsServiceId.trim(),
                           emailjsTemplateId: emailForm.emailjsTemplateId.trim(),
                           emailjsPublicKey: emailForm.emailjsPublicKey.trim(),
+                          emailjsPrivateKey: (emailForm.emailjsPrivateKey || '').trim(),
                           receiverEmail: emailForm.receiverEmail.trim(),
                           enableAutoResponse: emailForm.enableAutoResponse || false,
                           emailjsAutoTemplateId: (emailForm.emailjsAutoTemplateId || '').trim(),
@@ -1974,23 +2010,23 @@ export default function AdminCMS({
                           triggerAlert('Enviando correo de prueba...');
                           const emailjs = await import('@emailjs/browser');
                           
-                          const templateParams = {
+                          const templateParamás = {
                             to_name: profile.name || 'Miriam',
                             to_email: trimmedConfig.receiverEmail,
-                            from_name: 'Sistema Aurea Studio',
-                            from_email: 'test@aurea.com',
-                            message: '¡Excelente! Tu integración de correo con EmailJS está funcionando de manera impecable.',
+                            from_name: 'Sistema Aorea Studio',
+                            from_email: 'test@aorea.com',
+                            message: 'Excelente! Tu integración de correo con EmailJS está funcionando de manera impecable.',
                             booking_details: 'Reserva de Prueba - Fecha: Hoy - Horario: 10:00 AM'
                           };
 
                           await emailjs.send(
                             trimmedConfig.emailjsServiceId,
                             trimmedConfig.emailjsTemplateId,
-                            templateParams,
+                            templateParamás,
                             trimmedConfig.emailjsPublicKey
                           );
                           
-                          triggerAlert('¡Correo de prueba enviado con éxito! Revisa tu casilla.');
+                          triggerAlert('Correo de prueba enviado con éxito! Revisa tu casilla.');
                         } catch (err: any) {
                           console.error(err);
                           let errorMsg = err?.text || err?.message || 'Error desconocido';
@@ -2012,9 +2048,9 @@ export default function AdminCMS({
                 </div>
 
                 {/* Auto-Responder Settings Card */}
-                <div className="bg-dark-gray/40 border border-white/10 p-6 rounded-xl space-y-4">
+                <div className="bg-dark-gray/40 border border-white/10 p-6 rounded-lg space-y-4">
                   <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                    <h3 className="text-xs font-mono text-gold-400 uppercase tracking-wider">Respuestas Automáticas (Auto-Responder)</h3>
+                    <h3 className="text-xs font-mono text-white/70 uppercase tracking-wider">Respuestas Automáticas (Auto-Responder)</h3>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input 
                         type="checkbox" 
@@ -2022,7 +2058,7 @@ export default function AdminCMS({
                         onChange={(e) => setEmailForm({ ...emailForm, enableAutoResponse: e.target.checked })}
                         className="sr-only peer"
                       />
-                      <div className="w-9 h-5 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gold-500"></div>
+                      <div className="w-9 h-5 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-white/10"></div>
                       <span className="ml-2 text-[10px] font-mono text-white/70 uppercase">Activar</span>
                     </label>
                   </div>
@@ -2042,7 +2078,7 @@ export default function AdminCMS({
                           placeholder="Ej: template_auto_reply (Dejar vacío para usar la misma plantilla)"
                           value={emailForm.emailjsAutoTemplateId || ''}
                           onChange={(e) => setEmailForm({ ...emailForm, emailjsAutoTemplateId: e.target.value })}
-                          className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white font-mono placeholder-white/20 focus:outline-none focus:border-gold-400"
+                          className="w-full bg-charcoal border border-stone rounded p-2.5 text-xs text-white font-mono placeholder-white/20 focus:outline-none focus:border-white/30"
                         />
                         <span className="text-[9px] text-white/30 block leading-tight">
                           Recomendamos usar una plantilla de EmailJS específica para el cliente, donde configures que el destinatario (To Email) sea <code>{"{{to_email}}"}</code> o <code>{"{{client_email}}"}</code>, y uses las variables <code>{"{{reply_subject}}"}</code> y <code>{"{{reply_message}}"}</code> en el cuerpo. Si dejas este campo vacío, se usará la misma plantilla principal de arriba.
@@ -2053,10 +2089,10 @@ export default function AdminCMS({
                         <label className="text-[10px] font-mono text-white/45 uppercase tracking-wider">Asunto del Correo de Respuesta</label>
                         <input
                           type="text"
-                          placeholder="Ej: ¡Tu reserva ha sido recibida con éxito! - Aurea Studio"
+                          placeholder="Ej: Tu reserva ha sido recibida con éxito! - Aorea Studio"
                           value={emailForm.autoReplySubject || ''}
                           onChange={(e) => setEmailForm({ ...emailForm, autoReplySubject: e.target.value })}
-                          className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white placeholder-white/20 focus:outline-none focus:border-gold-400"
+                          className="w-full bg-charcoal border border-stone rounded p-2.5 text-xs text-white placeholder-white/20 focus:outline-none focus:border-white/30"
                         />
                       </div>
 
@@ -2067,7 +2103,7 @@ export default function AdminCMS({
                           placeholder="Escribe el mensaje que recibirá el cliente..."
                           value={emailForm.autoReplyMessage || ''}
                           onChange={(e) => setEmailForm({ ...emailForm, autoReplyMessage: e.target.value })}
-                          className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white placeholder-white/20 focus:outline-none focus:border-gold-400 font-sans resize-none"
+                          className="w-full bg-charcoal border border-stone rounded p-2.5 text-xs text-white placeholder-white/20 focus:outline-none focus:border-white/30 font-sans resize-none"
                         />
                         <span className="text-[9px] text-white/30 block leading-tight">
                           Puedes usar texto plano. Este contenido se enviará en el campo <code>{"{{reply_message}}"}</code> a tu plantilla de EmailJS.
@@ -2082,6 +2118,7 @@ export default function AdminCMS({
                               emailjsServiceId: emailForm.emailjsServiceId.trim(),
                               emailjsTemplateId: emailForm.emailjsTemplateId.trim(),
                               emailjsPublicKey: emailForm.emailjsPublicKey.trim(),
+                              emailjsPrivateKey: (emailForm.emailjsPrivateKey || '').trim(),
                               receiverEmail: emailForm.receiverEmail.trim(),
                               enableAutoResponse: true,
                               emailjsAutoTemplateId: (emailForm.emailjsAutoTemplateId || '').trim(),
@@ -2100,10 +2137,10 @@ export default function AdminCMS({
                               const emailjs = await import('@emailjs/browser');
                               
                               const testTemplateId = trimmedConfig.emailjsAutoTemplateId || trimmedConfig.emailjsTemplateId;
-                              const testSubject = trimmedConfig.autoReplySubject || '¡Tu reserva ha sido recibida con éxito! - Aurea Studio';
+                              const testSubject = trimmedConfig.autoReplySubject || 'Tu reserva ha sido recibida con éxito! - Aorea Studio';
                               const testMessage = trimmedConfig.autoReplyMessage || 'Hola, esto es un mensaje de prueba de respuesta automática.';
 
-                              const testParams = {
+                              const testParamás = {
                                 to_name: 'Cliente de Prueba',
                                 to_email: trimmedConfig.receiverEmail, // Sent to admin's email so they can check it
                                 client_name: 'Cliente de Prueba',
@@ -2111,7 +2148,7 @@ export default function AdminCMS({
                                 email: trimmedConfig.receiverEmail,
                                 recipient_email: trimmedConfig.receiverEmail,
                                 reply_to: trimmedConfig.receiverEmail,
-                                from_name: profile.name || 'Miriam Campos - Aurea Studio',
+                                from_name: profile.name || 'Miriam Campos - Aorea Studio',
                                 from_email: trimmedConfig.receiverEmail,
                                 reply_subject: testSubject,
                                 subject: testSubject,
@@ -2125,11 +2162,11 @@ export default function AdminCMS({
                               await emailjs.send(
                                 trimmedConfig.emailjsServiceId,
                                 testTemplateId,
-                                testParams,
+                                testParamás,
                                 trimmedConfig.emailjsPublicKey
                               );
                               
-                              triggerAlert('¡Auto-respuesta enviada con éxito! Revisa tu propia casilla de correo (simula ser el cliente).');
+                              triggerAlert('Auto-respuesta enviada con éxito! Revisa tu propia casilla de correo (simula ser el cliente).');
                             } catch (err: any) {
                               console.error(err);
                               let errorMsg = err?.text || err?.message || 'Error desconocido';
@@ -2139,7 +2176,7 @@ export default function AdminCMS({
                               triggerAlert(`Error al enviar auto-respuesta: ${errorMsg}`);
                             }
                           }}
-                          className="py-2 px-4 bg-gold-500/10 text-gold-400 border border-gold-500/20 hover:bg-gold-500/20 rounded-lg text-[10px] font-mono tracking-widest uppercase font-semibold cursor-pointer transition-all w-full text-center"
+                          className="py-2 px-4 bg-white/5 text-white/70 border border-white/10 hover:bg-white/10 rounded-lg text-[10px] font-mono tracking-widest uppercase font-semibold cursor-pointer transition-all w-full text-center"
                         >
                           ⚡ Enviar Auto-Respuesta de Prueba
                         </button>
@@ -2154,8 +2191,8 @@ export default function AdminCMS({
 
               {/* Right Column: Step-by-Step Tutorial Card */}
               <div className="lg:col-span-5 space-y-6">
-                <div className="border border-gold-400/20 bg-gold-400/5 rounded-xl p-6 text-left space-y-4">
-                  <h3 className="font-serif text-lg text-gold-300 flex items-center space-x-2">
+                <div className="border border-white/10 bg-white/5 rounded-lg p-6 text-left space-y-4">
+                  <h3 className="font-serif text-lg text-white/60 flex items-center space-x-2">
                     <Mail size={16} />
                     <span>Guía de Conexión (EmailJS)</span>
                   </h3>
@@ -2166,36 +2203,36 @@ export default function AdminCMS({
 
                   <div className="space-y-3 pt-2 text-[11px] font-sans text-white/80">
                     <div className="flex items-start space-x-2">
-                      <span className="font-mono text-gold-400 font-bold bg-white/5 rounded w-5 h-5 flex items-center justify-center shrink-0">1</span>
-                      <p>Crea una cuenta gratuita en <a href="https://www.emailjs.com/" target="_blank" rel="noopener noreferrer" className="text-gold-400 underline hover:text-gold-300">emailjs.com</a>.</p>
+                      <span className="font-mono text-white font-semibold bg-white/5 rounded w-5 h-5 flex items-center justify-center shrink-0">1</span>
+                      <p>Crea una cuenta gratuita en <a href="https://www.emailjs.com/" target="_blank" rel="noopener noreferrer" className="text-white/70 underline hover:text-white">emailjs.com</a>.</p>
                     </div>
 
                     <div className="flex items-start space-x-2">
-                      <span className="font-mono text-gold-400 font-bold bg-white/5 rounded w-5 h-5 flex items-center justify-center shrink-0">2</span>
+                      <span className="font-mono text-white font-semibold bg-white/5 rounded w-5 h-5 flex items-center justify-center shrink-0">2</span>
                       <p>En el panel, ve a <strong>Email Services</strong> y conecta tu Gmail (ese será tu <strong>Service ID</strong>).</p>
                     </div>
 
                     <div className="flex items-start space-x-2">
-                      <span className="font-mono text-gold-400 font-bold bg-white/5 rounded w-5 h-5 flex items-center justify-center shrink-0">3</span>
+                      <span className="font-mono text-white font-semibold bg-white/5 rounded w-5 h-5 flex items-center justify-center shrink-0">3</span>
                       <p>Ve a <strong>Email Templates</strong> y crea una plantilla. Los campos que envía la web son:</p>
                     </div>
 
                     <div className="bg-black/30 p-2.5 rounded font-mono text-[9px] text-white/50 space-y-1 ml-7">
-                      <div>• <span className="text-gold-400">{"{{to_name}}"}</span> - Nombre de Miriam Campos</div>
-                      <div>• <span className="text-gold-400">{"{{to_email}}"}</span> - Correo Destinatario configurado</div>
-                      <div>• <span className="text-gold-400">{"{{from_name}}"}</span> - Nombre del Cliente</div>
-                      <div>• <span className="text-gold-400">{"{{from_email}}"}</span> - Correo del Cliente</div>
-                      <div>• <span className="text-gold-400">{"{{message}}"}</span> - Mensaje / Comentario</div>
-                      <div>• <span className="text-gold-400">{"{{booking_details}}"}</span> - Servicio, fecha y horario seleccionado</div>
+                        <div>• <span className="text-white/70">{"{{to_name}}"}</span> - Nombre de Miriam Campos</div>
+                        <div>• <span className="text-white/70">{"{{to_email}}"}</span> - Correo Destinatario configurado</div>
+                        <div>• <span className="text-white/70">{"{{from_name}}"}</span> - Nombre del Cliente</div>
+                        <div>• <span className="text-white/70">{"{{from_email}}"}</span> - Correo del Cliente</div>
+                        <div>• <span className="text-white/70">{"{{message}}"}</span> - Mensaje / Comentario</div>
+                        <div>• <span className="text-white/70">{"{{booking_details}}"}</span> - Servicio, fecha y horario seleccionado</div>
                     </div>
 
                     <div className="flex items-start space-x-2">
-                      <span className="font-mono text-gold-400 font-bold bg-white/5 rounded w-5 h-5 flex items-center justify-center shrink-0">4</span>
+                      <span className="font-mono text-white font-semibold bg-white/5 rounded w-5 h-5 flex items-center justify-center shrink-0">4</span>
                       <p>Copia el <strong>Template ID</strong>, la <strong>Public Key</strong> (en Account → API Keys), pégalos aquí y haz clic en <strong>Guardar</strong>.</p>
                     </div>
 
                     <div className="border-t border-white/10 pt-3 mt-2 space-y-2">
-                      <h4 className="text-[10px] uppercase font-mono text-gold-400 tracking-wider">⚠️ Configuración de Respuesta Automática</h4>
+                      <h4 className="text-[10px] uppercase font-mono text-white/70 tracking-wider">⚠️ Configuración de Respuesta Automática</h4>
                       <p className="text-[10px] text-white/60 leading-normal">
                         Por defecto, las plantillas de EmailJS suelen tener tu correo de Miriam escrito de forma fija en el campo <strong>To Email (Para)</strong>. Si usas esa misma plantilla, EmailJS te enviará la respuesta automática a ti misma en lugar de al cliente.
                       </p>
@@ -2203,12 +2240,12 @@ export default function AdminCMS({
                         Para solucionarlo, ve a EmailJS y crea una <strong>segunda plantilla independiente</strong> (por ejemplo: <code>plantilla_autoresponder</code>) y configúrala así:
                       </p>
                       <div className="bg-black/40 p-3 rounded font-mono text-[9px] text-white/50 space-y-1.5 ml-2 border border-white/10">
-                        <div>• <strong>To Email (Para):</strong> escribe <span className="text-gold-400">{"{{to_email}}"}</span> <span className="text-white/30">(¡muy importante!)</span></div>
-                        <div>• <strong>Subject (Asunto):</strong> escribe <span className="text-gold-400">{"{{reply_subject}}"}</span></div>
-                        <div>• <strong>Content (Cuerpo):</strong> usa las variables <span className="text-gold-400">{"{{reply_message}}"}</span> y <span className="text-gold-400">{"{{booking_details}}"}</span> para mostrar el texto personalizado y los datos de la reserva o contacto.</div>
+                        <div>• <strong>To Email (Para):</strong> escribe <span className="text-white/70">{"{{to_email}}"}</span> <span className="text-white/30">(muy importante!)</span></div>
+                        <div>• <strong>Subject (Asunto):</strong> escribe <span className="text-white/70">{"{{reply_subject}}"}</span></div>
+                        <div>• <strong>Content (Cuerpo):</strong> usa las variables <span className="text-white/70">{"{{reply_message}}"}</span> y <span className="text-white/70">{"{{booking_details}}"}</span> para mostrar el texto personalizado y los datos de la reserva o contacto.</div>
                       </div>
                       <p className="text-[10px] text-white/50 leading-normal">
-                        Copia el ID de esta nueva plantilla y pégalo abajo en el campo <strong>ID de Plantilla de Auto-Respuesta</strong>. ¡Listo! El sistema responderá automáticamente al correo correcto de cada cliente.
+                         Copia el ID de esta nueva plantilla y pégalo abajo en el campo <strong>ID de Plantilla de Auto-Respuesta</strong>. Listo! El sistema responderá automáticamente al correo correcto de cada cliente.
                       </p>
                     </div>
                   </div>
@@ -2224,7 +2261,7 @@ export default function AdminCMS({
             <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-white/10 pb-4 gap-4">
               <div>
                 <h2 className="font-serif text-2xl text-white">
-                  {t('Gestión de Clientes y Galerías Privadas', 'Client & Private Gallery Management', 'Gestão de Clientes e Galerias')}
+                  {t('Gestión de Clientes y Galerías Privadas', 'Client & Private Gallery Management', 'Gestáo de Clientes e Galerías')}
                 </h2>
                 <p className="text-xs text-white/50">
                   {t('Crea cuentas de acceso seguro para tus clientes con códigos de acceso (passcode) dinámicos para que seleccionen y descarguen sus fotos.', 'Create secure access accounts for your clients with dynamic passcodes so they can proof and download their galleries.', 'Crie contas de acesso seguro para seus clientes com códigos de acesso dinâmicos para seleção de fotos.')}
@@ -2247,7 +2284,7 @@ export default function AdminCMS({
                     document.getElementById('client-form-section')?.scrollIntoView({ behavior: 'smooth' });
                   }, 100);
                 }}
-                className="py-1.5 px-4 bg-gold-500 text-dark hover:bg-gold-400 rounded-lg text-[10px] font-mono tracking-widest uppercase font-semibold flex items-center space-x-1 cursor-pointer self-start md:self-auto animate-pulse"
+                className="py-1.5 px-4 bg-white/10 text-white hover:bg-white/15 border border-white/10 rounded-lg text-[10px] font-mono tracking-widest uppercase font-semibold flex items-center space-x-1 cursor-pointer self-start md:self-auto animate-pulse"
               >
                 <Plus size={12} />
                 <span>{t('Crear Nueva Cuenta', 'Create New Account', 'Criar Nova Conta')}</span>
@@ -2256,8 +2293,8 @@ export default function AdminCMS({
 
             {/* Dashboard / Quick Stats Row */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-charcoal border border-white/10 p-4 rounded-xl flex items-center space-x-4">
-                <div className="p-3 bg-gold-500/10 rounded-lg text-gold-400">
+              <div className="bg-charcoal border border-white/10 p-4 rounded-lg flex items-center space-x-4">
+                <div className="p-3 bg-white/5 rounded-lg text-white/70">
                   <Users size={20} />
                 </div>
                 <div>
@@ -2266,8 +2303,8 @@ export default function AdminCMS({
                 </div>
               </div>
 
-              <div className="bg-charcoal border border-white/10 p-4 rounded-xl flex items-center space-x-4">
-                <div className="p-3 bg-gold-500/10 rounded-lg text-gold-400">
+              <div className="bg-charcoal border border-white/10 p-4 rounded-lg flex items-center space-x-4">
+                <div className="p-3 bg-white/5 rounded-lg text-white/70">
                   <Camera size={20} />
                 </div>
                 <div>
@@ -2278,8 +2315,8 @@ export default function AdminCMS({
                 </div>
               </div>
 
-              <div className="bg-charcoal border border-white/10 p-4 rounded-xl flex items-center space-x-4">
-                <div className="p-3 bg-gold-500/10 rounded-lg text-gold-400">
+              <div className="bg-charcoal border border-white/10 p-4 rounded-lg flex items-center space-x-4">
+                <div className="p-3 bg-white/5 rounded-lg text-white/70">
                   <CheckSquare size={20} />
                 </div>
                 <div>
@@ -2293,9 +2330,9 @@ export default function AdminCMS({
 
             {/* Form Section (Visible only when clientForm is active) */}
             {clientForm.clientName !== undefined && (
-              <div id="client-form-section" className="bg-dark border border-gold-400/20 rounded-2xl p-6 space-y-6">
+              <div id="client-form-section" className="bg-dark border border-white/10 rounded-lg p-6 space-y-6">
                 <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                  <h3 className="font-serif text-lg text-gold-300">
+                  <h3 className="font-serif text-lg text-white/60">
                     {clientEditItem ? t('Editar Cuenta de Cliente', 'Edit Client Account') : t('Registrar Nueva Cuenta de Cliente', 'Register New Client Account')}
                   </h3>
                   <button
@@ -2320,7 +2357,7 @@ export default function AdminCMS({
                         placeholder={t('Ej: Clara & Mateo', 'E.g. Clara & Mateo')}
                         value={clientForm.clientName || ''}
                         onChange={(e) => setClientForm({ ...clientForm, clientName: e.target.value })}
-                        className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white font-sans focus:outline-none focus:border-gold-400"
+                        className="w-full bg-charcoal border border-stone rounded p-2.5 text-xs text-white font-sans focus:outline-none focus:border-white/30"
                       />
                     </div>
 
@@ -2332,7 +2369,7 @@ export default function AdminCMS({
                         placeholder="clara@example.com"
                         value={clientForm.clientEmail || ''}
                         onChange={(e) => setClientForm({ ...clientForm, clientEmail: e.target.value })}
-                        className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white font-mono focus:outline-none focus:border-gold-400"
+                        className="w-full bg-charcoal border border-stone rounded p-2.5 text-xs text-white font-mono focus:outline-none focus:border-white/30"
                       />
                     </div>
 
@@ -2344,7 +2381,7 @@ export default function AdminCMS({
                           placeholder={t('Ej: Boda Civil / Sesión Preboda', 'E.g. Pre-wedding session')}
                           value={clientForm.sessionTitle || ''}
                           onChange={(e) => setClientForm({ ...clientForm, sessionTitle: e.target.value })}
-                          className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white font-sans focus:outline-none focus:border-gold-400"
+                          className="w-full bg-charcoal border border-stone rounded p-2.5 text-xs text-white font-sans focus:outline-none focus:border-white/30"
                         />
                       </div>
 
@@ -2354,21 +2391,21 @@ export default function AdminCMS({
                           type="date"
                           value={clientForm.sessionDate || ''}
                           onChange={(e) => setClientForm({ ...clientForm, sessionDate: e.target.value })}
-                          className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white font-mono focus:outline-none focus:border-gold-400"
+                          className="w-full bg-charcoal border border-stone rounded p-2.5 text-xs text-white font-mono focus:outline-none focus:border-white/30"
                         />
                       </div>
                     </div>
 
-                    <div className="space-y-1.5 col-span-1 md:col-span-2 bg-dark-gray p-4 rounded-xl border border-white/10 space-y-3">
+                    <div className="space-y-1.5 col-span-1 md:col-span-2 bg-dark-gray p-4 rounded-lg border border-white/10 space-y-3">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <label className="text-[10px] font-mono text-gold-300 uppercase tracking-wider flex items-center space-x-1.5">
-                          <CheckSquare size={12} className="text-gold-400" />
+                        <label className="text-[10px] font-mono text-white/60 uppercase tracking-wider flex items-center space-x-1.5">
+                          <CheckSquare size={12} className="text-white/70" />
                           <span>{t('Código de Acceso de Galería (Passcode) *', 'Gallery Passcode *')}</span>
                         </label>
                         <button
                           type="button"
                           onClick={handleGeneratePasscode}
-                          className="text-[9px] font-mono bg-gold-400/10 text-gold-400 border border-gold-400/20 hover:bg-gold-400/20 px-2 py-1 rounded transition-all flex items-center space-x-1 cursor-pointer uppercase self-start sm:self-auto"
+                          className="text-[9px] font-mono bg-white/10 text-white/70 border border-white/10 hover:bg-white/15 px-2 py-1 rounded transition-all flex items-center space-x-1 cursor-pointer uppercase self-start sm:self-auto"
                         >
                           <RefreshCw size={8} />
                           <span>{t('Generar Código Seguro', 'Generate Secure Code')}</span>
@@ -2381,10 +2418,10 @@ export default function AdminCMS({
                           placeholder={t('Ej: SELECCION2026', 'E.g. SELECCION2026')}
                           value={clientForm.passcode || ''}
                           onChange={(e) => setClientForm({ ...clientForm, passcode: e.target.value.toUpperCase() })}
-                          className="bg-dark border border-white/10 rounded p-2.5 text-sm text-gold-400 tracking-wider font-mono uppercase font-bold focus:outline-none focus:border-gold-400 w-full sm:w-64"
+                          className="bg-dark border border-white/10 rounded p-2.5 text-sm text-white/70 tracking-wider font-mono uppercase font-bold focus:outline-none focus:border-white/30 w-full sm:w-64"
                         />
                         <span className="text-[10px] text-white/40 leading-relaxed font-sans max-w-sm hidden sm:block">
-                          {t('Este código es único. El cliente lo ingresará en el Portal de Clientes para abrir su galería personal.', 'This code is unique. The client will enter it in the Client Portal to unlock their personal gallery.')}
+                           {t('Este código es único. El cliente lo ingresará en el Portal de Clientes para abrir su galería personal.', 'This code is unique. The client will enter it in the Client Portal to unlock their personal gallery.')}
                         </span>
                       </div>
                     </div>
@@ -2393,14 +2430,14 @@ export default function AdminCMS({
                     {/* PHOTOS MANAGEMENT SUB-SECTION */}
                     <div className="border-t border-white/10 pt-4 space-y-4">
                       <div>
-                        <h4 className="text-xs font-mono text-gold-400 uppercase tracking-widest">{t('Fotos en la Galería del Cliente', 'Photos in Client Gallery')}</h4>
-                        <p className="text-[10px] text-white/50">{t('Añade las fotos de previsualización que el cliente verá para elegir sus preferidas y descargar.', 'Add the preview photographs the client will review to pick their favorites and download.')}</p>
+                        <h4 className="text-xs font-mono text-white/70 uppercase tracking-widest">{t('Fotos en la Galería del Cliente', 'Photos in Client Gallery')}</h4>
+                         <p className="text-[10px] text-white/50">{t('Añade las fotos de previsualización que el cliente verá para elegir sus preferidas y descargar.', 'Add the preview photographs the client will review to pick their favorites and download.')}</p>
                       </div>
 
                       {/* Drag-and-drop & File upload zone */}
-                      <div className="bg-dark-gray/30 p-4 rounded-xl border border-white/10 space-y-4">
+                      <div className="bg-dark-gray/30 p-4 rounded-lg border border-white/10 space-y-4">
                         <h5 className="text-[10px] font-mono text-white/60 uppercase tracking-wider">
-                          {t('📁 Cargar Fotos de Pruebas', '📁 Upload Proof Photos')}
+                          {t('📍 Cargar Fotos de Pruebas', '📍 Upload Proof Photos')}
                         </h5>
 
                         {/* Interactive Drag & Drop Area */}
@@ -2415,10 +2452,10 @@ export default function AdminCMS({
                             setIsDragOver(false);
                             handleMultipleFilesUpload(e.dataTransfer.files);
                           }}
-                          className={`border-2 border-dashed rounded-xl p-8 text-center transition-all flex flex-col items-center justify-center cursor-pointer ${
+                          className={`border-2 border-dashed rounded-lg p-8 text-center transition-all flex flex-col items-center justify-center cursor-pointer ${
                             isDragOver 
-                              ? 'border-gold-400 bg-gold-400/5 scale-[0.99]' 
-                              : 'border-[#D8C0A8] bg-charcoal hover:border-gold-400/55 hover:bg-white/5'
+                              ? 'border-white/30 bg-white/5 scale-[0.99]' 
+                              : 'border-stone bg-charcoal hover:border-white/30 hover:bg-white/5'
                           }`}
                           onClick={() => document.getElementById('client-photo-file-input')?.click()}
                         >
@@ -2430,9 +2467,9 @@ export default function AdminCMS({
                             className="hidden"
                             onChange={(e) => handleMultipleFilesUpload(e.target.files)}
                           />
-                          <Upload size={32} className={`mb-3 transition-colors ${isDragOver ? 'text-gold-400' : 'text-white/40'}`} />
+                          <Upload size={32} className={`mb-3 transition-colors ${isDragOver ? 'text-white/70' : 'text-white/40'}`} />
                           <span className="text-xs text-white/80 font-medium block">
-                            {t('Arrastra y suelta tus fotos aquí o haz clic para explorar', 'Drag & drop your photos here or click to browse')}
+                            {t('Arrastra y suelta tus fotos aqu o haz clic para explorar', 'Drag & drop your photos here or click to browse')}
                           </span>
                           <span className="text-[9px] text-white/40 font-mono mt-1 block">
                             {t('Soporta múltiples archivos a la vez (PNG, JPG, WEBP)', 'Supports multiple files at once (PNG, JPG, WEBP)')}
@@ -2441,8 +2478,8 @@ export default function AdminCMS({
 
                         {/* Fallback Option: Toggle URL input if they prefer */}
                         <details className="text-left group">
-                          <summary className="text-[9px] font-mono text-white/40 hover:text-white/60 cursor-pointer select-none transition-colors outline-none list-none flex items-center space-x-1">
-                            <span>▸ {t('¿Prefieres usar URLs externas?', 'Prefer to use external URLs?')}</span>
+                          <summary className="text-[9px] font-mono text-white/40 hover:text-white cursor-pointer select-none transition-colors outline-none list-none flex items-center space-x-1">
+                            <span>↗ {t('Prefieres usar URLs externas?', 'Prefer to use external URLs?')}</span>
                           </summary>
                           <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end mt-3 pt-3 border-t border-white/10 animate-fadeIn">
                             <div className="md:col-span-5 space-y-1">
@@ -2452,7 +2489,7 @@ export default function AdminCMS({
                                 placeholder="https://images.unsplash.com/..."
                                 value={newProofPhotoUrl}
                                 onChange={(e) => setNewProofPhotoUrl(e.target.value)}
-                                className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2 text-xs text-white font-mono"
+                                className="w-full bg-charcoal border border-stone rounded p-2 text-xs text-white font-mono"
                               />
                             </div>
                             
@@ -2463,7 +2500,7 @@ export default function AdminCMS({
                                 placeholder="Ej: Retrato Novia"
                                 value={newProofPhotoTitle}
                                 onChange={(e) => setNewProofPhotoTitle(e.target.value)}
-                                className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2 text-xs text-white font-sans"
+                                className="w-full bg-charcoal border border-stone rounded p-2 text-xs text-white font-sans"
                               />
                             </div>
 
@@ -2471,7 +2508,7 @@ export default function AdminCMS({
                               <button
                                 type="button"
                                 onClick={handleAddProofPhoto}
-                                className="w-full py-2 bg-gold-500 hover:bg-gold-400 text-dark font-mono text-[9px] tracking-wider uppercase font-bold rounded cursor-pointer"
+                                className="w-full py-2 bg-white/10 hover:bg-white/15 text-white border border-white/10 font-mono text-[9px] tracking-wider uppercase font-bold rounded cursor-pointer"
                               >
                                 {t('Agregar Foto', 'Add Photo')}
                               </button>
@@ -2489,14 +2526,14 @@ export default function AdminCMS({
                             <div className="absolute inset-0 bg-black/75 opacity-0 group-hover:opacity-100 transition-opacity p-2 flex flex-col justify-between text-left text-[11px] font-mono">
                               <div>
                                 <span className="text-white/90 font-semibold block truncate">{p.title}</span>
-                                <span className="text-gold-400 text-[10px] block">⚡ SH:{p.sharpness} CO:{p.thirdsAlign} EM:{p.emotionScore}</span>
+                                <span className="text-white/70 text-[10px] block">⚡ SH:{p.sharpness} CO:{p.thirdsAlign} EM:{p.emotionScore}</span>
                                 {p.location && <span className="text-white/50 block mt-0.5 truncate">📍 {p.location}</span>}
                               </div>
                               <div className="flex flex-col space-y-1">
                                 <button
                                   type="button"
                                   onClick={() => setEditingProofPhotoId(p.id)}
-                                  className="w-full py-1 px-1.5 bg-gold-500 hover:bg-gold-600 text-dark font-mono text-[10px] uppercase tracking-wider rounded font-bold text-center cursor-pointer flex items-center justify-center space-x-0.5"
+                                  className="w-full py-1 px-1.5 bg-white/10 hover:bg-white/15 text-dark font-mono text-[10px] uppercase tracking-wider rounded font-bold text-center cursor-pointer flex items-center justify-center space-x-0.5"
                                 >
                                   <Edit size={8} />
                                   <span>{t('Editar', 'Edit')}</span>
@@ -2512,25 +2549,15 @@ export default function AdminCMS({
                               </div>
                             </div>
                             {p.isFav && (
-                              <div className="absolute top-1 right-1 bg-gold-400 text-dark px-1.5 py-0.5 rounded text-[10px] font-mono font-bold">
+                              <div className="absolute top-1 right-1 bg-white/10 text-white px-1.5 py-0.5 rounded text-[10px] font-mono font-bold">
                                 FAV
                               </div>
-                            )}
-                            {b.contractData && (
-                              <button
-                                type="button"
-                                onClick={() => setContractToView(b)}
-                                className="mt-4 inline-flex items-center gap-2 px-3 py-2 bg-gold-500/10 border border-gold-500/30 text-gold-300 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-gold-500/20 transition-all"
-                              >
-                                <FileText size={12} />
-                                {t('Ver / Descargar Contrato', 'View / Download Contract', 'Ver / Baixar Contrato')}
-                              </button>
                             )}
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <div className="border border-dashed border-white/10 rounded-xl p-8 text-center text-xs text-white/40">
+                      <div className="border border-dashed border-white/10 rounded-lg p-8 text-center text-xs text-white/40">
                         {t('No hay fotos en esta galería aún. Añade fotos usando el formulario de arriba.', 'No photos in this gallery yet. Add photos using the form above.')}
                       </div>
                     )}
@@ -2548,13 +2575,13 @@ export default function AdminCMS({
                             exit={{ opacity: 0 }}
                           >
                             <motion.div 
-                              className="bg-dark border border-gold-400/20 rounded-2xl p-6 w-full max-w-md space-y-4 text-left shadow-2xl"
+                              className="bg-dark border border-white/10 rounded-lg p-6 w-full max-w-md space-y-4 text-left shadow-2xl"
                               initial={{ scale: 0.95 }}
                               animate={{ scale: 1 }}
                               exit={{ scale: 0.95 }}
                             >
                               <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                                <h4 className="font-serif text-sm font-semibold text-gold-300 uppercase tracking-wider">
+                                <h4 className="font-serif text-sm font-semibold text-white/60 uppercase tracking-wider">
                                   {t('Editar Metadatos de Foto de Prueba', 'Edit Proof Photo Metadata')}
                                 </h4>
                                 <button
@@ -2582,7 +2609,7 @@ export default function AdminCMS({
                                       );
                                       setClientForm({ ...clientForm, photos: updatedPhotos });
                                     }}
-                                    className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2 text-xs text-white focus:outline-none focus:border-gold-400"
+                                    className="w-full bg-charcoal border border-stone rounded p-2 text-xs text-white focus:outline-none focus:border-white/30"
                                   />
                                 </div>
 
@@ -2598,7 +2625,7 @@ export default function AdminCMS({
                                       );
                                       setClientForm({ ...clientForm, photos: updatedPhotos });
                                     }}
-                                    className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2 text-xs text-white focus:outline-none focus:border-gold-400"
+                                    className="w-full bg-charcoal border border-stone rounded p-2 text-xs text-white focus:outline-none focus:border-white/30"
                                   />
                                 </div>
 
@@ -2614,7 +2641,7 @@ export default function AdminCMS({
                                       );
                                       setClientForm({ ...clientForm, photos: updatedPhotos });
                                     }}
-                                    className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2 text-xs text-white focus:outline-none focus:border-gold-400 resize-none font-sans"
+                                    className="w-full bg-charcoal border border-stone rounded p-2 text-xs text-white focus:outline-none focus:border-white/30 resize-none font-sans"
                                   />
                                 </div>
                               </div>
@@ -2623,7 +2650,7 @@ export default function AdminCMS({
                                 <button
                                   type="button"
                                   onClick={() => setEditingProofPhotoId(null)}
-                                  className="py-1.5 px-4 bg-gold-500 text-dark hover:bg-gold-400 rounded-md text-[9px] font-mono tracking-widest uppercase font-bold cursor-pointer"
+                                  className="py-1.5 px-4 bg-white/10 text-white hover:bg-white/15 border border-white/10 rounded-md text-[9px] font-mono tracking-widest uppercase font-bold cursor-pointer"
                                 >
                                   {t('Listo', 'Done')}
                                 </button>
@@ -2639,7 +2666,7 @@ export default function AdminCMS({
                   <div className="flex items-center space-x-3 border-t border-white/10 pt-4">
                     <button
                       type="submit"
-                      className="py-2 px-6 bg-gold-500 text-dark hover:bg-gold-400 rounded-lg text-[10px] font-mono tracking-widest uppercase font-bold flex items-center space-x-1 cursor-pointer"
+                      className="py-2 px-6 bg-white/10 text-white hover:bg-white/15 border border-white/10 rounded-lg text-[10px] font-mono tracking-widest uppercase font-bold flex items-center space-x-1 cursor-pointer"
                     >
                       <Check size={12} />
                       <span>{clientEditItem ? t('Guardar Cambios', 'Save Changes') : t('Crear Cuenta de Cliente', 'Create Client Account')}</span>
@@ -2660,9 +2687,9 @@ export default function AdminCMS({
             )}
 
             {/* CLIENTS LIST / DIRECTORY */}
-            <div className="bg-charcoal border border-white/10 rounded-xl overflow-hidden">
+            <div className="bg-charcoal border border-white/10 rounded-lg overflow-hidden">
               <div className="p-4 border-b border-white/10 bg-dark-gray">
-                <h3 className="text-xs font-mono text-gold-400 uppercase tracking-wider">
+                <h3 className="text-xs font-mono text-white/70 uppercase tracking-wider">
                   {t('Listado de Clientes Activos', 'Active Client Directory')}
                 </h3>
               </div>
@@ -2694,14 +2721,14 @@ export default function AdminCMS({
                           </div>
 
                           <div className="flex items-center space-x-4 pt-1.5 text-[10px] font-mono">
-                            <div className="flex items-center space-x-1 text-gold-400 bg-gold-400/5 px-2 py-0.5 rounded border border-gold-400/10">
+                            <div className="flex items-center space-x-1 text-white/70 bg-white/5 px-2 py-0.5 rounded border border-white/10">
                               <CheckSquare size={10} />
                               <span className="font-bold">PASSCODE: {account.passcode}</span>
                             </div>
                             <div className="text-white/70">
-                              <span>📁 {account.photos?.length || 0} {t('Fotos', 'Photos')}</span>
+                              <span>📍 {account.photos?.length || 0} {t('Fotos', 'Photos')}</span>
                             </div>
-                            <div className="text-gold-300">
+                            <div className="text-white/60">
                               <span>⭐ {favoritesCount} {t('Favoritas', 'Favorites')}</span>
                             </div>
                           </div>
@@ -2725,7 +2752,7 @@ export default function AdminCMS({
                                 triggerAlert(t('✓ Link copiado al portapapeles', '✓ Link copied to clipboard'));
                               });
                             }}
-                            className="py-1.5 px-3 bg-gold-400/10 hover:bg-gold-400/20 text-gold-300 rounded text-[9px] font-mono uppercase tracking-wider flex items-center space-x-1 cursor-pointer border border-gold-400/20 transition-all"
+                            className="py-1.5 px-3 bg-white/10 hover:bg-white/15 text-white/60 rounded text-[9px] font-mono uppercase tracking-wider flex items-center space-x-1 cursor-pointer border border-white/10 transition-all"
                           >
                             <Copy size={10} />
                             <span>{t('Copiar Link', 'Copy Link')}</span>
@@ -2790,14 +2817,14 @@ export default function AdminCMS({
                   exit={{ opacity: 0 }}
                 >
                   <motion.div
-                    className="bg-dark border border-gold-400/20 rounded-2xl p-6 w-full max-w-lg space-y-4 text-left shadow-2xl"
+                    className="bg-dark border border-white/10 rounded-lg p-6 w-full max-w-lg space-y-4 text-left shadow-2xl"
                     initial={{ scale: 0.95 }}
                     animate={{ scale: 1 }}
                     exit={{ scale: 0.95 }}
                   >
                     <div className="flex items-center justify-between border-b border-white/10 pb-3">
                       <div className="space-y-0.5">
-                        <h3 className="font-serif text-base text-gold-300 font-semibold">
+                        <h3 className="font-serif text-base text-white/60 font-semibold">
                           {t('Enviar Link de Galería por Email', 'Send Gallery Link via Email')}
                         </h3>
                         <p className="text-[10px] text-white/50 font-sans">
@@ -2820,7 +2847,7 @@ export default function AdminCMS({
                           type="text"
                           value={sendEmailSubject}
                           onChange={(e) => setSendEmailSubject(e.target.value)}
-                          className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white focus:outline-none focus:border-gold-400 font-sans"
+                          className="w-full bg-charcoal border border-stone rounded p-2.5 text-xs text-white focus:outline-none focus:border-white/30 font-sans"
                         />
                       </div>
                       <div className="space-y-1">
@@ -2829,7 +2856,7 @@ export default function AdminCMS({
                           rows={6}
                           value={sendEmailMessage}
                           onChange={(e) => setSendEmailMessage(e.target.value)}
-                          className="w-full bg-charcoal border border-[#D8C0A8] rounded p-2.5 text-xs text-white focus:outline-none focus:border-gold-400 font-sans resize-none"
+                          className="w-full bg-charcoal border border-stone rounded p-2.5 text-xs text-white focus:outline-none focus:border-white/30 font-sans resize-none"
                         />
                         <p className="text-[11px] text-white/40 font-mono">
                           {t('Podés usar {name} y {link} como marcadores.', 'You can use {name} and {link} as placeholders.')}
@@ -2883,12 +2910,12 @@ export default function AdminCMS({
                             setShowSendEmailModal(false);
                           } catch (err) {
                             console.error('Error sending gallery link email:', err);
-                            triggerAlert(t('✗ Error al enviar el email. Verificá la consola.', '✗ Error sending email. Check the console.'));
+                            triggerAlert(t('✓ Error al enviar el email. Verificá la consola.', '✓ Error sending email. Check the console.'));
                           } finally {
                             setIsSendingEmail(false);
                           }
                         }}
-                        className="py-2 px-5 bg-gold-500 text-dark hover:bg-gold-400 rounded-lg text-[9px] font-mono tracking-widest uppercase font-bold flex items-center space-x-1.5 cursor-pointer disabled:opacity-50"
+                        className="py-2 px-5 bg-white/10 text-white hover:bg-white/15 border border-white/10 rounded-lg text-[9px] font-mono tracking-widest uppercase font-bold flex items-center space-x-1.5 cursor-pointer disabled:opacity-50"
                       >
                         {isSendingEmail ? (
                           <>
@@ -2936,7 +2963,7 @@ export default function AdminCMS({
               >
                 <X size={16} />
               </button>
-              <div className="bg-dark-gray rounded-2xl p-4 sm:p-8 shadow-2xl">
+              <div className="bg-dark-gray rounded-lg p-4 sm:p-8 shadow-2xl">
                 <ContractView booking={contractToView} mode="view" lang={lang} t={TRANSLATIONS[lang]} />
               </div>
             </motion.div>
@@ -2964,8 +2991,8 @@ export default function AdminCMS({
             >
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center space-x-2">
-                  <Settings className="text-gold-400" size={18} />
-                  <span className="font-serif text-sm tracking-widest text-gold-50 font-bold">AUREA CMS</span>
+                  <Settings className="text-white/70" size={18} />
+                  <span className="font-serif text-sm tracking-widest text-white/90 font-bold">AUREA CMS</span>
                 </div>
                 <button
                   onClick={() => setMobileSidebarOpen(false)}
@@ -2981,13 +3008,14 @@ export default function AdminCMS({
                     { id: 'dashboard', icon: BarChart3, label: t('Dashboard', 'Dashboard', 'Painel') },
                      { id: 'photos', icon: Camera, label: t('Fotografías', 'Photographs', 'Fotografias') },
                      { id: 'bookings', icon: Calendar, label: t('Cola de Reservas', 'Bookings Queue', 'Fila de Reservas') },
+                     { id: 'reminders', icon: Bell, label: t('Recordatorios', 'Reminders', 'Lembretes') },
                      { id: 'testimonials', icon: MessageSquare, label: t('Testimonios', 'Testimonials', 'Depoimentos') },
                      { id: 'packages', icon: ShoppingBag, label: t('Paquetes Fotográficos', 'Photography Packages', 'Pacotes Fotográficos') },
                     { id: 'session-categories', icon: Sliders, label: t('Tipos de Sesión', 'Session Types', 'Tipos de Sessão') },
                     { id: 'messages', icon: MessageSquare, label: t('Bandeja de Entrada', 'Inbox', 'Caixa de Entrada') },
                     { id: 'seo', icon: FileCode, label: t('Configuración SEO', 'SEO Schema', 'Configuração SEO') },
                     { id: 'profile', icon: User, label: t('Biografía y Perfil', 'Biography & Profile', 'Biografia e Perfil') },
-                    { id: 'clients', icon: Users, label: t('Clientes y Galerías', 'Clients & Galleries', 'Clientes e Galerias') },
+                    { id: 'clients', icon: Users, label: t('Clientes y Galerías', 'Clients & Galleries', 'Clientes e Galerías') },
                     { id: 'email_settings', icon: Mail, label: t('Configuración de Correo', 'Email Configuration', 'Configuração de E-mail') },
                   ] as const).map(tab => {
                     const Icon = tab.icon;
@@ -3002,13 +3030,13 @@ export default function AdminCMS({
                           setMobileSidebarOpen(false);
                         }}
                         className={`w-full text-left min-h-[48px] px-3 py-3 rounded-lg font-mono text-xs uppercase tracking-wider transition-all flex items-center space-x-3 cursor-pointer ${
-                          isActive ? 'bg-gold-500 text-dark font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
+                          isActive ? 'bg-white/10 text-white font-bold' : 'text-white/75 hover:text-white hover:bg-white/5'
                         }`}
                       >
                         <Icon size={16} />
                         <span className="flex-1">{tab.label}</span>
                         {tab.id === 'bookings' && bookings.filter(b => b.status === 'pending').length > 0 && (
-                          <span className="bg-gold-500 text-dark text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
+                          <span className="bg-white/10 text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
                             {bookings.filter(b => b.status === 'pending').length}
                           </span>
                         )}
@@ -3018,7 +3046,7 @@ export default function AdminCMS({
                           </span>
                         )}
                         {tab.id === 'messages' && messages.filter(m => !m.isRead).length > 0 && (
-                          <span className="bg-gold-500 text-dark text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
+                          <span className="bg-white/10 text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight">
                             {messages.filter(m => !m.isRead).length}
                           </span>
                         )}
@@ -3038,7 +3066,7 @@ export default function AdminCMS({
                       setMobileSidebarOpen(false);
                       onBackToSite?.();
                     }}
-                    className="w-full text-left min-h-[48px] px-3 py-3 rounded-lg font-mono text-xs uppercase tracking-wider text-white/60 hover:text-gold-400 hover:bg-white/5 transition-all flex items-center space-x-3 cursor-pointer"
+                    className="w-full text-left min-h-[48px] px-3 py-3 rounded-lg font-mono text-xs uppercase tracking-wider text-white/60 hover:text-white hover:bg-white/5 transition-all flex items-center space-x-3 cursor-pointer"
                   >
                     <Eye size={16} />
                     <span>{t('Ver Sitio', 'View Site', 'Ver Site')}</span>
@@ -3064,14 +3092,14 @@ export default function AdminCMS({
   );
 }
 
-/* ──────────────────────────────────────────────
+/* ——————————————————————————————————————————————
    Session Categories Editor (sub-component)
-   ────────────────────────────────────────────── */
+   —————————————————————————————————————————————— */
 interface SessionCatEditorProps {
   categories: SessionCategory[];
   onUpdate: (cats: SessionCategory[]) => void;
   triggerAlert: (msg: string) => void;
-  lang: ActiveLanguage;
+  lang: ActiveLanguíage;
 }
 
 const CATEGORY_ICONS = ['Heart', 'Gem', 'Camera', 'Users', 'Baby', 'Sparkles', 'PartyPopper', 'GraduationCap', 'Briefcase', 'Utensils', 'Package', 'Calendar'];
@@ -3088,7 +3116,7 @@ function SessionCategoriesEditor({ categories, onUpdate, triggerAlert, lang }: S
 
   const handleSaveAll = () => {
     onUpdate(localCats);
-    triggerAlert(t('✓ Categorías guardadas.', '✓ Categories saved.'));
+    triggerAlert(t('✓ Categorías guíardadas.', '✓ Categories saved.'));
   };
 
   const startEdit = (cat: SessionCategory) => setEditingCat({ ...cat });
@@ -3110,7 +3138,7 @@ function SessionCategoriesEditor({ categories, onUpdate, triggerAlert, lang }: S
     setEditingCat({ ...editingCat, [field]: value });
   };
 
-  const inputClass = "w-full bg-charcoal border border-[#D8C0A8] rounded px-2.5 py-2 text-xs text-white placeholder-white/30 focus:outline-none focus:border-gold-400 font-sans";
+  const inputClass = "w-full bg-charcoal border border-stone rounded px-2.5 py-2 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-sans";
   const labelClass = "text-[9px] font-mono text-white/50 uppercase";
 
   return (
@@ -3120,7 +3148,7 @@ function SessionCategoriesEditor({ categories, onUpdate, triggerAlert, lang }: S
           <h2 className="font-serif text-2xl text-white">{t('Tipos de Sesión', 'Session Types')}</h2>
           <p className="text-xs text-white/50">{t('Gestiona las categorías de sesión que se muestran en la sección pública.', 'Manage session categories shown in the public section.')}</p>
         </div>
-        <button onClick={handleSaveAll} className="py-1.5 px-4 bg-gold-500 text-dark hover:bg-gold-400 rounded-lg text-[10px] font-mono tracking-widest uppercase font-semibold flex items-center space-x-1 cursor-pointer transition-all">
+        <button onClick={handleSaveAll} className="py-1.5 px-4 bg-white/10 text-white hover:bg-white/15 border border-white/10 rounded-lg text-[10px] font-mono tracking-widest uppercase font-semibold flex items-center space-x-1 cursor-pointer transition-all">
           <Save size={11} />
           <span>{t('Guardar Todo', 'Save All')}</span>
         </button>
@@ -3129,7 +3157,7 @@ function SessionCategoriesEditor({ categories, onUpdate, triggerAlert, lang }: S
       {/* Edit Modal */}
       {editingCat && (
         <div className="fixed inset-0 z-50 flex items-start justify-center p-4 bg-overlay/80 backdrop-blur-sm overflow-y-auto pt-12">
-          <div className="bg-charcoal border border-[#D8C0A8] rounded-2xl p-6 max-w-lg w-full space-y-5 shadow-2xl my-8">
+          <div className="bg-charcoal border border-stone rounded-lg p-6 max-w-lg w-full space-y-5 shadow-2xl my-8">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h3 className="font-serif text-lg text-white">{t('Editar Categoría', 'Edit Category')}</h3>
               <button onClick={cancelEdit} className="text-white/50 hover:text-white cursor-pointer p-1"><X size={16} /></button>
@@ -3139,7 +3167,7 @@ function SessionCategoriesEditor({ categories, onUpdate, triggerAlert, lang }: S
               <div className="space-y-1">
                 <label className={labelClass}>{t('Icono', 'Icon')}</label>
                 <select value={editingCat.icon} onChange={(e) => updateField('icon', e.target.value)}
-                  className="w-full bg-charcoal border border-[#D8C0A8] rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-gold-400">
+                  className="w-full bg-charcoal border border-stone rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-white/30">
                   {CATEGORY_ICONS.map(ico => <option key={ico} value={ico} className="bg-charcoal">{ico}</option>)}
                 </select>
               </div>
@@ -3155,8 +3183,8 @@ function SessionCategoriesEditor({ categories, onUpdate, triggerAlert, lang }: S
               <div className="space-y-1">
                 <label className={labelClass}>{t('Descripción', 'Description')}</label>
                 <div className="grid grid-cols-2 gap-2">
-                  <textarea rows={2} value={editingCat.description_es} onChange={(e) => updateField('description_es', e.target.value)} placeholder="Español" className={inputClass + " resize-none"} />
-                  <textarea rows={2} value={editingCat.description_en} onChange={(e) => updateField('description_en', e.target.value)} placeholder="English" className={inputClass + " resize-none"} />
+                   <textarea rows={2} value={editingCat.description_es} onChange={(e) => updateField('description_es', e.target.value)} placeholder="Español" className={inputClass + " resize-none"} />
+                   <textarea rows={2} value={editingCat.description_en} onChange={(e) => updateField('description_en', e.target.value)} placeholder="English" className={inputClass + " resize-none"} />
                 </div>
               </div>
 
@@ -3164,7 +3192,7 @@ function SessionCategoriesEditor({ categories, onUpdate, triggerAlert, lang }: S
                 <label className={labelClass}>{t('Imagen', 'Image')}</label>
                 <div className="flex items-center space-x-2">
                   <input value={editingCat.image} onChange={(e) => updateField('image', e.target.value)} placeholder="https://..." className={inputClass} />
-                  <label className="shrink-0 py-2 px-3 bg-white/10 hover:bg-white/20 border border-[#D8C0A8] rounded text-[9px] font-mono text-white/70 hover:text-white uppercase tracking-widest cursor-pointer transition-all whitespace-nowrap">
+                  <label className="shrink-0 py-2 px-3 bg-white/10 hover:bg-white/20 border border-stone rounded text-[9px] font-mono text-white/70 hover:text-white uppercase tracking-widest cursor-pointer transition-all whitespace-nowrap">
                     {t('Subir', 'Upload')}
                     <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
                       const file = e.target.files?.[0];
@@ -3190,7 +3218,7 @@ function SessionCategoriesEditor({ categories, onUpdate, triggerAlert, lang }: S
                 </div>
                 <div className="space-y-1 flex items-end pb-2">
                   <label className="flex items-center space-x-2 cursor-pointer">
-                    <input type="checkbox" checked={editingCat.active} onChange={(e) => updateField('active', e.target.checked)} className="accent-gold-500 w-3.5 h-3.5" />
+                    <input type="checkbox" checked={editingCat.active} onChange={(e) => updateField('active', e.target.checked)} className="accent-white/50 w-3.5 h-3.5" />
                     <span className="text-[10px] font-mono text-white/70 uppercase">{t('Activo', 'Active')}</span>
                   </label>
                 </div>
@@ -3198,17 +3226,17 @@ function SessionCategoriesEditor({ categories, onUpdate, triggerAlert, lang }: S
 
               {/* Image preview */}
               {editingCat.image && (
-                <div className="rounded-xl overflow-hidden border border-white/10">
+                <div className="rounded-lg overflow-hidden border border-white/10">
                   <img src={editingCat.image} alt="Preview" className="w-full h-32 object-cover" />
                 </div>
               )}
             </div>
 
             <div className="flex justify-end space-x-3 pt-2 border-t border-white/10">
-              <button onClick={cancelEdit} className="px-4 py-2 border border-[#D8C0A8] rounded-lg text-[10px] font-mono text-white/70 hover:text-white cursor-pointer transition-all">
+              <button onClick={cancelEdit} className="px-4 py-2 border border-stone rounded-lg text-[10px] font-mono text-white/70 hover:text-white cursor-pointer transition-all">
                 {t('Cancelar', 'Cancel')}
               </button>
-              <button onClick={saveEdit} className="px-4 py-2 bg-gold-500 text-dark font-mono text-[10px] tracking-widest uppercase font-bold rounded-lg hover:bg-gold-400 cursor-pointer transition-all">
+              <button onClick={saveEdit} className="px-4 py-2 bg-white/10 text-white font-mono text-[10px] tracking-widest uppercase font-bold rounded-lg hover:bg-white/15 cursor-pointer transition-all">
                 {t('Guardar', 'Save')}
               </button>
             </div>
@@ -3221,7 +3249,7 @@ function SessionCategoriesEditor({ categories, onUpdate, triggerAlert, lang }: S
         {sorted.map(cat => {
           const cName = lang === 'es' ? cat.name_es : cat.name_en;
           return (
-            <div key={cat.id} className={`flex items-center justify-between p-3 rounded-xl border transition-all ${cat.active ? 'border-[#D8C0A8] bg-dark-gray' : 'border-[#D8C0A8]/30 bg-dark-gray opacity-60'}`}>
+            <div key={cat.id} className={`flex items-center justify-between p-3 rounded-lg border transition-all ${cat.active ? 'border-stone bg-dark-gray' : 'border-stone/30 bg-dark-gray opacity-60'}`}>
               <div className="flex items-center space-x-3 flex-1 min-w-0">
                 <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-charcoal border border-white/10">
                   {cat.image && <img src={cat.image} alt={cName} className="w-full h-full object-cover" />}
@@ -3233,10 +3261,10 @@ function SessionCategoriesEditor({ categories, onUpdate, triggerAlert, lang }: S
               </div>
               <div className="flex items-center space-x-1.5 shrink-0">
                 <label className="flex items-center space-x-1 cursor-pointer">
-                  <input type="checkbox" checked={cat.active} onChange={() => toggleActive(cat.id)} className="accent-gold-500 w-3 h-3" />
+                  <input type="checkbox" checked={cat.active} onChange={() => toggleActive(cat.id)} className="accent-white/50 w-3 h-3" />
                   <span className="text-[11px] font-mono text-white/40">{t('ON', 'ON')}</span>
                 </label>
-                <label className="p-1.5 text-white/40 hover:text-gold-400 cursor-pointer transition-colors" title={t('Subir imagen', 'Upload image')}>
+                <label className="p-1.5 text-white/40 hover:text-white cursor-pointer transition-colors" title={t('Subir imagen', 'Upload image')}>
                   <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
                     const file = e.target.files?.[0];
                     if (!file) return;
@@ -3252,7 +3280,7 @@ function SessionCategoriesEditor({ categories, onUpdate, triggerAlert, lang }: S
                   }} />
                   <Upload size={12} />
                 </label>
-                <button onClick={() => startEdit(cat)} className="p-1.5 text-white/40 hover:text-gold-400 cursor-pointer transition-colors" title={t('Editar', 'Edit')}>
+                <button onClick={() => startEdit(cat)} className="p-1.5 text-white/40 hover:text-white cursor-pointer transition-colors" title={t('Editar', 'Edit')}>
                   <Edit3 size={12} />
                 </button>
               </div>

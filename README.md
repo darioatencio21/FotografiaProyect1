@@ -16,6 +16,7 @@
 - [Arquitectura y Flujo](#arquitectura-y-flujo)
 - [Vistas](#vistas)
 - [Internacionalización](#internacionalización)
+- [Workflows de GitHub](#workflows-de-github)
 - [Despliegue](#despliegue)
 - [Variables de Entorno](#variables-de-entorno)
 
@@ -23,9 +24,64 @@
 
 ## Descripción
 
-Miriam Campos Photography es una aplicación web completa que funciona como **portafolio público interactivo** y como **suite de gestión empresarial** para un estudio fotográfico de alta gama con estética editorial premium. Permite a los visitantes explorar galerías de fotos, reservar sesiones en un flujo de 2 pasos (elegir tipo de sesión → ver paquetes), contactar al estudio y acceder a un portal privado de pruebas mediante links compartibles. Del lado administrativo, incluye un CMS completo con dashboard de analytics, gestión de contenido, cola de reservas, bandeja de mensajes con notificaciones en tiempo real, categorías de sesión, paquetes fotográficos configurables y administración de cuentas de clientes.
+Miriam Campos Photography es una aplicación web completa que funciona como **portafolio público interactivo** y como **suite de gestión empresarial** para un estudio fotográfico de alta gama con estética editorial premium.
 
-El proyecto está diseñado para desplegarse en **Vercel** con Supabase (PostgreSQL + Storage + Auth) como backend.
+### Portafolio público
+
+- **Hero split-screen** con animación Ken Burns y gradiente de 3 capas
+- **Galería Pixieset integrada** — 23 galerías externas enlazadas desde Pixieset con vista en grid y hover overlay
+- **Feed de Instagram** en vivo con fotos y enlace directo al perfil
+- **Sección Sobre mí editorial** — fotografía en columna, biografía fluida, línea de tiempo vertical con hitos profesionales (2010–2025) y 3 pilares de filosofía
+- **Sección de estadísticas** con Count Up animado al entrar en viewport
+- **Paquetes destacados** en la home con enlace directo a reserva
+- **Testimonios** — grid de experiencias con formulario público de envío
+- **FAQ** con acordeón animado
+- **Formulario de contacto** con EmailJS y datos del estudio
+- **Portal de cliente con links compartibles** — área protegida por código de acceso donde los clientes pueden ver, seleccionar, descargar fotos y solicitar impresiones. Auto-login vía query param `?gallery=PASSCODE`
+- **Páginas legales** — Política de Privacidad y Términos del Servicio multi-idioma
+
+### Suite administrativa (CMS)
+
+Panel completo accesible vía Supabase Auth con las siguientes secciones:
+
+- **Dashboard** — analytics con gráficos de ingresos y tráfico, micro-stats (ingresos estimados, tasa de conversión, sesiones, visitantes)
+- **Fotografías** — CRUD completo con drag & drop upload, compresión automática a WebP, editor de metadatos EXIF, categorías, featured toggle
+- **Testimonios** — CRUD con aprobación, edición y eliminación
+- **Cola de Reservas** — tabla expandible con estado (pending/accepted/rejected), datos de contacto, cuestionario creativo, gestión de montos (depósito, restante, gastos de viaje), firma de contratos y marcado como pagado
+- **Facturas** — listado con estado (paid/partial/unpaid/cancelled) y detalle de items
+- **Paquetes Fotográficos** — CRUD con nombre bi-idioma, precio, depósito, duración, descripción, beneficios, nota de viaje, imagen por upload, orden, activo y destacado
+- **Tipos de Sesión** — CRUD con nombre bi-idioma, descripción, ícono, imagen y orden
+- **Bandeja de Entrada** — mensajes de contacto con reply-to via mailto, marcar como leído
+- **Configuración SEO** — título, descripción, Open Graph, Twitter Card, keywords, robots.txt, héroe izquierda/derecha con upload de imágenes
+- **Biografía y Perfil** — nombre, avatar con upload, título, cámara/lente preferida, biografía bi-idioma
+- **Clientes y Galerías** — CRUD de cuentas con fotos de prueba (proofs), upload múltiple con compresión, envío de link compartible por email, generación de passcode
+- **Configuración de Correo** — EmailJS service ID, template ID, public key, receiver email, auto-respuesta personalizable
+
+### Notificaciones en tiempo real
+
+- Badge con contador de pendientes (reservas `pending` y mensajes sin leer) en sidebar
+- Toast dorado al recibir nueva reserva o mensaje vía Supabase Realtime
+- Notificación de escritorio (API Notification) para nuevas reservas y mensajes
+
+### Checkout y contratos
+
+- **Checkout simulado con Stripe** — modal con formulario de tarjeta, validación, animación de procesamiento 3D Secure, comprobante de transacción con tx hash
+- **Flujo completo de contratos** — paso de pago → firma de contrato digital (cliente) → contra-firma (fotógrafa en CMS) → recibo de factura
+- **Contratos de boda** con campos específicos (novia, novio, ceremonia, recepción)
+- **Contratos de sesión** con datos generales del cliente
+- **Generación automática de facturas** al completar el pago
+
+### Otras características
+
+- **Notificaciones por email** — EmailJS integrado en formulario de contacto, reservas y envío de links de galería, con auto-respuesta configurable al cliente
+- **Multi-idioma** — Español e Inglés con cambio en tiempo real
+- **Cursor personalizado** con física Spring que cambia de estado sobre enlaces, botones e imágenes
+- **Navbar con drawer móvil** — apertura mediante pastilla deslizable dorada con drag gesture
+- **Persistencia offline** — datos cacheados en localStorage con prefijo `aurea_`. Supabase como fuente de verdad con sincronización en segundo plano
+- **Seeding automático** desde mock data cuando las tablas están vacías
+- **Migración de datos** — reparación automática de entidades HTML escapadas
+- **Pixieset integrado** — redirección a galerías externas de Pixieset para entrega de fotos a clientes
+- **Newsletter** — suscripción simulada en el footer
 
 ---
 
@@ -45,31 +101,42 @@ El proyecto está diseñado para desplegarse en **Vercel** con Supabase (Postgre
 
 ### Filosofía de diseño
 
-- **Estética editorial** inspirada en Leica, Hasselblad, Aesop, Kinfolk, Madi Bence, Folk Studio y portfolios galardonados en Awwwards.
-- **Imágenes en blanco y negro por defecto**, revelan color al hacer hover — efecto slow-burn de 800ms con escala `1.04×`.
-- **Tarjetas de galería limpias**: sin texto permanente sobre las fotos, solo overlay hover con fade+slide para título y categoría.
-- **Gradiente sutíl desde abajo** (`from-overlay/8`) que aparece solo en hover para legibilidad.
-- **Hero dual** (split screen en desktop, single en mobile) con gradiente de 3 capas y animación Ken Burns via Motion.
-- **Sección de estadísticas** con Count Up al entrar en viewport, editoriale triptych layout (3 columnas en desktop, 1 en mobile).
-- **Shadows eliminados** de todas las tarjetas, botones y modales — apuesta por bordes finos y espacio negativo.
-- **Sección Sobre mí con diseño editorial**: fotografía en columna al inicio, biografía fluida, línea de tiempo vertical con hitos profesionales reales y sección de filosofía con 3 pilares. Animaciones sutiles con scroll (fade-up, divisores animados, stagger en timeline). Sin tarjetas, sin bordes redondeados, sin badges.
+- Estética editorial inspirada en Leica, Hasselblad, Aesop, Kinfolk
+- Sin sombras en tarjetas, botones o modales — apuesta por bordes finos y espacio negativo
+- Logo SVG con monograma "mc", anillos dorados concéntricos y rosa como acento
+- Animaciones sutiles con scroll (fade-up, divisores animados, stagger)
 
 ---
 
 ## Funcionalidades
 
-- **Portafolio interactivo** — Galería masonry con filtros por categoría (16 categorías), búsqueda multilingual y lightbox a pantalla completa con descarga.
-- **Sistema de reservas en 2 pasos** — Selección de tipo de sesión → paquetes por categoría, con nota de gastos de viaje por paquete. Formulario simplificado con fecha, horario y datos de contacto.
-- **Portal de cliente con links compartibles** — Área protegida por código de acceso donde los clientes pueden ver, seleccionar y descargar sus fotos, y solicitar impresiones. Cada cliente tiene un link directo tipo `?gallery=PASSCODE` que puede compartirse por WhatsApp/email.
-- **Sección Sobre mí editorial** — Diseño tipo revista con fotografía en columna, biografía fluida, línea de tiempo vertical con hitos profesionales reales (2010–2025) y filosofía con 3 pilares.
-- **CMS administrativo** — Dashboard con analytics, CRUD completo de fotografías (con drag & drop y compresión), servicios, testimonios, blog, FAQ, mensajería, SEO, perfil del fotógrafo, categorías de sesión, paquetes fotográficos (agrupados por categoría con upload de imágenes), cuentas de clientes con fotos de prueba, editor de sesiones y notificaciones en tiempo real. Con sidebar responsive y botón flotante para navegación móvil.
-- **Notificaciones en tiempo real** — Badge con contador de pendientes por estado (reservas `pending` y mensajes sin leer) en sidebar desktop y drawer mobile, toast dorado y notificación de escritorio (API Notification) para nuevas reservas y mensajes vía Supabase Realtime. Marcado automático como leído al hacer clic.
-- **Checkout simulado** — Modal de pago con Stripe simulado, con animación de procesamiento y comprobante de transacción.
-- **Notificaciones por email** — Integración con EmailJS para notificaciones al administrador y auto-respuestas al cliente desde el formulario de contacto, reservas y envío de links de galería.
-- **Multi-idioma** — Soporte completo para Español, English y Português con cambio en tiempo real en toda la interfaz.
-- **Cursor personalizado** — Cursor animado con física Spring que cambia de estado sobre elementos interactivos.
-- **Navbar scrolleable** — Barra de navegación solid, menú mobile tipo drawer con apertura mediante pastilla deslizable dorada.
-- **Persistencia offline** — Datos cacheados en localStorage con prefijo `aurea_`. Supabase como fuente de verdad con sincronización en segundo plano.
+| Funcionalidad                    | Descripción                                                                 |
+| -------------------------------- | --------------------------------------------------------------------------- |
+| Hero split-screen                | Animación Ken Burns, 2 imágenes en desktop, 1 en mobile, gradiente 3 capas  |
+| Galería Pixieset                 | 23 galerías enlazadas externamente con hover overlay y fallback placeholder |
+| Feed de Instagram                | Grid de fotos desde Instagram con overlay y enlace al perfil                |
+| Sobre mí editorial               | Timeline vertical (2010–2025), biografía fluida, 3 pilares de filosofía     |
+| Estadísticas animadas            | Count Up con 2000+ sesiones, 15+ años, 98% satisfacción                     |
+| Portafolio con filtros           | 16 categorías de fotografía, búsqueda por texto, lightbox con descarga      |
+| Lightbox premium                 | Vista completa con EXIF, favoritos, descarga, compartir, modo RAW vs editado |
+| Sistema de reservas 2 pasos      | Categoría de sesión → paquetes → formulario con fecha, horario, contacto    |
+| Reservas de boda                 | Formulario extendido con datos de novia, novio, ceremonia y recepción       |
+| Checkout Stripe simulado         | Modal de pago con animación 3D Secure y comprobante de transacción          |
+| Contratos digitales              | Firma del cliente + contra-firma del fotógrafo, cláusulas por tipo          |
+| Facturación automática           | Generación de invoice al completar pago, con número único y estado          |
+| Portal de cliente                | Galería privada protegida por passcode, favoritos, descarga, selección de prints |
+| Link compartible                 | `?gallery=PASSCODE` para acceso directo al portal del cliente               |
+| CMS administrativo               | Dashboard, fotografías, testimonios, reservas, paquetes, sesiones, mensajes |
+| SEO configurable                 | Título, descripción, Open Graph, Twitter Card, hero images, keywords        |
+| Perfil del fotógrafo             | Nombre, avatar, biografía multi-idioma, equipo preferido                    |
+| Notificaciones en tiempo real    | Supabase Realtime para nuevas reservas y mensajes con desktop notification  |
+| EmailJS integrado                | Notificaciones al admin y auto-respuesta al cliente en contacto y reservas  |
+| Multi-idioma                     | Español e Inglés con cambio en tiempo real en toda la interfaz              |
+| Cursor personalizado             | Física Spring, cambia de estado (view/close/drag) sobre elementos           |
+| Drawer móvil                     | Pastilla dorada deslizable con drag gesture para abrir menú                 |
+| Persistencia offline             | localStorage con prefijo `aurea_`, fallback a mock data                     |
+| Subida de imágenes con compresión| Drag & drop, compresión a WebP, upload a Supabase Storage                   |
+| Galerías de pruebas (proofs)     | Upload múltiple, compresión, análisis (sharpness, composition, emotion)     |
 
 ---
 
@@ -88,7 +155,8 @@ El proyecto está diseñado para desplegarse en **Vercel** con Supabase (Postgre
 | Auth                | Supabase Auth                       | —       |
 | Hosting             | Vercel                              | —       |
 | Email               | EmailJS                             | —       |
-| CI/CD               | Vercel (automático desde GitHub)    | —       |
+| Galerías externas   | Pixieset                            | —       |
+| CI/CD               | GitHub Actions                      | —       |
 
 ---
 
@@ -96,43 +164,59 @@ El proyecto está diseñado para desplegarse en **Vercel** con Supabase (Postgre
 
 ```
 ├── public/
+│   └── favicon.svg                    # Favicon del estudio
 ├── supabase/
 │   └── migrations/
-│       └── 001_init.sql              # Esquema de tablas PostgreSQL + RLS
+│       └── 001_init.sql               # Esquema completo de tablas PostgreSQL + RLS + Storage policies
 ├── src/
-│   ├── App.tsx                       # Componente raíz: estado global, routing y lógica de datos
-│   ├── main.tsx                      # Punto de entrada de React
-│   ├── index.css                     # Configuración de Tailwind, tema (beige), fuentes y estilos globales
-│   ├── types.ts                      # Interfaces TypeScript para todos los modelos de datos
+│   ├── App.tsx                        # Componente raíz: estado global, routing, lógica de datos y UI principal
+│   ├── main.tsx                       # Punto de entrada de React
+│   ├── index.css                      # Tailwind v4, tema beige/dorado, fuentes, estilos globales
+│   ├── types.ts                       # Interfaces TypeScript para todos los modelos de datos
 │   ├── components/
-│   │   ├── Header.tsx                # Barra de navegación con menú drawer, pastilla deslizable y selector de idioma
-│   │   ├── Footer.tsx                # Pie de página con newsletter, redes sociales y enlaces legales
-│   │   ├── CustomCursor.tsx          # Cursor animado personalizado con física Spring
-│   │   ├── Lightbox.tsx              # Visor de fotos a pantalla completa con EXIF y acciones
-│   │   ├── BookingCalendar.tsx       # Formulario de reserva en 3 pasos
-│   │   ├── ClientPortal.tsx          # Portal de pruebas protegido por código
-│   │   ├── AboutSection.tsx          # Sección Sobre mí con diseño editorial, timeline vertical y filosofía
-│   │   ├── AdminCMS.tsx              # Panel de administración completo
-│   │   ├── StripeCheckout.tsx        # Modal de pago simulado con Stripe
-│   │   ├── LegalViews.tsx            # Páginas de Política de Privacidad y Términos
-│   │   └── Logo.tsx                  # Logotipo SVG del estudio
+│   │   ├── Header.tsx                 # Navbar con drawer móvil, selector de idioma, acceso a backoffice
+│   │   ├── Footer.tsx                 # Footer con newsletter, redes sociales, enlaces legales
+│   │   ├── CustomCursor.tsx           # Cursor animado con física Spring
+│   │   ├── Lightbox.tsx               # Visor de fotos fullscreen con EXIF, descarga, modo comparación RAW
+│   │   ├── BookingCalendar.tsx        # Formulario de reserva multi-paso con pago, contrato y factura
+│   │   ├── ClientPortal.tsx           # Portal de pruebas protegido por código con galería privada
+│   │   ├── AboutSection.tsx           # Sección Sobre mí editorial con timeline y filosofía
+│   │   ├── PixiesetGallery.tsx        # Galería externa de Pixieset con 23 galerías enlazadas
+│   │   ├── InstagramFeed.tsx          # Feed de Instagram integrado
+│   │   ├── ContractView.tsx           # Vista de contrato con firma digital (boda/sesión)
+│   │   ├── InvoiceReceipt.tsx         # Recibo de factura imprimible
+│   │   ├── StripeCheckout.tsx         # Modal de pago simulado con Stripe
+│   │   ├── AdminCMS.tsx               # Panel de administración completo con sidebar y tabs
+│   │   ├── AdminPackagesTab.tsx       # CRUD de paquetes fotográficos
+│   │   ├── AdminProfileTab.tsx        # Editor de perfil del fotógrafo
+│   │   ├── AdminSEOTab.tsx            # Configuración SEO
+│   │   ├── LegalViews.tsx             # Política de Privacidad y Términos del Servicio
+│   │   └── Logo.tsx                   # Logotipo SVG del estudio
 │   ├── lib/
-│   │   ├── supabase.ts               # Cliente Supabase (anon key)
-│   │   ├── db.ts                     # Capa CRUD: queries, storage, auth (reemplaza firebase.ts)
-│   │   └── sanitize.ts               # Funciones de sanitización de texto
+│   │   ├── supabase.ts                # Cliente Supabase (anon key) con limpieza de sesiones stale
+│   │   ├── db.ts                      # Capa CRUD: queries, storage, auth, seeding automático
+│   │   └── sanitize.ts               # Funciones de sanitización de texto, email, URL, teléfono
 │   └── data/
-│       └── mockData.ts               # Datos de inicialización, fallback y diccionario multi-idioma
+│       └── mockData.ts                # Datos iniciales, traducciones (100+ claves por idioma), fallback offline
 ├── scripts/
-│   ├── seed.ts                       # Siembra datos iniciales (analytics) vía service_role
-│   ├── setup-buckets.ts              # Crea buckets de Storage en Supabase
-│   └── apply-migration.ts            # Aplica migración SQL (fallback)
-├── .env.example                      # Plantilla de variables de entorno
-├── vercel.json                       # Configuración de deploy en Vercel
-├── vite.config.ts                    # Configuración de Vite
-├── tsconfig.json                     # Configuración de TypeScript
-├── package.json                      # Dependencias y scripts
-├── index.html                        # Entry point HTML
-└── metadata.json                     # Metadatos de AI Studio
+│   ├── seed.ts                        # Siembra datos de analytics vía service_role
+│   ├── setup-buckets.ts               # Crea buckets de Storage en Supabase
+│   └── apply-migration.ts             # Aplica migración SQL (fallback)
+├── .github/
+│   ├── dependabot.yml                 # Actualizaciones semanales de npm y mensuales de Actions
+│   └── workflows/
+│       ├── ci.yml                     # CI: type-check, audit, build
+│       ├── security.yml               # Gitleaks + dependency audit semanal
+│       ├── codeql.yml                 # Análisis estático CodeQL semanal
+│       ├── deploy.yml                 # Deploy a Vercel (tras CI exitoso)
+│       └── release.yml                # Release Please (Conventional Commits)
+├── .env.example                       # Plantilla de variables de entorno
+├── vercel.json                        # Configuración de deploy en Vercel
+├── vite.config.ts                     # Configuración de Vite con React + Tailwind
+├── tsconfig.json                      # Configuración de TypeScript
+├── package.json                       # Dependencias y scripts
+├── index.html                         # Entry point HTML con favicon
+└── metadata.json                      # Metadatos de AI Studio
 ```
 
 ---
@@ -193,21 +277,22 @@ La aplicación estará disponible en `http://localhost:3000`.
 
 ### Routing
 
-La aplicación utiliza **ruteo por estado** en lugar de React Router. El estado `currentView` en `App.tsx` determina qué componente/vista se renderiza. Las transiciones entre vistas se realizan mediante animaciones de Motion.
+La aplicación utiliza **ruteo por estado** en lugar de React Router. El estado `currentView` en `App.tsx` determina qué componente/vista se renderiza. Transiciones animadas con Motion.
 
 ```
 App.tsx
 └── currentView (state)
-    ├── "home"          → Hero + Stats + Portfolio Teaser
-    ├── "about"         → Biografía + Premios
-    ├── "portfolio"     → Galería completa (masonry)
-    ├── "services"      → Servicios + Booking
-    ├── "client-portal" → Portal de pruebas
-    ├── "faq"           → Preguntas frecuentes
-    ├── "contact"       → Formulario de contacto
-    ├── "admin"         → CMS (requiere login)
-    ├── "privacy"       → Política de privacidad
-    └── "terms"         → Términos del servicio
+    ├── "home"           → Hero split + Stats + Instagram + Paquetes destacados + Booking + Testimonios
+    ├── "about"          → AboutSection (biografía, timeline, filosofía)
+    ├── "portfolio"      → PixiesetGallery (23 galerías externas)
+    ├── "testimonials"   → Grid completo de testimonios + formulario público
+    ├── "services"       → Paso 1: Grid de categorías → Paso 2: Paquetes + BookingCalendar
+    ├── "client-portal"  → ClientPortal (login por passcode o ?gallery=)
+    ├── "faq"            → Acordeón de FAQ multi-idioma
+    ├── "contact"        → Formulario de contacto con EmailJS + datos del estudio
+    ├── "admin"          → AdminCMS (requiere login Supabase Auth)
+    ├── "privacy"        → LegalViews — Política de privacidad
+    └── "terms"          → LegalViews — Términos del servicio
 ```
 
 ### Flujo de Datos
@@ -216,7 +301,8 @@ App.tsx
 Supabase (PostgreSQL + Storage + Auth)
     │
     ├── getCollectionWithFallback() / getSingleDocument()
-    │   └── Si colección vacía → seed automático desde mockData
+    │   └── Si tabla vacía → seed automático desde mockData
+    │   └── Si tabla no existe → marca como missing, usa fallback
     │
     ▼
 App.tsx State + localStorage (caché offline, prefijo aurea_)
@@ -226,89 +312,92 @@ App.tsx State + localStorage (caché offline, prefijo aurea_)
     └── Cualquier mutación → saveDocument() / syncCollection() → Supabase
 ```
 
-1. **Carga inicial**: `App.tsx` fetches todas las tablas de Supabase mediante `getCollectionWithFallback()`.
-2. **Seeding automático**: Si una tabla está vacía, se seedea con los datos de `mockData.ts` y luego se lee de vuelta.
-3. **Fallback**: Solo si Supabase es inalcanzable (error de red) se usan los datos de `mockData.ts` como respaldo.
-4. **Caché offline**: Los datos se persisten en `localStorage` con claves con prefijo `aurea_`.
-5. **Sincronización**: Cada modificación (crear, editar, eliminar) llama a `saveDocument()` o `syncCollection()` para persistir en Supabase.
-6. **Admin CMS**: El panel administrativo realiza operaciones CRUD directas contra Supabase. Las notificaciones en tiempo real usan Supabase Realtime (`postgres_changes`).
+1. **Carga inicial**: `App.tsx` fetches todas las tablas de Supabase.
+2. **Seeding automático**: Si una tabla está vacía, se seedea con `mockData.ts`.
+3. **Fallback**: Si Supabase es inalcanzable, se usan los datos de `mockData.ts`.
+4. **Caché offline**: Datos persisten en `localStorage` con prefijo `aurea_`.
+5. **Migración automática**: Reparación de entidades HTML escapadas en datos existentes.
+6. **Sincronización**: Cada modificación persiste en Supabase.
+7. **Admin CMS**: CRUD directo contra Supabase. Notificaciones en tiempo real vía `postgres_changes`.
 
 ### Tablas de Base de Datos
 
-| Tabla                 | Propósito                       |
-| --------------------- | ------------------------------- |
-| `photographs`         | Fotografías del portafolio       |
-| `services`            | Paquetes de servicio            |
-| `testimonials`        | Testimonios de clientes         |
-| `blogposts`           | Artículos del blog              |
-| `faqs`                | Preguntas frecuentes            |
-| `bookings`            | Solicitudes de reserva          |
-| `messages`            | Mensajes de contacto            |
-| `clientaccounts`      | Cuentas de clientes             |
-| `photography_packages` | Paquetes fotográficos          |
-| `session_categories`  | Categorías de sesión            |
-| `seo`                 | Metadatos SEO globales          |
-| `profile`             | Perfil del fotógrafo            |
-| `bookingconfig`       | Configuración de reservas       |
-| `emailconfig`         | Configuración de EmailJS        |
-| `analytics`           | Estadísticas del dashboard      |
+| Tabla                 | Propósito                             |
+| --------------------- | ------------------------------------- |
+| `photographs`         | Fotografías del portafolio            |
+| `services`            | Paquetes de servicio                  |
+| `testimonials`        | Testimonios de clientes               |
+| `blogposts`           | Artículos del blog                    |
+| `faqs`                | Preguntas frecuentes                  |
+| `bookings`            | Solicitudes de reserva                |
+| `messages`            | Mensajes de contacto                  |
+| `clientaccounts`      | Cuentas de clientes con fotos proof   |
+| `photography_packages`| Paquetes fotográficos configurables   |
+| `session_categories`  | Categorías de sesión                  |
+| `invoices`            | Facturas generadas                    |
+| `seo`                 | Metadatos SEO globales (singleton)    |
+| `profile`             | Perfil del fotógrafo (singleton)      |
+| `bookingconfig`       | Configuración de reservas (singleton) |
+| `emailconfig`         | Configuración de EmailJS (singleton)  |
+| `analytics`           | Estadísticas del dashboard (singleton)|
 
 ### Almacenamiento (Storage)
 
-Las imágenes subidas desde el CMS se guardan en buckets de Supabase Storage:
+| Bucket                | Propósito                             |
+| --------------------- | ------------------------------------- |
+| `photographs`         | Fotografías del portafolio            |
+| `proofs`              | Fotos de prueba para clientes         |
+| `profile`             | Avatar del fotógrafo                  |
+| `seo`                 | Imágenes del hero y OG                |
+| `packages`            | Imágenes de paquetes                  |
+| `session_categories`  | Thumbnails de categorías              |
 
-| Bucket                | Propósito                        |
-| --------------------- | -------------------------------- |
-| `photographs`         | Fotografías del portafolio       |
-| `proofs`              | Fotos de prueba para clientes    |
-| `profile`             | Avatar del fotógrafo             |
-| `seo`                 | Imágenes del hero y OG           |
-| `packages`            | Imágenes de paquetes             |
-| `session_categories`  | Thumbnails de categorías         |
-
-Todos los buckets son públicos (lectura) para que las URLs funcionen en el frontend. La escritura está protegida por autenticación.
+Todos los buckets son públicos (lectura). La escritura está protegida por autenticación.
 
 ### Autenticación
 
-- **Admin**: El acceso usa exclusivamente Supabase Auth con el correo real del usuario. No se guardan credenciales ni indicadores de sesión administrativa en `localStorage`.
-- **Client Portal**: Protegido por código de acceso validado contra la tabla `clientaccounts`. Acceso directo mediante link compartible con query param `?gallery=PASSCODE`.
+- **Admin**: Supabase Auth con email y contraseña. No se guardan credenciales en localStorage.
+- **Client Portal**: Protegido por código de acceso validado contra `clientaccounts`. Acceso directo vía `?gallery=PASSCODE`.
 
 ---
 
 ## Vistas
 
-| Vista          | Ruta (state)   | Descripción                                                          |
-| -------------- | -------------- | -------------------------------------------------------------------- |
-| Inicio         | `home`         | Hero split-screen con Ken Burns, estadísticas con Count Up, 3 teasers |
-| Sobre mí       | `about`        | Diseño editorial con foto en columna, biografía fluida, línea de tiempo vertical con hitos profesionales (2010–2025) y 3 pilares de filosofía. Animaciones scroll. Sin tarjetas |
-| Portafolio     | `portfolio`    | Galería masonry con hover grayscale→color, filtros, búsqueda, lightbox |
-| Servicios      | `services`     | Flujo 2 pasos: grid de categorías de sesión → paquetes por categoría con nota de viaje + calendario de reservas |
-| Portal Cliente | `client-portal` | Galería privada protegida por código con selección, descarga, link compartible y auto-login vía `?gallery=` |
-| FAQ            | `faq`          | Acordeón de preguntas frecuentes multi-idioma                        |
-| Contacto       | `contact`      | Formulario con EmailJS y datos del estudio                           |
-| Admin          | `admin`        | CMS completo con dashboard analytics, CRUD y configuración           |
-| Privacidad     | `privacy`      | Política de privacidad multi-idioma                                  |
-| Términos       | `terms`        | Términos del servicio multi-idioma                                   |
+| Vista          | Ruta (state)   | Descripción                                                                    |
+| -------------- | -------------- | ------------------------------------------------------------------------------ |
+| Inicio         | `home`         | Hero split-screen, estadísticas Count Up, Instagram feed, paquetes destacados, booking simplificado, testimonios |
+| Sobre mí       | `about`        | Diseño editorial, biografía fluida, timeline vertical (2010–2025), 3 pilares filosofía |
+| Portafolio     | `portfolio`    | Galería Pixieset con 23 galerías externas y buscador de galería personal       |
+| Testimonios    | `testimonials` | Grid completo de experiencias + formulario público de envío                    |
+| Servicios      | `services`     | Paso 1: Grid de categorías de sesión → Paso 2: Paquetes por categoría + calendario de reservas con pago y contrato |
+| Portal Cliente | `client-portal`| Galería privada protegida por passcode, favoritos, descarga, prints, contrato, facturas, testimonio |
+| FAQ            | `faq`          | Acordeón de preguntas frecuentes multi-idioma                                  |
+| Contacto       | `contact`      | Formulario con EmailJS + datos del estudio + WhatsApp                          |
+| Admin          | `admin`        | CMS completo con 13 tabs: dashboard, fotos, testimonios, reservas, paquetes, facturas, sesiones, mensajes, SEO, perfil, clientes, email |
+| Privacidad     | `privacy`      | Política de privacidad multi-idioma con 6 secciones                            |
+| Términos       | `terms`        | Términos del servicio multi-idioma con 6 cláusulas                             |
 
 ---
 
 ## Internacionalización
 
-Sistema multi-idioma conmutado via `lang` state (`es` | `en` | `pt`).
+Sistema multi-idioma conmutado via `lang` state (`es` | `en`).
 
 ### Traducciones de interfaz
 
-Definidas en `TRANSLATIONS` dentro de `src/data/mockData.ts` con más de 100 claves por idioma que cubren navegación, hero, biografía, servicios, testimonios, estadísticas, FAQ, booking, contacto y SEO.
+Definidas en `TRANSLATIONS` dentro de `src/data/mockData.ts` con más de 100 claves por idioma que cubren navegación, hero, biografía, servicios, testimonios, estadísticas, FAQ, booking, contacto, SEO, contrato y facturación.
 
 ### Traducciones de contenido
 
-| Modelo              | Campos traducidos                     |
-| ------------------- | ------------------------------------- |
-| `Photograph`        | `title_es/pt`, `description_es/pt`   |
-| `Service`           | `title_es/pt`, `description_es/pt`, `duration_es/pt`, `includes_es/pt` |
-| `FAQ`               | `question_es/pt`, `answer_es/pt`     |
-| `PhotographyPackage` | `name_es/pt`, `description_es/pt`, `duration_es/pt`, `priceFromText_es/pt`, `buttonText_es/pt`, `travelNote_es/pt`, `benefits_es/pt` |
-| `PhotographerProfile` | `aboutTitle_es/pt`, `aboutText1_es/pt`, `aboutText2_es/pt` |
+| Modelo               | Campos traducidos                          |
+| -------------------- | ------------------------------------------ |
+| `Photograph`         | `title_es`, `description_es`              |
+| `Service`            | `title_es`, `description_es`, `duration_es`, `includes_es` |
+| `FAQ`                | `question_es`, `answer_es`                |
+| `PhotographyPackage` | `name_es`, `description_es`, `duration_es`, `priceFromText_es`, `buttonText_es`, `travelNote_es`, `benefits_es` |
+| `PhotographerProfile`| `aboutTitle_es`, `aboutText1_es`, `aboutText2_es` |
+| `SessionCategory`    | `name_es`, `description_es`               |
+| `Milestone`          | `title_es`, `description_es`              |
 
 ### Funciones helper
 
@@ -321,21 +410,51 @@ Ambas retornan el valor traducido según el idioma activo, con fallback al valor
 
 ---
 
+## Workflows de GitHub
+
+### CI (`ci.yml`)
+- TypeScript type checking (`tsc --noEmit`)
+- `npm audit` (high severity)
+- Build de producción
+- Se ejecuta en cada PR y push a `main`
+
+### Seguridad (`security.yml`)
+- **Gitleaks**: escanea el historial completo en busca de secretos filtrados
+- **Dependency audit**: auditoría de dependencias de producción
+- Ejecución semanal (lunes) y en cada PR/push a `main`
+
+### CodeQL (`codeql.yml`)
+- Análisis estático de código JavaScript/TypeScript
+- Ejecución semanal (lunes) y en cada PR/push a `main`
+
+### Deploy (`deploy.yml`)
+- Se ejecuta automáticamente tras CI exitoso en `main`
+- Build y deploy a Vercel usando `vercel deploy --prebuilt --prod`
+- Requiere secretos: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`
+
+### Release Please (`release.yml`)
+- Crea PR de versión automática basado en Conventional Commits
+- Detecta `feat:`, `fix:`, `BREAKING CHANGE:` para determinar el bump semántico
+
+### Dependabot
+- `npm`: actualizaciones semanales (máx. 10 PRs abiertos)
+- `github-actions`: actualizaciones mensuales (máx. 5 PRs abiertos)
+
+---
+
 ## Despliegue
 
 El proyecto está configurado para desplegarse en **Vercel** mediante GitHub Actions, después de que CI valide el cambio.
 
 ### Deploy automático
 
-Vincula el proyecto en Vercel y configura el workflow con los secretos indicados abajo. Vercel detecta Vite y aplica la configuración de `vercel.json`:
+El workflow `deploy.yml` se ejecuta automáticamente cuando CI completa exitosamente en `main`. Vercel detecta Vite y aplica `vercel.json`:
 
 - **Build**: `npm run build`
 - **Output**: `dist/`
 - **SPA rewrites**: Todas las rutas redirigen a `index.html`
 
-Cada push a `main` ejecuta lint, auditoría de dependencias y build. Solo si CI termina correctamente se ejecuta el deploy de producción.
-
-Configura estos secretos en GitHub (`Settings → Secrets and variables → Actions`) para habilitar el deploy:
+Configura estos secretos en GitHub (`Settings → Secrets and variables → Actions`):
 
 ```text
 VERCEL_TOKEN
@@ -343,7 +462,7 @@ VERCEL_ORG_ID
 VERCEL_PROJECT_ID
 ```
 
-Desactiva el deploy automático por integración Git en Vercel para no publicar dos veces el mismo commit. En `Settings → Branches`, protege `main` y exige los checks `CI`, `Security` y `CodeQL` antes de aceptar un pull request.
+Desactiva el deploy automático por integración Git en Vercel para no publicar dos veces el mismo commit. Protege `main` y exige los checks `CI`, `Security` y `CodeQL` antes de aceptar un pull request.
 
 ### Variables de entorno en Vercel
 
@@ -361,20 +480,6 @@ APP_URL=https://tu-app.vercel.app
 npm run build
 vercel --prod
 ```
-
----
-
-## Seguridad y Versionado
-
-Los workflows de `.github/workflows/` aplican estos controles:
-
-- `CI`: type-check, `npm audit` y build de producción en cada pull request y push a `main`.
-- `Security`: Gitleaks analiza el historial completo para bloquear claves o tokens, además de auditar dependencias de producción.
-- `CodeQL`: análisis estático semanal y en cada cambio de código.
-- `Dependabot`: actualiza dependencias npm y GitHub Actions semanalmente.
-- `Version and release`: Release Please crea un pull request de versión siguiendo Conventional Commits (`feat:`, `fix:`, `BREAKING CHANGE:`).
-
-Si una clave se filtra, revócala inmediatamente en el proveedor, reemplázala en los secretos correspondientes y no la agregues al repositorio, aunque esté dentro de un archivo ignorado por Git.
 
 ---
 
