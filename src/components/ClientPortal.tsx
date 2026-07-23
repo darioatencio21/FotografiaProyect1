@@ -21,6 +21,7 @@ interface ClientPortalProps {
   bookings?: Booking[];
   onUpdateBookings?: (bookings: Booking[]) => void;
   invoices?: Invoice[];
+  onSubmitTestimonial?: (testimonial: any) => void;
 }
 
 export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = [], onUpdateClientAccounts, autoPasscode, bookings = [], onUpdateBookings, invoices = [] }: ClientPortalProps) {

@@ -57,10 +57,11 @@ serve(async (req) => {
 
   for (const booking of bookings) {
     try {
-      const body = {
+      const body: Record<string, unknown> = {
         service_id: serviceId,
         template_id: templateId,
         user_id: publicKey,
+        accessToken: privateKey || undefined,
         template_params: {
           to_name: booking.clientName,
           to_email: booking.clientEmail,
@@ -68,9 +69,6 @@ serve(async (req) => {
           message: "Recordatorio: Tu sesi\u00f3n fotogr\u00e1fica es HOY a las " + booking.timeSlot + ".",
           booking_details: "Sesi\u00f3n: " + (booking.packageName || "Fotograf\u00eda") + " - Fecha: " + booking.date + " - Horario: " + booking.timeSlot,
         },
-      }
-      if (privateKey) {
-        body.accessToken = privateKey
       }
 
       const response = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
