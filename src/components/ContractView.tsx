@@ -31,119 +31,120 @@ export default function ContractView({ booking, lang, t, mode = 'view', onClient
     const cd = booking.contractData;
     const isSession = booking.contractType === 'session';
     const clauses = isSession ? sessionClauses : weddingClauses;
+    const pl = lang === 'es' ? 'Fotógrafa' : 'Photographer';
     const win = window.open('', '_blank');
     if (!win) { window.print(); return; }
     const priceRow = (label: string, val: string) => `<div style="text-align:center"><p style="font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:#8C8076;margin:0 0 4px">${label}</p><p style="font-size:18px;font-family:Georgia,serif;color:#2D2A28;margin:0">${val}</p></div>`;
     const labelVal = (l: string, v: string) => `<p style="margin:0;font-size:11px;color:#2D2A28"><span style="color:#8C8076">${l}:</span> ${v}</p>`;
-    win.document.write(`<!DOCTYPE html>
-<html><head><meta charset="utf-8">
-<style>
-  @page { margin: 10mm; }
-  body { margin:0; font-family:Inter,Segoe UI,sans-serif; color:#2D2A28; background:#fff; font-size:12px; line-height:1.5; }
-  .wrap { max-width:700px; margin:0 auto; }
-  h1 { font-family:Georgia,serif; font-size:20px; text-align:center; margin:0; font-weight:500; letter-spacing:0.02em; }
-  .sub { text-align:center; font-size:11px; color:#8C8076; margin:4px 0 0; }
-  .hr { border:0; border-top:1px solid #ddd; margin:20px 0; }
-  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; font-size:12px; }
-  .box { border:1px solid #ddd; border-radius:4px; padding:12px; }
-  .box-title { font-size:9px; text-transform:uppercase; letter-spacing:0.15em; color:#B58A4A; margin:0 0 6px; font-weight:600; }
-  .price-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
-  .clause { border-left:2px solid #ddd; padding-left:12px; margin-bottom:8px; }
-  .clause h4 { font-size:10px; letter-spacing:0.05em; margin:0 0 2px; color:#555; }
-  .clause p { font-size:10px; color:#888; margin:0; line-height:1.4; }
-  .sig-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
-  .sig-line { border-bottom:1px solid #ddd; padding-bottom:4px; font-family:Georgia,serif; font-size:16px; color:#2D2A28; }
-  .sig-label { font-size:9px; text-transform:uppercase; letter-spacing:0.15em; color:#B58A4A; margin:0 0 8px; font-weight:600; }
-  .sig-date { font-size:9px; color:#8C8076; margin:4px 0 0; }
-  .clauses-wrap { margin-top:24px; }
-  @media print { body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
-</style></head><body>
-<div class="wrap">
-<h1>${isSession ? (t.contractSessionTitle || 'Session Contract') : (t.contractTitle || 'Wedding Contract')}</h1>
-<p class="sub">${isSession ? (t.contractSessionSubtitle || '') : (t.contractSubtitle || '')}</p>
-<hr class="hr"/>
-<div class="grid2">
-<div>
-<p style="font-size:9px;text-transform:uppercase;letter-spacing:0.15em;color:#B58A4A;margin:0 0 4px;font-weight:600">Photographer</p>
-<p style="margin:0;font-size:13px;color:#2D2A28">Miriam Tellez</p>
-<p style="margin:0;font-size:11px;color:#8C8076">miriamtellezphotography@gmail.com</p>
-</div>
-<div style="text-align:right">
-<p style="font-size:9px;text-transform:uppercase;letter-spacing:0.15em;color:#B58A4A;margin:0 0 4px;font-weight:600">${isSession ? (t.contractSessionDate || 'Session Date') : 'Wedding Date'}</p>
-<p style="margin:0;font-size:16px;font-family:Georgia,serif;color:#2D2A28">${booking.date ? formatDate(booking.date) : '—'}</p>
-${isSession && booking.timeSlot ? `<p style="margin:2px 0 0;font-size:11px;color:#8C8076">${t.contractSessionTime || 'Time'}: ${booking.timeSlot}</p>` : ''}
-</div>
-</div>
-${cd ? (isSession ? `
-<div class="box">
-<p class="box-title">${t.contractClient || 'Client'}</p>
-<p style="margin:0;font-size:13px;color:#2D2A28">${cd.brideName || '—'}</p>
-<p style="margin:0;font-size:11px;color:#8C8076">${cd.brideEmail || '—'}</p>
-<p style="margin:0;font-size:11px;color:#8C8076">${cd.groomPhone || '—'}</p>
-</div>
-<div class="box" style="margin-top:12px">
-<p class="box-title">${t.contractSessionInfo || 'Session Info'}</p>
-${labelVal(t.contractSessionDate || 'Date', booking.date ? formatDate(booking.date) : '—')}
-${booking.timeSlot ? labelVal(t.contractSessionTime || 'Time', booking.timeSlot) : ''}
-${booking.packageName ? labelVal(t.contractSessionPackage || 'Package', booking.packageName) : ''}
-</div>` : `
-<div class="grid2">
-<div class="box">
-<p class="box-title">${t.contractBride || 'Bride'}</p>
-<p style="margin:0;font-size:13px;color:#2D2A28">${cd.brideName || '—'}</p>
-<p style="margin:0;font-size:11px;color:#8C8076">${cd.brideEmail || '—'}</p>
-<p style="margin:0;font-size:11px;color:#8C8076">${cd.brideAddress || '—'}</p>
-</div>
-<div class="box">
-<p class="box-title">${t.contractGroom || 'Groom'}</p>
-<p style="margin:0;font-size:13px;color:#2D2A28">${cd.groomName || '—'}</p>
-<p style="margin:0;font-size:11px;color:#8C8076">${cd.groomPhone || '—'}</p>
-</div>
-</div>
-<div class="grid2" style="margin-top:12px">
-<div class="box">
-<p class="box-title">${t.contractCeremony || 'Ceremony'}</p>
-<p style="margin:0;font-size:12px;color:#2D2A28">${cd.ceremonyLocation || '—'}</p>
-<p style="margin:0;font-size:11px;color:#8C8076">${cd.ceremonyAddress || '—'}</p>
-<p style="margin:0;font-size:11px;color:#8C8076;margin-top:4px">${cd.ceremonyStart ? cd.ceremonyStart + ' — ' + (cd.ceremonyEnd || '') : '—'}</p>
-</div>
-<div class="box">
-<p class="box-title">${t.contractReception || 'Reception'}</p>
-<p style="margin:0;font-size:12px;color:#2D2A28">${cd.receptionLocation || '—'}</p>
-<p style="margin:0;font-size:11px;color:#8C8076">${cd.receptionAddress || '—'}</p>
-<p style="margin:0;font-size:11px;color:#8C8076;margin-top:4px">${cd.receptionStart ? cd.receptionStart + ' — ' + (cd.receptionEnd || '') : '—'}</p>
-</div>
-</div>`) : ''}
-<hr class="hr"/>
-<div class="box">
-<p class="box-title">${t.contractPackage || 'Package'}</p>
-<p style="margin:0;font-size:16px;font-family:Georgia,serif;color:#2D2A28">${booking.packageName || '—'}</p>
-${booking.packageDetails ? `<p style="margin:4px 0 0;font-size:11px;color:#8C8076">${booking.packageDetails}</p>` : ''}
-<hr style="border:0;border-top:1px solid #ddd;margin:12px 0"/>
-<div class="price-grid">
-${priceRow(t.contractAmountAgreed || 'Amount', '$' + (booking.amount || 0).toLocaleString())}
-${priceRow(t.contractDeposit || 'Deposit', '$' + (booking.depositAmount || 0).toLocaleString())}
-${priceRow(t.contractAmountDue || 'Due', '$' + (booking.amountDue || 0).toLocaleString())}
-</div>
-${booking.travelExpenses ? `<p style="margin:8px 0 0;font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:#8C8076">${t.contractTravelExpenses || 'Travel'}: ${booking.travelExpenses}</p>` : ''}
-</div>
-<hr class="hr"/>
-<div class="clauses-wrap">
-${clauses.map(c => `<div class="clause"><h4>${c.title}</h4><p>${c.text}</p></div>`).join('')}
-</div>
-<hr class="hr"/>
-<div class="sig-grid">
-<div>
-<p class="sig-label">${t.contractSignatureClient || 'Client'}</p>
-${booking.contractSignature ? `<div class="sig-line">${booking.contractSignature}</div><p class="sig-date">${t.contractSignatureDate || 'Signed'}: ${booking.contractSignedAt ? formatDate(booking.contractSignedAt) : '—'}</p>` : '<p style="color:#aaa;font-style:italic">—</p>'}
-</div>
-<div>
-<p class="sig-label">${t.contractSignaturePhotographer || 'Photographer'}</p>
-${booking.contractPhotographerSignature ? `<div class="sig-line">${booking.contractPhotographerSignature}</div><p class="sig-date">${t.contractSignatureDate || 'Signed'}: ${booking.contractPhotographerSignedAt ? formatDate(booking.contractPhotographerSignedAt) : '—'}</p>` : '<p style="color:#aaa;font-style:italic">—</p>'}
-</div>
-</div>
-</div>
-</body></html>`);
+    win.document.write('<!DOCTYPE html>' +
+'<html><head><meta charset="utf-8">' +
+'<style>' +
+'  @page { margin: 10mm; }' +
+'  body { margin:0; font-family:Inter,Segoe UI,sans-serif; color:#2D2A28; background:#fff; font-size:12px; line-height:1.5; }' +
+'  .wrap { max-width:700px; margin:0 auto; }' +
+'  h1 { font-family:Georgia,serif; font-size:20px; text-align:center; margin:0; font-weight:500; letter-spacing:0.02em; }' +
+'  .sub { text-align:center; font-size:11px; color:#8C8076; margin:4px 0 0; }' +
+'  .hr { border:0; border-top:1px solid #ddd; margin:20px 0; }' +
+'  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; font-size:12px; }' +
+'  .box { border:1px solid #ddd; border-radius:4px; padding:12px; }' +
+'  .box-title { font-size:9px; text-transform:uppercase; letter-spacing:0.15em; color:#B58A4A; margin:0 0 6px; font-weight:600; }' +
+'  .price-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }' +
+'  .clause { border-left:2px solid #ddd; padding-left:12px; margin-bottom:8px; }' +
+'  .clause h4 { font-size:10px; letter-spacing:0.05em; margin:0 0 2px; color:#555; }' +
+'  .clause p { font-size:10px; color:#888; margin:0; line-height:1.4; }' +
+'  .sig-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }' +
+'  .sig-line { border-bottom:1px solid #ddd; padding-bottom:4px; font-family:Georgia,serif; font-size:16px; color:#2D2A28; }' +
+'  .sig-label { font-size:9px; text-transform:uppercase; letter-spacing:0.15em; color:#B58A4A; margin:0 0 8px; font-weight:600; }' +
+'  .sig-date { font-size:9px; color:#8C8076; margin:4px 0 0; }' +
+'  .clauses-wrap { margin-top:24px; }' +
+'  @media print { body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }' +
+'</style></head><body>' +
+'<div class="wrap">' +
+`<h1>${isSession ? t.contractSessionTitle : t.contractTitle}</h1>` +
+`<p class="sub">${isSession ? t.contractSessionSubtitle : t.contractSubtitle}</p>` +
+'<hr class="hr"/>' +
+'<div class="grid2">' +
+'<div>' +
+`<p style="font-size:9px;text-transform:uppercase;letter-spacing:0.15em;color:#B58A4A;margin:0 0 4px;font-weight:600">${pl}</p>` +
+'<p style="margin:0;font-size:13px;color:#2D2A28">Miriam Tellez</p>' +
+'<p style="margin:0;font-size:11px;color:#8C8076">miriamtellezphotography@gmail.com</p>' +
+'</div>' +
+'<div style="text-align:right">' +
+`<p style="font-size:9px;text-transform:uppercase;letter-spacing:0.15em;color:#B58A4A;margin:0 0 4px;font-weight:600">${isSession ? t.contractSessionDate : t.contractWeddingDate}</p>` +
+`<p style="margin:0;font-size:16px;font-family:Georgia,serif;color:#2D2A28">${booking.date ? formatDate(booking.date) : '—'}</p>` +
+(isSession && booking.timeSlot ? `<p style="margin:2px 0 0;font-size:11px;color:#8C8076">${t.contractSessionTime}: ${booking.timeSlot}</p>` : '') +
+'</div>' +
+'</div>' +
+(cd ? (isSession ?
+'<div class="box">' +
+`<p class="box-title">${t.contractClient}</p>` +
+`<p style="margin:0;font-size:13px;color:#2D2A28">${cd.brideName || '—'}</p>` +
+`<p style="margin:0;font-size:11px;color:#8C8076">${cd.brideEmail || '—'}</p>` +
+`<p style="margin:0;font-size:11px;color:#8C8076">${cd.groomPhone || '—'}</p>` +
+'</div>' +
+'<div class="box" style="margin-top:12px">' +
+`<p class="box-title">${t.contractSessionInfo}</p>` +
+`${labelVal(t.contractSessionDate, booking.date ? formatDate(booking.date) : '—')}` +
+(booking.timeSlot ? labelVal(t.contractSessionTime, booking.timeSlot) : '') +
+(booking.packageName ? labelVal(t.contractSessionPackage, booking.packageName) : '') +
+'</div>' :
+'<div class="grid2">' +
+'<div class="box">' +
+`<p class="box-title">${t.contractBride}</p>` +
+`<p style="margin:0;font-size:13px;color:#2D2A28">${cd.brideName || '—'}</p>` +
+`<p style="margin:0;font-size:11px;color:#8C8076">${cd.brideEmail || '—'}</p>` +
+`<p style="margin:0;font-size:11px;color:#8C8076">${cd.brideAddress || '—'}</p>` +
+'</div>' +
+'<div class="box">' +
+`<p class="box-title">${t.contractGroom}</p>` +
+`<p style="margin:0;font-size:13px;color:#2D2A28">${cd.groomName || '—'}</p>` +
+`<p style="margin:0;font-size:11px;color:#8C8076">${cd.groomPhone || '—'}</p>` +
+'</div>' +
+'</div>' +
+'<div class="grid2" style="margin-top:12px">' +
+'<div class="box">' +
+`<p class="box-title">${t.contractCeremony}</p>` +
+`<p style="margin:0;font-size:12px;color:#2D2A28">${cd.ceremonyLocation || '—'}</p>` +
+`<p style="margin:0;font-size:11px;color:#8C8076">${cd.ceremonyAddress || '—'}</p>` +
+`<p style="margin:0;font-size:11px;color:#8C8076;margin-top:4px">${cd.ceremonyStart ? cd.ceremonyStart + ' — ' + (cd.ceremonyEnd || '') : '—'}</p>` +
+'</div>' +
+'<div class="box">' +
+`<p class="box-title">${t.contractReception}</p>` +
+`<p style="margin:0;font-size:12px;color:#2D2A28">${cd.receptionLocation || '—'}</p>` +
+`<p style="margin:0;font-size:11px;color:#8C8076">${cd.receptionAddress || '—'}</p>` +
+`<p style="margin:0;font-size:11px;color:#8C8076;margin-top:4px">${cd.receptionStart ? cd.receptionStart + ' — ' + (cd.receptionEnd || '') : '—'}</p>` +
+'</div>' +
+'</div>') : '') +
+'<hr class="hr"/>' +
+'<div class="box">' +
+`<p class="box-title">${t.contractPackage}</p>` +
+`<p style="margin:0;font-size:16px;font-family:Georgia,serif;color:#2D2A28">${booking.packageName || '—'}</p>` +
+(booking.packageDetails ? `<p style="margin:4px 0 0;font-size:11px;color:#8C8076">${booking.packageDetails}</p>` : '') +
+'<hr style="border:0;border-top:1px solid #ddd;margin:12px 0"/>' +
+'<div class="price-grid">' +
+`${priceRow(t.contractAmountAgreed, '$' + (booking.amount || 0).toLocaleString())}` +
+`${priceRow(t.contractDeposit, '$' + (booking.depositAmount || 0).toLocaleString())}` +
+`${priceRow(t.contractAmountDue, '$' + (booking.amountDue || 0).toLocaleString())}` +
+'</div>' +
+(booking.travelExpenses ? `<p style="margin:8px 0 0;font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:#8C8076">${t.contractTravelExpenses}: ${booking.travelExpenses}</p>` : '') +
+'</div>' +
+'<hr class="hr"/>' +
+'<div class="clauses-wrap">' +
+clauses.map(c => `<div class="clause"><h4>${c.title}</h4><p>${c.text}</p></div>`).join('') +
+'</div>' +
+'<hr class="hr"/>' +
+'<div class="sig-grid">' +
+'<div>' +
+`<p class="sig-label">${t.contractSignatureClient}</p>` +
+(booking.contractSignature ? `<div class="sig-line">${booking.contractSignature}</div><p class="sig-date">${t.contractSignatureDate}: ${booking.contractSignedAt ? formatDate(booking.contractSignedAt) : '—'}</p>` : '<p style="color:#aaa;font-style:italic">—</p>') +
+'</div>' +
+'<div>' +
+`<p class="sig-label">${t.contractSignaturePhotographer}</p>` +
+(booking.contractPhotographerSignature ? `<div class="sig-line">${booking.contractPhotographerSignature}</div><p class="sig-date">${t.contractSignatureDate}: ${booking.contractPhotographerSignedAt ? formatDate(booking.contractPhotographerSignedAt) : '—'}</p>` : '<p style="color:#aaa;font-style:italic">—</p>') +
+'</div>' +
+'</div>' +
+'</div>' +
+'</body></html>');
     win.document.close();
     setTimeout(() => { win.focus(); win.print(); }, 500);
   };
@@ -184,13 +185,13 @@ ${booking.contractPhotographerSignature ? `<div class="sig-line">${booking.contr
       {/* Parties & Date */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs font-mono text-white/70">
         <div className="space-y-1">
-          <p className="text-white/70 font-semibold uppercase tracking-widest text-[10px]">Photographer</p>
+          <p className="text-white/70 font-semibold uppercase tracking-widest text-[10px]">{lang === 'es' ? 'Fotógrafa' : 'Photographer'}</p>
           <p>Miriam Tellez</p>
           <p>miriamtellezphotography@gmail.com</p>
           <p>(559) 756-1144</p>
         </div>
         <div className="space-y-1">
-          <p className="text-white/70 font-semibold uppercase tracking-widest text-[10px]">{isSession ? t.contractSessionDate : 'Wedding Date'}</p>
+          <p className="text-white/70 font-semibold uppercase tracking-widest text-[10px]">{isSession ? t.contractSessionDate : t.contractWeddingDate}</p>
           <p className="font-serif text-base text-white/90">{booking.date ? formatDate(booking.date) : '—'}</p>
           {isSession && booking.timeSlot && <p className="text-xs text-white/50 mt-1">{t.contractSessionTime}: {booking.timeSlot}</p>}
         </div>
@@ -291,7 +292,7 @@ ${booking.contractPhotographerSignature ? `<div class="sig-line">${booking.contr
       {mode === 'view' && (
         <details className="text-xs border border-white/10 rounded-lg">
           <summary className="text-white/50 hover:text-white/70 cursor-pointer px-4 py-2.5 text-[10px] font-mono tracking-wider uppercase select-none">
-            {isSession ? 'Términos y condiciones legales' : 'Términos y condiciones legales'}
+            {lang === 'es' ? 'Términos y condiciones' : 'Terms & Conditions'}
           </summary>
           <div className="border-t border-white/10 px-4 py-3 space-y-4">
             {(isSession ? sessionClauses : weddingClauses).map((clause) => (

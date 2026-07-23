@@ -100,7 +100,7 @@ const InvoiceReceipt: React.FC<InvoiceReceiptProps> = ({ invoice, lang, compact 
 <div class="header-right">
 <p class="inv-label">${t.invoiceNumber}</p>
 <p class="inv-num">${invoice.invoiceNumber}</p>
-<div class="status-badge ${isPaid ? 'status-paid' : isPartial ? 'status-partial' : 'status-other'}">${isPaid ? 'Paid' : isPartial ? 'Partial' : 'Pending'}</div>
+<div class="status-badge ${isPaid ? 'status-paid' : isPartial ? 'status-partial' : 'status-other'}">${isPaid ? t.invoiceStatusPaid : isPartial ? t.invoiceStatusPartial : invoice.status === 'cancelled' ? t.invoiceStatusCancelled : t.invoiceStatusUnpaid}</div>
 </div>
 </div>
 <div class="client-grid">
