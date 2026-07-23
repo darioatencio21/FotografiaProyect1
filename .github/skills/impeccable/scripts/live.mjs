@@ -255,9 +255,8 @@ function globToRegex(pattern) {
 
 function runScript(name, args, options = {}) {
   const scriptPath = path.join(__dirname, name);
-  const cmd = `node "${scriptPath}" ${args.map(a => `"${a}"`).join(' ')}`;
   try {
-    return execSync(cmd, { encoding: 'utf-8', cwd: options.cwd || process.cwd(), timeout: 15_000 });
+    return execSync(`"${scriptPath}"`, { encoding: 'utf-8', cwd: options.cwd || process.cwd(), timeout: 15_000, shell: false, env: { ...process.env, IMPECCABLE_SCRIPT_ARGS: JSON.stringify(args) } });
   } catch (err) {
     // execSync throws on non-zero exit; return stdout if any
     return err.stdout || err.message || '';

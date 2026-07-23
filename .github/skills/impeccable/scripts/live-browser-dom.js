@@ -65,8 +65,9 @@
     }
 
     function id8() {
-      if (crypto?.randomUUID) return crypto.randomUUID().replace(/-/g, '').slice(0, 8);
-      return (Math.random().toString(16).slice(2) + Date.now().toString(16)).slice(0, 8);
+      const arr = new Uint8Array(4);
+      crypto.getRandomValues(arr);
+      return Array.from(arr, (b) => b.toString(16).padStart(2, '0')).join('');
     }
 
     function cssId(id) {

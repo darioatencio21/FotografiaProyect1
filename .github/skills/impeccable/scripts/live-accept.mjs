@@ -678,7 +678,8 @@ function stripStyleAndJoin(lines, block) {
       // same-line-closed), including their body content.
       line = line
         .replace(/<style\b[^>]*>[\s\S]*?<\/style\s*>/g, '')
-        .replace(/<style\b[^>]*\/\s*>/g, '');
+        .replace(/<style\b[^>]*\/\s*>/g, '')
+        .slice(0, 10000);
 
       // If a <style> opener remains (multi-line body starts here), strip from
       // the opener to end-of-line and flip into skip mode.
@@ -708,7 +709,8 @@ function stripStyleAndJoin(lines, block) {
  * Returns the inner string (may be empty), or null if not found.
  */
 function extractInnerByAttr(text, attrMatch) {
-  const openerRe = new RegExp('<([A-Za-z][A-Za-z0-9]*)\\b[^>]*' + attrMatch + '[^>]*>');
+  const escaped = attrMatch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const openerRe = new RegExp('<([A-Za-z][A-Za-z0-9]*)\\b[^>]*' + escaped + '[^>]*>');
   const openMatch = text.match(openerRe);
   if (!openMatch) return null;
 

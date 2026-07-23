@@ -1008,7 +1008,7 @@ function handlePollGet(req, res, url) {
     return;
   }
   state.lastPollAt = Date.now();
-  const timeout = parseInt(url.searchParams.get('timeout') || DEFAULT_POLL_TIMEOUT, 10);
+  const timeout = Math.min(Math.max(parseInt(url.searchParams.get('timeout') || DEFAULT_POLL_TIMEOUT, 10) || DEFAULT_POLL_TIMEOUT, 1_000), DEFAULT_POLL_TIMEOUT);
   const leaseMs = parseInt(url.searchParams.get('leaseMs') || '30000', 10);
   const types = parsePollTypes(url.searchParams.get('types'));
   const available = findAvailablePendingEvent(Date.now(), types);

@@ -5198,7 +5198,7 @@
   }
 
   function scopeCssToSveltePreview(css, sessionId) {
-    const prefix = '[data-impeccable-variants="' + String(sessionId).replace(/"/g, '\\"') + '"] ';
+    const prefix = '[data-impeccable-variants="' + String(sessionId).replace(/["\\]/g, '\\$&') + '"] ';
     return scopeCssBlock(String(css || ''), prefix).trim();
   }
 
@@ -5781,7 +5781,7 @@
     let out = String(prop || '').trim().replace(/^["']|["']$/g, '');
     if (!out) return '';
     if (out.startsWith('--')) return out;
-    return out.replace(/[A-Z]/g, (ch) => '-' + ch.toLowerCase()).replace(/^-ms-/, '-ms-');
+    return out.replace(/[A-Z]/g, (ch) => '-' + ch.toLowerCase());
   }
 
   function buildSvelteExpressionTextMap(sourceOriginal, liveOriginal) {
@@ -7045,9 +7045,11 @@
   function loadModernScreenshot() {
     if (window.modernScreenshot) return Promise.resolve(window.modernScreenshot);
     if (msLoadPromise) return msLoadPromise;
+    const port = +PORT;
+    if (!Number.isInteger(port) || port < 1 || port > 65535) return Promise.reject(new Error('invalid port'));
     msLoadPromise = new Promise((resolve, reject) => {
       const s = document.createElement('script');
-      s.src = 'http://localhost:' + PORT + '/modern-screenshot.js';
+      s.src = 'http://localhost:' + port + '/modern-screenshot.js';
       s.onload = () => resolve(window.modernScreenshot);
       s.onerror = () => { msLoadPromise = null; reject(new Error('modern-screenshot failed to load')); };
       uiAppendStyle(s);
@@ -10326,9 +10328,11 @@ void main() {
 
   function loadDetectScript() {
     if (detectScriptLoaded) return;
+    const port = +PORT;
+    if (!Number.isInteger(port) || port < 1 || port > 65535) return;
     detectScriptLoaded = true;
     const s = document.createElement('script');
-    s.src = 'http://localhost:' + PORT + '/detect.js';
+    s.src = 'http://localhost:' + port + '/detect.js';
     s.dataset.impeccableExtension = 'true';
     document.head.appendChild(s);
   }
