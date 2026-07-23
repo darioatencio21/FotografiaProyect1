@@ -115,36 +115,36 @@ export default function Lightbox({
             </h2>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-1.5 sm:gap-3">
             <button
               onClick={onToggleFavorite}
-              className={`p-2.5 rounded-full border border-stone transition-all ${
+              className={`p-2 sm:p-2.5 rounded-full border border-stone transition-all ${
                 isFavorite ? 'bg-white/10 border-white/20 text-white' : 'bg-dark-gray/60 hover:bg-white/10 text-white'
               }`}
               title="Add to Favorites"
             >
-              <Heart size={16} className={isFavorite ? 'fill-dark' : ''} />
+              <Heart size={14} className={isFavorite ? 'fill-dark' : ''} />
             </button>
             <button
               onClick={handleDownload}
-              className="p-2.5 rounded-full border border-stone bg-dark-gray/60 hover:bg-white/10 transition-all text-white"
+              className="p-2 sm:p-2.5 rounded-full border border-stone bg-dark-gray/60 hover:bg-white/10 transition-all text-white"
               title="Download High-Res"
             >
-              <Download size={16} />
+              <Download size={14} />
             </button>
             <button
               onClick={handleShare}
-              className="p-2.5 rounded-full border border-stone bg-dark-gray/60 hover:bg-white/10 transition-all text-white"
+              className="hidden sm:block p-2.5 rounded-full border border-stone bg-dark-gray/60 hover:bg-white/10 transition-all text-white"
               title="Share Link"
             >
               <Share2 size={16} />
             </button>
             <button
               onClick={onClose}
-              className="p-2.5 rounded-full border border-stone bg-dark-gray/60 hover:bg-white/10 hover:text-white transition-all text-white"
+              className="p-2 sm:p-2.5 rounded-full border border-stone bg-dark-gray/60 hover:bg-white/10 hover:text-white transition-all text-white"
               title="Close Gallery"
             >
-              <X size={16} />
+              <X size={14} />
             </button>
           </div>
         </div>

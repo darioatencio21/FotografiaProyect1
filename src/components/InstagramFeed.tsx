@@ -45,9 +45,9 @@ export default function InstagramFeed({ lang }: InstagramFeedProps) {
         className="group block"
       >
         <span className="text-[10px] font-mono text-white/60 tracking-widest uppercase block group-hover:text-white transition-colors duration-300">Instagram Feed</span>
-        <h2 className="font-serif text-3xl text-white tracking-wide mt-1 flex items-center gap-3">
-          @miriamtellezphotography
-          <Instagram size={20} className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-white" />
+        <h2 className="font-serif text-xl sm:text-3xl text-white tracking-wide mt-1 flex items-center gap-2 sm:gap-3 flex-wrap">
+          <span className="truncate max-w-[calc(100%-2rem)] sm:max-w-none">@miriamtellezphotography</span>
+          <Instagram size={20} className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-white shrink-0" />
         </h2>
       </a>
 
@@ -59,7 +59,7 @@ export default function InstagramFeed({ lang }: InstagramFeedProps) {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="inline-flex items-center gap-2.5 px-6 py-3 border border-white/20 text-white/70 font-mono text-[10px] tracking-widest uppercase rounded-lg hover:bg-white/10 hover:text-white hover:border-white/40 transition-all duration-300 ease-out cursor-pointer"
+        className="inline-flex items-center gap-2 sm:gap-2.5 px-4 sm:px-6 py-3 border border-white/20 text-white/70 font-mono text-[9px] sm:text-[10px] tracking-widest uppercase rounded-lg hover:bg-white/10 hover:text-white hover:border-white/40 transition-all duration-300 ease-out cursor-pointer"
       >
         <Instagram size={15} />
         <span>Follow @miriamtellezphotography</span>

@@ -914,11 +914,11 @@ export default function App() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.35 }}
-                className="flex flex-nowrap items-center justify-center gap-2 sm:gap-3 md:gap-4 mt-5 md:mt-12"
+                className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-4 mt-5 md:mt-12"
               >
                 <button
                   onClick={() => navigateTo('portfolio')}
-                  className="px-4 sm:px-6 md:px-7 py-2 md:py-3 bg-white/10 hover:bg-white/15 text-white border border-white/20 font-mono text-[clamp(7px,2vw,10px)] tracking-widest uppercase font-semibold transition-all duration-300 cursor-pointer whitespace-nowrap"
+                  className="px-4 sm:px-6 md:px-7 py-2 md:py-3 bg-white/10 hover:bg-white/15 text-white border border-white/20 font-mono text-[clamp(7px,2vw,10px)] tracking-widest uppercase font-semibold transition-all duration-300 cursor-pointer whitespace-normal sm:whitespace-nowrap"
                 >
                   {t.ctaPortfolio}
                 </button>
@@ -930,7 +930,7 @@ export default function App() {
                       if (element) element.scrollIntoView({ behavior: 'smooth' });
                     }, 200);
                   }}
-                  className="px-4 sm:px-6 md:px-7 py-2 md:py-3 border border-white/30 text-white/80 hover:border-white font-mono text-[clamp(7px,2vw,10px)] tracking-widest uppercase font-semibold transition-all duration-300 cursor-pointer bg-transparent whitespace-nowrap drop-shadow-sm"
+                  className="px-4 sm:px-6 md:px-7 py-2 md:py-3 border border-white/30 text-white/80 hover:border-white font-mono text-[clamp(7px,2vw,10px)] tracking-widest uppercase font-semibold transition-all duration-300 cursor-pointer bg-transparent whitespace-normal sm:whitespace-nowrap drop-shadow-sm"
                 >
                   {t.ctaBook}
                 </button>

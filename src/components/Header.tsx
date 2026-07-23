@@ -135,7 +135,7 @@ export default function Header({
         className="flex items-center cursor-pointer group z-20 lg:flex lg:justify-center lg:items-center gap-2 lg:gap-3 py-0.5 lg:py-1"
       >
         <Logo size="xs" />
-        <span id="header-logo" className="font-serif text-clamp-sm lg:text-[13px] font-semibold tracking-[0.2em] lg:tracking-[0.25em] text-white group-hover:text-white transition-colors duration-500 whitespace-nowrap uppercase">
+        <span id="header-logo" className="font-serif text-[9px] sm:text-[11px] lg:text-[13px] font-semibold tracking-[0.15em] sm:tracking-[0.2em] lg:tracking-[0.25em] text-white group-hover:text-white transition-colors duration-500 whitespace-nowrap uppercase truncate max-w-[120px] sm:max-w-none">
           Miriam Campos
         </span>
       </div>

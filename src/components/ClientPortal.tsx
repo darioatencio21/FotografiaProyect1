@@ -207,7 +207,7 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                 <h1 className="font-serif text-[clamp(2rem,5vw,3.2rem)] text-white font-semibold leading-tight">
                   {t.proofTitle}
                 </h1>
-                <p className="font-sans text-sm text-[#6A5645] font-light leading-relaxed max-w-xs mx-auto">
+                <p className="font-sans text-sm text-white/60 font-light leading-relaxed max-w-xs mx-auto">
                   {t.proofSubtitle}
                 </p>
               </div>
