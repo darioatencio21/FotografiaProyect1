@@ -74,7 +74,8 @@ serve(async (req) => {
       results.sent++
     } catch (err) {
       results.errors++
-      results.details.push({ id: booking.id, error: err.message || String(err) })
+      console.error("send-reminders error for booking", booking.id, ":", err)
+      results.details.push({ id: booking.id, error: "Internal error" })
     }
   }
 
