@@ -136,6 +136,60 @@ export default function Header({
         </span>
       </div>
 
+      {/* Mobile menu trigger (hamburger + language) */}
+      <div className="flex lg:hidden items-center space-x-2 z-20">
+        <div className="relative">
+          <button
+            onClick={() => setShowLanguíageDropdown(!showLanguíageDropdown)}
+            className="flex items-center space-x-1 text-white/70 hover:text-white text-[10px] font-mono tracking-widest uppercase cursor-pointer transition-colors"
+          >
+            <Globe size={11} className="text-white" />
+            <span>{lang.toUpperCase()}</span>
+          </button>
+          <AnimatePresence>
+            {showLanguíageDropdown && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setShowLanguíageDropdown(false)} />
+                <motion.div
+                  className="absolute right-0 mt-2 w-20 bg-charcoal border border-white/10 rounded-lg shadow-2xl overflow-hidden z-20 text-left"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                >
+                  {languíages.map(item => (
+                    <button
+                      key={item.code}
+                      onClick={() => {
+                        onSetLang(item.code);
+                        setShowLanguíageDropdown(false);
+                      }}
+                      className={`w-full text-left px-3 py-1.5 text-[10px] font-mono transition-all ${
+                        lang === item.code
+                          ? 'bg-white/10 text-white font-bold'
+                          : 'text-white/75 hover:bg-white/5 hover:text-white'
+                      }`}
+                    >
+                      {item.name}
+                    </button>
+                  ))}
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+        </div>
+        <button
+          onClick={() => setIsMobileMenuOpen(true)}
+          className="flex items-center justify-center w-8 h-8 text-white/70 hover:text-white transition-colors cursor-pointer"
+          aria-label="Open menu"
+        >
+          <svg width="18" height="14" viewBox="0 0 18 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="1" y1="1" x2="17" y2="1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            <line x1="1" y1="7" x2="17" y2="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            <line x1="1" y1="13" x2="17" y2="13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+        </button>
+      </div>
+
       {/* Desktop Actions bar & Right split (Services, Client Portal, Contact) */}
       <div className="hidden lg:flex items-center justify-end space-x-8 z-10">
         <nav className="flex items-center space-x-8">
