@@ -988,7 +988,7 @@ export default function AdminCMS({
       {/* Floating hamburger — mobile only, centered on right edge */}
       <button
         onClick={() => setMobileSidebarOpen(true)}
-        className={`${mobileSidebarOpen ? 'hidden' : 'flex'} lg:hidden fixed right-4 top-4 z-30 bg-dark border border-white/10 rounded-full p-3 text-white hover:bg-white/10 hover:border-white/30 transition-all shadow-lg cursor-pointer`}
+        className={`${mobileSidebarOpen ? 'hidden' : 'flex'} lg:hidden fixed right-4 top-4 z-[60] bg-dark border border-white/10 rounded-full p-3 text-white hover:bg-white/10 hover:border-white/30 transition-all shadow-lg cursor-pointer`}
         aria-label="Open menu"
       >
         <Menu size={20} />
