@@ -19,6 +19,7 @@ export default function BookingApproval({ booking, lang, onConfirm, onCheckout }
   const [contractSigned, setContractSigned] = useState(booking.contractStatus === 'signed');
   const [paymentPaid, setPaymentPaid] = useState(booking.paymentStatus === 'paid');
   const [contractStep, setContractStep] = useState(false);
+  const [showSignedContract, setShowSignedContract] = useState(false);
 
   const depositAmount = booking.depositAmount ?? 0;
   const isExpired = booking.approvalExpiresAt && new Date(booking.approvalExpiresAt) < new Date();
@@ -144,9 +145,17 @@ export default function BookingApproval({ booking, lang, onConfirm, onCheckout }
               </span>
             </div>
             {contractSigned ? (
-              <span className="text-emerald-400 flex items-center gap-1 text-[10px] font-mono">
-                <CheckCircle2 size={12} /> {lang === 'en' ? 'Signed' : 'Firmado'}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-emerald-400 flex items-center gap-1 text-[10px] font-mono">
+                  <CheckCircle2 size={12} /> {lang === 'en' ? 'Signed' : 'Firmado'}
+                </span>
+                <button
+                  onClick={() => setShowSignedContract(true)}
+                  className="px-2.5 py-1 bg-white/10 hover:bg-white/15 text-white/80 border border-white/10 rounded text-[9px] font-mono tracking-wider cursor-pointer transition-all"
+                >
+                  {lang === 'en' ? 'View' : 'Ver'}
+                </button>
+              </div>
             ) : (
               <button
                 onClick={() => setContractStep(true)}
@@ -178,6 +187,30 @@ export default function BookingApproval({ booking, lang, onConfirm, onCheckout }
             </motion.div>
           )}
         </div>
+
+        {/* Signed contract viewer */}
+        {showSignedContract && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            className="overflow-hidden border border-white/10 rounded-lg bg-dark/20"
+          >
+            <div className="relative p-4">
+              <button
+                onClick={() => setShowSignedContract(false)}
+                className="absolute top-3 right-3 text-white/50 hover:text-white text-[10px] font-mono cursor-pointer z-10"
+              >
+                {lang === 'en' ? 'Close' : 'Cerrar'}
+              </button>
+              <ContractView
+                booking={booking}
+                mode="view"
+                lang={lang}
+                t={t}
+              />
+            </div>
+          </motion.div>
+        )}
 
         {/* Step 2: Pay Deposit */}
         <div className={`border rounded-lg p-4 ${paymentPaid ? 'border-emerald-500/20 bg-emerald-500/5' : 'border-white/10 bg-dark/20'}`}>

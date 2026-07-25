@@ -16,7 +16,7 @@ import {
 import { 
   INITIAL_PHOTOGRAPHS, INITIAL_SERVICES, INITIAL_TESTIMONIALS, 
   INITIAL_BLOG_POSTS, INITIAL_FAQS, INITIAL_BOOKINGS, 
-  INITIAL_MESSAGES, INITIAL_SEO, INITIAL_ANALYTICS, TRANSLATIONS,
+  INITIAL_MESSAGES, INITIAL_SEO, TRANSLATIONS,
   INITIAL_PROFILE, INITIAL_BOOKING_CONFIG, INITIAL_EMAIL_CONFIG,
    INITIAL_CLIENT_ACCOUNTS, INITIAL_PHOTOGRAPHY_PACKAGES, INITIAL_SESSION_CATEGORIES, INITIAL_INVOICES
  } from './data/mockData';
@@ -49,6 +49,7 @@ import {
   onAuthChange
 } from './lib/db';
 import { sanitizeString, sanitizeEmail, sanitizeUrl, unescapeHTMLEntities } from './lib/sanitize';
+import { computeAnalytics, trackPageView } from './lib/analytics';
 
 async function syncCollection<T extends { id: string }>(
   collectionPath: string,
@@ -286,7 +287,10 @@ export default function App() {
 
   const t = TRANSLATIONS[lang];
 
-  const [seoAnalytics, setSeoAnalytics] = useState<AnalyticsStats>(INITIAL_ANALYTICS);
+  const [seoAnalytics, setSeoAnalytics] = useState<AnalyticsStats>({
+    totalVisits: 0, totalRevenue: 0, bookingConversionRate: 0, sessionsCount: 0,
+    revenueByMonth: [], sessionsByService: [], visitsByDay: []
+  });
   const [bootstrapped, setBootstrapped] = useState(false);
 
   useEffect(() => {
@@ -326,12 +330,11 @@ export default function App() {
       ]);
 
       const packagesRes = await getCollectionWithFallback<PhotographyPackage>('photography_packages', []);
-      const [seoRes, profileRes, bookingConfigRes, emailConfigRes, analyticsRes] = await Promise.all([
+      const [seoRes, profileRes, bookingConfigRes, emailConfigRes] = await Promise.all([
         getSingleDocument<SEOMetadata>('seo', 'config'),
         getSingleDocument<PhotographerProfile>('profile', 'photographer'),
         getSingleDocument<BookingConfig>('bookingConfig', 'config'),
         getSingleDocument<EmailConfig>('emailConfig', 'config'),
-        getSingleDocument<AnalyticsStats>('analytics', 'stats')
       ]);
 
       if (cancelled) return;
@@ -410,13 +413,13 @@ export default function App() {
       setPackages(packagesRes.length > 0 ? packagesRes : INITIAL_PHOTOGRAPHY_PACKAGES);
       setBookingConfig(bookingConfigRes ?? INITIAL_BOOKING_CONFIG);
       setEmailConfig(emailConfigRes ? { ...INITIAL_EMAIL_CONFIG, ...emailConfigRes } : INITIAL_EMAIL_CONFIG);
-      setSeoAnalytics(analyticsRes ?? INITIAL_ANALYTICS);
+      const computedStats = await computeAnalytics();
+      setSeoAnalytics(computedStats);
 
       if (!seoRes) saveDocument('seo', 'config', INITIAL_SEO);
       if (!profileRes) saveDocument('profile', 'photographer', INITIAL_PROFILE);
       if (!bookingConfigRes) saveDocument('bookingConfig', 'config', INITIAL_BOOKING_CONFIG);
       if (!emailConfigRes) saveDocument('emailConfig', 'config', INITIAL_EMAIL_CONFIG);
-      if (!analyticsRes) saveDocument('analytics', 'stats', INITIAL_ANALYTICS);
       if (packagesRes.length === 0) {
         for (const pkg of INITIAL_PHOTOGRAPHY_PACKAGES) {
           await saveDocument('photography_packages', pkg.id, pkg);
@@ -429,6 +432,10 @@ export default function App() {
         if (!cancelled) setBootstrapped(true);
       });
     return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    trackPageView();
   }, []);
 
   // Custom state wrappers that write changes to both local state and sync them to Firestore
@@ -847,8 +854,6 @@ ${photographerName}`);
         onSetView={navigateTo}
         lang={lang}
         onSetLang={setLang}
-        isAdminLoggedIn={isAdminLoggedIn}
-        onOpenAdminLogin={() => setShowAdminLogin(true)}
       />
 
       {/* Full-width hero outside max-w-7xl container */}
@@ -1856,6 +1861,8 @@ ${photographerName}`);
       <Footer
         onSetView={navigateTo}
         lang={lang}
+        isAdminLoggedIn={isAdminLoggedIn}
+        onOpenAdminLogin={() => setShowAdminLogin(true)}
       />
 
       {/* ======================================================= */}

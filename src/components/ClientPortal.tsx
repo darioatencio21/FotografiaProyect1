@@ -58,7 +58,8 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
 
   const currentAccount = clientAccounts.find(c => c.id === authenticatedClientId);
   const proofPhotos = currentAccount ? (currentAccount.photos || []) : [];
-  const contractBooking = currentAccount ? bookings.find(b => b.clientName === currentAccount.clientName && b.contractData && b.isPaid && !b.contractSignature) : undefined;
+  const signedContractBookings = currentAccount ? bookings.filter(b => b.clientName === currentAccount.clientName && b.contractData && b.contractSignature) : [];
+  const pendingContractBooking = currentAccount ? bookings.find(b => b.clientName === currentAccount.clientName && b.contractData && b.isPaid && !b.contractSignature) : undefined;
   const clientInvoices = currentAccount ? invoices.filter(invoice => invoice.clientEmail.toLowerCase() === currentAccount.clientEmail.toLowerCase()) : [];
 
   const handleAuth = (e: React.FormEvent) => {
@@ -296,8 +297,8 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                 </div>
               )}
 
-              {/* Contract signing banner */}
-              {contractBooking && !showContract && (
+              {/* Contract signing banner — pending */}
+              {pendingContractBooking && !showContract && (
                 <div className="bg-white/5 border border-white/10 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <p className="text-[10px] font-mono text-white/70 tracking-widest uppercase">
@@ -313,25 +314,57 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                 </div>
               )}
 
-              {showContract && contractBooking && (
+              {/* Contract view — signed contracts */}
+              {signedContractBookings.length > 0 && !showContract && !pendingContractBooking && (
+                <div className="bg-white/5 border border-white/10 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[10px] font-mono text-white/70 tracking-widest uppercase">
+                      {lang === 'en' ? 'Contract Signed' : 'Contrato Firmado'}
+                    </p>
+                    <p className="text-xs text-white/80 mt-1">
+                      {lang === 'en' ? 'Your contract has been signed.' : 'Tu contrato ha sido firmado.'}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setShowContract(true)}
+                    className="px-4 py-2 bg-white/10 hover:bg-white/10 border border-white/10 text-white/70 rounded-lg text-[10px] font-mono tracking-wider uppercase transition-all shrink-0 cursor-pointer"
+                  >
+                    {lang === 'en' ? 'View Contract' : 'Ver Contrato'}
+                  </button>
+                </div>
+              )}
+
+              {(showContract && pendingContractBooking) ? (
                 <div className="relative bg-dark/40 border border-white/10 rounded-lg p-4 md:p-6">
                   <button onClick={() => setShowContract(false)} className="absolute top-3 right-3 text-white/50 hover:text-white text-[10px] font-mono cursor-pointer">
                     {lang === 'en' ? 'Close' : 'Cerrar'}
                   </button>
                   <ContractView
-                    booking={contractBooking}
+                    booking={pendingContractBooking}
                     mode="client-sign"
                     lang={lang}
                     t={t}
                     onClientSign={(signature) => {
                       if (onUpdateBookings) {
-                        onUpdateBookings(bookings.map(b => b.id === contractBooking.id ? { ...b, contractSignature: signature, contractSignedAt: new Date().toISOString() } : b));
+                        onUpdateBookings(bookings.map(b => b.id === pendingContractBooking.id ? { ...b, contractSignature: signature, contractSignedAt: new Date().toISOString() } : b));
                       }
                       setShowContract(false);
                     }}
                   />
                 </div>
-              )}
+              ) : showContract && signedContractBookings.length > 0 ? (
+                <div className="relative bg-dark/40 border border-white/10 rounded-lg p-4 md:p-6">
+                  <button onClick={() => setShowContract(false)} className="absolute top-3 right-3 text-white/50 hover:text-white text-[10px] font-mono cursor-pointer">
+                    {lang === 'en' ? 'Close' : 'Cerrar'}
+                  </button>
+                  <ContractView
+                    booking={signedContractBookings[0]}
+                    mode="view"
+                    lang={lang}
+                    t={t}
+                  />
+                </div>
+              ) : null}
 
               {clientInvoices.length > 0 && (
                 <section className="bg-dark-gray/60 border border-white/10 rounded-lg p-4 text-left space-y-3">

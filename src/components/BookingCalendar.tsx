@@ -154,7 +154,6 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
   const selectedService = services.find(s => s.id === selectedServiceId);
   const basePrice = preSelectedPackage ? preSelectedPackage.price : (selectedService ? selectedService.price : 0);
   const totalPrice = basePrice;
-  const depositAmount = preSelectedPackage?.deposit ?? 0;
   const bookingId = useMemo(() => `AUREA-${Math.floor(Math.random() * 8999 + 1000)}`, []);
 
   // Handle Date Selection Input
@@ -275,7 +274,7 @@ Miriam Campos`);
       ? weddingData
       : { brideName: safeName, brideEmail: safeEmail, groomPhone: safePhone, groomName: '', brideAddress: '', ceremonyLocation: '', ceremonyAddress: '', ceremonyStart: '', ceremonyEnd: '', receptionLocation: '', receptionAddress: '', receptionStart: '', receptionEnd: '' };
     const contractType = isWedding ? 'wedding' : 'session';
-    const depositAmt = preSelectedPackage?.deposit ?? 0;
+    const depositAmt = Math.round(totalPrice * 0.3);
 
     onAddBooking({
       clientName: safeName,

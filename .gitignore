@@ -12,3 +12,9 @@ credentials.json
 
 .vercel
 .env*
+
+# AI / local tool config
+.agents/
+.claude/
+.codex/
+assets/.aistudio/

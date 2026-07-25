@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'motion/react';
-import { X, Globe, User, ShieldAlert, ChevronLeft } from 'lucide-react';
+import { X, Globe, ChevronLeft } from 'lucide-react';
 import { ActiveLanguíage } from '../types';
 import { TRANSLATIONS } from '../data/mockData';
 import { Logo } from './Logo';
@@ -15,8 +15,6 @@ interface HeaderProps {
   onSetView: (view: string) => void;
   lang: ActiveLanguíage;
   onSetLang: (lang: ActiveLanguíage) => void;
-  isAdminLoggedIn: boolean;
-  onOpenAdminLogin: () => void;
 }
 
 const DRAWER_WIDTH_VW = 85;
@@ -29,8 +27,6 @@ export default function Header({
   onSetView,
   lang,
   onSetLang,
-  isAdminLoggedIn,
-  onOpenAdminLogin
 }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showLanguíageDropdown, setShowLanguíageDropdown] = useState(false);
@@ -210,53 +206,7 @@ export default function Header({
             </AnimatePresence>
           </div>
 
-          {/* Backoffice Button */}
-          <button
-            onClick={() => {
-              if (isAdminLoggedIn) {
-                onSetView('admin');
-              } else {
-                onOpenAdminLogin();
-              }
-            }}
-            className={`px-4 py-2 border rounded-full text-[10px] font-mono tracking-widest uppercase transition-all flex items-center space-x-1 cursor-pointer ${
-              currentView === 'admin'
-                ? 'bg-white/10 border-white/10 text-white font-bold'
-                : 'border-white/15 text-white/70 hover:border-white/30 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            {isAdminLoggedIn ? (
-              <>
-                <ShieldAlert size={10} className="animate-pulse text-white" />
-                <span>CMS Dashboard</span>
-              </>
-            ) : (
-              <>
-                <User size={10} />
-                <span>Backoffice</span>
-              </>
-            )}
-          </button>
         </div>
-      </div>
-
-      {/* Mobile Burger triggers */}
-      <div className="lg:hidden flex items-center space-x-2 z-10">
-        <button
-          onClick={() => {
-            setIsMobileMenuOpen(false);
-            if (isAdminLoggedIn) {
-              onSetView('admin');
-            } else {
-              onOpenAdminLogin();
-            }
-          }}
-          className="px-3 py-1.5 border border-white/15 text-white/70 hover:text-white rounded-full text-[11px] font-mono tracking-widest uppercase transition-all"
-        >
-          <User size={10} className="inline-block mr-1" />
-          <span>{isAdminLoggedIn ? 'CMS' : 'Staff'}</span>
-        </button>
-
       </div>
 
       {/* Drag handle — visible only on mobile, only when menu is closed.

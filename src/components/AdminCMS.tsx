@@ -212,7 +212,11 @@ export default function AdminCMS({
           }
         }
       )
-      .subscribe();
+      .subscribe((status, err) => {
+        if (status === 'CHANNEL_ERROR') {
+          console.warn('Realtime no disponible para bookings (normal si no está habilitado en Supabase)', err?.message);
+        }
+      });
     return () => { supabase.removeChannel(channel); };
   }, []);
 
@@ -244,7 +248,11 @@ export default function AdminCMS({
           }
         }
       )
-      .subscribe();
+      .subscribe((status, err) => {
+        if (status === 'CHANNEL_ERROR') {
+          console.warn('Realtime no disponible para messages (normal si no está habilitado en Supabase)', err?.message);
+        }
+      });
     return () => { supabase.removeChannel(channel); };
   }, []);
 
@@ -980,7 +988,7 @@ export default function AdminCMS({
       {/* Floating hamburger — mobile only, centered on right edge */}
       <button
         onClick={() => setMobileSidebarOpen(true)}
-        className={`${mobileSidebarOpen ? 'hidden' : 'flex'} lg:hidden fixed right-4 top-1/2 -translate-y-1/2 z-30 bg-dark border border-white/10 rounded-full p-3 text-white hover:bg-white/10 hover:border-white/30 transition-all shadow-lg cursor-pointer`}
+        className={`${mobileSidebarOpen ? 'hidden' : 'flex'} lg:hidden fixed right-4 top-4 z-30 bg-dark border border-white/10 rounded-full p-3 text-white hover:bg-white/10 hover:border-white/30 transition-all shadow-lg cursor-pointer`}
         aria-label="Open menu"
       >
         <Menu size={20} />
@@ -1764,36 +1772,36 @@ export default function AdminCMS({
                     </div>
 
                     {/* Action buttons */}
-                    <div className="flex items-center space-x-2 pt-2 border-t border-white/10" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-2 border-t border-white/10" onClick={(e) => e.stopPropagation()}>
                       {b.status === 'pending' ? (
                         <>
                           <button
                             onClick={() => handleApproveBooking(b.id)}
-                            className="flex-1 min-h-[44px] py-2.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-dark border border-emerald-500/20 transition-all cursor-pointer text-xs font-mono uppercase tracking-wider font-semibold flex items-center justify-center space-x-1.5"
+                            className="w-full sm:flex-1 min-h-[44px] py-2.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-dark border border-emerald-500/20 transition-all cursor-pointer text-xs font-mono uppercase tracking-wider font-semibold flex items-center justify-center space-x-1.5"
                           >
                             <Check size={14} />
                             <span>{t('Aceptar', 'Accept', 'Aceitar')}</span>
                           </button>
                           <button
                             onClick={() => { setRejectBookingId(b.id); setRejectReason(''); }}
-                            className="flex-1 min-h-[44px] py-2.5 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-dark border border-red-500/20 transition-all cursor-pointer text-xs font-mono uppercase tracking-wider font-semibold flex items-center justify-center space-x-1.5"
+                            className="w-full sm:flex-1 min-h-[44px] py-2.5 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-dark border border-red-500/20 transition-all cursor-pointer text-xs font-mono uppercase tracking-wider font-semibold flex items-center justify-center space-x-1.5"
                           >
                             <X size={14} />
                             <span>{t('Rechazar', 'Decline', 'Recusar')}</span>
                           </button>
                         </>
                       ) : b.status === 'approved' ? (
-                        <div className="flex w-full gap-2">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center w-full gap-2">
                           <button
                             onClick={() => handleResendLink(b.id)}
-                            className="flex-1 min-h-[44px] py-2.5 rounded-lg bg-sky-500/10 hover:bg-sky-500 text-sky-400 hover:text-dark border border-sky-500/20 transition-all cursor-pointer text-[9px] font-mono uppercase tracking-wider font-semibold flex items-center justify-center space-x-1"
+                            className="w-full sm:flex-1 min-h-[44px] py-2.5 rounded-lg bg-sky-500/10 hover:bg-sky-500 text-sky-400 hover:text-dark border border-sky-500/20 transition-all cursor-pointer text-[9px] font-mono uppercase tracking-wider font-semibold flex items-center justify-center space-x-1"
                           >
                             <RefreshCw size={12} />
                             <span>{t('Reenviar Link', 'Resend Link', 'Reenviar Link')}</span>
                           </button>
                           <button
                             onClick={() => handleReleaseSlot(b.id)}
-                            className="flex-1 min-h-[44px] py-2.5 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-dark border border-red-500/20 transition-all cursor-pointer text-[9px] font-mono uppercase tracking-wider font-semibold flex items-center justify-center space-x-1"
+                            className="w-full sm:flex-1 min-h-[44px] py-2.5 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-dark border border-red-500/20 transition-all cursor-pointer text-[9px] font-mono uppercase tracking-wider font-semibold flex items-center justify-center space-x-1"
                           >
                             <X size={12} />
                             <span>{t('Liberar', 'Release', 'Liberar')}</span>
@@ -1956,7 +1964,7 @@ export default function AdminCMS({
               {invoices.length === 0 ? (
                 <p className="text-sm text-white/40">{t('No hay facturas disponibles.', 'No invoices available.', 'Nenhuma fatura disponível.')}</p>
               ) : invoices.map(invoice => (
-                <div key={invoice.id} className="bg-dark-gray border border-white/10 rounded-lg p-4 grid grid-cols-1 md:grid-cols-6 gap-3 items-center text-xs">
+                <div key={invoice.id} className="bg-dark-gray border border-white/10 rounded-lg p-4 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3 items-center text-xs">
                   <div><p className="text-[9px] text-white/40 uppercase">{t('Factura', 'Invoice', 'Fatura')}</p><p className="font-mono text-white/60">{invoice.invoiceNumber}</p></div>
                   <div><p className="text-[9px] text-white/40 uppercase">{t('Cliente', 'Client', 'Cliente')}</p><p className="text-white/80">{invoice.clientName}</p></div>
                   <div className="md:col-span-2"><p className="text-[9px] text-white/40 uppercase">{t('Paquete', 'Package', 'Pacote')}</p><p className="text-white/70 truncate">{invoice.packageName}</p></div>
@@ -2908,7 +2916,7 @@ export default function AdminCMS({
                         </div>
 
                         {/* Quick action buttons for this client */}
-                        <div className="flex items-center space-x-2 shrink-0 self-start md:self-auto">
+                        <div className="flex flex-wrap items-center gap-2 shrink-0 self-start md:self-auto">
                           <button
                             type="button"
                             onClick={() => {

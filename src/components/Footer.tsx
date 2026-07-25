@@ -13,9 +13,11 @@ import { Logo } from './Logo';
 interface FooterProps {
   onSetView: (view: string) => void;
   lang: ActiveLanguíage;
+  isAdminLoggedIn: boolean;
+  onOpenAdminLogin: () => void;
 }
 
-export default function Footer({ onSetView, lang }: FooterProps) {
+export default function Footer({ onSetView, lang, isAdminLoggedIn, onOpenAdminLogin }: FooterProps) {
   const [email, setEmail] = useState('');
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -178,6 +180,19 @@ export default function Footer({ onSetView, lang }: FooterProps) {
           <span>&copy; {new Date().getFullYear()} Estudio Camaleón. {t.footerRights}</span>
           <button onClick={() => handleNav('privacy')} className="hover:text-white transition-colors cursor-pointer">{t.privacy}</button>
           <button onClick={() => handleNav('terms')} className="hover:text-white transition-colors cursor-pointer">{t.terms}</button>
+          <button
+            onClick={() => {
+              if (isAdminLoggedIn) {
+                onSetView('admin');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              } else {
+                onOpenAdminLogin();
+              }
+            }}
+            className="text-white/40 hover:text-white/70 transition-colors cursor-pointer text-[10px]"
+          >
+            Admin
+          </button>
         </div>
 
         <button
