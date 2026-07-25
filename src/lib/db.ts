@@ -9,7 +9,7 @@ function tn(table: string): string {
 
 function isTableMissing(table: string): boolean {
   try {
-    const missing = JSON.parse(localStorage.getItem(MISSING_TABLES_KEY) || '[]');
+    const missing = JSON.parse(sessionStorage.getItem(MISSING_TABLES_KEY) || '[]');
     return missing.includes(table);
   } catch {
     return false;
@@ -18,10 +18,10 @@ function isTableMissing(table: string): boolean {
 
 function markTableMissing(table: string): void {
   try {
-    const missing = JSON.parse(localStorage.getItem(MISSING_TABLES_KEY) || '[]');
+    const missing = JSON.parse(sessionStorage.getItem(MISSING_TABLES_KEY) || '[]');
     if (!missing.includes(table)) {
       missing.push(table);
-      localStorage.setItem(MISSING_TABLES_KEY, JSON.stringify(missing));
+      sessionStorage.setItem(MISSING_TABLES_KEY, JSON.stringify(missing));
     }
   } catch { /* ignore */ }
 }
@@ -103,21 +103,53 @@ export async function getSingleDocument<T>(collectionPath: string, docId: string
 
 export async function saveDocument<T>(collectionPath: string, docId: string, data: T): Promise<void> {
   const table = tn(collectionPath);
-  if (isTableMissing(table)) return;
+  // Don't skip on missing-table: try always, since RLS is fixed.
+
+  const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/${table}`;
+  const apikey = import.meta.env.VITE_SUPABASE_ANON_KEY ?? '';
+  const body = JSON.stringify({ id: docId, ...(data as Record<string, unknown>) });
+
+  const doUpsert = async (payload: string) => {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'apikey': apikey,
+        'Authorization': `Bearer ${apikey}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates,return=minimal',
+      },
+      body: payload,
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      throw Object.assign(new Error(`saveDocument ${table} failed: ${res.status} ${text}`), {
+        status: res.status,
+        body: text,
+      });
+    }
+  };
 
   try {
-    const { error } = await supabase
-      .from(table)
-      .upsert({ id: docId, ...data as any });
-    if (error) throw error;
+    await doUpsert(body);
+    if (table === 'bookings' && (data as any)?.approvalToken) {
+      console.log(`[saveDocument] OK bookings/${docId} token=${(data as any).approvalToken}`);
+    }
+    return;
   } catch (err: any) {
+    console.error(`[saveDocument] ${table}/${docId} first attempt failed:`, err?.message ?? err);
     if (table === 'bookings' && isSchemaMismatchError(err)) {
       const compatibleData = getCompatiblePayload(table, data as Record<string, unknown>);
-      const { error: retryError } = await supabase
-        .from(table)
-        .upsert({ id: docId, ...compatibleData });
-      if (!retryError) return;
-      throw retryError;
+      const compatibleBody = JSON.stringify({ id: docId, ...compatibleData });
+      try {
+        await doUpsert(compatibleBody);
+        return;
+      } catch (retryErr: any) {
+        if (isMissingTableError(retryErr)) {
+          markTableMissing(table);
+          return;
+        }
+        throw retryErr;
+      }
     }
     if (isMissingTableError(err)) {
       markTableMissing(table);

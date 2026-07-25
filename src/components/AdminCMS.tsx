@@ -9,7 +9,8 @@ import {
   BarChart3, Camera, Calendar, BookOpen, MessageSquare, HelpCircle, 
   Settings, LogOut, Check, X, ShieldAlert, Edit, Edit3, Trash2, Plus, Menu, Save,
   ArrowUpRight, Eye, RefreshCw, Upload, Sliders, FileCode, CheckSquare,
-  User, Mail, ChevronDown, ChevronUp, Phone, Users, FileText, ShoppingBag, Copy, Receipt, Bell
+  User, Mail, ChevronDown, ChevronUp, Phone, Users, FileText, ShoppingBag, Copy, 
+  Receipt, Bell, Clock
 } from 'lucide-react';
 import { 
   Photograph, Service, Testimonial, BlogPost, FAQ, Booking, 
@@ -19,6 +20,7 @@ import {
 import { TRANSLATIONS } from '../data/mockData';
 import { sanitizeString, sanitizeEmail, sanitizeUrl, sanitizeObject } from '../lib/sanitize';
 import { supabase, uploadImageBlob, deleteImageByUrl } from '../lib/db';
+import { sendApprovalEmail, sendRejectionEmail, sendExpirationEmail, sendPendingPaymentReminder, sendConfirmationEmail } from '../lib/email';
 
 import AdminSEOTab from './AdminSEOTab';
 import AdminProfileTab from './AdminProfileTab';
@@ -386,10 +388,162 @@ export default function AdminCMS({
     }
   };
 
-  // Manage bookings
-  const handleBookingStatus = (id: string, newStatus: 'pending' | 'accepted' | 'rejected' | 'completed') => {
-    onUpdateBookings(bookings.map(b => b.id === id ? { ...b, status: newStatus } : b));
-    triggerAlert(`Booking status updated to ${newStatus.toUpperCase()}`);
+  // Rejection modal state
+  const [rejectBookingId, setRejectBookingId] = useState<string | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
+
+  // Approval flow
+  const handleApproveBooking = async (id: string) => {
+    const booking = bookings.find(b => b.id === id);
+    if (!booking) return;
+
+    const token = crypto.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).substring(2, 10)}`;
+    const expiresHours = bookingConfig.approvalExpirationHours || 48;
+    const expiresAt = new Date(Date.now() + expiresHours * 60 * 60 * 1000).toISOString();
+
+    const appUrl = import.meta.env.VITE_APP_URL || window.location.origin;
+    const approvalLink = `${appUrl}/?approval=${token}`;
+
+    const updatedBooking: Booking = {
+      ...booking,
+      status: 'approved',
+      approvalToken: token,
+      approvedAt: new Date().toISOString(),
+      approvalExpiresAt: expiresAt,
+      paymentStatus: 'pending',
+      contractStatus: 'pending',
+    };
+
+    await onUpdateBookings(bookings.map(b => b.id === id ? updatedBooking : b));
+
+    // Resend free tier only allows sending to the account owner email.
+    // For testing, route all approval emails to darioatencio21@gmail.com.
+    const testRecipient = 'darioatencio21@gmail.com';
+    triggerAlert(`Booking approved — link sent to ${testRecipient}`);
+
+    const sent = await sendApprovalEmail(
+      emailConfig,
+      booking.clientName,
+      testRecipient,
+      approvalLink,
+      booking.date,
+      (booking.depositAmount ?? 0),
+      booking.packageName || 'Photography Session',
+    );
+    if (!sent) {
+      triggerAlert('Warning: Approval email could not be sent');
+    }
+  };
+
+  // Rejection flow
+  const handleRejectBooking = (id: string, reason?: string) => {
+    const booking = bookings.find(b => b.id === id);
+    if (!booking) return;
+
+    onUpdateBookings(bookings.map(b => b.id === id ? {
+      ...b,
+      status: 'rejected',
+      rejectionReason: reason || '',
+    } : b));
+
+    triggerAlert(`Booking rejected — ${booking.clientName} notified`);
+
+    sendRejectionEmail(
+      emailConfig,
+      booking.clientName,
+      booking.clientEmail,
+      booking.date,
+      reason,
+    );
+
+    setRejectBookingId(null);
+    setRejectReason('');
+  };
+
+  // Release / expire an approved booking
+  const handleReleaseSlot = (id: string) => {
+    const booking = bookings.find(b => b.id === id);
+    if (!booking) return;
+
+    onUpdateBookings(bookings.map(b => b.id === id ? {
+      ...b,
+      status: 'expired',
+      approvalToken: '',
+    } : b));
+
+    triggerAlert(`Slot released for ${booking.clientName}`);
+
+    sendExpirationEmail(
+      emailConfig,
+      booking.clientName,
+      booking.clientEmail,
+      booking.date,
+    );
+  };
+
+  // Resend approval link
+  const handleResendLink = async (id: string) => {
+    const booking = bookings.find(b => b.id === id);
+    if (!booking) return;
+
+    const token = crypto.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).substring(2, 10)}`;
+    const expiresHours = bookingConfig.approvalExpirationHours || 48;
+    const expiresAt = new Date(Date.now() + expiresHours * 60 * 60 * 1000).toISOString();
+    const updated: Booking = {
+      ...booking,
+      approvalToken: token,
+      approvedAt: new Date().toISOString(),
+      approvalExpiresAt: expiresAt,
+    };
+    await onUpdateBookings(bookings.map(b => b.id === id ? updated : b));
+
+    const appUrl = import.meta.env.VITE_APP_URL || window.location.origin;
+    const approvalLink = `${appUrl}/?approval=${token}`;
+
+    // Resend free tier only allows sending to the account owner email.
+    // For testing, route all approval emails to darioatencio21@gmail.com.
+    const testRecipient = 'darioatencio21@gmail.com';
+    const sent = await sendApprovalEmail(
+      emailConfig,
+      booking.clientName,
+      testRecipient,
+      approvalLink,
+      booking.date,
+      (booking.depositAmount ?? 0),
+      booking.packageName || 'Photography Session',
+    );
+    if (sent) {
+        triggerAlert(`Approval link resent to ${testRecipient}`);
+      } else {
+        triggerAlert('Warning: Could not resend approval email');
+      }
+  };
+
+  // Confirm booking after payment+signature from client
+  const handleConfirmBooking = (id: string) => {
+    const booking = bookings.find(b => b.id === id);
+    if (!booking) return;
+
+    onUpdateBookings(bookings.map(b => b.id === id ? {
+      ...b,
+      status: 'confirmed',
+      isPaid: true,
+      paymentStatus: 'paid',
+      contractStatus: 'signed',
+    } : b));
+
+    triggerAlert(`Booking confirmed — ${booking.clientName}`);
+
+    sendConfirmationEmail(
+      emailConfig,
+      booking.clientName,
+      booking.clientEmail,
+      emailConfig.receiverEmail,
+      booking.date,
+      booking.timeSlot,
+      (booking.depositAmount ?? 0),
+      booking.packageName || 'Photography Session',
+    );
   };
 
   const handleToggleBookingRead = (id: string) => {
@@ -1283,38 +1437,64 @@ export default function AdminCMS({
                             <td className="p-4 font-semibold text-white/60 font-mono">${b.amount || 1800}</td>
                             <td className="p-4">
                               <span className={`px-2 py-0.5 rounded text-[9px] font-mono font-semibold uppercase ${
-                                b.status === 'accepted' 
-                                  ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-500/20' 
+                                b.status === 'confirmed' || b.status === 'completed'
+                                  ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-500/20'
+                                  : b.status === 'approved'
+                                  ? 'bg-sky-950/40 text-sky-400 border border-sky-500/20'
                                   : b.status === 'pending'
                                   ? 'bg-gold-950/40 text-white/70 border border-white/10'
-                                  : 'bg-red-950/40 text-red-400 border border-red-500/20'
+                                  : b.status === 'rejected'
+                                  ? 'bg-red-950/40 text-red-400 border border-red-500/20'
+                                  : 'bg-gray-950/40 text-gray-400 border border-gray-500/20'
                               }`}>
-                                {b.status}
+                                {b.status === 'approved' ? 'approved' : b.status}
                               </span>
                             </td>
                             <td className="p-4 text-right space-x-2" onClick={(e) => e.stopPropagation()}>
                               {b.status === 'pending' ? (
                                 <>
                                   <button
-                                    onClick={() => handleBookingStatus(b.id, 'accepted')}
+                                    onClick={() => handleApproveBooking(b.id)}
                                     className="p-1.5 rounded bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-dark border border-emerald-500/20 transition-all cursor-pointer"
-                                    title="Accept & Sync Calendar"
+                                    title="Approve & Send Link"
                                   >
                                     <Check size={12} />
                                   </button>
                                   <button
-                                    onClick={() => handleBookingStatus(b.id, 'rejected')}
+                                    onClick={() => { setRejectBookingId(b.id); setRejectReason(''); }}
                                     className="p-1.5 rounded bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-dark border border-red-500/20 transition-all cursor-pointer"
                                     title="Decline Slot"
                                   >
                                     <X size={12} />
                                   </button>
                                 </>
+                              ) : b.status === 'approved' ? (
+                                <>
+                                  <button
+                                    onClick={() => handleResendLink(b.id)}
+                                    className="p-1.5 rounded bg-sky-500/10 hover:bg-sky-500 text-sky-400 hover:text-dark border border-sky-500/20 transition-all cursor-pointer"
+                                    title="Resend Approval Link"
+                                  >
+                                    <RefreshCw size={12} />
+                                  </button>
+                                  <button
+                                    onClick={() => handleReleaseSlot(b.id)}
+                                    className="p-1.5 rounded bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-dark border border-red-500/20 transition-all cursor-pointer"
+                                    title="Release Slot (Expire)"
+                                  >
+                                    <X size={12} />
+                                  </button>
+                                </>
+                              ) : b.status === 'confirmed' || b.status === 'completed' ? (
+                                <span className="text-[9px] text-emerald-400 font-mono">✓ Done</span>
                               ) : (
                                 <button
-                                  onClick={() => handleBookingStatus(b.id, 'pending')}
+                                  onClick={() => {
+                                    onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, status: 'pending' } : book));
+                                    triggerAlert('Status reverted to PENDING');
+                                  }}
                                   className="px-2 py-1.5 rounded bg-white/5 hover:bg-white/10 hover:text-white border border-white/10 text-white/60 transition-all cursor-pointer inline-flex items-center space-x-1 animate-fade-in"
-                                  title={t('Revertir estado a Pendiente (Corregir error)', 'Revert status to Pending (Correct error)', 'Reverter status para Pendente (Corrigir erro)')}
+                                  title={t('Revertir estado a Pendiente', 'Revert status to Pending', 'Reverter status para Pendente')}
                                 >
                                   <RefreshCw size={10} className="mr-1" />
                                   <span className="text-[9px] font-mono uppercase tracking-wider font-semibold">{t('Corregir', 'Correct', 'Corrigir')}</span>
@@ -1414,39 +1594,78 @@ export default function AdminCMS({
                                       </div>
                                     </div>
 
-                                      {/* Contract & Pricing section */}
-                                      {(b.contractData || b.status === 'accepted') && (
-                                        <div className="mt-6 pt-6 border-t border-white/10">
-                                          <h4 className="text-[10px] font-mono uppercase tracking-widest text-white/70 font-semibold pb-3">
-                                            {t('Contrato y Montos', 'Contract & Pricing', 'Contrato e Valores')}
-                                          </h4>
-                                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div className="space-y-3">
-                                              <p className="text-[9px] uppercase tracking-wider text-white/40">{t('Montos', 'Amounts', 'Valores')}</p>
-                                              <div className="flex gap-2">
-                                                <input type="number" placeholder={t('Depósito', 'Deposit', 'Depósito')} defaultValue={b.depositAmount || 0} onChange={(e) => { const v = parseInt(e.target.value) || 0; onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, depositAmount: v } : book)); }} className="w-full bg-dark/60 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-mono" />
-                                                <input type="number" placeholder={t('Restante', 'Due', 'Restante')} defaultValue={b.amountDue || 0} onChange={(e) => { const v = parseInt(e.target.value) || 0; onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, amountDue: v } : book)); }} className="w-full bg-dark/60 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-mono" />
+                                          {/* Approval Link & Expiration */}
+                                          {b.status === 'approved' && b.approvalToken && (
+                                            <div className="mt-4 p-4 bg-sky-950/20 border border-sky-500/20 rounded-lg space-y-2">
+                                              <h4 className="text-[10px] font-mono uppercase tracking-widest text-sky-400 font-semibold">
+                                                {t('Link de Aprobación', 'Approval Link', 'Link de Aprovação')}
+                                              </h4>
+                                              <div className="flex items-center gap-2">
+                                                <code className="text-[9px] font-mono text-white/70 bg-dark/60 px-2 py-1 rounded border border-white/10 truncate flex-1">
+                                                  {import.meta.env.VITE_APP_URL || window.location.origin}/?approval={b.approvalToken}
+                                                </code>
+                                                <button
+                                                  onClick={() => {
+                                                    const link = `${import.meta.env.VITE_APP_URL || window.location.origin}/?approval=${b.approvalToken}`;
+                                                    navigator.clipboard.writeText(link).then(() => triggerAlert('Link copied!'));
+                                                  }}
+                                                  className="shrink-0 p-1.5 text-white/50 hover:text-white cursor-pointer"
+                                                >
+                                                  <Copy size={12} />
+                                                </button>
                                               </div>
-                                              <input type="text" placeholder={t('Gastos de Viaje', 'Travel Expenses', 'Despesas de Viagem')} defaultValue={b.travelExpenses || ''} onChange={(e) => { onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, travelExpenses: e.target.value } : book)); }} className="w-full bg-dark/60 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-mono" />
-                                            </div>
-                                            <div className="space-y-2">
-                                              <div className="flex gap-2">
-                                                {!b.isPaid && b.status === 'accepted' && (
-                                                  <button onClick={() => onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, isPaid: true } : book))} className="flex-1 px-3 py-2 bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-emerald-600/30 transition-all">
-                                                    {t('Marcar como Pagado', 'Mark as Paid', 'Marcar como Pago')}
-                                                  </button>
-                                                )}
-                                                {b.contractSignature && !b.contractPhotographerSignature && (
-                                                  <button onClick={() => onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, contractPhotographerSignature: 'Miriam Tellez', contractPhotographerSignedAt: new Date().toISOString() } : book))} className="flex-1 px-3 py-2 bg-white/10 border border-white/10 text-white/70 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-white/15 transition-all">
-                                                    {t('Firmar como Fotógrafa', 'Sign as Photographer', 'Assinar como Fotógrafa')}
-                                                  </button>
-                                                )}
+                                              {b.approvalExpiresAt && (
+                                                <div className="flex items-center gap-1 text-[10px] text-white/50 font-mono">
+                                                  <Clock size={10} />
+                                                  {t('Expira:', 'Expires:', 'Expira:')}{' '}
+                                                  {new Date(b.approvalExpiresAt).toLocaleString()}
+                                                </div>
+                                              )}
+                                              <div className="flex gap-1 text-[10px]">
+                                                <span className={b.paymentStatus === 'paid' ? 'text-emerald-400' : 'text-white/50'}>
+                                                  {t('Pago:', 'Payment:', 'Pagamento:')} {b.paymentStatus || 'pending'}
+                                                </span>
+                                                <span className="text-white/30">|</span>
+                                                <span className={b.contractStatus === 'signed' ? 'text-emerald-400' : 'text-white/50'}>
+                                                  {t('Contrato:', 'Contract:', 'Contrato:')} {b.contractStatus || 'pending'}
+                                                </span>
                                               </div>
-                                              {b.isPaid && <span className="text-[9px] text-emerald-400 font-mono">{t('✓ Pagado', '✓ Paid', '✓ Pago')}</span>}
-                                              {b.contractSignature && <span className="text-[9px] text-green-400 font-mono block">{t('✓ Cliente firmó', '✓ Client signed', '✓ Cliente assinou')}</span>}
-                                              {b.contractPhotographerSignature && <span className="text-[9px] text-white/70 font-mono block">{t('✓ Fotógrafa firmó', '✓ Photographer signed', '✓ Fotógrafa assinou')}</span>}
                                             </div>
-                                          </div>
+                                          )}
+
+                                          {/* Contract & Pricing section */}
+                                       {(b.contractData || b.status === 'confirmed' || b.status === 'approved') && (
+                                         <div className="mt-6 pt-6 border-t border-white/10">
+                                           <h4 className="text-[10px] font-mono uppercase tracking-widest text-white/70 font-semibold pb-3">
+                                             {t('Contrato y Montos', 'Contract & Pricing', 'Contrato e Valores')}
+                                           </h4>
+                                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                             <div className="space-y-3">
+                                               <p className="text-[9px] uppercase tracking-wider text-white/40">{t('Montos', 'Amounts', 'Valores')}</p>
+                                               <div className="flex gap-2">
+                                                 <input type="number" placeholder={t('Depósito', 'Deposit', 'Depósito')} defaultValue={b.depositAmount || 0} onChange={(e) => { const v = parseInt(e.target.value) || 0; onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, depositAmount: v } : book)); }} className="w-full bg-dark/60 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-mono" />
+                                                 <input type="number" placeholder={t('Restante', 'Due', 'Restante')} defaultValue={b.amountDue || 0} onChange={(e) => { const v = parseInt(e.target.value) || 0; onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, amountDue: v } : book)); }} className="w-full bg-dark/60 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-mono" />
+                                               </div>
+                                               <input type="text" placeholder={t('Gastos de Viaje', 'Travel Expenses', 'Despesas de Viagem')} defaultValue={b.travelExpenses || ''} onChange={(e) => { onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, travelExpenses: e.target.value } : book)); }} className="w-full bg-dark/60 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-mono" />
+                                             </div>
+                                             <div className="space-y-2">
+                                               <div className="flex gap-2">
+                                                 {!b.isPaid && (b.status === 'confirmed' || b.status === 'approved') && (
+                                                   <button onClick={() => onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, isPaid: true } : book))} className="flex-1 px-3 py-2 bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-emerald-600/30 transition-all">
+                                                     {t('Marcar como Pagado', 'Mark as Paid', 'Marcar como Pago')}
+                                                   </button>
+                                                 )}
+                                                 {b.contractSignature && !b.contractPhotographerSignature && (
+                                                   <button onClick={() => onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, contractPhotographerSignature: 'Miriam Tellez', contractPhotographerSignedAt: new Date().toISOString() } : book))} className="flex-1 px-3 py-2 bg-white/10 border border-white/10 text-white/70 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-white/15 transition-all">
+                                                     {t('Firmar como Fotógrafa', 'Sign as Photographer', 'Assinar como Fotógrafa')}
+                                                   </button>
+                                                 )}
+                                               </div>
+                                               {b.isPaid && <span className="text-[9px] text-emerald-400 font-mono">{t('✓ Pagado', '✓ Paid', '✓ Pago')}</span>}
+                                               {b.contractSignature && <span className="text-[9px] text-green-400 font-mono block">{t('✓ Cliente firmó', '✓ Client signed', '✓ Cliente assinou')}</span>}
+                                               {b.contractPhotographerSignature && <span className="text-[9px] text-white/70 font-mono block">{t('✓ Fotógrafa firmó', '✓ Photographer signed', '✓ Fotógrafa assinou')}</span>}
+                                             </div>
+                                           </div>
                                            {b.contractData && (
                                             <div className="mt-3">
                                               <details className="text-xs">
@@ -1516,11 +1735,15 @@ export default function AdminCMS({
                           </div>
                         </div>
                         <span className={`shrink-0 ml-2 px-2 py-0.5 rounded text-[9px] font-mono font-semibold uppercase ${
-                          b.status === 'accepted' 
-                            ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-500/20' 
+                          b.status === 'confirmed' || b.status === 'completed'
+                            ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-500/20'
+                            : b.status === 'approved'
+                            ? 'bg-sky-950/40 text-sky-400 border border-sky-500/20'
                             : b.status === 'pending'
                             ? 'bg-gold-950/40 text-white/70 border border-white/10'
-                            : 'bg-red-950/40 text-red-400 border border-red-500/20'
+                            : b.status === 'rejected'
+                            ? 'bg-red-950/40 text-red-400 border border-red-500/20'
+                            : 'bg-gray-950/40 text-gray-400 border border-gray-500/20'
                         }`}>
                           {b.status}
                         </span>
@@ -1545,23 +1768,43 @@ export default function AdminCMS({
                       {b.status === 'pending' ? (
                         <>
                           <button
-                            onClick={() => handleBookingStatus(b.id, 'accepted')}
+                            onClick={() => handleApproveBooking(b.id)}
                             className="flex-1 min-h-[44px] py-2.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-dark border border-emerald-500/20 transition-all cursor-pointer text-xs font-mono uppercase tracking-wider font-semibold flex items-center justify-center space-x-1.5"
                           >
                             <Check size={14} />
                             <span>{t('Aceptar', 'Accept', 'Aceitar')}</span>
                           </button>
                           <button
-                            onClick={() => handleBookingStatus(b.id, 'rejected')}
+                            onClick={() => { setRejectBookingId(b.id); setRejectReason(''); }}
                             className="flex-1 min-h-[44px] py-2.5 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-dark border border-red-500/20 transition-all cursor-pointer text-xs font-mono uppercase tracking-wider font-semibold flex items-center justify-center space-x-1.5"
                           >
                             <X size={14} />
                             <span>{t('Rechazar', 'Decline', 'Recusar')}</span>
                           </button>
                         </>
+                      ) : b.status === 'approved' ? (
+                        <div className="flex w-full gap-2">
+                          <button
+                            onClick={() => handleResendLink(b.id)}
+                            className="flex-1 min-h-[44px] py-2.5 rounded-lg bg-sky-500/10 hover:bg-sky-500 text-sky-400 hover:text-dark border border-sky-500/20 transition-all cursor-pointer text-[9px] font-mono uppercase tracking-wider font-semibold flex items-center justify-center space-x-1"
+                          >
+                            <RefreshCw size={12} />
+                            <span>{t('Reenviar Link', 'Resend Link', 'Reenviar Link')}</span>
+                          </button>
+                          <button
+                            onClick={() => handleReleaseSlot(b.id)}
+                            className="flex-1 min-h-[44px] py-2.5 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-dark border border-red-500/20 transition-all cursor-pointer text-[9px] font-mono uppercase tracking-wider font-semibold flex items-center justify-center space-x-1"
+                          >
+                            <X size={12} />
+                            <span>{t('Liberar', 'Release', 'Liberar')}</span>
+                          </button>
+                        </div>
                       ) : (
                         <button
-                          onClick={() => handleBookingStatus(b.id, 'pending')}
+                          onClick={() => {
+                            onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, status: 'pending' } : book));
+                            triggerAlert('Status reverted to PENDING');
+                          }}
                           className="w-full min-h-[44px] py-2.5 rounded-lg bg-white/5 hover:bg-white/10 hover:text-white border border-white/10 text-white/60 transition-all cursor-pointer text-xs font-mono uppercase tracking-wider font-semibold flex items-center justify-center space-x-1.5"
                         >
                           <RefreshCw size={14} />
@@ -1593,7 +1836,32 @@ export default function AdminCMS({
                             {b.notes || t('Sin notas adicionales', 'No additional notes', 'Sem notas adicionais')}
                           </div>
                         </div>
-                        {(b.contractData || b.status === 'accepted') && (
+                        {/* Approval Link (mobile) */}
+                        {b.status === 'approved' && b.approvalToken && (
+                          <div className="p-3 bg-sky-950/20 border border-sky-500/20 rounded-lg space-y-1.5">
+                            <h4 className="text-[9px] font-mono uppercase tracking-widest text-sky-400 font-semibold">
+                              {t('Link de Aprobación', 'Approval Link')}
+                            </h4>
+                            <code className="text-[8px] font-mono text-white/60 bg-dark/60 px-2 py-1 rounded border border-white/10 block truncate">
+                              .../?approval={b.approvalToken}
+                            </code>
+                            {b.approvalExpiresAt && (
+                              <div className="text-[9px] text-white/50 font-mono">
+                                {t('Expira:', 'Expires:')} {new Date(b.approvalExpiresAt).toLocaleString()}
+                              </div>
+                            )}
+                            <div className="flex gap-2 text-[9px]">
+                              <span className={b.paymentStatus === 'paid' ? 'text-emerald-400' : 'text-white/50'}>
+                                {t('Pago:', 'Pay:')} {b.paymentStatus}
+                              </span>
+                              <span className={b.contractStatus === 'signed' ? 'text-emerald-400' : 'text-white/50'}>
+                                {t('Contrato:', 'Cont:')} {b.contractStatus}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+
+                        {(b.contractData || b.status === 'confirmed' || b.status === 'approved') && (
                           <div className="pt-3 border-t border-white/10 space-y-3">
                             <h4 className="text-[10px] font-mono uppercase tracking-widest text-white/70 font-semibold">
                               {t('Contrato y Montos', 'Contract & Pricing', 'Contrato e Valores')}
@@ -1604,7 +1872,7 @@ export default function AdminCMS({
                             </div>
                             <input type="text" placeholder={t('Gastos de Viaje', 'Travel Expenses', 'Despesas de Viagem')} defaultValue={b.travelExpenses || ''} onChange={(e) => { onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, travelExpenses: e.target.value } : book)); }} className="w-full bg-dark/60 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-mono" />
                             <div className="flex gap-2">
-                              {!b.isPaid && b.status === 'accepted' && (
+                              {!b.isPaid && (b.status === 'confirmed' || b.status === 'approved') && (
                                 <button onClick={() => onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, isPaid: true } : book))} className="flex-1 px-3 py-2 bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-emerald-600/30 transition-all">
                                   {t('Marcar como Pagado', 'Mark as Paid', 'Marcar como Pago')}
                                 </button>
@@ -1925,55 +2193,11 @@ export default function AdminCMS({
               {/* Left Column: Form Fields */}
               <div className="lg:col-span-7 space-y-6">
                 <div className="bg-dark-gray/40 border border-white/10 p-6 rounded-lg space-y-4">
-                  <h3 className="text-xs font-mono text-white/70 uppercase tracking-wider border-b border-white/10 pb-2">Credenciales de EmailJS</h3>
+                  <h3 className="text-xs font-mono text-white/70 uppercase tracking-wider border-b border-white/10 pb-2">Remitente y Envío</h3>
 
                   <div className="space-y-4 pt-2">
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-mono text-white/45 uppercase tracking-wider">Service ID (ID de Servicio)</label>
-                      <input
-                        type="text"
-                        placeholder="Ej: service_xxxxxxx"
-                        value={emailForm.emailjsServiceId}
-                        onChange={(e) => setEmailForm({ ...emailForm, emailjsServiceId: e.target.value })}
-                        className="w-full bg-charcoal border border-stone rounded p-2.5 text-xs text-white font-mono placeholder-white/20 focus:outline-none focus:border-white/30"
-                      />
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-mono text-white/45 uppercase tracking-wider">Template ID (ID de Plantilla)</label>
-                      <input
-                        type="text"
-                        placeholder="Ej: template_xxxxxxx"
-                        value={emailForm.emailjsTemplateId}
-                        onChange={(e) => setEmailForm({ ...emailForm, emailjsTemplateId: e.target.value })}
-                        className="w-full bg-charcoal border border-stone rounded p-2.5 text-xs text-white font-mono placeholder-white/20 focus:outline-none focus:border-white/30"
-                      />
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-mono text-white/45 uppercase tracking-wider">Public Key (Clave Pública)</label>
-                      <input
-                        type="text"
-                        placeholder="Ej: xxxxxxxxxxxxxxx"
-                        value={emailForm.emailjsPublicKey}
-                        onChange={(e) => setEmailForm({ ...emailForm, emailjsPublicKey: e.target.value })}
-                        className="w-full bg-charcoal border border-stone rounded p-2.5 text-xs text-white font-mono placeholder-white/20 focus:outline-none focus:border-white/30"
-                      />
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-mono text-white/45 uppercase tracking-wider">Private / REST API Key (Clave Privada)</label>
-                      <input
-                        type="text"
-                        placeholder="Ej: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-                        value={emailForm.emailjsPrivateKey || ''}
-                        onChange={(e) => setEmailForm({ ...emailForm, emailjsPrivateKey: e.target.value })}
-                        className="w-full bg-charcoal border border-stone rounded p-2.5 text-xs text-white font-mono placeholder-white/20 focus:outline-none focus:border-white/30"
-                      />
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-mono text-white/45 uppercase tracking-wider">Tu Correo Destinatario (Donde recibirás los avisos)</label>
+                      <label className="text-[10px] font-mono text-white/45 uppercase tracking-wider">Tu Correo Remitente (Desde donde se enviarán los emails)</label>
                       <input
                         type="email"
                         placeholder="Ej: tu-email@gmail.com"
@@ -1981,59 +2205,44 @@ export default function AdminCMS({
                         onChange={(e) => setEmailForm({ ...emailForm, receiverEmail: e.target.value })}
                         className="w-full bg-charcoal border border-stone rounded p-2.5 text-xs text-white font-mono placeholder-white/20 focus:outline-none focus:border-white/30"
                       />
+                      <span className="text-[9px] text-white/30 block leading-tight">
+                        Debes verificar este correo en Resend. Los emails se envían mediante una Edge Function de Supabase + Resend.
+                      </span>
                     </div>
                   </div>
 
-                  <div className="pt-4 flex space-x-3 border-t border-white/10">
+                    <div className="pt-4 flex space-x-3 border-t border-white/10">
                     <button
                       type="button"
                       onClick={async () => {
-                        const trimmedConfig = {
-                          emailjsServiceId: emailForm.emailjsServiceId.trim(),
-                          emailjsTemplateId: emailForm.emailjsTemplateId.trim(),
-                          emailjsPublicKey: emailForm.emailjsPublicKey.trim(),
-                          emailjsPrivateKey: (emailForm.emailjsPrivateKey || '').trim(),
-                          receiverEmail: emailForm.receiverEmail.trim(),
-                          enableAutoResponse: emailForm.enableAutoResponse || false,
-                          emailjsAutoTemplateId: (emailForm.emailjsAutoTemplateId || '').trim(),
-                          autoReplySubject: (emailForm.autoReplySubject || '').trim(),
-                          autoReplyMessage: (emailForm.autoReplyMessage || '')
-                        };
-                        setEmailForm(trimmedConfig);
-
-                        if (!trimmedConfig.emailjsServiceId || !trimmedConfig.emailjsTemplateId || !trimmedConfig.emailjsPublicKey || !trimmedConfig.receiverEmail) {
-                          triggerAlert('Por favor completa todos los campos para enviar el correo de prueba');
+                        const toEmail = emailForm.receiverEmail.trim();
+                        if (!toEmail) {
+                          triggerAlert('Por favor configura tu correo destinatario');
                           return;
                         }
                         
                         try {
                           triggerAlert('Enviando correo de prueba...');
-                          const emailjs = await import('@emailjs/browser');
-                          
-                          const templateParamás = {
-                            to_name: profile.name || 'Miriam',
-                            to_email: trimmedConfig.receiverEmail,
-                            from_name: 'Sistema Aorea Studio',
-                            from_email: 'test@aorea.com',
-                            message: 'Excelente! Tu integración de correo con EmailJS está funcionando de manera impecable.',
-                            booking_details: 'Reserva de Prueba - Fecha: Hoy - Horario: 10:00 AM'
-                          };
-
-                          await emailjs.send(
-                            trimmedConfig.emailjsServiceId,
-                            trimmedConfig.emailjsTemplateId,
-                            templateParamás,
-                            trimmedConfig.emailjsPublicKey
-                          );
-                          
+                          const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+                          const apiKey = import.meta.env.VITE_SEND_EMAIL_SECRET || '';
+                          const res = await fetch(`${supabaseUrl}/functions/v1/send-email`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey },
+                            body: JSON.stringify({
+                              to: toEmail,
+                              subject: 'Correo de prueba — Miriam Campos Photography',
+                              html: '<p>Excelente! Tu sistema de correo está funcionando de manera impecable.</p>',
+                              text: 'Excelente! Tu sistema de correo está funcionando de manera impecable.',
+                            }),
+                          });
+                          if (!res.ok) {
+                            const errBody = await res.text();
+                            throw new Error(errBody || res.statusText);
+                          }
                           triggerAlert('Correo de prueba enviado con éxito! Revisa tu casilla.');
                         } catch (err: any) {
                           console.error(err);
-                          let errorMsg = err?.text || err?.message || 'Error desconocido';
-                          if (errorMsg.includes('template ID not found') || errorMsg.includes('Template ID not found')) {
-                            errorMsg += ' -> Recuerda GUARDAR los cambios de tu plantilla pulsando "Save" en la esquina superior derecha del panel de EmailJS, y asegúrate de no haber copiado el "Template Name" en vez del "Template ID".';
-                          }
-                          triggerAlert(`Error al enviar: ${errorMsg}`);
+                          triggerAlert(`Error al enviar: ${err?.message || 'Error desconocido'}`);
                         }
                       }}
                       className="py-2 px-4 bg-white/10 text-white hover:bg-white/20 rounded-lg text-[10px] font-mono tracking-widest uppercase font-semibold cursor-pointer transition-all"
@@ -2043,7 +2252,7 @@ export default function AdminCMS({
                   </div>
                   
                   <p className="text-[10px] text-white/50 leading-relaxed font-sans bg-dark-gray p-3 rounded-lg border border-white/10 mt-2">
-                    ℹ️ <strong>¿Cómo funciona el envío?</strong> EmailJS es una API invisible que procesa el correo de forma 100% silenciosa en segundo plano. <strong>No te redireccionará a Gmail</strong> ni te pedirá abrir aplicaciones de correo externas al hacer clic; el mensaje se envía directamente a tu casilla destinataria.
+                    ℹ️ Los correos se envían mediante una Edge Function de Supabase que utiliza la API de Resend. Asegúrate de haber configurado <code>RESEND_API_KEY</code> y <code>SEND_EMAIL_SECRET</code> en las variables de entorno de tu Edge Function en Supabase.
                   </p>
                 </div>
 
@@ -2127,53 +2336,38 @@ export default function AdminCMS({
                             };
                             setEmailForm(trimmedConfig);
 
-                            if (!trimmedConfig.emailjsServiceId || !trimmedConfig.emailjsPublicKey || !trimmedConfig.receiverEmail) {
-                              triggerAlert('Por favor completa al menos: ID de Servicio, Clave Pública y Tu Correo Destinatario para enviar la prueba.');
+                            const toEmail = emailForm.receiverEmail.trim();
+                            if (!toEmail) {
+                              triggerAlert('Por favor configura tu correo destinatario');
                               return;
                             }
 
                             try {
                               triggerAlert('Enviando auto-respuesta de prueba a tu propio correo...');
-                              const emailjs = await import('@emailjs/browser');
-                              
-                              const testTemplateId = trimmedConfig.emailjsAutoTemplateId || trimmedConfig.emailjsTemplateId;
-                              const testSubject = trimmedConfig.autoReplySubject || 'Tu reserva ha sido recibida con éxito! - Aorea Studio';
-                              const testMessage = trimmedConfig.autoReplyMessage || 'Hola, esto es un mensaje de prueba de respuesta automática.';
+                              const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+                              const apiKey = import.meta.env.VITE_SEND_EMAIL_SECRET || '';
+                              const testSubject = emailForm.autoReplySubject || 'Tu reserva ha sido recibida con éxito! - Miriam Campos Photography';
+                              const testMessage = emailForm.autoReplyMessage || 'Hola, esto es un mensaje de prueba de respuesta automática.';
 
-                              const testParamás = {
-                                to_name: 'Cliente de Prueba',
-                                to_email: trimmedConfig.receiverEmail, // Sent to admin's email so they can check it
-                                client_name: 'Cliente de Prueba',
-                                client_email: trimmedConfig.receiverEmail,
-                                email: trimmedConfig.receiverEmail,
-                                recipient_email: trimmedConfig.receiverEmail,
-                                reply_to: trimmedConfig.receiverEmail,
-                                from_name: profile.name || 'Miriam Campos - Aorea Studio',
-                                from_email: trimmedConfig.receiverEmail,
-                                reply_subject: testSubject,
-                                subject: testSubject,
-                                autoReplySubject: testSubject,
-                                reply_message: testMessage,
-                                message: testMessage,
-                                autoReplyMessage: testMessage,
-                                booking_details: 'Sesión Fotográfica de Prueba - Fecha: Mañana - Horario: 4:00 PM - Total: $150'
-                              };
-
-                              await emailjs.send(
-                                trimmedConfig.emailjsServiceId,
-                                testTemplateId,
-                                testParamás,
-                                trimmedConfig.emailjsPublicKey
-                              );
+                              const res = await fetch(`${supabaseUrl}/functions/v1/send-email`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey },
+                                body: JSON.stringify({
+                                  to: toEmail,
+                                  subject: testSubject,
+                                  html: testMessage.replace(/\n/g, '<br>'),
+                                  text: testMessage,
+                                }),
+                              });
+                              if (!res.ok) {
+                                const errBody = await res.text();
+                                throw new Error(errBody || res.statusText);
+                              }
                               
                               triggerAlert('Auto-respuesta enviada con éxito! Revisa tu propia casilla de correo (simula ser el cliente).');
                             } catch (err: any) {
                               console.error(err);
-                              let errorMsg = err?.text || err?.message || 'Error desconocido';
-                              if (errorMsg.includes('template ID not found') || errorMsg.includes('Template ID not found')) {
-                                errorMsg += ' -> Verifica si el ID de Plantilla de Auto-Respuesta es correcto.';
-                              }
-                              triggerAlert(`Error al enviar auto-respuesta: ${errorMsg}`);
+                              triggerAlert(`Error al enviar auto-respuesta: ${err?.message || 'Error desconocido'}`);
                             }
                           }}
                           className="py-2 px-4 bg-white/5 text-white/70 border border-white/10 hover:bg-white/10 rounded-lg text-[10px] font-mono tracking-widest uppercase font-semibold cursor-pointer transition-all w-full text-center"
@@ -2194,59 +2388,38 @@ export default function AdminCMS({
                 <div className="border border-white/10 bg-white/5 rounded-lg p-6 text-left space-y-4">
                   <h3 className="font-serif text-lg text-white/60 flex items-center space-x-2">
                     <Mail size={16} />
-                    <span>Guía de Conexión (EmailJS)</span>
+                    <span>Guía de Configuración (Resend + Supabase)</span>
                   </h3>
                   
                   <p className="text-xs text-white/70 leading-relaxed font-sans">
-                    Para que los correos automáticos de reserva y contacto se envíen de forma real, utilizamos <strong>EmailJS</strong>, un servicio gratuito que te permite conectar tu Gmail o casilla corporativa directamente sin necesidad de programar un servidor.
+                    Los correos se envían mediante una <strong>Edge Function de Supabase</strong> que utiliza la API de <strong>Resend</strong>. No necesitas EmailJS.
                   </p>
 
                   <div className="space-y-3 pt-2 text-[11px] font-sans text-white/80">
                     <div className="flex items-start space-x-2">
                       <span className="font-mono text-white font-semibold bg-white/5 rounded w-5 h-5 flex items-center justify-center shrink-0">1</span>
-                      <p>Crea una cuenta gratuita en <a href="https://www.emailjs.com/" target="_blank" rel="noopener noreferrer" className="text-white/70 underline hover:text-white">emailjs.com</a>.</p>
+                      <p>Crea una cuenta gratuita en <a href="https://resend.com" target="_blank" rel="noopener noreferrer" className="text-white/70 underline hover:text-white">resend.com</a> y agrega tu dominio para obtener una <strong>API Key</strong>.</p>
                     </div>
 
                     <div className="flex items-start space-x-2">
                       <span className="font-mono text-white font-semibold bg-white/5 rounded w-5 h-5 flex items-center justify-center shrink-0">2</span>
-                      <p>En el panel, ve a <strong>Email Services</strong> y conecta tu Gmail (ese será tu <strong>Service ID</strong>).</p>
+                      <p>Ve al panel de Supabase → Edge Functions → <strong>send-email</strong> → Environment Variables. Agrega:</p>
+                    </div>
+
+                    <div className="bg-black/30 p-2.5 rounded font-mono text-[9px] text-white/50 space-y-1 ml-7">
+                      <div>• <span className="text-white/70">RESEND_API_KEY</span> — Tu API key de Resend</div>
+                      <div>• <span className="text-white/70">SEND_EMAIL_SECRET</span> — Un string secreto compartido (el mismo que en <code>.env</code> como <code>VITE_SEND_EMAIL_SECRET</code>)</div>
+                      <div>• <span className="text-white/70">FROM_EMAIL</span> — (Opcional) Correo verificado en Resend</div>
                     </div>
 
                     <div className="flex items-start space-x-2">
                       <span className="font-mono text-white font-semibold bg-white/5 rounded w-5 h-5 flex items-center justify-center shrink-0">3</span>
-                      <p>Ve a <strong>Email Templates</strong> y crea una plantilla. Los campos que envía la web son:</p>
-                    </div>
-
-                    <div className="bg-black/30 p-2.5 rounded font-mono text-[9px] text-white/50 space-y-1 ml-7">
-                        <div>• <span className="text-white/70">{"{{to_name}}"}</span> - Nombre de Miriam Campos</div>
-                        <div>• <span className="text-white/70">{"{{to_email}}"}</span> - Correo Destinatario configurado</div>
-                        <div>• <span className="text-white/70">{"{{from_name}}"}</span> - Nombre del Cliente</div>
-                        <div>• <span className="text-white/70">{"{{from_email}}"}</span> - Correo del Cliente</div>
-                        <div>• <span className="text-white/70">{"{{message}}"}</span> - Mensaje / Comentario</div>
-                        <div>• <span className="text-white/70">{"{{booking_details}}"}</span> - Servicio, fecha y horario seleccionado</div>
+                      <p>En tu archivo <code>.env.local</code>, agrega <code>VITE_SEND_EMAIL_SECRET</code> con el mismo valor que usaste en Supabase.</p>
                     </div>
 
                     <div className="flex items-start space-x-2">
                       <span className="font-mono text-white font-semibold bg-white/5 rounded w-5 h-5 flex items-center justify-center shrink-0">4</span>
-                      <p>Copia el <strong>Template ID</strong>, la <strong>Public Key</strong> (en Account → API Keys), pégalos aquí y haz clic en <strong>Guardar</strong>.</p>
-                    </div>
-
-                    <div className="border-t border-white/10 pt-3 mt-2 space-y-2">
-                      <h4 className="text-[10px] uppercase font-mono text-white/70 tracking-wider">⚠️ Configuración de Respuesta Automática</h4>
-                      <p className="text-[10px] text-white/60 leading-normal">
-                        Por defecto, las plantillas de EmailJS suelen tener tu correo de Miriam escrito de forma fija en el campo <strong>To Email (Para)</strong>. Si usas esa misma plantilla, EmailJS te enviará la respuesta automática a ti misma en lugar de al cliente.
-                      </p>
-                      <p className="text-[10px] text-white/60 leading-normal">
-                        Para solucionarlo, ve a EmailJS y crea una <strong>segunda plantilla independiente</strong> (por ejemplo: <code>plantilla_autoresponder</code>) y configúrala así:
-                      </p>
-                      <div className="bg-black/40 p-3 rounded font-mono text-[9px] text-white/50 space-y-1.5 ml-2 border border-white/10">
-                        <div>• <strong>To Email (Para):</strong> escribe <span className="text-white/70">{"{{to_email}}"}</span> <span className="text-white/30">(muy importante!)</span></div>
-                        <div>• <strong>Subject (Asunto):</strong> escribe <span className="text-white/70">{"{{reply_subject}}"}</span></div>
-                        <div>• <strong>Content (Cuerpo):</strong> usa las variables <span className="text-white/70">{"{{reply_message}}"}</span> y <span className="text-white/70">{"{{booking_details}}"}</span> para mostrar el texto personalizado y los datos de la reserva o contacto.</div>
-                      </div>
-                      <p className="text-[10px] text-white/50 leading-normal">
-                         Copia el ID de esta nueva plantilla y pégalo abajo en el campo <strong>ID de Plantilla de Auto-Respuesta</strong>. Listo! El sistema responderá automáticamente al correo correcto de cada cliente.
-                      </p>
+                      <p>Configura tu correo remitente en el campo de arriba y haz clic en <strong>Enviar Correo de Prueba</strong>.</p>
                     </div>
                   </div>
                 </div>
@@ -2876,36 +3049,32 @@ export default function AdminCMS({
                         type="button"
                         disabled={isSendingEmail}
                         onClick={async () => {
-                          if (!sendingToClient || !emailConfig.emailjsServiceId || !emailConfig.emailjsTemplateId || !emailConfig.emailjsPublicKey) {
-                            triggerAlert(t('⚠️ Configurá EmailJS primero en Ajustes de Email', '⚠️ Configure EmailJS first in Email Settings'));
+                          if (!sendingToClient) {
+                            triggerAlert(t('⚠️ Seleccioná un cliente primero', '⚠️ Select a client first'));
                             return;
                           }
                           setIsSendingEmail(true);
                           try {
-                            const emailjs = await import('@emailjs/browser');
+                            const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+                            const apiKey = import.meta.env.VITE_SEND_EMAIL_SECRET || '';
                             const link = window.location.origin + window.location.pathname + '?gallery=' + sendingToClient.passcode;
                             const message = sendEmailMessage
                               .replace(/\{name\}/g, sendingToClient.clientName)
                               .replace(/\{link\}/g, link);
-                            await emailjs.send(
-                              emailConfig.emailjsServiceId,
-                              emailConfig.emailjsAutoTemplateId || emailConfig.emailjsTemplateId,
-                              {
-                                to_name: sendingToClient.clientName,
-                                to_email: sendingToClient.clientEmail,
-                                client_name: sendingToClient.clientName,
-                                client_email: sendingToClient.clientEmail,
-                                from_name: profile.name || 'Miriam Campos',
-                                from_email: emailConfig.receiverEmail,
-                                reply_subject: sendEmailSubject,
+                            const res = await fetch(`${supabaseUrl}/functions/v1/send-email`, {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey },
+                              body: JSON.stringify({
+                                to: sendingToClient.clientEmail,
                                 subject: sendEmailSubject,
-                                reply_message: message,
-                                message: message,
-                                gallery_link: link,
-                                booking_details: `Galería compartida con ${sendingToClient.clientName}`,
-                              },
-                              emailConfig.emailjsPublicKey
-                            );
+                                html: message.replace(/\n/g, '<br>'),
+                                text: message,
+                              }),
+                            });
+                            if (!res.ok) {
+                              const errBody = await res.text();
+                              throw new Error(errBody || res.statusText);
+                            }
                             triggerAlert(t('✓ Email enviado correctamente a {email}', '✓ Email sent successfully to {email}').replace('{email}', sendingToClient.clientEmail));
                             setShowSendEmailModal(false);
                           } catch (err) {
@@ -2965,6 +3134,54 @@ export default function AdminCMS({
               </button>
               <div className="bg-dark-gray rounded-lg p-4 sm:p-8 shadow-2xl">
                 <ContractView booking={contractToView} mode="view" lang={lang} t={TRANSLATIONS[lang]} />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Rejection reason modal */}
+      <AnimatePresence>
+        {rejectBookingId && (
+          <motion.div
+            className="fixed inset-0 z-[75] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="bg-dark-gray border border-white/10 rounded-lg p-6 max-w-md w-full space-y-4"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="font-serif text-lg text-white">
+                {t('Razon de Rechazo', 'Rejection Reason', 'Razão de Rejeição')}
+              </h3>
+              <p className="text-xs text-white/60">
+                {t('Opcional: explicale al cliente por qué no es posible su solicitud.', 'Optional: explain to the client why their request is not possible.', 'Opcional: explique ao cliente por que a solicitação não é possível.')}
+              </p>
+              <textarea
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                placeholder={t('Ej: El horario ya no está disponible...', 'E.g.: The time slot is no longer available...', 'Ex: O horário não está mais disponível...')}
+                rows={3}
+                className="w-full bg-dark/60 border border-white/10 rounded px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-sans resize-none"
+              />
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => { setRejectBookingId(null); setRejectReason(''); }}
+                  className="px-4 py-2 border border-white/15 rounded-lg text-[10px] font-mono text-white/60 hover:text-white cursor-pointer transition-all"
+                >
+                  {t('Cancelar', 'Cancel', 'Cancelar')}
+                </button>
+                <button
+                  onClick={() => rejectBookingId && handleRejectBooking(rejectBookingId, rejectReason)}
+                  className="px-4 py-2 bg-red-500/20 border border-red-500/30 text-red-400 rounded-lg text-[10px] font-mono hover:bg-red-500/30 cursor-pointer transition-all"
+                >
+                  {t('Rechazar Reserva', 'Reject Booking', 'Rejeitar Reserva')}
+                </button>
               </div>
             </motion.div>
           </motion.div>

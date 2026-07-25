@@ -143,7 +143,7 @@ export interface Booking {
   serviceId: string;
   peopleCount: number;
   notes: string;
-  status: 'pending' | 'accepted' | 'rejected' | 'completed';
+  status: 'pending' | 'approved' | 'rejected' | 'confirmed' | 'completed' | 'expired';
   createdAt: string;
   amount?: number;
   isRead?: boolean;
@@ -163,6 +163,13 @@ export interface Booking {
   invoiceId?: string;
   reminderSent?: boolean;
   reminderSentAt?: string;
+  approvalToken?: string;
+  approvedAt?: string;
+  approvalExpiresAt?: string;
+  paymentStatus?: 'pending' | 'paid';
+  contractStatus?: 'pending' | 'signed';
+  rejectionReason?: string;
+  paymentTxHash?: string;
 }
 
 export interface Message {
@@ -218,6 +225,7 @@ export interface BookingConfig {
   timeSlots: string[];
   availableDays: number[]; // e.g. [1, 2, 3, 4, 5, 6] (0 is Sunday, 1 is Monday, etc.)
   blockedDates: string[]; // e.g. ["2026-07-15"]
+  approvalExpirationHours?: number; // hours until approval link expires (default 48)
 }
 
 export interface EmailConfig {

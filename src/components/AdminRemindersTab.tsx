@@ -25,7 +25,7 @@ export default function AdminRemindersTab({
 
   const upcomingBookings = useMemo(() => {
     return bookings
-      .filter(b => b.status === 'accepted' && b.date >= today)
+      .filter(b => (b.status === 'confirmed' || b.status === 'approved') && b.date >= today)
       .sort((a, b) => a.date.localeCompare(b.date) || a.timeSlot.localeCompare(b.timeSlot));
   }, [bookings, today]);
 
@@ -40,32 +40,33 @@ export default function AdminRemindersTab({
   };
 
   const sendReminder = async (booking: Booking) => {
-    if (!emailConfig.emailjsServiceId || !emailConfig.emailjsTemplateId || !emailConfig.emailjsPublicKey) {
-      triggerAlert(t('Configura EmailJS primero en Ajustes de Correo', 'Configure EmailJS first in Email Settings'));
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    if (!supabaseUrl) {
+      triggerAlert(t('VITE_SUPABASE_URL no configurado', 'VITE_SUPABASE_URL not configured'));
       return;
     }
 
     setSendingIds(prev => new Set(prev).add(booking.id));
     try {
-      const emailjs = await import('@emailjs/browser');
-       const dayLabel = booking.date === today
-         ? t('HOY', 'TODAY')
-         : booking.date === tomorrow
-           ? t('MAÑANA', 'TOMORROW')
-           : booking.date;
+      const apiKey = import.meta.env.VITE_SEND_EMAIL_SECRET || '';
+      const dayLabel = booking.date === today
+        ? t('HOY', 'TODAY')
+        : booking.date === tomorrow
+          ? t('MAÑANA', 'TOMORROW')
+          : booking.date;
 
-       await emailjs.send(
-        emailConfig.emailjsServiceId,
-        emailConfig.emailjsTemplateId,
-        {
-          to_name: booking.clientName,
-          to_email: booking.clientEmail,
-          from_name: profile.name || 'Miriam Campos',
-           message: `Recordatorio: tu sesión fotográfica es ${dayLabel} a las ${booking.timeSlot}.`,
-          booking_details: `Sesión: ${booking.packageName || 'Fotografía'} - Fecha: ${booking.date} - Horario: ${booking.timeSlot}`,
-        },
-        emailConfig.emailjsPublicKey
-      );
+      const subject = t('Recordatorio: Tu sesión fotográfica', 'Reminder: Your Photo Session');
+      const text = `Hola ${booking.clientName},\n\nTe recordamos que tu sesión fotográfica es ${dayLabel} a las ${booking.timeSlot}.\n\nPaquete: ${booking.packageName || 'Fotografía'}\n\nSaludos,\n${profile.name || 'Miriam Campos'}`;
+
+      const res = await fetch(`${supabaseUrl}/functions/v1/send-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey },
+        body: JSON.stringify({ to: booking.clientEmail, subject, html: text.replace(/\n/g, '<br>'), text }),
+      });
+      if (!res.ok) {
+        const errBody = await res.text();
+        throw new Error(errBody || res.statusText);
+      }
 
       onUpdateBookings(bookings.map(b => b.id === booking.id ? {
         ...b,
@@ -75,7 +76,7 @@ export default function AdminRemindersTab({
 
       triggerAlert(t('Recordatorio enviado a ' + booking.clientName, 'Reminder sent to ' + booking.clientName));
     } catch (err: any) {
-      triggerAlert(t('Error al enviar recordatorio', 'Error sending reminder') + ': ' + (err?.text || err?.message || ''));
+      triggerAlert(t('Error al enviar recordatorio', 'Error sending reminder') + ': ' + (err?.message || ''));
     } finally {
       setSendingIds(prev => {
         const next = new Set(prev);
@@ -85,7 +86,7 @@ export default function AdminRemindersTab({
     }
   };
 
-  const isConfigured = emailConfig.emailjsServiceId && emailConfig.emailjsTemplateId && emailConfig.emailjsPublicKey;
+  const isConfigured = !!(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SEND_EMAIL_SECRET);
 
   const renderBookingRow = (booking: Booking) => {
     const isSending = sendingIds.has(booking.id);
@@ -193,8 +194,8 @@ export default function AdminRemindersTab({
             )}
             <span className="text-xs font-mono text-white/70">
               {isConfigured
-                ? t('EmailJS configurado correctamente', 'EmailJS configured correctly')
-                : t('EmailJS no está configurado. Ve a Ajustes de Correo primero.', 'EmailJS not configured. Go to Email Settings first.')}
+                ? t('Sistema de correo configurado (Supabase + Resend)', 'Email system configured (Supabase + Resend)')
+                : t('Edge Function no configurada. Revisá VITE_SEND_EMAIL_SECRET en .env', 'Edge Function not configured. Check VITE_SEND_EMAIL_SECRET in .env')}
             </span>
           </div>
           {isConfigured && (

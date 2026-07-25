@@ -15,7 +15,6 @@
     "setup:buckets": "npx tsx scripts/setup-buckets.ts"
   },
   "dependencies": {
-    "@emailjs/browser": "^4.4.1",
     "@supabase/supabase-js": "^2.110.7",
     "@tailwindcss/vite": "^4.3.3",
     "@vitejs/plugin-react": "^5.0.4",

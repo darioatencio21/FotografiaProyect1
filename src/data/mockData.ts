@@ -484,9 +484,14 @@ export const INITIAL_BOOKINGS: Booking[] = [
     serviceId: 'service-2',
     peopleCount: 1,
     notes: 'Agency portrait test. Need high-key lighting and clean gray/beige backdrops. Styling is focused on summer resort wear.',
-    status: 'accepted',
+    status: 'confirmed',
     createdAt: '2026-07-09T14:22:00Z',
     amount: 1800,
+    isPaid: true,
+    depositAmount: 900,
+    amountDue: 900,
+    paymentStatus: 'paid',
+    contractStatus: 'signed',
     reminderSent: true,
     reminderSentAt: '2026-07-22T06:00:00Z'
   },
@@ -503,6 +508,8 @@ export const INITIAL_BOOKINGS: Booking[] = [
     status: 'pending',
     createdAt: '2026-07-10T09:12:00Z',
     amount: 2500,
+    depositAmount: 1250,
+    amountDue: 1250,
     reminderSent: false
   },
   {
@@ -518,6 +525,8 @@ export const INITIAL_BOOKINGS: Booking[] = [
     status: 'pending',
     createdAt: '2026-07-11T05:43:00Z',
     amount: 4500,
+    depositAmount: 2250,
+    amountDue: 2250,
     reminderSent: false
   }
 ];
@@ -566,7 +575,8 @@ export const INITIAL_BOOKING_CONFIG: BookingConfig = {
     '19:00 - 21:00'
   ],
   availableDays: [1, 2, 3, 4, 5, 6], // Monday through Saturday
-  blockedDates: []
+  blockedDates: [],
+  approvalExpirationHours: 48
 };
 
 export const INITIAL_EMAIL_CONFIG: EmailConfig = {
@@ -799,7 +809,7 @@ export const INITIAL_INVOICES: Invoice[] = [
     packageName: 'Fashion Editorial',
     items: [
       { description: 'High-End Fashion & Portraiture Package', amount: 1800 },
-      { description: 'Booking Deposit (50%)', amount: -900 },
+      { description: 'Booking Deposit', amount: -900 },
     ],
     subtotal: 1800,
     depositPaid: 900,

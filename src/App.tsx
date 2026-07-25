@@ -6,11 +6,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useInView } from 'motion/react';
 import { 
-   Heart, ArrowRight, MessageSquare, MapPin, 
-   Mail, Phone, ShieldCheck, Sparkles, AlertCircle, ChevronDown,
-    Eye, EyeOff, X, Camera, Users, Calendar, PartyPopper,
-    CheckCircle2, ShoppingBag, Star, Baby, GraduationCap, Gift, Briefcase,
-    Gem, Utensils, Package, Award
+    Heart, ArrowRight, MessageSquare, MapPin, 
+    Mail, Phone, ShieldCheck, Sparkles, AlertCircle, ChevronDown,
+     Eye, EyeOff, X, Camera, Users, Calendar, Clock, PartyPopper,
+     CheckCircle2, ShoppingBag, Star, Baby, GraduationCap, Gift, Briefcase,
+     Gem, Utensils, Package, Award
 } from 'lucide-react';
 
 import { 
@@ -25,6 +25,7 @@ import { Photograph, Service, Testimonial, BlogPost, FAQ, Booking, Message, SEOM
 import CustomCursor from './components/CustomCursor';
 import Lightbox from './components/Lightbox';
 import BookingCalendar from './components/BookingCalendar';
+import BookingApproval from './components/BookingApproval';
 import ClientPortal from './components/ClientPortal';
 import StripeCheckout from './components/StripeCheckout';
 import { PaymentResult } from './components/StripeCheckout';
@@ -133,7 +134,13 @@ export default function App() {
   const [currentView, setCurrentView] = useState<string>(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.has('gallery')) return 'client-portal';
+    if (params.has('approval')) return 'booking-approval';
     return params.get('view') || 'home';
+  });
+
+  const [approvalToken, setApprovalToken] = useState<string>(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('approval') || '';
   });
 
   const navigationGuardRef = useRef(false);
@@ -294,6 +301,12 @@ export default function App() {
   useEffect(() => {
     // Remove client passcodes written by older versions of the application.
     localStorage.removeItem('aorea_client_accounts');
+    // Clear old table-missing cache that blocked Supabase reads after RLS fix.
+    localStorage.removeItem('aurea_missing_tables');
+    // Clear stale bookings cache so initial render doesn't show stale data.
+    localStorage.removeItem('aorea_bookings');
+    // Clear session-level table-missing cache so Supabase queries are retried.
+    sessionStorage.removeItem('aurea_missing_tables');
   }, []);
 
   useEffect(() => {
@@ -444,8 +457,8 @@ export default function App() {
     setFaqs(newFaqs);
   };
 
-  const handleUpdateBookings = (newBookings: Booking[]) => {
-    syncCollection('bookings', bookings, newBookings);
+  const handleUpdateBookings = async (newBookings: Booking[]) => {
+    await syncCollection('bookings', bookings, newBookings);
     setBookings(newBookings);
   };
 
@@ -462,6 +475,37 @@ export default function App() {
   const handleUpdateInvoices = (newInvoices: Invoice[]) => {
     syncCollection('invoices', invoices, newInvoices);
     setInvoices(newInvoices);
+  };
+
+  const handleConfirmBooking = (bookingId: string) => {
+    const booking = bookings.find(b => b.id === bookingId);
+    if (!booking) return;
+
+    const updatedBooking: Booking = {
+      ...booking,
+      status: 'confirmed',
+      isPaid: true,
+      paymentStatus: 'paid',
+      contractStatus: 'signed',
+    };
+
+    handleUpdateBookings(bookings.map(b => b.id === bookingId ? updatedBooking : b));
+
+    // Send confirmation email
+    if (emailConfig?.receiverEmail) {
+      import('./lib/email').then(({ sendConfirmationEmail }) => {
+        sendConfirmationEmail(
+          emailConfig,
+          booking.clientName,
+          booking.clientEmail,
+          emailConfig.receiverEmail,
+          booking.date,
+          booking.timeSlot,
+          (booking.depositAmount ?? 0),
+          booking.packageName || 'Photography Session',
+        );
+      });
+    }
   };
 
   const handleInvoiceCreated = (invoice: Invoice) => {
@@ -616,54 +660,49 @@ export default function App() {
       console.error('Could not save message directly to Firestore:', err);
     }
 
-    if (emailConfig && emailConfig.emailjsServiceId && emailConfig.emailjsTemplateId && emailConfig.emailjsPublicKey) {
+    if (emailConfig) {
       try {
-        const emailjs = await import('@emailjs/browser');
-        await emailjs.send(
-          emailConfig.emailjsServiceId,
-          emailConfig.emailjsTemplateId,
-          {
-            to_name: sanitizeString(profile.name || 'Miriam Campos'),
-            to_email: emailConfig.receiverEmail || safeEmail,
-            from_name: safeName,
-            from_email: safeEmail,
-            message: safeMsg,
-            booking_details: `Mensaje de contacto - Asunto: ${safeSubject || 'Direct Portfolio Query'}`
-          },
-          emailConfig.emailjsPublicKey
-        );
+        const { sendConfirmationEmail: _unused, ...emailHelpers } = await import('./lib/email');
+        const sendFn = async (to: string, subject: string, text: string) => {
+          await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-email`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-api-key': import.meta.env.VITE_SEND_EMAIL_SECRET || '',
+            },
+            body: JSON.stringify({
+              to,
+              subject,
+              html: text.replace(/\n/g, '<br>'),
+              text,
+            }),
+          });
+        };
+
+        const photographerName = sanitizeString(profile.name || 'Miriam Campos');
+        const subject = `Nuevo mensaje de contacto: ${safeSubject || 'Consulta'}`;
+        const photographerText = `Recibiste un nuevo mensaje de contacto:
+
+De: ${safeName} (${safeEmail})
+Asunto: ${safeSubject || 'Consulta General'}
+Mensaje:
+${safeMsg}`;
+
+        await sendFn(emailConfig.receiverEmail || safeEmail, subject, photographerText);
 
         if (emailConfig.enableAutoResponse) {
-          const autoTemplateId = emailConfig.emailjsAutoTemplateId || emailConfig.emailjsTemplateId;
-          const autoSubject = emailConfig.autoReplySubject || 'Tu mensaje ha sido recibido! - Aorea Studio';
+          const autoSubject = emailConfig.autoReplySubject || 'Tu mensaje ha sido recibido! - Miriam Campos Photography';
           const autoMessage = emailConfig.autoReplyMessage || 'Gracias por contactarte con nosotros. Responderemos a la brevedad.';
 
-          await emailjs.send(
-            emailConfig.emailjsServiceId,
-            autoTemplateId,
-            {
-              to_name: safeName,
-              to_email: safeEmail,
-              client_name: safeName,
-              client_email: safeEmail,
-              email: safeEmail,
-              recipient_email: safeEmail,
-              reply_to: safeEmail,
-              from_name: sanitizeString(profile.name || 'Miriam Campos'),
-              from_email: emailConfig.receiverEmail,
-              reply_subject: autoSubject,
-              subject: autoSubject,
-              autoReplySubject: autoSubject,
-              reply_message: autoMessage,
-              message: autoMessage,
-              autoReplyMessage: autoMessage,
-              booking_details: `Contacto recibido: "${safeSubject || 'Consulta General'}"`
-            },
-            emailConfig.emailjsPublicKey
-          );
+          await sendFn(safeEmail, autoSubject, `Hola ${safeName},
+
+${autoMessage}
+
+Saludos,
+${photographerName}`);
         }
       } catch (err) {
-        console.error('Could not send contact emails via EmailJS:', err);
+        console.error('Could not send contact emails:', err);
       }
     }
 
@@ -1400,8 +1439,6 @@ export default function App() {
                   emailConfig={emailConfig}
                   preSelectedPackage={selectedPackageId ? packages.find(p => p.id === selectedPackageId) ?? null : null}
                   onClearPackage={() => setSelectedPackageId(null)}
-                   onCheckout={handleCheckoutWithCallback}
-                   onInvoiceCreated={handleInvoiceCreated}
                   setNavigationGuard={setNavigationGuard}
                   onAddBooking={(newBook) => {
                     setSelectedPackageId(null);
@@ -1435,6 +1472,124 @@ export default function App() {
                 invoices={invoices}
                 onSubmitTestimonial={(testimonial) => handleUpdateTestimonials([testimonial, ...testimonials])}
                />
+            </div>
+          )}
+
+          {/* ======================================================= */}
+          {/* BOOKING APPROVAL SCREEN (from approval link) */}
+          {/* ======================================================= */}
+          {currentView === 'booking-approval' && approvalToken && (
+            <div className="w-full max-w-4xl mx-auto px-4 py-8">
+              {(() => {
+                if (!bootstrapped) {
+                  return (
+                    <div className="glass-premium rounded-lg border border-white/10 p-8 md:p-12 max-w-lg mx-auto text-center space-y-4">
+                      <div className="inline-flex p-4 rounded-full bg-white/10 border border-white/10 text-white/30 mx-auto">
+                        <div className="w-6 h-6 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
+                      </div>
+                      <p className="text-sm text-white/50">
+                        {lang === 'en' ? 'Loading...' : 'Cargando...'}
+                      </p>
+                    </div>
+                  );
+                }
+                const booking = bookings.find(b => b.approvalToken === approvalToken);
+                if (!booking) {
+                  return (
+                    <div className="glass-premium rounded-lg border border-white/10 p-8 md:p-12 max-w-lg mx-auto text-center space-y-4">
+                      <div className="inline-flex p-4 rounded-full bg-white/10 border border-white/10 text-white/50 mx-auto">
+                        <AlertCircle size={40} />
+                      </div>
+                      <h3 className="font-serif text-2xl text-white/80">
+                        {lang === 'en' ? 'Invalid Link' : 'Link Inválido'}
+                      </h3>
+                      <p className="text-sm text-white/60">
+                        {lang === 'en'
+                          ? 'This approval link is not valid or has already been used.'
+                          : 'Este enlace de aprobación no es válido o ya fue utilizado.'}
+                      </p>
+                    </div>
+                  );
+                }
+                if (booking.status === 'confirmed') {
+                  return (
+                    <div className="glass-premium rounded-lg border border-white/10 p-8 md:p-12 max-w-lg mx-auto text-center space-y-4">
+                      <div className="inline-flex p-4 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 mx-auto">
+                        <CheckCircle2 size={40} />
+                      </div>
+                      <h3 className="font-serif text-2xl text-white/90">
+                        {lang === 'en' ? 'Already Confirmed' : 'Ya Confirmada'}
+                      </h3>
+                      <p className="text-sm text-white/60">
+                        {lang === 'en'
+                          ? 'This booking has already been confirmed. Thank you!'
+                          : 'Esta reserva ya fue confirmada. Gracias!'}
+                      </p>
+                    </div>
+                  );
+                }
+                if (booking.status === 'expired') {
+                  return (
+                    <div className="glass-premium rounded-lg border border-white/10 p-8 md:p-12 max-w-lg mx-auto text-center space-y-4">
+                      <div className="inline-flex p-4 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 mx-auto">
+                        <AlertCircle size={40} />
+                      </div>
+                      <h3 className="font-serif text-2xl text-white/90">
+                        {lang === 'en' ? 'Link Expired' : 'Enlace Expirado'}
+                      </h3>
+                      <p className="text-sm text-white/60">
+                        {lang === 'en'
+                          ? 'The time to complete this booking has expired. Please contact the photographer.'
+                          : 'El tiempo para completar esta reserva ha expirado. Contactá a la fotógrafa.'}
+                      </p>
+                    </div>
+                  );
+                }
+                if (booking.status === 'rejected') {
+                  return (
+                    <div className="glass-premium rounded-lg border border-white/10 p-8 md:p-12 max-w-lg mx-auto text-center space-y-4">
+                      <div className="inline-flex p-4 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 mx-auto">
+                        <X size={40} />
+                      </div>
+                      <h3 className="font-serif text-2xl text-white/90">
+                        {lang === 'en' ? 'Request Rejected' : 'Solicitud Rechazada'}
+                      </h3>
+                      <p className="text-sm text-white/60">
+                        {booking.rejectionReason
+                          ? (lang === 'en' ? `Reason: ${booking.rejectionReason}` : `Motivo: ${booking.rejectionReason}`)
+                          : (lang === 'en'
+                              ? 'Unfortunately, the photographer cannot accommodate your request for this date.'
+                              : 'Lamentablemente, la fotógrafa no puede atender tu solicitud para esta fecha.')}
+                      </p>
+                    </div>
+                  );
+                }
+                if (booking.status === 'pending') {
+                  return (
+                    <div className="glass-premium rounded-lg border border-white/10 p-8 md:p-12 max-w-lg mx-auto text-center space-y-4">
+                      <div className="inline-flex p-4 rounded-full bg-gold-950/40 border border-white/10 text-white/70 mx-auto">
+                        <Clock size={40} />
+                      </div>
+                      <h3 className="font-serif text-2xl text-white/80">
+                        {lang === 'en' ? 'Awaiting Approval' : 'Esperando Aprobación'}
+                      </h3>
+                      <p className="text-sm text-white/60">
+                        {lang === 'en'
+                          ? 'Your request is still pending. The photographer will review it shortly.'
+                          : 'Tu solicitud aún está pendiente. La fotógrafa la revisará en breve.'}
+                      </p>
+                    </div>
+                  );
+                }
+                return (
+                  <BookingApproval
+                    booking={booking}
+                    lang={lang}
+                    onConfirm={handleConfirmBooking}
+                    onCheckout={handleCheckoutWithCallback}
+                  />
+                );
+              })()}
             </div>
           )}
 

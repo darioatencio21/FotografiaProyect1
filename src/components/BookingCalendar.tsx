@@ -21,11 +21,8 @@ import {
   MapPin,
   Printer
 } from 'lucide-react';
-import { Service, ActiveLanguíage, Booking, BookingConfig, EmailConfig, PhotographyPackage, ContractData, Invoice } from '../types';
+import { Service, ActiveLanguíage, Booking, BookingConfig, EmailConfig, PhotographyPackage, ContractData } from '../types';
 import { sanitizeString, sanitizeEmail, sanitizePhone } from '../lib/sanitize';
-import ContractView from './ContractView';
-import InvoiceReceipt from './InvoiceReceipt';
-import { PaymentResult } from './StripeCheckout';
 import { TRANSLATIONS } from '../data/mockData';
 
 interface BookingCalendarProps {
@@ -35,9 +32,7 @@ interface BookingCalendarProps {
   emailConfig?: EmailConfig;
   preSelectedPackage?: PhotographyPackage | null;
   onClearPackage?: () => void;
-  onCheckout?: (amount: number, description: string, onDone: (result?: PaymentResult) => void, onCancel?: () => void) => void;
   onAddBooking: (booking: Omit<Booking, 'id' | 'status' | 'createdAt'>) => void;
-  onInvoiceCreated?: (invoice: Invoice) => void;
   setNavigationGuard?: (v: boolean) => void;
 }
 
@@ -60,7 +55,7 @@ const LOCAL_TRANSLATIONS = {
     otherSchedulePlaceholder: 'Ej: 11:30 AM o sesión nocturna...',
     customScheduleLabel: 'Especifica tu horario preferido',
     successTitle: '¡Solicitud Enviada a la Fotógrafa!',
-    successDesc: 'Hemos enviado tu solicitud de reserva a Miriam. En las próximas horas se pondrá en contacto contigo para coordinar los detalles finales.',
+    successDesc: 'Hemos enviado tu solicitud de reserva a Miriam. Ella revisará la disponibilidad y te enviará un enlace seguro para firmar el contrato y realizar el pago.',
     submit: 'Enviar Solicitud de Reserva',
     submitting: 'ENVIANDO TU SOLICITUD...',
     backToGallery: 'Nueva Solicitud',
@@ -92,7 +87,7 @@ const LOCAL_TRANSLATIONS = {
     otherSchedulePlaceholder: 'E.g. 11:30 AM or night shoot...',
     customScheduleLabel: 'Specify your preferred time',
     successTitle: 'Request Sent to Photographer!',
-    successDesc: 'Your booking request has been sent to Miriam. She will contact you shortly to coordinate the final details.',
+    successDesc: 'Your booking request has been sent to Miriam. She will review availability and send you a secure link to sign the contract and make the payment.',
     submit: 'Send Booking Request',
     submitting: 'SENDING YOUR REQUEST...',
     backToGallery: 'New Request',
@@ -108,7 +103,7 @@ const LOCAL_TRANSLATIONS = {
   },
 };
 
-export default function BookingCalendar({ services, lang, config, emailConfig, preSelectedPackage, onClearPackage, onCheckout, onAddBooking, onInvoiceCreated, setNavigationGuard }: BookingCalendarProps) {
+export default function BookingCalendar({ services, lang, config, emailConfig, preSelectedPackage, onClearPackage, onAddBooking, setNavigationGuard }: BookingCalendarProps) {
   const t = LOCAL_TRANSLATIONS[lang] || LOCAL_TRANSLATIONS.es;
 
   // Form State
@@ -137,17 +132,13 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
   });
 
   // Flow State
-  const [step, setStep] = useState<'form' | 'payment' | 'contract' | 'success'>('form');
+  const [step, setStep] = useState<'form' | 'success'>('form');
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
-  const [pendingBooking, setPendingBooking] = useState<Booking | null>(null);
   const [weddingError, setWeddingError] = useState<string>('');
-  const [paymentCancelled, setPaymentCancelled] = useState(false);
-  const [createdInvoice, setCreatedInvoice] = useState<Invoice | null>(null);
-  const [paymentResult, setPaymentResult] = useState<PaymentResult | null>(null);
 
-  // Warn before leaving if form has data or invoice is showing
+  // Warn before leaving if form has data
   const formHasData = clientName || clientEmail || clientPhone || dateValue || creativeNotes || customServiceText || customTimeframeText;
-  const shouldWarn = formHasData || createdInvoice !== null;
+  const shouldWarn = formHasData;
   useEffect(() => {
     setNavigationGuard?.(shouldWarn);
     if (!shouldWarn) return;
@@ -163,9 +154,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
   const selectedService = services.find(s => s.id === selectedServiceId);
   const basePrice = preSelectedPackage ? preSelectedPackage.price : (selectedService ? selectedService.price : 0);
   const totalPrice = basePrice;
-  const depositAmount = totalPrice > 0
-    ? Math.min(preSelectedPackage?.deposit || Math.round(totalPrice / 2), totalPrice)
-    : 0;
+  const depositAmount = preSelectedPackage?.deposit ?? 0;
   const bookingId = useMemo(() => `AUREA-${Math.floor(Math.random() * 8999 + 1000)}`, []);
 
   // Handle Date Selection Input
@@ -203,8 +192,6 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
       }
     }
     setWeddingError('');
-    setPaymentCancelled(false);
-
     setIsSyncing(true);
 
     let finalSchedule = '';
@@ -226,61 +213,71 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
            `\n- Fecha solicitada: ${formattedDate}` +
            `\n- Horario preferido: ${finalSchedule}`;
 
-    if (emailConfig && emailConfig.emailjsServiceId && emailConfig.emailjsTemplateId && emailConfig.emailjsPublicKey) {
+    if (emailConfig) {
       try {
-        const emailjs = await import('@emailjs/browser');
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        const apiKey = import.meta.env.VITE_SEND_EMAIL_SECRET || '';
+        const sendFn = async (to: string, subject: string, text: string) => {
+          if (!supabaseUrl) return;
+          await fetch(`${supabaseUrl}/functions/v1/send-email`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-api-key': apiKey,
+            },
+            body: JSON.stringify({ to, subject, html: text.replace(/\n/g, '<br>'), text }),
+          });
+        };
 
-        await emailjs.send(
-          emailConfig.emailjsServiceId,
-          emailConfig.emailjsTemplateId,
-          {
-            to_name: 'Miriam Campos',
-            to_email: emailConfig.receiverEmail || safeEmail,
-            from_name: safeName,
-            from_email: safeEmail,
-            message: notesText,
-            booking_details: `Servicio: ${serviceName} - Fecha: ${formattedDate} - Horario: ${finalSchedule} - Personas: ${peopleCount} - Total Estimado: $${totalPrice > 0 ? totalPrice : 'A Definir'}`
-          },
-          emailConfig.emailjsPublicKey
-        );
+        const photographerSubject = `Nueva solicitud de reserva — ${serviceName}`;
+        const photographerText = `Nueva solicitud de reserva recibida:
+
+Cliente: ${safeName}
+Email: ${safeEmail}
+Teléfono: ${safePhone}
+Paquete: ${serviceName}
+Fecha: ${formattedDate}
+Horario: ${finalSchedule}
+Personas: ${peopleCount}
+Total Estimado: $${totalPrice > 0 ? totalPrice : 'A Definir'}
+
+Notas del cliente:
+${safeNotes || 'Sin notas'}`;
+
+        await sendFn(emailConfig.receiverEmail || safeEmail, photographerSubject, photographerText);
 
         if (emailConfig.enableAutoResponse) {
-          const autoTemplateId = emailConfig.emailjsAutoTemplateId || emailConfig.emailjsTemplateId;
-          const autoSubject = emailConfig.autoReplySubject || '¡Tu solicitud ha sido recibida con éxito! - Aurea Studio';
-          const autoMessage = emailConfig.autoReplyMessage || 'Gracias por tu preferencia.';
+          const autoSubject = emailConfig.autoReplySubject || '¡Tu solicitud ha sido recibida con éxito! - Miriam Campos Photography';
+          const autoMessage = emailConfig.autoReplyMessage || 'Gracias por tu preferencia. Te contactaremos pronto.';
 
-          await emailjs.send(
-            emailConfig.emailjsServiceId,
-            autoTemplateId,
-            {
-              to_name: safeName,
-              to_email: safeEmail,
-              client_name: safeName,
-              client_email: safeEmail,
-              email: safeEmail,
-              recipient_email: safeEmail,
-              reply_to: safeEmail,
-              from_name: 'Miriam Campos - Aurea Studio',
-              from_email: emailConfig.receiverEmail,
-              reply_subject: autoSubject,
-              subject: autoSubject,
-              autoReplySubject: autoSubject,
-              reply_message: autoMessage,
-              message: autoMessage,
-              autoReplyMessage: autoMessage,
-              booking_details: `Servicio: ${serviceName} - Fecha: ${formattedDate} - Horario: ${finalSchedule} - Personas: ${peopleCount} - Total Estimado: $${totalPrice > 0 ? totalPrice : 'A Definir'}`
-            },
-            emailConfig.emailjsPublicKey
-          );
+          await sendFn(safeEmail, autoSubject, `Hola ${safeName},
+
+${autoMessage}
+
+Resumen de tu solicitud:
+- Paquete: ${serviceName}
+- Fecha tentativa: ${formattedDate}
+- Horario preferido: ${finalSchedule}
+- Personas: ${peopleCount}
+- Total estimado: $${totalPrice > 0 ? totalPrice : 'A Definir'}
+
+Saludos,
+Miriam Campos`);
         }
       } catch (err) {
-        console.error('Could not send email notifications via EmailJS:', err);
+        console.error('Could not send email notifications:', err);
       }
     }
 
     setIsSyncing(false);
 
-    const baseBooking = {
+    const contractData: ContractData = isWedding
+      ? weddingData
+      : { brideName: safeName, brideEmail: safeEmail, groomPhone: safePhone, groomName: '', brideAddress: '', ceremonyLocation: '', ceremonyAddress: '', ceremonyStart: '', ceremonyEnd: '', receptionLocation: '', receptionAddress: '', receptionStart: '', receptionEnd: '' };
+    const contractType = isWedding ? 'wedding' : 'session';
+    const depositAmt = preSelectedPackage?.deposit ?? 0;
+
+    onAddBooking({
       clientName: safeName,
       clientEmail: safeEmail,
       clientPhone: safePhone,
@@ -296,70 +293,12 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
       packageDetails: preSelectedPackage
         ? (lang === 'es' ? preSelectedPackage.description_es : preSelectedPackage.description_en)
         : undefined,
-    };
-
-    const contractData: ContractData = isWedding
-      ? weddingData
-      : { brideName: safeName, brideEmail: safeEmail, groomPhone: safePhone, groomName: '', brideAddress: '', ceremonyLocation: '', ceremonyAddress: '', ceremonyStart: '', ceremonyEnd: '', receptionLocation: '', receptionAddress: '', receptionStart: '', receptionEnd: '' };
-    const contractType = isWedding ? 'wedding' : 'session';
-    const depositAmt = totalPrice > 0
-      ? Math.min(preSelectedPackage?.deposit || Math.round(totalPrice / 2), totalPrice)
-      : 0;
-
-    // Custom projects need a quote before any payment can be collected.
-    if (totalPrice <= 0) {
-      onAddBooking({ ...baseBooking, contractData, contractType, depositAmount: 0, amountDue: 0, isPaid: false });
-      setStep('success');
-      return;
-    }
-
-    setPendingBooking({
-      status: 'pending',
-      createdAt: new Date().toISOString(),
-      ...baseBooking,
       contractData,
       contractType,
       depositAmount: depositAmt,
       amountDue: Math.max(0, totalPrice - depositAmt),
     });
-    setStep('payment');
-  };
 
-  const handleSignContract = (signature: string) => {
-    if (!pendingBooking) return;
-    const now = new Date().toISOString();
-    const invNumber = `INV-${now.substring(0, 7).replace('-', '')}-${String(Math.floor(Math.random() * 8999 + 1000)).padStart(4, '0')}`;
-    const newInvoice: Invoice = {
-      id: `inv-${Date.now()}`,
-      bookingId: bookingId,
-      invoiceNumber: invNumber,
-      clientName: pendingBooking.clientName,
-      clientEmail: pendingBooking.clientEmail,
-      packageName: pendingBooking.packageName || 'Photography Session',
-      items: [
-        { description: pendingBooking.packageName || 'Photography Session', amount: pendingBooking.amount || 0 },
-      ],
-      subtotal: pendingBooking.amount || 0,
-      depositPaid: depositAmount,
-      total: pendingBooking.amount || 0,
-      amountPaid: depositAmount,
-       balanceDue: pendingBooking.amountDue ?? Math.max(0, (pendingBooking.amount || 0) - depositAmount),
-      status: depositAmount >= (pendingBooking.amount || 0) ? 'paid' : 'partial',
-       paymentMethod: paymentResult?.paymentMethod || 'Credit Card (Stripe)',
-       stripeTxHash: paymentResult?.txHash || '',
-      createdAt: now,
-      paidAt: now,
-    };
-    onInvoiceCreated?.(newInvoice);
-    setCreatedInvoice(newInvoice);
-    onAddBooking({
-      ...pendingBooking,
-      contractSignature: signature,
-      contractSignedAt: now,
-      isPaid: depositAmount > 0,
-      amountDue: pendingBooking.amountDue ?? Math.max(0, (pendingBooking.amount || 0) - depositAmount),
-      invoiceId: newInvoice.id,
-    });
     setStep('success');
   };
 
@@ -379,15 +318,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
               </p>
             </div>
 
-            {paymentCancelled && (
-              <div className="text-center py-2 px-4 rounded-lg bg-white/10 border border-white/10">
-                <p className="text-[11px] font-mono text-white/60">
-                  {lang === 'en'
-                    ? 'Payment was cancelled — you can try again below.'
-                    : 'Pago cancelado — puedes intentar de nuevo abajo.'}
-                </p>
-              </div>
-            )}
+
 
             <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
               
@@ -698,97 +629,7 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
 
             </div>
           </form>
-          ) : step === 'payment' && pendingBooking ? (
-          <motion.div
-            className="py-12 px-6 text-center max-w-md mx-auto space-y-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <div className="inline-flex p-4 rounded-full bg-white/10 border border-white/10 text-white/70 mx-auto">
-              <DollarSign size={40} />
-            </div>
-            <div className="space-y-2">
-              <h3 className="font-serif text-2xl text-white/90 tracking-wide">
-                {lang === 'en' ? 'Secure Your Date' : 'Asegura tu Fecha'}
-              </h3>
-              <p className="text-[11px] text-white/60">
-                {lang === 'en'
-                  ? 'A deposit is required to confirm your booking. You can pay the remaining balance later.'
-                  : 'Se requiere un depósito para confirmar tu reserva. Puedes pagar el resto después.'}
-              </p>
-            </div>
-            <div className="bg-dark/40 border border-white/10 rounded-lg p-4 space-y-2">
-              <div className="flex justify-between text-xs text-white/70">
-                <span>{lang === 'en' ? 'Package' : 'Paquete'}</span>
-                <span className="font-semibold text-white">{pendingBooking.packageName || '—'}</span>
-              </div>
-              <div className="flex justify-between text-xs text-white/70">
-                <span>{lang === 'en' ? 'Total' : 'Total'}</span>
-                <span className="font-semibold text-white">${pendingBooking.amount || 0}</span>
-              </div>
-              <div className="border-t border-white/10 pt-2 flex justify-between text-sm">
-                <span className="text-white/70 font-semibold">{lang === 'en' ? 'Deposit Required' : 'Depósito Requerido'}</span>
-                <span className="font-serif text-xl text-white/90">${depositAmount}</span>
-              </div>
-            </div>
-            <div className="flex gap-3 justify-center">
-              <button
-                type="button"
-                onClick={() => setStep('form')}
-                className="py-2.5 px-5 border border-white/15 hover:border-white/30 text-white/70 rounded-lg font-mono text-[10px] tracking-widest uppercase transition-all"
-              >
-                {lang === 'en' ? 'Back' : 'Volver'}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  onCheckout?.(
-                    depositAmount,
-                    `${pendingBooking.packageName || 'Photography Session'} — Deposit (${pendingBooking.clientName})`,
-                     (result) => { setPaymentResult(result || null); setStep('contract'); },
-                    () => { setStep('form'); setPaymentCancelled(true); }
-                  );
-                }}
-                className="py-2.5 px-6 bg-white/10 hover:bg-white/15 text-white border border-white/10 font-mono text-xs tracking-widest uppercase font-semibold rounded-lg transition-all"
-              >
-                {lang === 'en' ? `Pay $${depositAmount} Deposit` : `Pagar $${depositAmount} de Depósito`}
-              </button>
-            </div>
-          </motion.div>
-        ) : step === 'contract' && pendingBooking ? (
-          <motion.div
-            className="py-6 px-2 md:px-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <p className="text-[10px] font-mono text-white/70 tracking-widest uppercase">
-                  {lang === 'en' ? 'Step 2 of 2 — Sign Contract' : 'Paso 2 de 2 — Firma el Contrato'}
-                </p>
-                <h3 className="font-serif text-xl text-white/90 mt-1">
-                  {isWedding
-                    ? (lang === 'en' ? 'Wedding Photography Contract' : 'Contrato de Fotografía de Boda')
-                    : (lang === 'en' ? 'Photography Services Contract' : 'Contrato de Servicios Fotográficos')}
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setStep('form')}
-                className="text-[10px] font-mono text-white/50 hover:text-white underline"
-              >
-                {lang === 'en' ? 'Back' : 'Volver'}
-              </button>
-            </div>
-            <ContractView
-              booking={pendingBooking}
-              mode="client-sign"
-              lang={lang}
-              t={TRANSLATIONS[lang]}
-              onClientSign={handleSignContract}
-            />
-          </motion.div>
-        ) : (
+          ) : (
           /* SUCCESS STATE */
           <motion.div
             className="py-12 px-6 text-center max-w-md mx-auto space-y-6"
@@ -802,30 +643,20 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
               <h3 className="font-serif text-2xl text-white/90 tracking-wide">
                 {t.successTitle}
               </h3>
-              <p className="text-[10px] font-mono text-white/70 uppercase tracking-widest">
-                ID: {bookingId}
-              </p>
             </div>
             <p className="text-xs text-white/70 font-sans leading-relaxed">
               {t.successDesc}
               {emailConfig?.enableAutoResponse && (
-                <> Hemos enviado un acuse de recibo y detalles iniciales de la propuesta a <strong className="text-white">{clientEmail}</strong>.</>
+                <> Hemos enviado un acuse de recibo a <strong className="text-white">{clientEmail}</strong>.</>
               )}
             </p>
-
-            {createdInvoice && <InvoiceReceipt invoice={createdInvoice} lang={lang} />}
 
             <div className="border-t border-white/10 pt-5 flex justify-center">
               <button
                 type="button"
                 onClick={() => {
-                  if (createdInvoice && !window.confirm(lang === 'en' ? 'You have an unpaid invoice. Are you sure you want to leave?' : 'Tienes una factura pendiente. ¿Seguro que quieres salir?')) return;
                   setStep('form');
-                   setPendingBooking(null);
-                   setCreatedInvoice(null);
-                   setPaymentResult(null);
                   setWeddingError('');
-                  setPaymentCancelled(false);
                   setDateValue('');
                   setSelectedDate(null);
                   setClientName('');

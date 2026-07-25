@@ -1,11 +1,18 @@
 ﻿import { serve } from "https://deno.land/std@0.192.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")
+const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "onboarding@resend.dev"
+
 serve(async (req) => {
   const authHeader = req.headers.get("Authorization")
   const cronSecret = Deno.env.get("CRON_SECRET")
   if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
     return new Response("Unauthorized", { status: 401 })
+  }
+
+  if (!RESEND_API_KEY) {
+    return new Response("RESEND_API_KEY not configured", { status: 500 })
   }
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL")
@@ -21,7 +28,7 @@ serve(async (req) => {
     .from("bookings")
     .select("*")
     .eq("date", today)
-    .eq("status", "accepted")
+    .in("status", ["confirmed", "approved"])
     .eq("reminderSent", false)
 
   if (error) {
@@ -34,52 +41,29 @@ serve(async (req) => {
     })
   }
 
-  const { data: emailConfig, error: configError } = await supabase
-    .from("emailconfig")
-    .select("*")
-    .eq("id", "config")
-    .single()
-
-  if (configError || !emailConfig) {
-    return new Response(JSON.stringify({ error: "Email config not found" }), { status: 500 })
-  }
-
-  const serviceId = emailConfig.emailjsServiceId
-  const templateId = emailConfig.emailjsTemplateId
-  const publicKey = emailConfig.emailjsPublicKey
-  const privateKey = emailConfig.emailjsPrivateKey || ""
-
-  if (!serviceId || !templateId || !publicKey) {
-    return new Response(JSON.stringify({ error: "Incomplete EmailJS config" }), { status: 500 })
-  }
-
   const results = { sent: 0, errors: 0, details: [] }
 
   for (const booking of bookings) {
     try {
-      const body: Record<string, unknown> = {
-        service_id: serviceId,
-        template_id: templateId,
-        user_id: publicKey,
-        accessToken: privateKey || undefined,
-        template_params: {
-          to_name: booking.clientName,
-          to_email: booking.clientEmail,
-          from_name: "Miriam Campos",
-          message: "Recordatorio: Tu sesi\u00f3n fotogr\u00e1fica es HOY a las " + booking.timeSlot + ".",
-          booking_details: "Sesi\u00f3n: " + (booking.packageName || "Fotograf\u00eda") + " - Fecha: " + booking.date + " - Horario: " + booking.timeSlot,
-        },
-      }
-
-      const response = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
+      const text = `Hola ${booking.clientName},\n\nTe recordamos que tu sesión fotográfica es HOY a las ${booking.timeSlot}.\n\nPaquete: ${booking.packageName || 'Fotografía'}\n\nSaludos,\nMiriam Campos`
+      const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        headers: {
+          "Authorization": `Bearer ${RESEND_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: FROM_EMAIL,
+          to: booking.clientEmail,
+          subject: "Recordatorio: Tu sesión fotográfica es HOY",
+          html: text.replace(/\n/g, "<br>"),
+          text,
+        }),
       })
 
-      if (!response.ok) {
-        const errBody = await response.text()
-        throw new Error("EmailJS error " + response.status + ": " + errBody)
+      if (!res.ok) {
+        const errBody = await res.text()
+        throw new Error("Resend error " + res.status + ": " + errBody)
       }
 
       await supabase
