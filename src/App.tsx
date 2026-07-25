@@ -772,6 +772,7 @@ ${photographerName}`);
   // Trigger Stripe print or service booking Checkout overlay
   const pendingPaymentRef = useRef<((result?: PaymentResult) => void) | null>(null);
   const pendingCancelRef = useRef<(() => void) | null>(null);
+  const pendingPaymentBookingRef = useRef<{ clientName: string; clientEmail: string; photographerEmail: string; amount: number; packageName: string } | null>(null);
 
   const handleOpenStripeCheckout = (amount: number, description: string) => {
     setCheckoutAmount(amount);
@@ -1591,7 +1592,16 @@ ${photographerName}`);
                     booking={booking}
                     lang={lang}
                     onConfirm={handleConfirmBooking}
-                    onCheckout={handleCheckoutWithCallback}
+                    onCheckout={(amount, desc, onDone, onCancel) => {
+                      pendingPaymentBookingRef.current = {
+                        clientName: booking.clientName,
+                        clientEmail: booking.clientEmail,
+                        photographerEmail: emailConfig.receiverEmail || booking.clientEmail,
+                        amount,
+                        packageName: booking.packageName || 'Photography Session',
+                      };
+                      handleCheckoutWithCallback(amount, desc, onDone, onCancel);
+                    }}
                   />
                 );
               })()}
@@ -1979,6 +1989,20 @@ ${photographerName}`);
         }}
         onSuccess={(result) => {
           pendingPaymentRef.current?.(result);
+          if (pendingPaymentBookingRef.current) {
+            const info = pendingPaymentBookingRef.current;
+            import('./lib/email').then(({ sendDepositReceivedEmail }) => {
+              sendDepositReceivedEmail(
+                emailConfig,
+                info.clientName,
+                info.clientEmail,
+                info.photographerEmail,
+                info.amount,
+                info.packageName,
+              );
+            });
+            pendingPaymentBookingRef.current = null;
+          }
           pendingPaymentRef.current = null;
           pendingCancelRef.current = null;
         }}

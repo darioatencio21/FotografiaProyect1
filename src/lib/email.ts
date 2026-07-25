@@ -148,6 +148,26 @@ Miriam Campos Photography`;
   return callSendEmail(clientEmail, subject, text);
 }
 
+export async function sendDepositReceivedEmail(
+  emailConfig: EmailConfig,
+  clientName: string,
+  clientEmail: string,
+  photographerEmail: string,
+  amount: number,
+  packageName: string,
+): Promise<boolean> {
+  const subject = 'Depósito recibido — Miriam Campos Photography';
+  const text = `Nuevo depósito recibido
+
+Cliente: ${clientName}
+Email: ${clientEmail}
+Paquete: ${packageName}
+Monto: $${amount}
+
+El pago fue procesado exitosamente. Revisá el panel de administración para más detalles.`;
+  return callSendEmail(photographerEmail, subject, text);
+}
+
 export async function sendPendingPaymentReminder(
   emailConfig: EmailConfig,
   clientName: string,
