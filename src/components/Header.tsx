@@ -267,7 +267,7 @@ export default function Header({
           Outer button is an extended hit-target (44px+ tall for accessibility);
           inner span is the visible gold pill. */}
       <AnimatePresence>
-        {currentView !== 'admin' && !isMobileMenuOpen && (
+        {!isMobileMenuOpen && (
           <motion.button
             key="drag-handle"
             type="button"
@@ -333,7 +333,7 @@ export default function Header({
 
       {/* Mobile drawer (draggable) */}
       <AnimatePresence>
-        {currentView !== 'admin' && isMobileMenuOpen && (
+        {isMobileMenuOpen && (
           <motion.aside
             key="mobile-drawer"
             className="fixed inset-y-0 right-0 w-[85vw] max-w-sm bg-dark z-40 lg:hidden
