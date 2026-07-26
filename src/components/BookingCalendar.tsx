@@ -228,8 +228,25 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
           });
         };
 
-        const photographerSubject = `Nueva solicitud de reserva — ${serviceName}`;
-        const photographerText = `Nueva solicitud de reserva recibida:
+        const isEn = lang === 'en';
+        const photographerSubject = isEn
+          ? `New booking request — ${serviceName}`
+          : `Nueva solicitud de reserva — ${serviceName}`;
+        const photographerText = isEn
+          ? `New booking request received:
+
+Client: ${safeName}
+Email: ${safeEmail}
+Phone: ${safePhone}
+Package: ${serviceName}
+Date: ${formattedDate}
+Time: ${finalSchedule}
+Guests: ${peopleCount}
+Estimated Total: $${totalPrice > 0 ? totalPrice : 'TBD'}
+
+Client notes:
+${safeNotes || 'No notes'}`
+          : `Nueva solicitud de reserva recibida:
 
 Cliente: ${safeName}
 Email: ${safeEmail}
@@ -246,22 +263,35 @@ ${safeNotes || 'Sin notas'}`;
         await sendFn(emailConfig.receiverEmail || safeEmail, photographerSubject, photographerText);
 
         if (emailConfig.enableAutoResponse) {
-          const autoSubject = emailConfig.autoReplySubject || '¡Tu solicitud ha sido recibida con éxito! - Miriam Campos Photography';
-          const autoMessage = emailConfig.autoReplyMessage || 'Gracias por tu preferencia. Te contactaremos pronto.';
+          const autoSubject = isEn
+            ? (emailConfig.autoReplySubject || 'Your request has been received! - Miriam Campos Photography')
+            : (emailConfig.autoReplySubject || '¡Tu solicitud ha sido recibida con éxito! - Miriam Campos Photography');
+          const autoMessage = isEn
+            ? (emailConfig.autoReplyMessage || 'Thank you for your preference. We will contact you soon.')
+            : (emailConfig.autoReplyMessage || 'Gracias por tu preferencia. Te contactaremos pronto.');
 
-          await sendFn(safeEmail, autoSubject, `Hola ${safeName},
+          const greeting = isEn ? 'Hi' : 'Hola';
+          const summaryTitle = isEn ? 'Summary of your request:' : 'Resumen de tu solicitud:';
+          const packageLabel = isEn ? 'Package' : 'Paquete';
+          const dateLabel = isEn ? 'Tentative date' : 'Fecha tentativa';
+          const timeLabel = isEn ? 'Preferred time' : 'Horario preferido';
+          const guestsLabel = isEn ? 'Guests' : 'Personas';
+          const totalLabel = isEn ? 'Estimated total' : 'Total estimado';
+          const totalVal = totalPrice > 0 ? `$${totalPrice}` : (isEn ? 'To be defined' : 'A Definir');
+          const closing = isEn ? 'Best regards,\nMiriam Campos' : 'Saludos,\nMiriam Campos';
+
+          await sendFn(safeEmail, autoSubject, `${greeting} ${safeName},
 
 ${autoMessage}
 
-Resumen de tu solicitud:
-- Paquete: ${serviceName}
-- Fecha tentativa: ${formattedDate}
-- Horario preferido: ${finalSchedule}
-- Personas: ${peopleCount}
-- Total estimado: $${totalPrice > 0 ? totalPrice : 'A Definir'}
+${summaryTitle}
+- ${packageLabel}: ${serviceName}
+- ${dateLabel}: ${formattedDate}
+- ${timeLabel}: ${finalSchedule}
+- ${guestsLabel}: ${peopleCount}
+- ${totalLabel}: ${totalVal}
 
-Saludos,
-Miriam Campos`);
+${closing}`);
         }
       } catch (err) {
         console.error('Could not send email notifications:', err);

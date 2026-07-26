@@ -510,6 +510,7 @@ export default function App() {
           booking.timeSlot,
           (booking.depositAmount ?? 0),
           booking.packageName || 'Photography Session',
+          lang,
         );
       });
     }
@@ -686,9 +687,19 @@ export default function App() {
           });
         };
 
+        const isEn = lang === 'en';
         const photographerName = sanitizeString(profile.name || 'Miriam Campos');
-        const subject = `Nuevo mensaje de contacto: ${safeSubject || 'Consulta'}`;
-        const photographerText = `Recibiste un nuevo mensaje de contacto:
+        const subject = isEn
+          ? `New contact message: ${safeSubject || 'Inquiry'}`
+          : `Nuevo mensaje de contacto: ${safeSubject || 'Consulta'}`;
+        const photographerText = isEn
+          ? `You received a new contact message:
+
+From: ${safeName} (${safeEmail})
+Subject: ${safeSubject || 'General Inquiry'}
+Message:
+${safeMsg}`
+          : `Recibiste un nuevo mensaje de contacto:
 
 De: ${safeName} (${safeEmail})
 Asunto: ${safeSubject || 'Consulta General'}
@@ -698,14 +709,20 @@ ${safeMsg}`;
         await sendFn(emailConfig.receiverEmail || safeEmail, subject, photographerText);
 
         if (emailConfig.enableAutoResponse) {
-          const autoSubject = emailConfig.autoReplySubject || 'Tu mensaje ha sido recibido! - Miriam Campos Photography';
-          const autoMessage = emailConfig.autoReplyMessage || 'Gracias por contactarte con nosotros. Responderemos a la brevedad.';
+          const autoSubject = isEn
+            ? (emailConfig.autoReplySubject || 'Your message has been received! - Miriam Campos Photography')
+            : (emailConfig.autoReplySubject || 'Tu mensaje ha sido recibido! - Miriam Campos Photography');
+          const autoMessage = isEn
+            ? (emailConfig.autoReplyMessage || 'Thank you for contacting us. We will get back to you shortly.')
+            : (emailConfig.autoReplyMessage || 'Gracias por contactarte con nosotros. Responderemos a la brevedad.');
+          const greeting = isEn ? 'Hi' : 'Hola';
+          const closing = isEn ? 'Best regards,' : 'Saludos,';
 
-          await sendFn(safeEmail, autoSubject, `Hola ${safeName},
+          await sendFn(safeEmail, autoSubject, `${greeting} ${safeName},
 
 ${autoMessage}
 
-Saludos,
+${closing}
 ${photographerName}`);
         }
       } catch (err) {
@@ -1999,6 +2016,7 @@ ${photographerName}`);
                 info.photographerEmail,
                 info.amount,
                 info.packageName,
+                lang,
               );
             });
             pendingPaymentBookingRef.current = null;

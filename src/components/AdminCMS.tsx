@@ -437,6 +437,7 @@ export default function AdminCMS({
       booking.date,
       (booking.depositAmount ?? 0),
       booking.packageName || 'Photography Session',
+      lang,
     );
     if (!sent) {
       triggerAlert('Warning: Approval email could not be sent');
@@ -462,6 +463,7 @@ export default function AdminCMS({
       booking.clientEmail,
       booking.date,
       reason,
+      lang,
     );
 
     setRejectBookingId(null);
@@ -486,6 +488,7 @@ export default function AdminCMS({
       booking.clientName,
       booking.clientEmail,
       booking.date,
+      lang,
     );
   };
 
@@ -519,6 +522,7 @@ export default function AdminCMS({
       booking.date,
       (booking.depositAmount ?? 0),
       booking.packageName || 'Photography Session',
+      lang,
     );
     if (sent) {
         triggerAlert(`Approval link resent to ${testRecipient}`);
@@ -551,6 +555,7 @@ export default function AdminCMS({
       booking.timeSlot,
       (booking.depositAmount ?? 0),
       booking.packageName || 'Photography Session',
+      lang,
     );
   };
 
