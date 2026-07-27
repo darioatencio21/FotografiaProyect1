@@ -1,5 +1,5 @@
 ﻿import React, { useState, useCallback, useEffect } from 'react';
-import { Save, Plus, Trash2, Edit3, X, Upload } from 'lucide-react';
+import { Save, Plus, Trash2, Edit3, X, Upload, Star } from 'lucide-react';
 import { PhotographyPackage, ActiveLanguíage, SessionCategory } from '../types';
 import { uploadImageBlob } from '../lib/db';
 
@@ -438,6 +438,9 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
                       )}
                     </div>
                     <div className="flex items-center space-x-1.5 shrink-0">
+                      <button onClick={() => toggleFeatured(pkg.id)} className={`p-1.5 cursor-pointer transition-colors ${pkg.featured ? 'text-amber-400 hover:text-amber-300' : 'text-white/30 hover:text-amber-400'}`} title={pkg.featured ? t('Quitar de destacados', 'Unfeature') : t('Marcar como destacado', 'Feature')}>
+                        <Star size={12} fill={pkg.featured ? 'currentColor' : 'none'} />
+                      </button>
                       <label className="flex items-center space-x-1 cursor-pointer">
                         <input type="checkbox" checked={pkg.active} onChange={() => toggleActive(pkg.id)} className="accent-white/50 w-3 h-3" />
                         <span className="text-[11px] font-mono text-white/40">{t('ON', 'ON')}</span>
@@ -487,6 +490,9 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
                   <span className="text-[10px] font-mono text-white/90 font-bold">${pkg.price.toLocaleString()}</span>
                 </div>
                 <div className="flex items-center space-x-1.5 shrink-0">
+                  <button onClick={() => toggleFeatured(pkg.id)} className={`p-1.5 cursor-pointer transition-colors ${pkg.featured ? 'text-amber-400 hover:text-amber-300' : 'text-white/30 hover:text-amber-400'}`} title={pkg.featured ? t('Quitar de destacados', 'Unfeature') : t('Marcar como destacado', 'Feature')}>
+                    <Star size={12} fill={pkg.featured ? 'currentColor' : 'none'} />
+                  </button>
                   <button onClick={() => startEdit(pkg)} className="p-1.5 text-white/40 hover:text-white/90 cursor-pointer transition-colors" title={t('Editar', 'Edit')}>
                     <Edit3 size={12} />
                   </button>
