@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Instagram } from 'lucide-react';
+import { Instagram } from './BrandIcons';
 import { ActiveLanguíage, InstagramPost } from '../types';
 
 const PROFILE_URL = 'https://www.instagram.com/miriamtellezphotography/';

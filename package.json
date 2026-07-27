@@ -15,17 +15,17 @@
     "setup:buckets": "npx tsx scripts/setup-buckets.ts"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.110.7",
+    "@supabase/supabase-js": "^2.110.8",
     "@tailwindcss/vite": "^4.3.3",
-    "@vitejs/plugin-react": "^5.0.4",
-    "lucide-react": "^0.546.0",
+    "@vitejs/plugin-react": "^5.2.0",
+    "lucide-react": "^1.27.0",
     "motion": "^12.23.24",
-    "react": "^19.0.1",
-    "react-dom": "^19.0.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
     "vite": "^6.2.3"
   },
   "devDependencies": {
-    "@types/node": "^22.20.1",
+    "@types/node": "^26.1.1",
     "dotenv": "^17.4.2",
     "pg": "^8.22.0",
     "tailwindcss": "^4.3.3",

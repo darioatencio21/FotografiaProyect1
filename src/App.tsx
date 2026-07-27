@@ -10,8 +10,9 @@ import {
     Mail, Phone, ShieldCheck, Sparkles, AlertCircle, ChevronDown,
      Eye, EyeOff, X, Camera, Users, Calendar, Clock, PartyPopper,
      CheckCircle2, ShoppingBag, Star, Baby, GraduationCap, Gift, Briefcase,
-     Gem, Utensils, Package, Award, Instagram
+     Gem, Utensils, Package, Award
 } from 'lucide-react';
+import { Instagram } from './components/BrandIcons';
 
 import { 
   INITIAL_PHOTOGRAPHS, INITIAL_SERVICES, INITIAL_TESTIMONIALS, 
