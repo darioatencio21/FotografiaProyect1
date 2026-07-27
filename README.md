@@ -47,8 +47,8 @@ Panel completo accesible vía Supabase Auth con las siguientes secciones:
 - **Dashboard** — analytics con gráficos de ingresos y tráfico, micro-stats (ingresos estimados, tasa de conversión, sesiones, visitantes)
 - **Fotografías** — CRUD completo con drag & drop upload, compresión automática a WebP, editor de metadatos EXIF, categorías, featured toggle
 - **Testimonios** — CRUD con aprobación, edición y eliminación
-- **Cola de Reservas** — tabla expandible con estado (pending/accepted/rejected), datos de contacto, cuestionario creativo, gestión de montos (depósito, restante, gastos de viaje), firma de contratos y marcado como pagado
-- **Facturas** — listado con estado (paid/partial/unpaid/cancelled) y detalle de items
+- **Cola de Reservas** — tabla expandible ordenada por fecha de creación (más recientes arriba), con estado (pending/approved/rejected/confirmed/completed), datos de contacto, cuestionario creativo, gestión de montos (depósito, restante, gastos de viaje), firma de contratos y marcado como pagado
+- **Facturas** — listado con estado (paid/partial/unpaid/cancelled) y detalle de items. Generación automática de invoices al completar el pago o al marcar como pagado desde el admin
 - **Paquetes Fotográficos** — CRUD con nombre bi-idioma, precio, depósito, duración, descripción, beneficios, nota de viaje, imagen por upload, orden, activo y destacado
 - **Tipos de Sesión** — CRUD con nombre bi-idioma, descripción, ícono, imagen y orden
 - **Bandeja de Entrada** — mensajes de contacto con reply-to via mailto, marcar como leído
@@ -69,7 +69,7 @@ Panel completo accesible vía Supabase Auth con las siguientes secciones:
 - **Flujo completo de contratos** — paso de pago → firma de contrato digital (cliente) → contra-firma (fotógrafa en CMS) → recibo de factura
 - **Contratos de boda** con campos específicos (novia, novio, ceremonia, recepción)
 - **Contratos de sesión** con datos generales del cliente
-- **Generación automática de facturas** al completar el pago
+- **Generación automática de facturas** al completar el pago o al marcar como pagado desde el admin, con número único INV-YYYYMM-XXXX
 
 ### Otras características
 
@@ -114,16 +114,16 @@ Panel completo accesible vía Supabase Auth con las siguientes secciones:
 | -------------------------------- | --------------------------------------------------------------------------- |
 | Hero split-screen                | Animación Ken Burns, 2 imágenes en desktop, 1 en mobile, gradiente 3 capas  |
 | Galería Pixieset                 | 23 galerías enlazadas externamente con hover overlay y fallback placeholder |
-| Feed de Instagram                | Grid de fotos desde Instagram con overlay y enlace al perfil                |
+| Feed de Instagram                | Grid de fotos sincronizado desde Supabase + Instagram Graph API con auto-refresco de token |
 | Sobre mí editorial               | Timeline vertical (2010–2025), biografía fluida, 3 pilares de filosofía     |
 | Estadísticas animadas            | Count Up con 2000+ sesiones, 15+ años, 98% satisfacción                     |
 | Portafolio con filtros           | 16 categorías de fotografía, búsqueda por texto, lightbox con descarga      |
 | Lightbox premium                 | Vista completa con EXIF, favoritos, descarga, compartir, modo RAW vs editado |
-| Sistema de reservas 2 pasos      | Categoría de sesión → paquetes → formulario con fecha, horario, contacto    |
+| Sistema de reservas 2 pasos      | Categoría de sesión → paquetes → formulario con fecha, horario, contacto. Reservas ordenadas por fecha de creación (más recientes arriba) |
 | Reservas de boda                 | Formulario extendido con datos de novia, novio, ceremonia y recepción       |
 | Checkout Stripe simulado         | Modal de pago con animación 3D Secure y comprobante de transacción          |
 | Contratos digitales              | Firma del cliente + contra-firma del fotógrafo, cláusulas por tipo          |
-| Facturación automática           | Generación de invoice al completar pago, con número único y estado          |
+| Facturación automática           | Generación de invoice al completar pago o marcar pagado, con número único INV-YYYYMM-XXXX y estado |
 | Portal de cliente                | Galería privada protegida por passcode, favoritos, descarga, selección de prints |
 | Link compartible                 | `?gallery=PASSCODE` para acceso directo al portal del cliente               |
 | CMS administrativo               | Dashboard, fotografías, testimonios, reservas, paquetes, sesiones, mensajes |
@@ -167,7 +167,9 @@ Panel completo accesible vía Supabase Auth con las siguientes secciones:
 │   └── favicon.svg                    # Favicon del estudio
 ├── supabase/
 │   └── migrations/
-│       └── 001_init.sql               # Esquema completo de tablas PostgreSQL + RLS + Storage policies
+│       ├── 001_init.sql               # Esquema completo de tablas PostgreSQL + RLS + Storage policies
+│       ├── ...
+│       └── 011_instagram_config.sql   # Tabla para almacenar token de Instagram con auto-refresh
 ├── src/
 │   ├── App.tsx                        # Componente raíz: estado global, routing, lógica de datos y UI principal
 │   ├── main.tsx                       # Punto de entrada de React
@@ -340,6 +342,44 @@ App.tsx State + localStorage (caché offline, prefijo aurea_)
 | `bookingconfig`       | Configuración de reservas (singleton) |
 | `emailconfig`         | Configuración de EmailJS (singleton)  |
 | `analytics`           | Estadísticas del dashboard (singleton)|
+| `instagram_posts`     | Posts sincronizados desde Instagram   |
+| `instagram_config`    | Token de acceso de Instagram (auto-refrescado)|
+
+### Sincronización de Instagram
+
+El feed de Instagram se sincroniza automáticamente mediante una **Supabase Edge Function** (`sync-instagram`) que:
+
+1. **Refresca el token** de Instagram Graph API automáticamente en cada ejecución (extiende la validez 60 días)
+2. **Obtiene las últimas 8 fotos** del perfil de Instagram Business
+3. **Reemplaza los posts** anteriores en la tabla `instagram_posts`
+4. **Frontend**: `InstagramFeed.tsx` lee directamente de la tabla `instagram_posts` vía Supabase
+
+#### Token de acceso
+
+El token se auto-gestiona:
+
+- **Primera vez**: La edge function lee `INSTAGRAM_ACCESS_TOKEN` de las variables de entorno de Supabase
+- **Auto-refresco**: Cada llamada renueva el token y lo guarda en la tabla `instagram_config`
+- **Persistencia**: Mientras el cron se ejecute al menos una vez cada 55 días, el token nunca expira
+
+#### Configurar el cron (cron-job.org)
+
+1. Crea una cuenta en [cron-job.org](https://cron-job.org)
+2. Crea un nuevo cron job:
+   - **URL**: `https://<PROYECTO>.supabase.co/functions/v1/sync-instagram`
+   - **Method**: `GET`
+   - **Schedule**: `Cada 30 minutos` (o `Cada hora` / `Cada 6 horas` según tu preferencia)
+   - **Advanced → Headers**: Añade `x-cron-secret` con el valor que configuraste como `CRON_SECRET`
+
+#### Variables de entorno en Supabase Edge Functions
+
+Configura estos secrets en Supabase Dashboard → Edge Functions → `sync-instagram` → Environment Variables:
+
+| Variable                  | Descripción                              |
+| ------------------------- | ---------------------------------------- |
+| `INSTAGRAM_ACCESS_TOKEN`  | Token long-lived inicial de Instagram    |
+| `INSTAGRAM_USER_ID`       | ID de usuario de Instagram (opcional)    |
+| `CRON_SECRET`             | Clave secreta para proteger el endpoint  |
 
 ### Almacenamiento (Storage)
 
@@ -373,7 +413,7 @@ Todos los buckets son públicos (lectura). La escritura está protegida por aute
 | Portal Cliente | `client-portal`| Galería privada protegida por passcode, favoritos, descarga, prints, contrato, facturas, testimonio |
 | FAQ            | `faq`          | Acordeón de preguntas frecuentes multi-idioma                                  |
 | Contacto       | `contact`      | Formulario con EmailJS + datos del estudio + WhatsApp                          |
-| Admin          | `admin`        | CMS completo con 13 tabs: dashboard, fotos, testimonios, reservas, paquetes, facturas, sesiones, mensajes, SEO, perfil, clientes, email |
+| Admin          | `admin`        | CMS completo con 13 tabs: dashboard, fotos, testimonios, reservas (ordenadas por fecha), paquetes, facturas (auto-generadas), sesiones, mensajes, SEO, perfil, clientes, email |
 | Privacidad     | `privacy`      | Política de privacidad multi-idioma con 6 secciones                            |
 | Términos       | `terms`        | Términos del servicio multi-idioma con 6 cláusulas                             |
 
@@ -491,6 +531,9 @@ vercel --prod
 | `VITE_SUPABASE_ANON_KEY`     | Clave anónima (frontend)                 | `eyJhbGciOi...`                               |
 | `SUPABASE_SERVICE_ROLE_KEY`  | Clave service_role (solo scripts)        | `eyJhbGciOi...`                               |
 | `APP_URL`                    | URL base de la aplicación                | `http://localhost:3000`                        |
+| `INSTAGRAM_ACCESS_TOKEN`     | Token long-lived de Instagram (Edge Function secret) | `EAA...`                    |
+| `INSTAGRAM_USER_ID`          | ID de usuario de Instagram (opcional)    | `178414...`                                  |
+| `CRON_SECRET`                | Clave secreta para cron jobs             | `openssl rand -hex 32`                        |
 
 Copia `.env.example` a `.env.local` y completa los valores antes de ejecutar la aplicación.
 

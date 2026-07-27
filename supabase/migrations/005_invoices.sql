@@ -42,13 +42,17 @@ CREATE TABLE IF NOT EXISTS invoices (
 ALTER TABLE invoices ENABLE ROW LEVEL SECURITY;
 
 -- Public read for authenticated users
+DROP POLICY IF EXISTS "Auth read invoices" ON invoices;
 CREATE POLICY "Auth read invoices" ON invoices FOR SELECT USING (auth.role() = 'authenticated');
 
 -- Allow public insert for booking/invoice creation
+DROP POLICY IF EXISTS "Public insert invoices" ON invoices;
 CREATE POLICY "Public insert invoices" ON invoices FOR INSERT WITH CHECK (true);
 
 -- Authenticated users can update invoices
+DROP POLICY IF EXISTS "Auth update invoices" ON invoices;
 CREATE POLICY "Auth update invoices" ON invoices FOR UPDATE USING (auth.role() = 'authenticated') WITH CHECK (auth.role() = 'authenticated');
 
 -- Authenticated users can delete invoices
+DROP POLICY IF EXISTS "Auth delete invoices" ON invoices;
 CREATE POLICY "Auth delete invoices" ON invoices FOR DELETE USING (auth.role() = 'authenticated');

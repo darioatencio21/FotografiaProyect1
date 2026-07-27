@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { CheckCircle2, Clock, DollarSign, FileText, AlertCircle, Calendar, Shield } from 'lucide-react';
 import { ActiveLanguíage, Booking } from '../types';
@@ -9,7 +9,7 @@ import { TRANSLATIONS } from '../data/mockData';
 interface BookingApprovalProps {
   booking: Booking;
   lang: ActiveLanguíage;
-  onConfirm: (bookingId: string) => void;
+  onConfirm: (bookingId: string, signature?: string) => void;
   onCheckout: (amount: number, description: string, onDone: (result?: PaymentResult) => void, onCancel?: () => void) => void;
 }
 
@@ -19,9 +19,16 @@ export default function BookingApproval({ booking, lang, onConfirm, onCheckout }
   const [contractSigned, setContractSigned] = useState(booking.contractStatus === 'signed');
   const [paymentPaid, setPaymentPaid] = useState(booking.paymentStatus === 'paid');
   const [contractStep, setContractStep] = useState(false);
+  const [savedSignature, setSavedSignature] = useState<string | null>(null);
   const [showSignedContract, setShowSignedContract] = useState(false);
+  const hasConfirmedRef = useRef(booking.contractStatus === 'signed' && booking.paymentStatus === 'paid');
+  const savedSignatureRef = useRef<string | null>(null);
 
-  const depositAmount = booking.depositAmount ?? 0;
+  const packagePrice = Number(booking.amount) || 0;
+  const depositAmount = Number(booking.depositAmount) || 0;
+  const travelAmount = Number(booking.travelExpenses) || 0;
+  const totalWithTravel = packagePrice + travelAmount;
+  const dueAmount = Math.max(0, totalWithTravel - depositAmount);
   const isExpired = booking.approvalExpiresAt && new Date(booking.approvalExpiresAt) < new Date();
 
   if (isExpired) {
@@ -44,12 +51,21 @@ export default function BookingApproval({ booking, lang, onConfirm, onCheckout }
     );
   }
 
+  useEffect(() => {
+    savedSignatureRef.current = savedSignature;
+  }, [savedSignature]);
+
+  useEffect(() => {
+    if (contractSigned && paymentPaid && !hasConfirmedRef.current) {
+      hasConfirmedRef.current = true;
+      onConfirm(booking.id, savedSignatureRef.current || undefined);
+    }
+  }, [contractSigned, paymentPaid, booking.id, onConfirm]);
+
   const handleContractSign = (signature: string) => {
     setContractSigned(true);
     setContractStep(false);
-    if (paymentPaid) {
-      onConfirm(booking.id);
-    }
+    setSavedSignature(signature);
   };
 
   const handlePayment = () => {
@@ -58,9 +74,6 @@ export default function BookingApproval({ booking, lang, onConfirm, onCheckout }
       `${booking.packageName || 'Photography Session'} — Deposit (${booking.clientName})`,
       () => {
         setPaymentPaid(true);
-        if (contractSigned) {
-          onConfirm(booking.id);
-        }
       },
       () => {},
     );
@@ -115,21 +128,51 @@ export default function BookingApproval({ booking, lang, onConfirm, onCheckout }
             </span>
           </div>
         </div>
-        <div className="border-t border-white/10 pt-2 flex justify-between items-center">
-          <span className="text-white/50 text-[10px] font-mono">
-            {lang === 'en' ? 'Total' : 'Total'}
-          </span>
-          <span className="text-white/90 font-serif text-lg font-semibold">
-            ${booking.amount || 0}
-          </span>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-white/50 text-[10px] font-mono">
-            {lang === 'en' ? 'Deposit Required' : 'Depósito Requerido'}
-          </span>
-          <span className="text-[#C7A962] font-serif text-lg font-semibold">
-            ${depositAmount}
-          </span>
+
+        {/* Price breakdown */}
+        <div className="border-t border-white/10 pt-2 space-y-1">
+          <div className="flex justify-between items-center">
+            <span className="text-white/50 text-[10px] font-mono">
+              {lang === 'en' ? 'Package Price' : 'Precio del Paquete'}
+            </span>
+            <span className="text-white/80 font-mono text-sm">
+              ${(booking.amount || 0).toLocaleString()}
+            </span>
+          </div>
+          {travelAmount > 0 && (
+            <div className="flex justify-between items-center">
+              <span className="text-white/50 text-[10px] font-mono">
+                {lang === 'en' ? 'Travel Expenses' : 'Gastos de Viaje'}
+              </span>
+              <span className="text-white/80 font-mono text-sm">
+                + ${travelAmount.toLocaleString()}
+              </span>
+            </div>
+          )}
+          <div className="flex justify-between items-center border-t border-white/5 pt-1">
+            <span className="text-white/70 text-[10px] font-mono font-semibold">
+              {lang === 'en' ? 'Total' : 'Total'}
+            </span>
+            <span className="text-white/90 font-serif text-lg font-semibold">
+              ${totalWithTravel.toLocaleString()}
+            </span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-white/50 text-[10px] font-mono">
+              {lang === 'en' ? 'Deposit (30%)' : 'Depósito (30%)'}
+            </span>
+            <span className="text-[#C7A962] font-serif text-lg font-semibold">
+              ${depositAmount.toLocaleString()}
+            </span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-white/50 text-[10px] font-mono">
+              {lang === 'en' ? 'Balance Due' : 'Saldo Restante'}
+            </span>
+            <span className="text-white/80 font-mono text-sm">
+              ${dueAmount.toLocaleString()}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -231,7 +274,12 @@ export default function BookingApproval({ booking, lang, onConfirm, onCheckout }
             ) : (
               <button
                 onClick={handlePayment}
-                className="px-3 py-1.5 bg-[#C7A962]/20 hover:bg-[#C7A962]/30 text-[#C7A962] border border-[#C7A962]/20 rounded text-[10px] font-mono tracking-wider cursor-pointer transition-all"
+                disabled={!contractSigned}
+                className={`px-3 py-1.5 border rounded text-[10px] font-mono tracking-wider transition-all ${
+                  contractSigned
+                    ? 'bg-[#C7A962]/20 hover:bg-[#C7A962]/30 text-[#C7A962] border-[#C7A962]/20 cursor-pointer'
+                    : 'bg-white/5 text-white/20 border-white/5 cursor-not-allowed'
+                }`}
               >
                 {lang === 'en' ? 'Pay Now' : 'Pagar Ahora'}
               </button>

@@ -265,58 +265,92 @@ ALTER TABLE emailconfig ENABLE ROW LEVEL SECURITY;
 ALTER TABLE analytics ENABLE ROW LEVEL SECURITY;
 
 -- Public read policies
+DROP POLICY IF EXISTS "Public read photographs" ON photographs;
 CREATE POLICY "Public read photographs" ON photographs FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public read services" ON services;
 CREATE POLICY "Public read services" ON services FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public read testimonials" ON testimonials;
 CREATE POLICY "Public read testimonials" ON testimonials FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public read blogposts" ON blogposts;
 CREATE POLICY "Public read blogposts" ON blogposts FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public read faqs" ON faqs;
 CREATE POLICY "Public read faqs" ON faqs FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public read photography_packages" ON photography_packages;
 CREATE POLICY "Public read photography_packages" ON photography_packages FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public read session_categories" ON session_categories;
 CREATE POLICY "Public read session_categories" ON session_categories FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public read seo" ON seo;
 CREATE POLICY "Public read seo" ON seo FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public read profile" ON profile;
 CREATE POLICY "Public read profile" ON profile FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public read bookingconfig" ON bookingconfig;
 CREATE POLICY "Public read bookingconfig" ON bookingconfig FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public read analytics" ON analytics;
 CREATE POLICY "Public read analytics" ON analytics FOR SELECT USING (true);
 
 -- Auth required for sensitive collections
+DROP POLICY IF EXISTS "Auth read bookings" ON bookings;
 CREATE POLICY "Auth read bookings" ON bookings FOR SELECT USING (auth.role() = 'authenticated');
+DROP POLICY IF EXISTS "Auth read messages" ON messages;
 CREATE POLICY "Auth read messages" ON messages FOR SELECT USING (auth.role() = 'authenticated');
+DROP POLICY IF EXISTS "Auth read clientaccounts" ON clientaccounts;
 CREATE POLICY "Auth read clientaccounts" ON clientaccounts FOR SELECT USING (auth.role() = 'authenticated');
+DROP POLICY IF EXISTS "Auth read emailconfig" ON emailconfig;
 CREATE POLICY "Auth read emailconfig" ON emailconfig FOR SELECT USING (auth.role() = 'authenticated');
 
 -- Auth required for all writes
+DROP POLICY IF EXISTS "Auth write photographs" ON photographs;
 CREATE POLICY "Auth write photographs" ON photographs FOR ALL USING (auth.role() = 'authenticated');
+DROP POLICY IF EXISTS "Auth write services" ON services;
 CREATE POLICY "Auth write services" ON services FOR ALL USING (auth.role() = 'authenticated');
+DROP POLICY IF EXISTS "Auth write testimonials" ON testimonials;
 CREATE POLICY "Auth write testimonials" ON testimonials FOR ALL USING (auth.role() = 'authenticated');
+DROP POLICY IF EXISTS "Auth write blogposts" ON blogposts;
 CREATE POLICY "Auth write blogposts" ON blogposts FOR ALL USING (auth.role() = 'authenticated');
+DROP POLICY IF EXISTS "Auth write faqs" ON faqs;
 CREATE POLICY "Auth write faqs" ON faqs FOR ALL USING (auth.role() = 'authenticated');
+DROP POLICY IF EXISTS "Auth write bookings" ON bookings;
 CREATE POLICY "Auth write bookings" ON bookings FOR ALL USING (auth.role() = 'authenticated');
+DROP POLICY IF EXISTS "Auth write messages" ON messages;
 CREATE POLICY "Auth write messages" ON messages FOR ALL USING (auth.role() = 'authenticated');
+DROP POLICY IF EXISTS "Auth write clientaccounts" ON clientaccounts;
 CREATE POLICY "Auth write clientaccounts" ON clientaccounts FOR ALL USING (auth.role() = 'authenticated');
+DROP POLICY IF EXISTS "Auth write photography_packages" ON photography_packages;
 CREATE POLICY "Auth write photography_packages" ON photography_packages FOR ALL USING (auth.role() = 'authenticated');
+DROP POLICY IF EXISTS "Auth write session_categories" ON session_categories;
 CREATE POLICY "Auth write session_categories" ON session_categories FOR ALL USING (auth.role() = 'authenticated');
+DROP POLICY IF EXISTS "Auth write seo" ON seo;
 CREATE POLICY "Auth write seo" ON seo FOR ALL USING (auth.role() = 'authenticated');
+DROP POLICY IF EXISTS "Auth write profile" ON profile;
 CREATE POLICY "Auth write profile" ON profile FOR ALL USING (auth.role() = 'authenticated');
+DROP POLICY IF EXISTS "Auth write bookingconfig" ON bookingconfig;
 CREATE POLICY "Auth write bookingconfig" ON bookingconfig FOR ALL USING (auth.role() = 'authenticated');
+DROP POLICY IF EXISTS "Auth write emailconfig" ON emailconfig;
 CREATE POLICY "Auth write emailconfig" ON emailconfig FOR ALL USING (auth.role() = 'authenticated');
+DROP POLICY IF EXISTS "Auth write analytics" ON analytics;
 CREATE POLICY "Auth write analytics" ON analytics FOR ALL USING (auth.role() = 'authenticated');
 
 -- Storage RLS policies (for image uploads)
+DROP POLICY IF EXISTS "Public can read images" ON storage.objects;
 CREATE POLICY "Public can read images"
 ON storage.objects FOR SELECT
 TO public
 USING (bucket_id IN ('photographs', 'proofs', 'profile', 'seo', 'packages', 'session_categories'));
 
+DROP POLICY IF EXISTS "Authenticated users can upload images" ON storage.objects;
 CREATE POLICY "Authenticated users can upload images"
 ON storage.objects FOR INSERT
 TO authenticated
 WITH CHECK (bucket_id IN ('photographs', 'proofs', 'profile', 'seo', 'packages', 'session_categories'));
 
+DROP POLICY IF EXISTS "Authenticated users can update images" ON storage.objects;
 CREATE POLICY "Authenticated users can update images"
 ON storage.objects FOR UPDATE
 TO authenticated
 USING (bucket_id IN ('photographs', 'proofs', 'profile', 'seo', 'packages', 'session_categories'))
 WITH CHECK (bucket_id IN ('photographs', 'proofs', 'profile', 'seo', 'packages', 'session_categories'));
 
+DROP POLICY IF EXISTS "Authenticated users can delete images" ON storage.objects;
 CREATE POLICY "Authenticated users can delete images"
 ON storage.objects FOR DELETE
 TO authenticated

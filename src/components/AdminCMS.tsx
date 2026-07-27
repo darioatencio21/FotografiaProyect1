@@ -98,6 +98,15 @@ interface AdminCMSProps {
   onBackToSite?: () => void;
 }
 
+function formatDate(dateStr: string) {
+  if (!dateStr) return '—';
+  try {
+    return new Date(dateStr).toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
+  } catch {
+    return dateStr;
+  }
+}
+
 export default function AdminCMS({
   photographs, services, testimonials, blogPosts, faqs, bookings, messages, clientAccounts = [], seo, profile, bookingConfig, emailConfig, stats, lang,
   onUpdatePhotographs, onUpdateTestimonials, onUpdateBlogPosts,
@@ -544,6 +553,8 @@ export default function AdminCMS({
       contractStatus: 'signed',
     } : b));
 
+    createInvoiceForBooking(booking);
+
     triggerAlert(`Booking confirmed — ${booking.clientName}`);
 
     sendConfirmationEmail(
@@ -561,6 +572,42 @@ export default function AdminCMS({
 
   const handleToggleBookingRead = (id: string) => {
     onUpdateBookings(bookings.map(b => b.id === id ? { ...b, isRead: true } : b));
+  };
+
+  const createInvoiceForBooking = (booking: Booking) => {
+    const existing = invoices.find(inv => inv.bookingId === booking.id);
+    if (existing) return;
+    const now = new Date();
+    const yearMonth = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const seq = String(invoices.filter(inv => inv.invoiceNumber?.startsWith(`INV-${yearMonth}`)).length + 1).padStart(4, '0');
+    const serviceTitle = services.find(s => s.id === booking.serviceId)?.title || booking.packageName || 'Photography Session';
+    const totalAmount = Number(booking.amount) || 0;
+    const depositPaid = Number(booking.depositAmount) || 0;
+    const travelExpenses = Number(booking.travelExpenses) || 0;
+    const total = totalAmount + travelExpenses;
+    const newInvoice: Invoice = {
+      id: `inv-${Date.now()}`,
+      bookingId: booking.id,
+      invoiceNumber: `INV-${yearMonth}-${seq}`,
+      clientName: booking.clientName,
+      clientEmail: booking.clientEmail,
+      packageName: serviceTitle,
+      items: [
+        { description: `${serviceTitle} Package`, amount: totalAmount },
+        ...(travelExpenses > 0 ? [{ description: 'Travel Expenses', amount: travelExpenses }] : []),
+        ...(depositPaid > 0 ? [{ description: 'Booking Deposit', amount: -depositPaid }] : []),
+      ],
+      subtotal: total,
+      depositPaid,
+      total,
+      amountPaid: depositPaid,
+      balanceDue: Math.max(0, total - depositPaid),
+      status: depositPaid >= total ? 'paid' : 'partial',
+      paymentMethod: 'Manual',
+      createdAt: now.toISOString(),
+      paidAt: depositPaid > 0 ? now.toISOString() : undefined,
+    };
+    onUpdateInvoices([newInvoice, ...invoices]);
   };
 
   // Photo actions
@@ -1418,7 +1465,7 @@ export default function AdminCMS({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
-                    {bookings.map(b => {
+                    {[...bookings].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).map(b => {
                       const isExpanded = expandedBookingId === b.id;
                       return (
                         <React.Fragment key={b.id}>
@@ -1463,56 +1510,71 @@ export default function AdminCMS({
                                 {b.status === 'approved' ? 'approved' : b.status}
                               </span>
                             </td>
-                            <td className="p-4 text-right space-x-2" onClick={(e) => e.stopPropagation()}>
-                              {b.status === 'pending' ? (
-                                <>
+                            <td className="p-4" onClick={(e) => e.stopPropagation()}>
+                              <div className="flex items-center justify-end gap-1.5">
+                                {b.status === 'pending' ? (
+                                  <>
+                                    <button
+                                      onClick={() => handleApproveBooking(b.id)}
+                                      className="p-2 rounded-md bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-dark border border-emerald-500/20 transition-all cursor-pointer"
+                                      title="Approve & Send Link"
+                                    >
+                                      <Check size={14} />
+                                    </button>
+                                    <button
+                                      onClick={() => { setRejectBookingId(b.id); setRejectReason(''); }}
+                                      className="p-2 rounded-md bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-dark border border-red-500/20 transition-all cursor-pointer"
+                                      title="Decline Slot"
+                                    >
+                                      <X size={14} />
+                                    </button>
+                                  </>
+                                ) : b.status === 'approved' ? (
+                                  <>
+                                    <button
+                                      onClick={() => handleResendLink(b.id)}
+                                      className="p-2 rounded-md bg-sky-500/10 hover:bg-sky-500 text-sky-400 hover:text-dark border border-sky-500/20 transition-all cursor-pointer"
+                                      title="Resend Approval Link"
+                                    >
+                                      <RefreshCw size={14} />
+                                    </button>
+                                    <button
+                                      onClick={() => handleReleaseSlot(b.id)}
+                                      className="p-2 rounded-md bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-dark border border-red-500/20 transition-all cursor-pointer"
+                                      title="Release Slot (Expire)"
+                                    >
+                                      <X size={14} />
+                                    </button>
+                                  </>
+                                ) : b.status === 'confirmed' || b.status === 'completed' ? (
+                                  <span className="text-[9px] text-emerald-400 font-mono">✓ Done</span>
+                                ) : (
                                   <button
-                                    onClick={() => handleApproveBooking(b.id)}
-                                    className="p-1.5 rounded bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-dark border border-emerald-500/20 transition-all cursor-pointer"
-                                    title="Approve & Send Link"
-                                  >
-                                    <Check size={12} />
-                                  </button>
-                                  <button
-                                    onClick={() => { setRejectBookingId(b.id); setRejectReason(''); }}
-                                    className="p-1.5 rounded bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-dark border border-red-500/20 transition-all cursor-pointer"
-                                    title="Decline Slot"
-                                  >
-                                    <X size={12} />
-                                  </button>
-                                </>
-                              ) : b.status === 'approved' ? (
-                                <>
-                                  <button
-                                    onClick={() => handleResendLink(b.id)}
-                                    className="p-1.5 rounded bg-sky-500/10 hover:bg-sky-500 text-sky-400 hover:text-dark border border-sky-500/20 transition-all cursor-pointer"
-                                    title="Resend Approval Link"
+                                    onClick={() => {
+                                      onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, status: 'pending' } : book));
+                                      triggerAlert('Status reverted to PENDING');
+                                    }}
+                                    className="px-2.5 py-2 rounded-md bg-white/5 hover:bg-white/10 hover:text-white border border-white/10 text-white/60 transition-all cursor-pointer inline-flex items-center space-x-1.5 animate-fade-in"
+                                    title={t('Revertir estado a Pendiente', 'Revert status to Pending', 'Reverter status para Pendente')}
                                   >
                                     <RefreshCw size={12} />
+                                    <span className="text-[9px] font-mono uppercase tracking-wider font-semibold">{t('Corregir', 'Correct', 'Corrigir')}</span>
                                   </button>
-                                  <button
-                                    onClick={() => handleReleaseSlot(b.id)}
-                                    className="p-1.5 rounded bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-dark border border-red-500/20 transition-all cursor-pointer"
-                                    title="Release Slot (Expire)"
-                                  >
-                                    <X size={12} />
-                                  </button>
-                                </>
-                              ) : b.status === 'confirmed' || b.status === 'completed' ? (
-                                <span className="text-[9px] text-emerald-400 font-mono">✓ Done</span>
-                              ) : (
+                                )}
+                                <div className="w-px h-5 bg-white/10 mx-0.5" />
                                 <button
                                   onClick={() => {
-                                    onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, status: 'pending' } : book));
-                                    triggerAlert('Status reverted to PENDING');
+                                    if (window.confirm(t(`¿Eliminar la reserva de ${b.clientName}? Esta acción no se puede deshacer.`, `Delete booking for ${b.clientName}? This action cannot be undone.`, `Excluir a reserva de ${b.clientName}? Esta ação não pode ser desfeita.`))) {
+                                      onUpdateBookings(bookings.filter(book => book.id !== b.id));
+                                      triggerAlert(`Booking deleted — ${b.clientName}`);
+                                    }
                                   }}
-                                  className="px-2 py-1.5 rounded bg-white/5 hover:bg-white/10 hover:text-white border border-white/10 text-white/60 transition-all cursor-pointer inline-flex items-center space-x-1 animate-fade-in"
-                                  title={t('Revertir estado a Pendiente', 'Revert status to Pending', 'Reverter status para Pendente')}
+                                  className="p-2 rounded-md bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-dark border border-red-500/20 transition-all cursor-pointer"
+                                  title={t('Eliminar Reserva', 'Delete Booking', 'Excluir Reserva')}
                                 >
-                                  <RefreshCw size={10} className="mr-1" />
-                                  <span className="text-[9px] font-mono uppercase tracking-wider font-semibold">{t('Corregir', 'Correct', 'Corrigir')}</span>
+                                  <Trash2 size={14} />
                                 </button>
-                              )}
+                              </div>
                             </td>
                           </tr>
                           
@@ -1657,17 +1719,17 @@ export default function AdminCMS({
                                                <p className="text-[9px] uppercase tracking-wider text-white/40">{t('Montos', 'Amounts', 'Valores')}</p>
                                                <div className="flex gap-2">
                                                  <input type="number" placeholder={t('Depósito', 'Deposit', 'Depósito')} defaultValue={b.depositAmount || 0} onChange={(e) => { const v = parseInt(e.target.value) || 0; onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, depositAmount: v } : book)); }} className="w-full bg-dark/60 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-mono" />
-                                                 <input type="number" placeholder={t('Restante', 'Due', 'Restante')} defaultValue={b.amountDue || 0} onChange={(e) => { const v = parseInt(e.target.value) || 0; onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, amountDue: v } : book)); }} className="w-full bg-dark/60 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-mono" />
+                                                 <input type="number" placeholder={t('Restante', 'Due', 'Restante')} value={Math.max(0, (Number(b.amount) || 0) + (Number(b.travelExpenses) || 0) - (Number(b.depositAmount) || 0))} readOnly className="w-full bg-dark/60 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-white/30 font-mono opacity-60" />
                                                </div>
-                                               <input type="text" placeholder={t('Gastos de Viaje', 'Travel Expenses', 'Despesas de Viagem')} defaultValue={b.travelExpenses || ''} onChange={(e) => { onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, travelExpenses: e.target.value } : book)); }} className="w-full bg-dark/60 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-mono" />
+                                               <input type="number" placeholder={t('Gastos de Viaje', 'Travel Expenses', 'Despesas de Viagem')} defaultValue={b.travelExpenses || 0} onChange={(e) => { onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, travelExpenses: Number(e.target.value) || 0 } : book)); }} className="w-full bg-dark/60 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-mono" />
                                              </div>
                                              <div className="space-y-2">
-                                               <div className="flex gap-2">
-                                                 {!b.isPaid && (b.status === 'confirmed' || b.status === 'approved') && (
-                                                   <button onClick={() => onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, isPaid: true } : book))} className="flex-1 px-3 py-2 bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-emerald-600/30 transition-all">
-                                                     {t('Marcar como Pagado', 'Mark as Paid', 'Marcar como Pago')}
-                                                   </button>
-                                                 )}
+                                                 <div className="flex gap-2">
+                                                  {!b.isPaid && (
+                                                    <button onClick={() => { onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, isPaid: true, paymentStatus: 'paid', status: book.status === 'pending' ? 'confirmed' : book.status } : book)); createInvoiceForBooking(b); }} className="flex-1 px-3 py-2 bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-emerald-600/30 transition-all">
+                                                      {t('Marcar como Pagado', 'Mark as Paid', 'Marcar como Pago')}
+                                                    </button>
+                                                  )}
                                                  {b.contractSignature && !b.contractPhotographerSignature && (
                                                    <button onClick={() => onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, contractPhotographerSignature: 'Miriam Tellez', contractPhotographerSignedAt: new Date().toISOString() } : book))} className="flex-1 px-3 py-2 bg-white/10 border border-white/10 text-white/70 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-white/15 transition-all">
                                                      {t('Firmar como Fotógrafa', 'Sign as Photographer', 'Assinar como Fotógrafa')}
@@ -1675,9 +1737,13 @@ export default function AdminCMS({
                                                  )}
                                                </div>
                                                {b.isPaid && <span className="text-[9px] text-emerald-400 font-mono">{t('✓ Pagado', '✓ Paid', '✓ Pago')}</span>}
-                                               {b.contractSignature && <span className="text-[9px] text-green-400 font-mono block">{t('✓ Cliente firmó', '✓ Client signed', '✓ Cliente assinou')}</span>}
-                                               {b.contractPhotographerSignature && <span className="text-[9px] text-white/70 font-mono block">{t('✓ Fotógrafa firmó', '✓ Photographer signed', '✓ Fotógrafa assinou')}</span>}
-                                             </div>
+                                                {b.contractSignature && <span className="text-[9px] text-green-400 font-mono block">{t('✓ Cliente firmó', '✓ Client signed', '✓ Cliente assinou')}</span>}
+                                                {b.contractSignature && <span className="text-[10px] text-white/50 font-serif block">{b.contractSignature}</span>}
+                                                {b.contractSignedAt && <span className="text-[9px] text-white/30 font-mono block">{formatDate(b.contractSignedAt)}</span>}
+                                                {b.contractPhotographerSignature && <span className="text-[9px] text-white/70 font-mono block">{t('✓ Fotógrafa firmó', '✓ Photographer signed', '✓ Fotógrafa assinou')}</span>}
+                                                {b.contractPhotographerSignature && <span className="text-[10px] text-white/50 font-serif block">{b.contractPhotographerSignature}</span>}
+                                                {b.contractPhotographerSignedAt && <span className="text-[9px] text-white/30 font-mono block">{formatDate(b.contractPhotographerSignedAt)}</span>}
+                                              </div>
                                            </div>
                                            {b.contractData && (
                                             <div className="mt-3">
@@ -1731,7 +1797,7 @@ export default function AdminCMS({
 
             {/* Mobile cards */}
             <div className="block md:hidden space-y-3">
-              {bookings.map(b => {
+              {[...bookings].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).map(b => {
                 const isExpanded = expandedBookingId === b.id;
                 return (
                   <div key={b.id} className={`border rounded-lg bg-dark-gray p-4 space-y-3 ${!b.isRead ? 'border-white/10 bg-white/5' : 'border-white/10'}`}>
@@ -1813,16 +1879,30 @@ export default function AdminCMS({
                           </button>
                         </div>
                       ) : (
-                        <button
-                          onClick={() => {
-                            onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, status: 'pending' } : book));
-                            triggerAlert('Status reverted to PENDING');
-                          }}
-                          className="w-full min-h-[44px] py-2.5 rounded-lg bg-white/5 hover:bg-white/10 hover:text-white border border-white/10 text-white/60 transition-all cursor-pointer text-xs font-mono uppercase tracking-wider font-semibold flex items-center justify-center space-x-1.5"
-                        >
-                          <RefreshCw size={14} />
-                          <span>{t('Corregir', 'Correct', 'Corrigir')}</span>
-                        </button>
+                        <div className="flex items-center w-full gap-2">
+                          <button
+                            onClick={() => {
+                              onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, status: 'pending' } : book));
+                              triggerAlert('Status reverted to PENDING');
+                            }}
+                            className="flex-1 min-h-[44px] py-2.5 rounded-lg bg-white/5 hover:bg-white/10 hover:text-white border border-white/10 text-white/60 transition-all cursor-pointer text-xs font-mono uppercase tracking-wider font-semibold flex items-center justify-center space-x-1.5"
+                          >
+                            <RefreshCw size={14} />
+                            <span>{t('Corregir', 'Correct', 'Corrigir')}</span>
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (window.confirm(t(`¿Eliminar la reserva de ${b.clientName}? Esta acción no se puede deshacer.`, `Delete booking for ${b.clientName}? This action cannot be undone.`, `Excluir a reserva de ${b.clientName}? Esta ação não pode ser desfeita.`))) {
+                                onUpdateBookings(bookings.filter(book => book.id !== b.id));
+                                triggerAlert(`Booking deleted — ${b.clientName}`);
+                              }
+                            }}
+                            className="min-h-[44px] py-2.5 px-3 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-dark border border-red-500/20 transition-all cursor-pointer flex items-center justify-center"
+                            title={t('Eliminar Reserva', 'Delete Booking', 'Excluir Reserva')}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
                       )}
                     </div>
 
@@ -1881,12 +1961,12 @@ export default function AdminCMS({
                             </h4>
                             <div className="flex gap-2">
                               <input type="number" placeholder={t('Depósito', 'Deposit', 'Depósito')} defaultValue={b.depositAmount || 0} onChange={(e) => { const v = parseInt(e.target.value) || 0; onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, depositAmount: v } : book)); }} className="w-full bg-dark/60 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-mono" />
-                              <input type="number" placeholder={t('Restante', 'Due', 'Restante')} defaultValue={b.amountDue || 0} onChange={(e) => { const v = parseInt(e.target.value) || 0; onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, amountDue: v } : book)); }} className="w-full bg-dark/60 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-mono" />
+                              <input type="number" placeholder={t('Restante', 'Due', 'Restante')} value={Math.max(0, (Number(b.amount) || 0) + (Number(b.travelExpenses) || 0) - (Number(b.depositAmount) || 0))} readOnly className="w-full bg-dark/60 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-white/30 font-mono opacity-60" />
                             </div>
-                            <input type="text" placeholder={t('Gastos de Viaje', 'Travel Expenses', 'Despesas de Viagem')} defaultValue={b.travelExpenses || ''} onChange={(e) => { onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, travelExpenses: e.target.value } : book)); }} className="w-full bg-dark/60 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-mono" />
+                            <input type="number" placeholder={t('Gastos de Viaje', 'Travel Expenses', 'Despesas de Viagem')} defaultValue={b.travelExpenses || 0} onChange={(e) => { onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, travelExpenses: Number(e.target.value) || 0 } : book)); }} className="w-full bg-dark/60 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-mono" />
                             <div className="flex gap-2">
-                              {!b.isPaid && (b.status === 'confirmed' || b.status === 'approved') && (
-                                <button onClick={() => onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, isPaid: true } : book))} className="flex-1 px-3 py-2 bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-emerald-600/30 transition-all">
+                              {!b.isPaid && (
+                                <button onClick={() => { onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, isPaid: true, paymentStatus: 'paid', status: book.status === 'pending' ? 'confirmed' : book.status } : book)); createInvoiceForBooking(b); }} className="flex-1 px-3 py-2 bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-emerald-600/30 transition-all">
                                   {t('Marcar como Pagado', 'Mark as Paid', 'Marcar como Pago')}
                                 </button>
                               )}
@@ -1898,7 +1978,11 @@ export default function AdminCMS({
                             </div>
                             {b.isPaid && <span className="text-[9px] text-emerald-400 font-mono block">{t('✓ Pagado', '✓ Paid', '✓ Pago')}</span>}
                             {b.contractSignature && <span className="text-[9px] text-green-400 font-mono block">{t('✓ Cliente firmó', '✓ Client signed', '✓ Cliente assinou')}</span>}
+                            {b.contractSignature && <span className="text-[10px] text-white/50 font-serif block">{b.contractSignature}</span>}
+                            {b.contractSignedAt && <span className="text-[9px] text-white/30 font-mono block">{formatDate(b.contractSignedAt)}</span>}
                             {b.contractPhotographerSignature && <span className="text-[9px] text-white/70 font-mono block">{t('✓ Fotógrafa firmó', '✓ Photographer signed', '✓ Fotógrafa assinou')}</span>}
+                            {b.contractPhotographerSignature && <span className="text-[10px] text-white/50 font-serif block">{b.contractPhotographerSignature}</span>}
+                            {b.contractPhotographerSignedAt && <span className="text-[9px] text-white/30 font-mono block">{formatDate(b.contractPhotographerSignedAt)}</span>}
                             {b.contractData && (
                               <details className="text-xs">
                                 <summary className="text-white/70 cursor-pointer hover:text-white text-[10px] font-mono">{b.contractType === 'session' ? t('Ver detalles de la sesión', 'View session details', 'Ver detalhes da sessão') : t('Ver datos de la boda', 'View wedding details', 'Ver dados do casamento')}</summary>

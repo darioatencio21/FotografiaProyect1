@@ -122,11 +122,11 @@ export default function ContractView({ booking, lang, t, mode = 'view', onClient
 (booking.packageDetails ? `<p style="margin:4px 0 0;font-size:11px;color:#8C8076">${booking.packageDetails}</p>` : '') +
 '<hr style="border:0;border-top:1px solid #ddd;margin:12px 0"/>' +
 '<div class="price-grid">' +
-`${priceRow(t.contractAmountAgreed, '$' + (booking.amount || 0).toLocaleString())}` +
-`${priceRow(t.contractDeposit, '$' + (booking.depositAmount || 0).toLocaleString())}` +
-`${priceRow(t.contractAmountDue, '$' + (booking.amountDue || 0).toLocaleString())}` +
+`${priceRow(t.contractAmountAgreed, '$' + (Number(booking.amount) || 0).toLocaleString())}` +
+(Number(booking.travelExpenses) ? `${priceRow(t.contractTravelExpenses, '$' + (Number(booking.travelExpenses) || 0).toLocaleString())}` : '') +
+`${priceRow(t.contractDeposit, '$' + (Number(booking.depositAmount) || 0).toLocaleString())}` +
+`${priceRow(t.contractAmountDue, '$' + Math.max(0, (Number(booking.amount) || 0) + (Number(booking.travelExpenses) || 0) - (Number(booking.depositAmount) || 0)).toLocaleString())}` +
 '</div>' +
-(booking.travelExpenses ? `<p style="margin:8px 0 0;font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:#8C8076">${t.contractTravelExpenses}: ${booking.travelExpenses}</p>` : '') +
 '</div>' +
 '<hr class="hr"/>' +
 '<div class="clauses-wrap">' +
@@ -253,25 +253,26 @@ clauses.map(c => `<div class="clause"><h4>${c.title}</h4><p>${c.text}</p></div>`
         <p className="text-white/70 font-semibold uppercase tracking-widest text-[10px]">{t.contractPackage}</p>
         <p className="font-serif text-base text-white/90">{booking.packageName || '—'}</p>
         {booking.packageDetails && <p className="text-white/50 leading-relaxed">{booking.packageDetails}</p>}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-3 border-t border-white/10 mt-3">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 pt-3 border-t border-white/10 mt-3">
           <div>
             <p className="text-[9px] uppercase tracking-widest text-white/30">{t.contractAmountAgreed}</p>
-            <p className="font-serif text-lg text-white/90">${(booking.amount || 0).toLocaleString()}</p>
+            <p className="font-serif text-lg text-white/90">${(Number(booking.amount) || 0).toLocaleString()}</p>
           </div>
+          {Number(booking.travelExpenses) ? (
+            <div>
+              <p className="text-[9px] uppercase tracking-widest text-white/30">{t.contractTravelExpenses}</p>
+              <p className="font-serif text-lg text-white/90">+ ${(Number(booking.travelExpenses) || 0).toLocaleString()}</p>
+            </div>
+          ) : <div />}
           <div>
             <p className="text-[9px] uppercase tracking-widest text-white/30">{t.contractDeposit}</p>
-            <p className="font-serif text-lg text-white/90">${(booking.depositAmount || 0).toLocaleString()}</p>
+            <p className="font-serif text-lg text-white/90">${(Number(booking.depositAmount) || 0).toLocaleString()}</p>
           </div>
           <div>
             <p className="text-[9px] uppercase tracking-widest text-white/30">{t.contractAmountDue}</p>
-            <p className="font-serif text-lg text-white/90">${(booking.amountDue || 0).toLocaleString()}</p>
+            <p className="font-serif text-lg text-white/90">${Math.max(0, (Number(booking.amount) || 0) + (Number(booking.travelExpenses) || 0) - (Number(booking.depositAmount) || 0)).toLocaleString()}</p>
           </div>
         </div>
-        {booking.travelExpenses && (
-          <p className="text-[9px] uppercase tracking-widest text-white/30 pt-2">
-            {t.contractTravelExpenses}: {booking.travelExpenses}
-          </p>
-        )}
         {booking.invoiceId && (
           <p className="text-[9px] uppercase tracking-widest text-white/30 pt-2">
             {lang === 'en' ? 'Invoice reference' : 'Referencia de factura'}: {booking.invoiceId}

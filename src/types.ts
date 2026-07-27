@@ -159,7 +159,7 @@ export interface Booking {
   contractType?: 'wedding' | 'session';
   depositAmount?: number;
   amountDue?: number;
-  travelExpenses?: string;
+  travelExpenses?: number;
   invoiceId?: string;
   reminderSent?: boolean;
   reminderSentAt?: string;
@@ -312,9 +312,18 @@ export interface ClientAccount {
   id: string;
   clientName: string;
   clientEmail: string;
-  passcode: string; // login access code
+  passcode: string;
   sessionDate: string;
   sessionTitle: string;
   photos: ProofPhoto[];
   createdAt: string;
+}
+
+export interface InstagramPost {
+  id: string;
+  imageUrl: string;
+  postUrl: string;
+  caption?: string;
+  timestamp: string;
+  sortOrder: number;
 }

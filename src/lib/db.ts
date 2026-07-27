@@ -7,6 +7,21 @@ function tn(table: string): string {
   return table.toLowerCase();
 }
 
+export async function confirmBookingInDB(
+  bookingId: string,
+  fields: Record<string, unknown>,
+): Promise<void> {
+  const { error } = await supabase
+    .from('bookings')
+    .update(fields)
+    .eq('id', bookingId);
+  if (error) {
+    console.error('[confirmBookingInDB] FAILED:', error.code, error.message, error.details);
+    throw error;
+  }
+  console.log('[confirmBookingInDB] OK', bookingId, Object.keys(fields));
+}
+
 function isTableMissing(table: string): boolean {
   try {
     const missing = JSON.parse(sessionStorage.getItem(MISSING_TABLES_KEY) || '[]');
@@ -36,10 +51,18 @@ function isSchemaMismatchError(err: any): boolean {
   return err?.status === 400 || err?.code === 'PGRST204' || /column .* does not exist|could not find the .* column/i.test(message);
 }
 
-// Keep public booking creation working while an older Supabase schema is being migrated.
+// All columns currently used by the booking workflow.
+// Used as a fallback when the Supabase schema is missing newer columns.
 const BOOKING_BASE_COLUMNS = new Set([
   'id', 'clientName', 'clientEmail', 'clientPhone', 'date', 'timeSlot',
-  'serviceId', 'peopleCount', 'notes', 'status', 'createdAt', 'amount', 'isRead'
+  'serviceId', 'peopleCount', 'notes', 'status', 'createdAt', 'amount', 'isRead',
+  'isPaid', 'depositAmount', 'amountDue', 'travelExpenses',
+  'contractData', 'contractAccepted', 'contractSignature', 'contractSignedAt',
+  'contractPhotographerSignature', 'contractPhotographerSignedAt',
+  'packageName', 'packageDetails', 'contractType', 'invoiceId',
+  'reminderSent', 'reminderSentAt',
+  'approvalToken', 'approvedAt', 'approvalExpiresAt',
+  'paymentStatus', 'contractStatus', 'rejectionReason', 'paymentTxHash',
 ]);
 
 function getCompatiblePayload(table: string, data: Record<string, unknown>): Record<string, unknown> {
@@ -103,45 +126,29 @@ export async function getSingleDocument<T>(collectionPath: string, docId: string
 
 export async function saveDocument<T>(collectionPath: string, docId: string, data: T): Promise<void> {
   const table = tn(collectionPath);
-  // Don't skip on missing-table: try always, since RLS is fixed.
 
-  const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/${table}`;
-  const apikey = import.meta.env.VITE_SUPABASE_ANON_KEY ?? '';
-  const body = JSON.stringify({ id: docId, ...(data as Record<string, unknown>) });
+  const payload = { id: docId, ...(data as Record<string, unknown>) };
 
-  const doUpsert = async (payload: string) => {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'apikey': apikey,
-        'Authorization': `Bearer ${apikey}`,
-        'Content-Type': 'application/json',
-        'Prefer': 'resolution=merge-duplicates,return=minimal',
-      },
-      body: payload,
-    });
-    if (!res.ok) {
-      const text = await res.text();
-      throw Object.assign(new Error(`saveDocument ${table} failed: ${res.status} ${text}`), {
-        status: res.status,
-        body: text,
-      });
-    }
+  const doUpsert = async (row: Record<string, unknown>) => {
+    const { error } = await supabase
+      .from(table)
+      .upsert(row, { onConflict: 'id', ignoreDuplicates: false });
+    if (error) throw error;
   };
 
   try {
-    await doUpsert(body);
-    if (table === 'bookings' && (data as any)?.approvalToken) {
-      console.log(`[saveDocument] OK bookings/${docId} token=${(data as any).approvalToken}`);
+    await doUpsert(payload);
+    if (table === 'bookings') {
+      console.log(`[saveDocument] OK ${table}/${docId}`, Object.keys(payload).filter(k => ['isPaid','paymentStatus','contractStatus','contractSignature','contractSignedAt'].includes(k)));
     }
     return;
   } catch (err: any) {
-    console.error(`[saveDocument] ${table}/${docId} first attempt failed:`, err?.message ?? err);
+    console.error(`[saveDocument] ${table}/${docId} first attempt failed:`, err?.code, err?.message ?? err, err?.details);
     if (table === 'bookings' && isSchemaMismatchError(err)) {
       const compatibleData = getCompatiblePayload(table, data as Record<string, unknown>);
-      const compatibleBody = JSON.stringify({ id: docId, ...compatibleData });
+      console.warn(`[saveDocument] ${table}/${docId} retrying with ${Object.keys(compatibleData).length} compatible columns`);
       try {
-        await doUpsert(compatibleBody);
+        await doUpsert({ id: docId, ...compatibleData });
         return;
       } catch (retryErr: any) {
         if (isMissingTableError(retryErr)) {

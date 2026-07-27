@@ -10,7 +10,7 @@ import {
     Mail, Phone, ShieldCheck, Sparkles, AlertCircle, ChevronDown,
      Eye, EyeOff, X, Camera, Users, Calendar, Clock, PartyPopper,
      CheckCircle2, ShoppingBag, Star, Baby, GraduationCap, Gift, Briefcase,
-     Gem, Utensils, Package, Award
+     Gem, Utensils, Package, Award, Instagram
 } from 'lucide-react';
 
 import { 
@@ -31,7 +31,6 @@ import StripeCheckout from './components/StripeCheckout';
 import { PaymentResult } from './components/StripeCheckout';
 import AboutSection from './components/AboutSection';
 import PixiesetGallery from './components/PixiesetGallery';
-import InstagramFeed from './components/InstagramFeed';
 import TestimonialsView from './components/TestimonialsView';
 
 import AdminCMS from './components/AdminCMS';
@@ -43,6 +42,7 @@ import {
   getCollectionWithFallback,
   getSingleDocument,
   saveDocument,
+  confirmBookingInDB,
   deleteDocument,
   loginWithSupabase,
   logoutFromSupabase,
@@ -249,8 +249,7 @@ export default function App() {
 
   const [clientAccounts, setClientAccounts] = useState<ClientAccount[]>(INITIAL_CLIENT_ACCOUNTS);
 
-  // UI Interactive States
-  const [activeFilter, setActiveFilter] = useState<string>('galeria');
+  // UI Interactive States('galeria');
   const [selectedPhotoForLightbox, setSelectedPhotoForLightbox] = useState<Photograph | null>(null);
   const [favorites, setFavorites] = useState<string[]>(() => {
     try { const saved = localStorage.getItem('aorea_favorites'); return saved ? JSON.parse(saved) : []; } catch { return []; }
@@ -283,6 +282,7 @@ export default function App() {
   const [contactSuccess, setContactSuccess] = useState(false);
 
   // Search filter
+  const [activeFilter, setActiveFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
   const t = TRANSLATIONS[lang];
@@ -377,11 +377,11 @@ export default function App() {
           ...(migratedBookings as Booking[]).map((b, i) => b !== bookingsRes[i] ? saveDocument('bookings', b.id, b) : Promise.resolve()),
           ...(migratedMessages as Message[]).map((m, i) => m !== messagesRes[i] ? saveDocument('messages', m.id, m) : Promise.resolve()),
            ...(migratedClients as ClientAccount[]).map((c, i) => c !== clientAccsRes[i] ? saveDocument('clientAccounts', c.id, c) : Promise.resolve()),
-           ...(migratedInvoices as Invoice[]).map((i, index) => i !== invoicesRes[index] ? saveDocument('invoices', i.id, i) : Promise.resolve()),
-          migratedSeo && migratedSeo !== seoRes ? saveDocument('seo', 'config', migratedSeo) : Promise.resolve(),
-          migratedProfile && migratedProfile !== profileRes ? saveDocument('profile', 'photographer', migratedProfile) : Promise.resolve(),
-          migratedEmailCfg && migratedEmailCfg !== emailConfigRes ? saveDocument('emailConfig', 'config', migratedEmailCfg) : Promise.resolve(),
-        ]).then(() => {
+          ...(migratedInvoices as Invoice[]).map((i, index) => i !== invoicesRes[index] ? saveDocument('invoices', i.id, i) : Promise.resolve()),
+           migratedSeo && migratedSeo !== seoRes ? saveDocument('seo', 'config', migratedSeo) : Promise.resolve(),
+           migratedProfile && migratedProfile !== profileRes ? saveDocument('profile', 'photographer', migratedProfile) : Promise.resolve(),
+           migratedEmailCfg && migratedEmailCfg !== emailConfigRes ? saveDocument('emailConfig', 'config', migratedEmailCfg) : Promise.resolve(),
+         ]).then(() => {
           localStorage.setItem(MIGRATE_FLAG, 'true');
           console.log('Data migration complete: HTML entities unescaped in Firestore');
         }).catch(console.error);
@@ -393,7 +393,7 @@ export default function App() {
         setBookings(migratedBookings);
          setMessages(migratedMessages);
          setClientAccounts(migratedClients);
-         setInvoices(migratedInvoices as Invoice[]);
+          setInvoices(migratedInvoices as Invoice[]);
         setSeo(migratedSeo ?? INITIAL_SEO);
         setProfile(migratedProfile ?? INITIAL_PROFILE);
       } else {
@@ -464,9 +464,9 @@ export default function App() {
     setFaqs(newFaqs);
   };
 
-  const handleUpdateBookings = async (newBookings: Booking[]) => {
-    await syncCollection('bookings', bookings, newBookings);
+  const handleUpdateBookings = (newBookings: Booking[]) => {
     setBookings(newBookings);
+    syncCollection('bookings', bookings, newBookings);
   };
 
   const handleUpdateMessages = (newMessages: Message[]) => {
@@ -484,9 +484,14 @@ export default function App() {
     setInvoices(newInvoices);
   };
 
-  const handleConfirmBooking = (bookingId: string) => {
+  const handleConfirmBooking = (bookingId: string, signature?: string) => {
     const booking = bookings.find(b => b.id === bookingId);
-    if (!booking) return;
+    if (!booking) {
+      console.error('[handleConfirmBooking] booking not found:', bookingId);
+      return;
+    }
+
+    console.log('[handleConfirmBooking] CONFIRMING', bookingId, booking.clientName, { signature: !!signature });
 
     const updatedBooking: Booking = {
       ...booking,
@@ -494,9 +499,61 @@ export default function App() {
       isPaid: true,
       paymentStatus: 'paid',
       contractStatus: 'signed',
+      contractSignature: signature || booking.contractSignature,
+      contractSignedAt: signature ? new Date().toISOString() : booking.contractSignedAt,
     };
 
     handleUpdateBookings(bookings.map(b => b.id === bookingId ? updatedBooking : b));
+
+    saveDocument('bookings', bookingId, updatedBooking)
+      .then(() => console.log('[handleConfirmBooking] DB saved OK', bookingId))
+      .catch(err => console.error('[handleConfirmBooking] DB save FAILED:', bookingId, err));
+
+    confirmBookingInDB(bookingId, {
+      status: 'confirmed',
+      isPaid: true,
+      paymentStatus: 'paid',
+      contractStatus: 'signed',
+      contractSignature: signature || booking.contractSignature || '',
+      contractSignedAt: signature ? new Date().toISOString() : booking.contractSignedAt || new Date().toISOString(),
+    }).catch(err => console.error('[handleConfirmBooking] confirmBookingInDB FAILED:', bookingId, err));
+
+    // Create invoice for this confirmed booking
+    const existingInvoice = invoices.find(inv => inv.bookingId === bookingId);
+    if (!existingInvoice) {
+      const now = new Date();
+      const yearMonth = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}`;
+      const seq = String(invoices.filter(inv => inv.invoiceNumber?.startsWith(`INV-${yearMonth}`)).length + 1).padStart(4, '0');
+      const serviceTitle = services.find(s => s.id === booking.serviceId)?.title || booking.packageName || 'Photography Session';
+      const totalAmount = Number(booking.amount) || 0;
+      const depositPaid = Number(booking.depositAmount) || 0;
+      const travelExpenses = Number(booking.travelExpenses) || 0;
+      const total = totalAmount + travelExpenses;
+
+      const newInvoice: Invoice = {
+        id: `inv-${Date.now()}`,
+        bookingId: booking.id,
+        invoiceNumber: `INV-${yearMonth}-${seq}`,
+        clientName: booking.clientName,
+        clientEmail: booking.clientEmail,
+        packageName: serviceTitle,
+        items: [
+          { description: `${serviceTitle} Package`, amount: totalAmount },
+          ...(travelExpenses > 0 ? [{ description: 'Travel Expenses', amount: travelExpenses }] : []),
+          ...(depositPaid > 0 ? [{ description: 'Booking Deposit', amount: -depositPaid }] : []),
+        ],
+        subtotal: total,
+        depositPaid,
+        total,
+        amountPaid: depositPaid,
+        balanceDue: Math.max(0, total - depositPaid),
+        status: depositPaid >= total ? 'paid' : 'partial',
+        paymentMethod: 'Stripe',
+        createdAt: now.toISOString(),
+        paidAt: depositPaid > 0 ? now.toISOString() : undefined,
+      };
+      handleInvoiceCreated(newInvoice);
+    }
 
     // Send confirmation email
     if (emailConfig?.receiverEmail) {
@@ -1129,8 +1186,6 @@ ${photographerName}`);
                 </div>
               </section>
 
-              <InstagramFeed lang={lang} />
-
               {/* Featured packages */}
               <section className="space-y-7 text-left">
                 <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
@@ -1170,6 +1225,23 @@ ${photographerName}`);
                     </article>
                   ))}
                 </div>
+              </section>
+
+              {/* Instagram Follow */}
+              <section className="text-center py-8 md:py-12">
+                <a
+                  href="https://www.instagram.com/miriamtellezphotography/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#FCAF45] rounded-xl text-white font-mono text-sm tracking-widest uppercase font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
+                >
+                  <Instagram size={22} />
+                  <span>{lang === 'es' ? 'Seguir en Instagram' : 'Follow on Instagram'}</span>
+                  <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
+                </a>
+                <p className="text-[10px] text-white/40 mt-3 font-mono tracking-wider">
+                  @miriamtellezphotography
+                </p>
               </section>
 
               {/* Booking process */}
@@ -1530,23 +1602,6 @@ ${photographerName}`);
                         {lang === 'en'
                           ? 'This approval link is not valid or has already been used.'
                           : 'Este enlace de aprobación no es válido o ya fue utilizado.'}
-                      </p>
-                    </div>
-                  );
-                }
-                if (booking.status === 'confirmed') {
-                  return (
-                    <div className="glass-premium rounded-lg border border-white/10 p-8 md:p-12 max-w-lg mx-auto text-center space-y-4">
-                      <div className="inline-flex p-4 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 mx-auto">
-                        <CheckCircle2 size={40} />
-                      </div>
-                      <h3 className="font-serif text-2xl text-white/90">
-                        {lang === 'en' ? 'Already Confirmed' : 'Ya Confirmada'}
-                      </h3>
-                      <p className="text-sm text-white/60">
-                        {lang === 'en'
-                          ? 'This booking has already been confirmed. Thank you!'
-                          : 'Esta reserva ya fue confirmada. Gracias!'}
                       </p>
                     </div>
                   );

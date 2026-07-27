@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Photograph, Service, Testimonial, BlogPost, FAQ, Booking, Message, SEOMetadata, AnalyticsStats, PhotographerProfile, BookingConfig, EmailConfig, ClientAccount, SessionCategory, PhotographyPackage, Invoice } from '../types';
+import { Photograph, Service, Testimonial, BlogPost, FAQ, Booking, Message, SEOMetadata, AnalyticsStats, PhotographerProfile, BookingConfig, EmailConfig, ClientAccount, SessionCategory, PhotographyPackage, Invoice, InstagramPost } from '../types';
 
 // Curated selection of ultra-high-resolution Unsplash photography matching Leica, Hasselblad tones
 export const INITIAL_PHOTOGRAPHS: Photograph[] = [
@@ -1286,5 +1286,40 @@ export const TRANSLATIONS = {
     searchPlaceholder: 'Search photos by tag, camera, color...'
   },
 };
+
+export const INITIAL_INSTAGRAM_POSTS: InstagramPost[] = [
+  {
+    id: 'ig-1',
+    imageUrl: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80',
+    postUrl: 'https://www.instagram.com/p/DY54qj3zRuF/',
+    caption: 'Golden hour magic ✨',
+    timestamp: '2026-07-20T10:00:00Z',
+    sortOrder: 0,
+  },
+  {
+    id: 'ig-2',
+    imageUrl: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=800&q=80',
+    postUrl: 'https://www.instagram.com/p/DYxh6sOheSH/',
+    caption: 'Timeless elegance 🖤',
+    timestamp: '2026-07-18T14:00:00Z',
+    sortOrder: 1,
+  },
+  {
+    id: 'ig-3',
+    imageUrl: 'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?auto=format&fit=crop&w=800&q=80',
+    postUrl: 'https://www.instagram.com/p/DYoJvTKTeqv/',
+    caption: 'Soft light, strong soul 🌿',
+    timestamp: '2026-07-15T09:00:00Z',
+    sortOrder: 2,
+  },
+  {
+    id: 'ig-4',
+    imageUrl: 'https://images.unsplash.com/photo-1554048612-b6a482bf67e5?auto=format&fit=crop&w=800&q=80',
+    postUrl: 'https://www.instagram.com/p/DUyd8j9khcL/?img_index=1',
+    caption: 'Captured in Milan 🇮🇹',
+    timestamp: '2026-07-12T16:00:00Z',
+    sortOrder: 3,
+  },
+];
 
 export const INITIAL_CLIENT_ACCOUNTS: ClientAccount[] = [];
