@@ -167,6 +167,10 @@ export default function App() {
       if (!window.confirm(msg)) return;
       navigationGuardRef.current = false;
     }
+    if (view !== 'services') {
+      setSelectedCategory(null);
+      setSelectedPackageId(null);
+    }
     setCurrentView(view);
     const url = view === 'home' ? '/' : '/?view=' + view;
     window.history.pushState({ view }, '', url);
@@ -1053,7 +1057,7 @@ ${photographerName}`);
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-                className="text-[clamp(8px,2.5vw,12px)] text-hero/80 max-w-lg mx-auto leading-relaxed tracking-wider font-light mt-4 md:mt-10 px-2 drop-shadow-sm"
+                className="text-[clamp(10px,2.8vw,14px)] text-hero/80 max-w-lg mx-auto leading-relaxed tracking-wider font-light mt-4 md:mt-10 px-2 drop-shadow-sm"
               >
                 {t.heroSubtitle}
               </motion.p>
@@ -1110,7 +1114,7 @@ ${photographerName}`);
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -15 }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
-          className="pt-[70px] lg:pt-20 pb-24 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto space-y-12 md:space-y-24">
+          className="pt-[70px] lg:pt-20 pb-32 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto space-y-16 md:space-y-32">
 
           {/* ======================================================= */}
           {/* HOME SCREEN (content below hero) */}
@@ -1419,20 +1423,20 @@ ${photographerName}`);
                       return (
                         <div className="space-y-6">
                           {/* Hero header */}
-                          <div className="text-center space-y-6 py-6 md:py-10">
+                          <div className="space-y-6 py-6 md:py-10">
                             {/* Back button */}
                             <button
                               onClick={() => {
                                 setSelectedCategory(null);
                                 setSelectedPackageId(null);
                               }}
-                              className="group inline-flex items-center space-x-2 text-[11px] font-mono text-white/70/80 hover:text-white/60 tracking-wider transition-all duration-300 cursor-pointer"
+                              className="group inline-flex items-center space-x-2 text-[11px] font-mono text-white/60 hover:text-white border border-white/10 hover:border-white/25 px-3.5 py-2 rounded-md tracking-wider transition-all duration-300 cursor-pointer bg-white/[0.03] hover:bg-white/[0.06]"
                             >
                               <ArrowRight size={11} className="rotate-180 transition-transform duration-300 group-hover:-translate-x-0.5" />
                               <span>{t.backToCategories}</span>
                             </button>
 
-                            <div className="space-y-6">
+                            <div className="text-center space-y-6">
                               <span className="text-[9px] font-mono text-white/70/40 tracking-[0.25em] uppercase block">{cEyebrow}</span>
                               <h2 className="font-serif text-3xl md:text-5xl lg:text-6xl text-white/90 font-light tracking-wide">{cName}</h2>
                               <p className="text-sm text-white/50 max-w-xl mx-auto font-light leading-relaxed">{cDesc}</p>

@@ -168,7 +168,7 @@ export default function Header({
           <div className="relative">
             <button
               onClick={() => setShowLanguíageDropdown(!showLanguíageDropdown)}
-              className="flex items-center space-x-1.5 text-white/70 hover:text-white text-xs font-mono tracking-widest uppercase cursor-pointer transition-colors"
+              className="flex items-center space-x-1.5 bg-white/10 hover:bg-white/15 border border-white/15 px-2.5 py-1.5 rounded-md text-white/90 hover:text-white text-xs font-mono tracking-widest uppercase cursor-pointer transition-all"
             >
               <Globe size={12} className="text-white" />
               <span>{lang.toUpperCase()}</span>
