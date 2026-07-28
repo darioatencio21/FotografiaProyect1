@@ -225,7 +225,7 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
 
               <button
                 type="submit"
-                className="w-full py-3 bg-white text-white hover:bg-white/10 font-mono text-xs tracking-widest uppercase font-semibold rounded-lg transition-all flex items-center justify-center space-x-2 shadow-xl cursor-pointer"
+                className="w-full py-3 bg-white text-dark hover:bg-white/80 font-mono text-xs tracking-widest uppercase font-semibold rounded-lg transition-all flex items-center justify-center space-x-2 shadow-xl cursor-pointer"
               >
                 <span>{t.proofEnter}</span>
                 <ArrowRight size={14} />
@@ -599,7 +599,7 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                     {/* Descargar Foto */}
                     <button
                       onClick={() => handleDownload(proofPhotos[lightboxIndex!])}
-                      className="p-4 bg-white text-white hover:bg-white/10 border border-stone rounded-full transition-all flex items-center justify-center cursor-pointer active:scale-95 shadow-xl"
+                      className="p-4 bg-white text-dark hover:bg-white/80 border border-stone rounded-full transition-all flex items-center justify-center cursor-pointer active:scale-95 shadow-xl"
                       title="Descargar Foto"
                     >
                       <Download size={20} />
