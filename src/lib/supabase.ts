@@ -34,8 +34,15 @@ function createNoOpClient(): SupabaseClient {
     then: (resolve: any) => resolve({ data: null, error: null, count: null }),
   };
 
+  const noopChannel: any = {
+    on: () => noopChannel,
+    subscribe: () => noopChannel,
+  };
+
   return {
     from: () => noopQuery,
+    channel: () => noopChannel,
+    removeChannel: () => Promise.resolve({ error: null }),
     auth: {
       getSession: () => Promise.resolve({ data: { session: null }, error: null }),
       signOut: () => Promise.resolve({ error: null }),

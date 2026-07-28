@@ -1533,41 +1533,41 @@ ${photographerName}`);
                               );
                             })}
                           </div>
+
+                          {/* Booking Calendar — only inside Step 2 */}
+                          <section id="booking-calendar" className="pt-12 border-t border-white/10 space-y-8">
+                            <div className="text-center max-w-md mx-auto space-y-2">
+                              <h3 className="font-serif text-2xl text-white font-medium">{t.bookingTitle}</h3>
+                              <p className="text-xs text-white/50">{t.bookingSubtitle}</p>
+                            </div>
+
+                            <BookingCalendar
+                              services={services}
+                              lang={lang}
+                              config={bookingConfig}
+                              emailConfig={emailConfig}
+                              preSelectedPackage={selectedPackageId ? packages.find(p => p.id === selectedPackageId) ?? null : null}
+                              onClearPackage={() => setSelectedPackageId(null)}
+                              setNavigationGuard={setNavigationGuard}
+                              onAddBooking={(newBook) => {
+                                setSelectedPackageId(null);
+                                const savedBook: Booking = {
+                                  ...newBook,
+                                  id: `book-${Date.now()}`,
+                                  status: 'pending',
+                                  isRead: false,
+                                  createdAt: new Date().toISOString(),
+                                };
+                                handleUpdateBookings([savedBook, ...bookings]);
+                              }}
+                            />
+                          </section>
                         </div>
                       );
                     })()}
                   </motion.section>
                 )}
               </AnimatePresence>
-
-              {/* Inline interactive Booking Calendar module */}
-              <section id="booking-calendar" className="pt-12 border-t border-white/10 space-y-8">
-                <div className="text-center max-w-md mx-auto space-y-2">
-                  <h3 className="font-serif text-2xl text-white font-medium">{t.bookingTitle}</h3>
-                  <p className="text-xs text-white/50">{t.bookingSubtitle}</p>
-                </div>
-
-                <BookingCalendar
-                  services={services}
-                  lang={lang}
-                  config={bookingConfig}
-                  emailConfig={emailConfig}
-                  preSelectedPackage={selectedPackageId ? packages.find(p => p.id === selectedPackageId) ?? null : null}
-                  onClearPackage={() => setSelectedPackageId(null)}
-                  setNavigationGuard={setNavigationGuard}
-                  onAddBooking={(newBook) => {
-                    setSelectedPackageId(null);
-                    const savedBook: Booking = {
-                      ...newBook,
-                      id: `book-${Date.now()}`,
-                      status: 'pending',
-                      isRead: false,
-                      createdAt: new Date().toISOString(),
-                    };
-                    handleUpdateBookings([savedBook, ...bookings]);
-                  }}
-                />
-              </section>
             </div>
           )}
 

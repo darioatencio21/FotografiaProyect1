@@ -201,34 +201,37 @@ export default function AdminCMS({
     if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
       Notification.requestPermission();
     }
-    const channel = supabase
-      .channel('bookings-changes')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'bookings' },
-        (payload) => {
-          const newBooking = payload.new as Record<string, any>;
-          const id = newBooking.id;
-          if (id && !seenBookingIds.current.has(id)) {
-            seenBookingIds.current.add(id);
-            setUnseenBookings(prev => prev + 1);
-            const cName = newBooking.clientname || 'Alguien';
-            triggerAlert(`📍 Nueva reserva de ${cName}!`);
-            if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-              new Notification('Nueva Reserva - Aorea Studio', {
-                body: `${cName} ha solicitado una sesión. Revisa la cola de reservas.`,
-                icon: '/favicon.svg',
-              });
+    let channel: any;
+    try {
+      channel = supabase
+        .channel('bookings-changes')
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'bookings' },
+          (payload) => {
+            const newBooking = payload.new as Record<string, any>;
+            const id = newBooking.id;
+            if (id && !seenBookingIds.current.has(id)) {
+              seenBookingIds.current.add(id);
+              setUnseenBookings(prev => prev + 1);
+              const cName = newBooking.clientname || 'Alguien';
+              triggerAlert(`📍 Nueva reserva de ${cName}!`);
+              if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+                new Notification('Nueva Reserva - Aorea Studio', {
+                  body: `${cName} ha solicitado una sesión. Revisa la cola de reservas.`,
+                  icon: '/favicon.svg',
+                });
+              }
             }
           }
-        }
-      )
-      .subscribe((status, err) => {
-        if (status === 'CHANNEL_ERROR') {
-          console.warn('Realtime no disponible para bookings (normal si no está habilitado en Supabase)', err?.message);
-        }
-      });
-    return () => { supabase.removeChannel(channel); };
+        )
+        .subscribe((status, err) => {
+          if (status === 'CHANNEL_ERROR') {
+            console.warn('Realtime no disponible para bookings', err?.message);
+          }
+        });
+    } catch { /* Realtime not supported */ }
+    return () => { if (channel) supabase.removeChannel(channel); };
   }, []);
 
   // Real-time message notification state
@@ -237,34 +240,37 @@ export default function AdminCMS({
 
   // Real-time subscription for new messages
   useEffect(() => {
-    const channel = supabase
-      .channel('messages-changes')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'messages' },
-        (payload) => {
-          const newMsg = payload.new as Record<string, any>;
-          const id = newMsg.id;
-          if (id && !seenMessageIds.current.has(id)) {
-            seenMessageIds.current.add(id);
-            setUnseenMessages(prev => prev + 1);
-            const cName = newMsg.name || 'Alguien';
-            triggerAlert(`✉️ Nuevo mensaje de ${cName}!`);
-            if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-              new Notification('Nuevo Mensaje - Aorea Studio', {
-                body: `${cName} te ha escrito. Revisa la bandeja de entrada.`,
-                icon: '/favicon.svg',
-              });
+    let channel: any;
+    try {
+      channel = supabase
+        .channel('messages-changes')
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'messages' },
+          (payload) => {
+            const newMsg = payload.new as Record<string, any>;
+            const id = newMsg.id;
+            if (id && !seenMessageIds.current.has(id)) {
+              seenMessageIds.current.add(id);
+              setUnseenMessages(prev => prev + 1);
+              const cName = newMsg.name || 'Alguien';
+              triggerAlert(`✉️ Nuevo mensaje de ${cName}!`);
+              if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+                new Notification('Nuevo Mensaje - Aorea Studio', {
+                  body: `${cName} te ha escrito. Revisa la bandeja de entrada.`,
+                  icon: '/favicon.svg',
+                });
+              }
             }
           }
-        }
-      )
-      .subscribe((status, err) => {
-        if (status === 'CHANNEL_ERROR') {
-          console.warn('Realtime no disponible para messages (normal si no está habilitado en Supabase)', err?.message);
-        }
-      });
-    return () => { supabase.removeChannel(channel); };
+        )
+        .subscribe((status, err) => {
+          if (status === 'CHANNEL_ERROR') {
+            console.warn('Realtime no disponible para messages', err?.message);
+          }
+        });
+    } catch { /* Realtime not supported */ }
+    return () => { if (channel) supabase.removeChannel(channel); };
   }, []);
 
   // Client Account management state
