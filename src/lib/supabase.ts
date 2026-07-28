@@ -1,30 +1,66 @@
 /// <reference types="vite/client" />
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
+const isSupabaseConfigured = Boolean(
+  supabaseUrl && supabaseAnonKey && supabaseUrl.startsWith('http')
+);
 
 if (!isSupabaseConfigured) {
-  console.warn('Supabase not configured — running in offline/demo mode. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your Vercel environment variables.');
+  console.warn(
+    '[Aurea] Supabase not configured — running in offline/demo mode. ' +
+    'Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your Vercel environment variables.'
+  );
 }
 
-export const supabase = isSupabaseConfigured
-  ? createClient(supabaseUrl, supabaseAnonKey)
-  : createClient('https://placeholder.supabase.co', 'placeholder');
+/**
+ * When Supabase env vars are missing, export a no-op proxy so every
+ * `.from().select()` etc. resolves to `{ data: null, error: null }`
+ * and the app falls back to its built-in mock data.
+ */
+function createNoOpClient(): SupabaseClient {
+  const noopPromise = Promise.resolve({ data: null, error: null, count: null, status: 200, statusText: 'OK' });
 
-// Clear stale auth session if refresh token is invalid
-supabase.auth.getSession().then(({ data, error }) => {
-  if (error || !data.session) {
-    // No valid session — clear any stale auth tokens from storage
-    const keysToRemove: string[] = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && (key.startsWith('sb-') || key.includes('-auth-token'))) {
-        keysToRemove.push(key);
+  const noopQuery: any = {
+    select: () => noopQuery,
+    insert: () => noopQuery,
+    update: () => noopQuery,
+    delete: () => noopQuery,
+    eq: () => noopQuery,
+    single: () => Promise.resolve({ data: null, error: null }),
+    maybeSingle: () => Promise.resolve({ data: null, error: null }),
+    then: (resolve: any) => resolve({ data: null, error: null, count: null }),
+  };
+
+  return {
+    from: () => noopQuery,
+    auth: {
+      getSession: () => Promise.resolve({ data: { session: null }, error: null }),
+      signOut: () => Promise.resolve({ error: null }),
+      onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
+    },
+    storage: { from: () => ({ download: () => noopPromise, upload: () => noopPromise, getPublicUrl: () => ({ data: { publicUrl: '' } }) }) },
+  } as unknown as SupabaseClient;
+}
+
+export const supabase: SupabaseClient = isSupabaseConfigured
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : createNoOpClient();
+
+// Clear stale auth session if refresh token is invalid (only when configured)
+if (isSupabaseConfigured) {
+  supabase.auth.getSession().then(({ data, error }) => {
+    if (error || !data.session) {
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.startsWith('sb-') || key.includes('-auth-token'))) {
+          keysToRemove.push(key);
+        }
       }
+      keysToRemove.forEach((key) => localStorage.removeItem(key));
     }
-    keysToRemove.forEach((key) => localStorage.removeItem(key));
-  }
-});
+  });
+}
