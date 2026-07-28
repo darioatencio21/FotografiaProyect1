@@ -38,6 +38,7 @@ import AdminCMS from './components/AdminCMS';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import LegalViews from './components/LegalViews';
+import NotFound from './components/NotFound';
 
 import {
   getCollectionWithFallback,
@@ -51,6 +52,11 @@ import {
 } from './lib/db';
 import { sanitizeString, sanitizeEmail, sanitizeUrl, unescapeHTMLEntities } from './lib/sanitize';
 import { computeAnalytics, trackPageView } from './lib/analytics';
+
+const VALID_VIEWS = new Set([
+  'home', 'about', 'portfolio', 'services', 'client-portal',
+  'contact', 'admin', 'faq', 'testimonials', 'privacy', 'terms', 'blog',
+]);
 
 async function syncCollection<T extends { id: string }>(
   collectionPath: string,
@@ -137,7 +143,10 @@ export default function App() {
     const params = new URLSearchParams(window.location.search);
     if (params.has('gallery')) return 'client-portal';
     if (params.has('approval')) return 'booking-approval';
-    return params.get('view') || 'home';
+    const view = params.get('view');
+    if (view && VALID_VIEWS.has(view)) return view;
+    if (window.location.pathname !== '/' && !view) return '404';
+    return 'home';
   });
 
   const [approvalToken, setApprovalToken] = useState<string>(() => {
@@ -175,9 +184,15 @@ export default function App() {
         setCurrentView(view);
       } else {
         const params = new URLSearchParams(window.location.search);
-        const fallbackView = params.get('view') || 'home';
-        setCurrentView(fallbackView);
-        window.history.pushState({ view: fallbackView }, '', fallbackView === 'home' ? '/' : '/?view=' + fallbackView);
+        const viewParam = params.get('view');
+        if (viewParam && VALID_VIEWS.has(viewParam)) {
+          setCurrentView(viewParam);
+        } else if (window.location.pathname !== '/' && !viewParam) {
+          setCurrentView('404');
+        } else {
+          setCurrentView('home');
+          window.history.pushState({ view: 'home' }, '', '/');
+        }
       }
     };
     window.addEventListener('popstate', handlePopState);
@@ -1206,11 +1221,11 @@ ${photographerName}`);
                     <ArrowRight size={12} />
                   </button>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                   {packages.filter(pkg => pkg.active && pkg.featured).slice(0, 3).map(pkg => (
                     <article key={pkg.id} className="group bg-dark-gray border border-white/10 rounded-lg overflow-hidden hover:border-white/30 transition-all duration-500 shadow-sm">
-                      {pkg.image && <div className="h-36 overflow-hidden"><img src={sanitizeUrl(pkg.image) || undefined} alt={lang === 'es' ? pkg.name_es : pkg.name_en} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" /></div>}
-                      <div className="p-5 space-y-4">
+                      {pkg.image && <div className="h-32 sm:h-36 lg:h-40 overflow-hidden"><img src={sanitizeUrl(pkg.image) || undefined} alt={lang === 'es' ? pkg.name_es : pkg.name_en} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" /></div>}
+                      <div className="p-4 sm:p-5 space-y-4">
                         <div className="flex items-start justify-between gap-3">
                           <div>
                             <p className="text-[11px] font-mono tracking-[0.2em] uppercase text-white/70/70">{t[pkg.category as keyof typeof t] || pkg.category}</p>
@@ -1319,7 +1334,7 @@ ${photographerName}`);
                       <p className="text-xs text-white/55 leading-relaxed">{t.servicesSubtitle}</p>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
                       {sessionCategories.filter(c => c.active).sort((a, b) => a.sortOrder - b.sortOrder).map((cat, idx) => {
                         const cName = lang === 'es' ? cat.name_es : cat.name_en;
                         const cDesc = lang === 'es' ? cat.description_es : cat.description_en;
@@ -1349,7 +1364,7 @@ ${photographerName}`);
                             viewport={{ once: true, margin: "-30px" }}
                             transition={{ duration: 0.4, delay: idx * 0.05 }}
                             onClick={() => setSelectedCategory(cat.id)}
-                            className="group relative overflow-hidden rounded-lg aspect-[3/4] md:aspect-[4/5] text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                            className="group relative overflow-hidden rounded-lg aspect-[4/5] sm:aspect-[3/4] lg:aspect-[4/5] text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
                           >
                             {/* Background image */}
                             <div className="absolute inset-0">
@@ -1364,13 +1379,13 @@ ${photographerName}`);
                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
 
                             {/* Content with solid dark base */}
-                            <div className="absolute bottom-0 left-0 right-0 p-5 space-y-2.5 z-10 bg-black/70 backdrop-blur-sm rounded-b-2xl">
+                            <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 space-y-2.5 z-10 bg-black/70 backdrop-blur-sm rounded-b-2xl">
                               <div className="w-10 h-10 rounded-lg bg-white/15 backdrop-blur-sm border border-white/30 flex items-center justify-center transition-transform duration-500 group-hover:scale-110 group-hover:bg-white/10/30 group-hover:border-white/30">
                                 {categoryIconMap[cat.icon] || <Camera size={22} className="text-white" />}
                               </div>
                               <div>
                                 <h3 className="font-serif text-lg text-white font-medium leading-tight">{cName}</h3>
-                                <p className="text-[11px] md:text-[10px] text-white/90 leading-relaxed mt-0.5 line-clamp-2">{cDesc}</p>
+                                <p className="text-[11px] text-white/90 leading-relaxed mt-0.5 line-clamp-2">{cDesc}</p>
                               </div>
                               <div className="flex items-center space-x-1.5 text-[9px] font-mono text-white/80 uppercase tracking-wider">
                                 <span>{activePkgCount} {lang === 'es' ? 'paquetes' : 'packages'}</span>
@@ -1426,7 +1441,7 @@ ${photographerName}`);
                           </div>
 
                           {/* Package cards grid */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
                             {categoryPkgs.map((pkg, idx) => {
                               const pName = lang === 'es' ? pkg.name_es : pkg.name_en;
                               const pDesc = lang === 'es' ? pkg.description_es : pkg.description_en;
@@ -1441,7 +1456,7 @@ ${photographerName}`);
                                   whileInView={{ opacity: 1, y: 0 }}
                                   viewport={{ once: true, margin: "-40px" }}
                                   transition={{ duration: 0.4, delay: idx * 0.08 }}
-                                   className={`group bg-dark-gray border rounded-lg p-5 md:p-8 flex flex-col justify-between space-y-6 text-left transition-all duration-500 hover:-translate-y-1 ${
+                                    className={`group bg-dark-gray border rounded-lg p-4 sm:p-6 lg:p-8 flex flex-col justify-between space-y-5 sm:space-y-6 text-left transition-all duration-500 hover:-translate-y-1 ${
                                      pkg.featured
                                        ? 'border-white/10 ring-1 ring-white/10 shadow-lg shadow-white/5'
                                        : 'border-white/[0.07] hover:border-white/10 hover:shadow-xl hover:shadow-white/5'
@@ -1449,8 +1464,8 @@ ${photographerName}`);
                                 >
                                   <div className="space-y-5">
                                     {pkg.image && (
-                                      <div className="rounded-lg overflow-hidden -mx-2 -mt-2">
-                                        <img src={pkg.image} alt={pName} className="w-full h-40 object-cover transition-all duration-700 group-hover:scale-105" />
+                                      <div className="rounded-lg overflow-hidden sm:-mx-2 sm:-mt-2">
+                                        <img src={pkg.image} alt={pName} className="w-full h-36 sm:h-40 object-cover transition-all duration-700 group-hover:scale-105" />
                                       </div>
                                     )}
 
@@ -1461,15 +1476,15 @@ ${photographerName}`);
                                           {t.recommended}
                                         </span>
                                       )}
-                                      <h3 className="font-serif text-xl md:text-2xl text-white/90 font-light">{pName}</h3>
+                                      <h3 className="font-serif text-xl sm:text-2xl text-white/90 font-light">{pName}</h3>
                                     </div>
 
                                     {/* Duration + Price */}
-                                    <div className="flex items-baseline justify-between border-b border-white/10 pb-4">
+                                    <div className="flex items-baseline justify-between border-b border-white/10 pb-3 sm:pb-4">
                                       <span className="text-[10px] font-mono text-white/50 tracking-wide">{pDuration}</span>
                                       <div className="text-right">
                                         <span className="text-[11px] text-white/40 block font-mono tracking-wider">{pPriceFrom}</span>
-                                        <span className="text-xl md:text-2xl md:text-3xl font-light text-white/70 font-mono">${pkg.price.toLocaleString()}</span>
+                                        <span className="text-xl sm:text-2xl lg:text-3xl font-light text-white/70 font-mono">${pkg.price.toLocaleString()}</span>
                                       </div>
                                     </div>
 
@@ -1480,7 +1495,7 @@ ${photographerName}`);
                                       <h5 className="text-[11px] font-mono tracking-[0.2em] text-white/40 uppercase">{t.includesLabel}</h5>
                                       <ul className="space-y-2">
                                         {(lang === 'es' ? (pkg.benefits_es || pkg.benefits) : (pkg.benefits_en || pkg.benefits)).map((benefit, i) => (
-                                          <li key={i} className="flex items-start space-x-2.5 text-[11px] text-white/60 font-light">
+                                          <li key={i} className="flex items-start space-x-2.5 text-[11px] sm:text-xs text-white/60 font-light">
                                             <CheckCircle2 size={9} className="text-white/30 mt-0.5 shrink-0" />
                                             <span>{benefit}</span>
                                           </li>
@@ -1505,7 +1520,7 @@ ${photographerName}`);
                                         targetCalendar.scrollIntoView({ behavior: 'smooth' });
                                       }
                                     }}
-                                    className="w-full py-3 bg-transparent border border-white/20 hover:border-white/30 text-white/70 hover:text-white/60 font-mono text-[10px] tracking-[0.2em] uppercase font-light rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 cursor-pointer group/btn"
+                                    className="w-full py-3 bg-transparent border border-white/20 hover:border-white/30 text-white/70 hover:text-white/60 font-mono text-[10px] sm:text-[11px] tracking-[0.2em] uppercase font-light rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 cursor-pointer group/btn"
                                   >
                                     <span>{pButton}</span>
                                     <ArrowRight size={9} className="transition-transform duration-300 group-hover/btn:translate-x-1" />
@@ -1935,6 +1950,17 @@ ${photographerName}`);
               type={currentView}
               lang={lang}
               onBack={() => navigateTo('home')}
+            />
+          )}
+
+          {/* ======================================================= */}
+          {/* 404 NOT FOUND */}
+          {/* ======================================================= */}
+          {currentView === '404' && (
+            <NotFound
+              lang={lang}
+              onNavigateHome={() => navigateTo('home')}
+              onNavigatePortfolio={() => navigateTo('portfolio')}
             />
           )}
         </motion.main>
