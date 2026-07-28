@@ -335,7 +335,7 @@ export default function Header({
                 ))}
               </div>
               <div className="text-center flex flex-col items-center justify-center pt-2">
-                <Logo size="xs" className="mb-2 opacity-60 [&>svg]:h-10 [&>svg]:w-10" />
+                <Logo size="xs" className="mb-2 opacity-60 [&>img]:h-10 [&>img]:w-10" />
                 <span className="font-serif text-[10px] font-bold tracking-[0.2em] text-white/30 uppercase">
                   Miriam Campos Photography
                 </span>
