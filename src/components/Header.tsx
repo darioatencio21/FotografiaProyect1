@@ -179,7 +179,7 @@ export default function Header({
                 <>
                   <div className="fixed inset-0 z-10" onClick={() => setShowLanguíageDropdown(false)} />
                   <motion.div
-                    className="absolute right-0 mt-2.5 w-24 bg-charcoal border border-white/10 rounded-lg shadow-2xl overflow-hidden z-20 text-left"
+                    className="absolute right-0 mt-2.5 w-24 bg-[#2D2A28] border border-white/10 rounded-lg shadow-2xl overflow-hidden z-20 text-left"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
@@ -193,8 +193,8 @@ export default function Header({
                         }}
                         className={`w-full text-left px-3.5 py-2 text-xs font-mono transition-all ${
                           lang === item.code
-                            ? 'bg-white/10 text-white font-bold'
-                            : 'text-white/75 hover:bg-white/5 hover:text-white'
+                            ? 'bg-white/15 text-white font-bold'
+                            : 'text-white/80 hover:bg-white/10 hover:text-white'
                         }`}
                       >
                         {item.name}

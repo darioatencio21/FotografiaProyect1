@@ -27,6 +27,8 @@ import AdminProfileTab from './AdminProfileTab';
 import AdminPackagesTab from './AdminPackagesTab';
 import AdminRemindersTab from './AdminRemindersTab';
 import ContractView from './ContractView';
+import RevealableField from './RevealableField';
+import { maskToken } from '../utils/maskData';
 
 function compressImage(file: File, maxSize = 1600, quality = 0.85): Promise<{ blob: Blob; width: number; height: number }> {
   return new Promise((resolve, reject) => {
@@ -1480,8 +1482,8 @@ export default function AdminCMS({
                                 </span>
                                 {!b.isRead && <span className="w-1.5 h-1.5 rounded-full bg-white/10 animate-pulse shrink-0" />}
                                 <div>
-                                  <div className="font-semibold text-white/90">{b.clientName}</div>
-                                  <div className="text-[10px] text-white/40 font-mono mt-0.5">{b.clientEmail}</div>
+                                  <div className="font-semibold text-white/90"><RevealableField value={b.clientName} type="name" /></div>
+                                   <div className="text-[10px] text-white/40 font-mono mt-0.5"><RevealableField value={b.clientEmail} type="email" /></div>
                                 </div>
                               </div>
                             </td>
@@ -1597,24 +1599,24 @@ export default function AdminCMS({
                                       <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-xs">
                                         <div className="space-y-0.5">
                                           <span className="text-white/40 block text-[9px] uppercase tracking-wider">{t('Nombre Completo:', 'Full Name:', 'Nome Completo:')}</span>
-                                          <span className="text-white font-medium flex items-center space-x-1.5">
-                                            <User size={12} className="text-white/80 shrink-0" />
-                                            <span>{b.clientName}</span>
-                                          </span>
+                            <span className="text-white font-medium flex items-center space-x-1.5">
+                                             <User size={12} className="text-white/80 shrink-0" />
+                                             <RevealableField value={b.clientName} type="name" />
+                                           </span>
                                         </div>
                                         <div className="space-y-0.5">
                                           <span className="text-white/40 block text-[9px] uppercase tracking-wider">{t('Correo Electrónico:', 'Email Address:', 'E-mail:')}</span>
-                                          <span className="text-white font-medium flex items-center space-x-1.5 break-all">
-                                            <Mail size={12} className="text-white/80 shrink-0" />
-                                            <span>{b.clientEmail}</span>
-                                          </span>
+                            <span className="text-white font-medium flex items-center space-x-1.5 break-all">
+                                             <Mail size={12} className="text-white/80 shrink-0" />
+                                             <RevealableField value={b.clientEmail} type="email" />
+                                           </span>
                                         </div>
                                         <div className="space-y-0.5">
                                           <span className="text-white/40 block text-[9px] uppercase tracking-wider">{t('Teléfono / WhatsApp:', 'Phone / WhatsApp:', 'Telefone / WhatsApp:')}</span>
-                                          <span className="text-white font-medium flex items-center space-x-1.5">
-                                            <Phone size={12} className="text-white/80 shrink-0" />
-                                            <span>{b.clientPhone || t('No proporcionado', 'Not provided', 'Não fornecido')}</span>
-                                          </span>
+                            <span className="text-white font-medium flex items-center space-x-1.5">
+                                             <Phone size={12} className="text-white/80 shrink-0" />
+                                             <RevealableField value={b.clientPhone} type="phone" />
+                                           </span>
                                         </div>
                                         <div className="space-y-0.5">
                                           <span className="text-white/40 block text-[9px] uppercase tracking-wider">{t('Personas:', 'People Count:', 'Pessoas:')}</span>
@@ -1661,8 +1663,8 @@ export default function AdminCMS({
                                           </h4>
                                         </div>
                                         <div className="text-xs text-white/80 whitespace-pre-wrap leading-relaxed max-h-[180px] overflow-y-auto pr-2 scrollbar-thin font-sans">
-                                          {b.notes || t('El cliente no dejó respuestas adicionales para el cuestionario.', 'The client did not leave additional answers for the questionnaire.', 'O cliente não deixou respostas adicionais para o questionário.')}
-                                        </div>
+                                           <RevealableField value={b.notes} type="text" />
+                                         </div>
                                       </div>
                                       <div className="text-[10px] text-white/30 border-t border-white/10 pt-2 italic text-right">
                                         {t('Creada el:', 'Created at:', 'Criado em:')} {b.createdAt ? new Date(b.createdAt).toLocaleString(lang === 'es' ? 'es-ES' : 'en-US') : 'N/A'}
@@ -1677,8 +1679,8 @@ export default function AdminCMS({
                                               </h4>
                                               <div className="flex items-center gap-2">
                                                 <code className="text-[9px] font-mono text-white/70 bg-dark/60 px-2 py-1 rounded border border-white/10 truncate flex-1">
-                                                  {import.meta.env.VITE_APP_URL || window.location.origin}/?approval={b.approvalToken}
-                                                </code>
+                                                   {maskToken(b.approvalToken)}
+                                                 </code>
                                                 <button
                                                   onClick={() => {
                                                     const link = `${import.meta.env.VITE_APP_URL || window.location.origin}/?approval=${b.approvalToken}`;
@@ -1738,10 +1740,10 @@ export default function AdminCMS({
                                                </div>
                                                {b.isPaid && <span className="text-[9px] text-emerald-400 font-mono">{t('✓ Pagado', '✓ Paid', '✓ Pago')}</span>}
                                                 {b.contractSignature && <span className="text-[9px] text-green-400 font-mono block">{t('✓ Cliente firmó', '✓ Client signed', '✓ Cliente assinou')}</span>}
-                                                {b.contractSignature && <span className="text-[10px] text-white/50 font-serif block">{b.contractSignature}</span>}
-                                                {b.contractSignedAt && <span className="text-[9px] text-white/30 font-mono block">{formatDate(b.contractSignedAt)}</span>}
-                                                {b.contractPhotographerSignature && <span className="text-[9px] text-white/70 font-mono block">{t('✓ Fotógrafa firmó', '✓ Photographer signed', '✓ Fotógrafa assinou')}</span>}
-                                                {b.contractPhotographerSignature && <span className="text-[10px] text-white/50 font-serif block">{b.contractPhotographerSignature}</span>}
+                                                 {b.contractSignature && <span className="text-[10px] text-white/50 font-serif block"><RevealableField value={b.contractSignature} type="text" /></span>}
+                                                 {b.contractSignedAt && <span className="text-[9px] text-white/30 font-mono block">{formatDate(b.contractSignedAt)}</span>}
+                                                 {b.contractPhotographerSignature && <span className="text-[9px] text-white/70 font-mono block">{t('✓ Fotógrafa firmó', '✓ Photographer signed', '✓ Fotógrafa assinou')}</span>}
+                                                 {b.contractPhotographerSignature && <span className="text-[10px] text-white/50 font-serif block"><RevealableField value={b.contractPhotographerSignature} type="name" /></span>}
                                                 {b.contractPhotographerSignedAt && <span className="text-[9px] text-white/30 font-mono block">{formatDate(b.contractPhotographerSignedAt)}</span>}
                                               </div>
                                            </div>
@@ -1752,15 +1754,15 @@ export default function AdminCMS({
                                                 <div className="mt-2 text-white/70 space-y-1 text-[11px]">
                                                   {b.contractType === 'session' ? (
                                                     <>
-                                                      <p>{t('Cliente', 'Client', 'Cliente')}: {b.contractData.brideName} — {b.contractData.brideEmail}</p>
-                                                      <p>{t('Teléfono', 'Phone', 'Telefone')}: {b.contractData.groomPhone}</p>
+                                                      <p>{t('Cliente', 'Client', 'Cliente')}: <RevealableField value={b.contractData.brideName} type="name" /> — <RevealableField value={b.contractData.brideEmail} type="email" /></p>
+                                                      <p>{t('Teléfono', 'Phone', 'Telefone')}: <RevealableField value={b.contractData.groomPhone} type="phone" /></p>
                                                       <p>{t('Fecha', 'Date', 'Data')}: {b.date}</p>
                                                       <p>{t('Horario', 'Schedule', 'Horário')}: {b.timeSlot}</p>
                                                     </>
                                                   ) : (
                                                     <>
-                                                      <p>{t('Novia', 'Bride', 'Noiva')}: {b.contractData.brideName} — {b.contractData.brideEmail}</p>
-                                                      <p>{t('Novio', 'Groom', 'Noivo')}: {b.contractData.groomName} — {b.contractData.groomPhone}</p>
+                                                      <p>{t('Novia', 'Bride', 'Noiva')}: <RevealableField value={b.contractData.brideName} type="name" /> — <RevealableField value={b.contractData.brideEmail} type="email" /></p>
+                                                      <p>{t('Novio', 'Groom', 'Noivo')}: <RevealableField value={b.contractData.groomName} type="name" /> — <RevealableField value={b.contractData.groomPhone} type="phone" /></p>
                                                       <p>{t('Ceremonia', 'Ceremony', 'Cerimônia')}: {b.contractData.ceremonyLocation} ({b.contractData.ceremonyStart} - {b.contractData.ceremonyEnd})</p>
                                                       <p>{t('Recepción', 'Reception', 'Recepção')}: {b.contractData.receptionLocation} ({b.contractData.receptionStart} - {b.contractData.receptionEnd})</p>
                                                     </>
@@ -1808,10 +1810,10 @@ export default function AdminCMS({
                             {isExpanded ? <ChevronUp size={16} className="text-white/70" /> : <ChevronDown size={16} />}
                           </span>
                           {!b.isRead && <span className="w-1.5 h-1.5 rounded-full bg-white/10 animate-pulse shrink-0" />}
-                          <div className="min-w-0">
-                            <div className="font-semibold text-white/90 text-sm truncate">{b.clientName}</div>
-                            <div className="text-[10px] text-white/40 font-mono truncate">{b.clientEmail}</div>
-                          </div>
+                           <div className="min-w-0">
+                             <div className="font-semibold text-white/90 text-sm truncate"><RevealableField value={b.clientName} type="name" /></div>
+                             <div className="text-[10px] text-white/40 font-mono truncate"><RevealableField value={b.clientEmail} type="email" /></div>
+                           </div>
                         </div>
                         <span className={`shrink-0 ml-2 px-2 py-0.5 rounded text-[9px] font-mono font-semibold uppercase ${
                           b.status === 'confirmed' || b.status === 'completed'
@@ -1914,10 +1916,10 @@ export default function AdminCMS({
                         className="pt-3 border-t border-white/10 space-y-3 text-xs"
                       >
                         <div className="grid grid-cols-2 gap-3">
-                          <div className="space-y-0.5">
-                            <span className="text-white/40 block text-[9px] uppercase tracking-wider">{t('Teléfono:', 'Phone:', 'Telefone:')}</span>
-                            <span className="text-white/90">{b.clientPhone || t('No proporcionado', 'Not provided', 'Não fornecido')}</span>
-                          </div>
+                           <div className="space-y-0.5">
+                             <span className="text-white/40 block text-[9px] uppercase tracking-wider">{t('Teléfono:', 'Phone:', 'Telefone:')}</span>
+                             <RevealableField value={b.clientPhone} type="phone" />
+                           </div>
                           <div className="space-y-0.5">
                             <span className="text-white/40 block text-[9px] uppercase tracking-wider">{t('Personas:', 'People:', 'Pessoas:')}</span>
                             <span className="text-white/90">{b.peopleCount || 1}</span>
@@ -1925,9 +1927,9 @@ export default function AdminCMS({
                         </div>
                         <div>
                           <span className="text-white/40 block text-[9px] uppercase tracking-wider mb-1">{t('Notas:', 'Notes:', 'Notas:')}</span>
-                          <div className="text-white/80 whitespace-pre-wrap leading-relaxed bg-charcoal border border-white/10 rounded-lg p-3">
-                            {b.notes || t('Sin notas adicionales', 'No additional notes', 'Sem notas adicionais')}
-                          </div>
+                           <div className="text-white/80 whitespace-pre-wrap leading-relaxed bg-charcoal border border-white/10 rounded-lg p-3">
+                             <RevealableField value={b.notes} type="text" />
+                           </div>
                         </div>
                         {/* Approval Link (mobile) */}
                         {b.status === 'approved' && b.approvalToken && (
@@ -1935,9 +1937,9 @@ export default function AdminCMS({
                             <h4 className="text-[9px] font-mono uppercase tracking-widest text-sky-400 font-semibold">
                               {t('Link de Aprobación', 'Approval Link')}
                             </h4>
-                            <code className="text-[8px] font-mono text-white/60 bg-dark/60 px-2 py-1 rounded border border-white/10 block truncate">
-                              .../?approval={b.approvalToken}
-                            </code>
+                             <code className="text-[8px] font-mono text-white/60 bg-dark/60 px-2 py-1 rounded border border-white/10 block truncate">
+                               {maskToken(b.approvalToken)}
+                             </code>
                             {b.approvalExpiresAt && (
                               <div className="text-[9px] text-white/50 font-mono">
                                 {t('Expira:', 'Expires:')} {new Date(b.approvalExpiresAt).toLocaleString()}
@@ -1978,26 +1980,26 @@ export default function AdminCMS({
                             </div>
                             {b.isPaid && <span className="text-[9px] text-emerald-400 font-mono block">{t('✓ Pagado', '✓ Paid', '✓ Pago')}</span>}
                             {b.contractSignature && <span className="text-[9px] text-green-400 font-mono block">{t('✓ Cliente firmó', '✓ Client signed', '✓ Cliente assinou')}</span>}
-                            {b.contractSignature && <span className="text-[10px] text-white/50 font-serif block">{b.contractSignature}</span>}
-                            {b.contractSignedAt && <span className="text-[9px] text-white/30 font-mono block">{formatDate(b.contractSignedAt)}</span>}
-                            {b.contractPhotographerSignature && <span className="text-[9px] text-white/70 font-mono block">{t('✓ Fotógrafa firmó', '✓ Photographer signed', '✓ Fotógrafa assinou')}</span>}
-                            {b.contractPhotographerSignature && <span className="text-[10px] text-white/50 font-serif block">{b.contractPhotographerSignature}</span>}
+                             {b.contractSignature && <span className="text-[10px] text-white/50 font-serif block"><RevealableField value={b.contractSignature} type="text" /></span>}
+                             {b.contractSignedAt && <span className="text-[9px] text-white/30 font-mono block">{formatDate(b.contractSignedAt)}</span>}
+                             {b.contractPhotographerSignature && <span className="text-[9px] text-white/70 font-mono block">{t('✓ Fotógrafa firmó', '✓ Photographer signed', '✓ Fotógrafa assinou')}</span>}
+                             {b.contractPhotographerSignature && <span className="text-[10px] text-white/50 font-serif block"><RevealableField value={b.contractPhotographerSignature} type="name" /></span>}
                             {b.contractPhotographerSignedAt && <span className="text-[9px] text-white/30 font-mono block">{formatDate(b.contractPhotographerSignedAt)}</span>}
                             {b.contractData && (
                               <details className="text-xs">
                                 <summary className="text-white/70 cursor-pointer hover:text-white text-[10px] font-mono">{b.contractType === 'session' ? t('Ver detalles de la sesión', 'View session details', 'Ver detalhes da sessão') : t('Ver datos de la boda', 'View wedding details', 'Ver dados do casamento')}</summary>
                                 <div className="mt-2 text-white/70 space-y-1 text-[11px]">
-                                  {b.contractType === 'session' ? (
-                                    <>
-                                      <p>{t('Cliente', 'Client', 'Cliente')}: {b.contractData.brideName} — {b.contractData.brideEmail}</p>
-                                      <p>{t('Teléfono', 'Phone', 'Telefone')}: {b.contractData.groomPhone}</p>
+                                   {b.contractType === 'session' ? (
+                                     <>
+                                       <p>{t('Cliente', 'Client', 'Cliente')}: <RevealableField value={b.contractData.brideName} type="name" /> — <RevealableField value={b.contractData.brideEmail} type="email" /></p>
+                                       <p>{t('Teléfono', 'Phone', 'Telefone')}: <RevealableField value={b.contractData.groomPhone} type="phone" /></p>
                                       <p>{t('Fecha', 'Date', 'Data')}: {b.date}</p>
                                       <p>{t('Horario', 'Schedule', 'Horário')}: {b.timeSlot}</p>
                                     </>
                                   ) : (
                                     <>
-                                      <p>{t('Novia', 'Bride', 'Noiva')}: {b.contractData.brideName} — {b.contractData.brideEmail}</p>
-                                      <p>{t('Novio', 'Groom', 'Noivo')}: {b.contractData.groomName} — {b.contractData.groomPhone}</p>
+                                       <p>{t('Novia', 'Bride', 'Noiva')}: <RevealableField value={b.contractData.brideName} type="name" /> — <RevealableField value={b.contractData.brideEmail} type="email" /></p>
+                                       <p>{t('Novio', 'Groom', 'Noivo')}: <RevealableField value={b.contractData.groomName} type="name" /> — <RevealableField value={b.contractData.groomPhone} type="phone" /></p>
                                       <p>{t('Ceremonia', 'Ceremony', 'Cerimônia')}: {b.contractData.ceremonyLocation} ({b.contractData.ceremonyStart} - {b.contractData.ceremonyEnd})</p>
                                       <p>{t('Recepción', 'Reception', 'Recepção')}: {b.contractData.receptionLocation} ({b.contractData.receptionStart} - {b.contractData.receptionEnd})</p>
                                     </>
@@ -2055,7 +2057,7 @@ export default function AdminCMS({
               ) : invoices.map(invoice => (
                 <div key={invoice.id} className="bg-dark-gray border border-white/10 rounded-lg p-4 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3 items-center text-xs">
                   <div><p className="text-[9px] text-white/40 uppercase">{t('Factura', 'Invoice', 'Fatura')}</p><p className="font-mono text-white/60">{invoice.invoiceNumber}</p></div>
-                  <div><p className="text-[9px] text-white/40 uppercase">{t('Cliente', 'Client', 'Cliente')}</p><p className="text-white/80">{invoice.clientName}</p></div>
+                   <div><p className="text-[9px] text-white/40 uppercase">{t('Cliente', 'Client', 'Cliente')}</p><p className="text-white/80"><RevealableField value={invoice.clientName} type="name" /></p></div>
                   <div className="md:col-span-2"><p className="text-[9px] text-white/40 uppercase">{t('Paquete', 'Package', 'Pacote')}</p><p className="text-white/70 truncate">{invoice.packageName}</p></div>
                   <div><p className="text-[9px] text-white/40 uppercase">{t('Total', 'Total', 'Total')}</p><p className="text-white/60 font-mono">${invoice.total.toLocaleString()}</p></div>
                   <div className="flex items-center justify-between gap-2"><span className={invoice.status === 'paid' ? 'text-emerald-400' : 'text-white/60'}>{invoice.status === 'paid' ? t('Pagada', 'Paid', 'Paga') : invoice.status === 'partial' ? t('Parcial', 'Partial', 'Parcial') : t('Pendiente', 'Pending', 'Pendente')}</span><button onClick={() => window.print()} className="text-white/70 hover:text-white"><FileText size={14} /></button></div>
@@ -2099,19 +2101,19 @@ export default function AdminCMS({
                   <div className="flex justify-between items-start">
                     <div className="space-y-0.5">
                       <div className="flex items-center space-x-2">
-                        <h4 className="text-xs font-semibold text-white/95">{msg.name}</h4>
+                         <h4 className="text-xs font-semibold text-white/95"><RevealableField value={msg.name} type="name" /></h4>
                         {!msg.isRead && (
                           <span className="w-1.5 h-1.5 rounded-full bg-white/10 animate-pulse" />
                         )}
                       </div>
-                      <p className="text-[10px] font-mono text-white/40">{msg.email}</p>
+                       <p className="text-[10px] font-mono text-white/40"><RevealableField value={msg.email} type="email" /></p>
                     </div>
                     <span className="text-[9px] font-mono text-white/35">{msg.createdAt.split('T')[0]}</span>
                   </div>
 
                   <div className="space-y-1">
                     <p className="text-xs font-semibold text-white/60">{msg.subject}</p>
-                    <p className="text-xs text-white/70 leading-relaxed font-sans">{msg.message}</p>
+                     <p className="text-xs text-white/70 leading-relaxed font-sans"><RevealableField value={msg.message} type="text" /></p>
                   </div>
 
                   {msg.replyText && (
@@ -2124,7 +2126,7 @@ export default function AdminCMS({
                           {msg.replyAt ? msg.replyAt.split('T')[0] : msg.createdAt.split('T')[0]}
                         </span>
                       </div>
-                      <p className="text-xs text-white/80 leading-relaxed font-sans whitespace-pre-line">{msg.replyText}</p>
+                       <p className="text-xs text-white/80 leading-relaxed font-sans whitespace-pre-line"><RevealableField value={msg.replyText} type="text" /></p>
                     </div>
                   )}
 
@@ -2972,7 +2974,7 @@ export default function AdminCMS({
                       <div key={account.id} className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-white/5 transition-colors">
                         <div className="space-y-1 text-left">
                           <div className="flex items-center space-x-2">
-                            <h4 className="font-serif text-sm font-bold text-white">{account.clientName}</h4>
+                             <h4 className="font-serif text-sm font-bold text-white"><RevealableField value={account.clientName} type="name" /></h4>
                             <span className="text-[9px] font-mono bg-white/5 border border-white/10 rounded px-1.5 py-0.5 text-white/50">
                               ID: {account.id}
                             </span>
@@ -2980,7 +2982,7 @@ export default function AdminCMS({
                           
                           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-1 text-[10px] font-mono text-white/50">
                             <div>
-                              <span className="text-white/35 font-semibold">EMAIL:</span> {account.clientEmail}
+                               <span className="text-white/35 font-semibold">EMAIL:</span> <RevealableField value={account.clientEmail} type="email" />
                             </div>
                             <div>
                               <span className="text-white/35 font-semibold">FECHA:</span> {account.sessionDate}
@@ -2991,10 +2993,10 @@ export default function AdminCMS({
                           </div>
 
                           <div className="flex items-center space-x-4 pt-1.5 text-[10px] font-mono">
-                            <div className="flex items-center space-x-1 text-white/70 bg-white/5 px-2 py-0.5 rounded border border-white/10">
-                              <CheckSquare size={10} />
-                              <span className="font-bold">PASSCODE: {account.passcode}</span>
-                            </div>
+                             <div className="flex items-center space-x-1 text-white/70 bg-white/5 px-2 py-0.5 rounded border border-white/10">
+                               <CheckSquare size={10} />
+                               <span className="font-bold">PASSCODE: <RevealableField value={account.passcode} type="passcode" /></span>
+                             </div>
                             <div className="text-white/70">
                               <span>📍 {account.photos?.length || 0} {t('Fotos', 'Photos')}</span>
                             </div>

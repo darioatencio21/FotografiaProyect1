@@ -657,9 +657,7 @@ export default function App() {
     if (bootstrapped) localStorage.setItem('aorea_invoices', JSON.stringify(invoices));
   }, [invoices, bootstrapped]);
 
-  useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aorea_messages', JSON.stringify(messages));
-  }, [messages, bootstrapped]);
+  // SECURITY: messages contain client PII (name, email) — not cached in localStorage
 
   useEffect(() => {
     if (bootstrapped) localStorage.setItem('aorea_seo', JSON.stringify(seo));
@@ -673,9 +671,7 @@ export default function App() {
     if (bootstrapped) localStorage.setItem('aorea_booking_config', JSON.stringify(bookingConfig));
   }, [bookingConfig, bootstrapped]);
 
-  useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aorea_email_config', JSON.stringify(emailConfig));
-  }, [emailConfig, bootstrapped]);
+  // SECURITY: email config contains receiver email — not cached in localStorage
 
   useEffect(() => {
     localStorage.setItem('aorea_lang', lang);
@@ -753,6 +749,7 @@ export default function App() {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              // FIXME: VITE_SEND_EMAIL_SECRET is exposed in client bundle. Move email-sending to a server-side endpoint.
               'x-api-key': import.meta.env.VITE_SEND_EMAIL_SECRET || '',
             },
             body: JSON.stringify({
@@ -1114,7 +1111,10 @@ ${photographerName}`);
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -15 }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
-          className="pt-[70px] lg:pt-20 pb-32 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto space-y-16 md:space-y-32">
+          className={currentView === 'admin'
+            ? "pt-[70px] lg:pt-20 pb-32 space-y-16 md:space-y-32"
+            : "pt-[70px] lg:pt-20 pb-32 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto space-y-16 md:space-y-32"
+          }>
 
           {/* ======================================================= */}
           {/* HOME SCREEN (content below hero) */}
@@ -1770,7 +1770,7 @@ ${photographerName}`);
           {/* CONTACT SCREEN */}
           {/* ======================================================= */}
           {currentView === 'contact' && (
-            <div className="space-y-12">
+            <div className="space-y-12 pt-12 md:pt-20">
               <section className="text-center max-w-md mx-auto space-y-3">
                 <span className="text-[10px] font-mono text-white/70 tracking-widest uppercase block">GET IN TOUCH</span>
                 <h2 className="font-serif text-3xl text-white tracking-wide">{t.contactTitle}</h2>
@@ -1886,20 +1886,7 @@ ${photographerName}`);
                     </div>
                   </div>
 
-                  <div className="bg-dark-gray border border-white/10 rounded-lg p-4 space-y-2">
-                    <span className="text-[9px] font-mono text-white/40 uppercase">LIVE CALENDAR ASSISTANCE</span>
-                    <p className="text-[11px] text-white/70 leading-normal">
-                      For immediate booking validations or priority destination weddings, coordinate directly with our support desk via our linked WhatsApp.
-                    </p>
-                    <a
-                      href="https://wa.me/390212345678"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-block mt-1 text-[10px] font-mono text-white/70 hover:text-white/60 uppercase tracking-widest"
-                    >
-                      Open WhatsApp Chat &rarr;
-                    </a>
-                  </div>
+
                 </div>
               </section>
             </div>
