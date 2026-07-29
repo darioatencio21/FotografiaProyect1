@@ -308,6 +308,14 @@ export interface ProofPhoto {
   location?: string;
 }
 
+export interface GalleryData {
+  clientName: string;
+  clientEmail?: string;
+  sessionTitle: string;
+  sessionDate: string;
+  photos: ProofPhoto[];
+}
+
 export interface ClientAccount {
   id: string;
   clientName: string;

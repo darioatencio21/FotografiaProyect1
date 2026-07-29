@@ -7,21 +7,6 @@ function tn(table: string): string {
   return table.toLowerCase();
 }
 
-export async function confirmBookingInDB(
-  bookingId: string,
-  fields: Record<string, unknown>,
-): Promise<void> {
-  const { error } = await supabase
-    .from('bookings')
-    .update(fields)
-    .eq('id', bookingId);
-  if (error) {
-    console.error('[confirmBookingInDB] FAILED:', error.code, error.message, error.details);
-    throw error;
-  }
-  console.log('[confirmBookingInDB] OK', bookingId, Object.keys(fields));
-}
-
 function isTableMissing(table: string): boolean {
   try {
     const missing = JSON.parse(sessionStorage.getItem(MISSING_TABLES_KEY) || '[]');
@@ -138,15 +123,11 @@ export async function saveDocument<T>(collectionPath: string, docId: string, dat
 
   try {
     await doUpsert(payload);
-    if (table === 'bookings') {
-      console.log(`[saveDocument] OK ${table}/${docId}`, Object.keys(payload).filter(k => ['isPaid','paymentStatus','contractStatus','contractSignature','contractSignedAt'].includes(k)));
-    }
     return;
   } catch (err: any) {
     console.error(`[saveDocument] ${table}/${docId} first attempt failed:`, err?.code, err?.message ?? err, err?.details);
     if (table === 'bookings' && isSchemaMismatchError(err)) {
       const compatibleData = getCompatiblePayload(table, data as Record<string, unknown>);
-      console.warn(`[saveDocument] ${table}/${docId} retrying with ${Object.keys(compatibleData).length} compatible columns`);
       try {
         await doUpsert({ id: docId, ...compatibleData });
         return;
@@ -237,6 +218,11 @@ export function onAuthChange(callback: (user: any | null) => void): () => void {
     callback(session?.user ?? null);
   });
   return () => subscription.unsubscribe();
+}
+
+export async function getSessionToken(): Promise<string | null> {
+  const { data: { session } } = await supabase.auth.getSession();
+  return session?.access_token || null;
 }
 
 export { supabase };

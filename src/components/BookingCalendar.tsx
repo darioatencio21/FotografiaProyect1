@@ -106,22 +106,27 @@ const LOCAL_TRANSLATIONS = {
 export default function BookingCalendar({ services, lang, config, emailConfig, preSelectedPackage, onClearPackage, onAddBooking, setNavigationGuard }: BookingCalendarProps) {
   const t = LOCAL_TRANSLATIONS[lang] || LOCAL_TRANSLATIONS.es;
 
+  const BOOKING_DRAFT_KEY = 'booking_draft';
+
   // Form State
-  const [selectedServiceId, setSelectedServiceId] = useState<string>(services[0]?.id || 'custom');
-  const [customServiceText, setCustomServiceText] = useState<string>('');
-  const [dateValue, setDateValue] = useState<string>('');
+  const [selectedServiceId, setSelectedServiceId] = useState<string>(() => sessionStorage.getItem(`${BOOKING_DRAFT_KEY}_service`) || services[0]?.id || 'custom');
+  const [customServiceText, setCustomServiceText] = useState<string>(() => sessionStorage.getItem(`${BOOKING_DRAFT_KEY}_customService`) || '');
+  const [dateValue, setDateValue] = useState<string>(() => sessionStorage.getItem(`${BOOKING_DRAFT_KEY}_date`) || '');
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   
   // Timeframe choice
-  const [selectedTimeframe, setSelectedTimeframe] = useState<'morning' | 'afternoon' | 'goldenHour' | 'other'>('goldenHour');
-  const [customTimeframeText, setCustomTimeframeText] = useState<string>('');
+  const [selectedTimeframe, setSelectedTimeframe] = useState<'morning' | 'afternoon' | 'goldenHour' | 'other'>(() => (sessionStorage.getItem(`${BOOKING_DRAFT_KEY}_timeframe`) as any) || 'goldenHour');
+  const [customTimeframeText, setCustomTimeframeText] = useState<string>(() => sessionStorage.getItem(`${BOOKING_DRAFT_KEY}_customTime`) || '');
 
   // Client Details
-  const [clientName, setClientName] = useState<string>('');
-  const [clientEmail, setClientEmail] = useState<string>('');
-  const [clientPhone, setClientPhone] = useState<string>('');
-  const [peopleCount, setPeopleCount] = useState<number>(1);
-  const [creativeNotes, setCreativeNotes] = useState<string>('');
+  const [clientName, setClientName] = useState<string>(() => sessionStorage.getItem(`${BOOKING_DRAFT_KEY}_name`) || '');
+  const [clientEmail, setClientEmail] = useState<string>(() => sessionStorage.getItem(`${BOOKING_DRAFT_KEY}_email`) || '');
+  const [clientPhone, setClientPhone] = useState<string>(() => sessionStorage.getItem(`${BOOKING_DRAFT_KEY}_phone`) || '');
+  const [peopleCount, setPeopleCount] = useState<number>(() => {
+    const saved = sessionStorage.getItem(`${BOOKING_DRAFT_KEY}_people`);
+    return saved ? parseInt(saved, 10) : 1;
+  });
+  const [creativeNotes, setCreativeNotes] = useState<string>(() => sessionStorage.getItem(`${BOOKING_DRAFT_KEY}_notes`) || '');
   
   // Wedding-specific fields (only shown for boda packages)
   const isWedding = preSelectedPackage?.category === 'boda';
@@ -130,6 +135,9 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
     ceremonyLocation: '', ceremonyAddress: '', ceremonyStart: '', ceremonyEnd: '',
     receptionLocation: '', receptionAddress: '', receptionStart: '', receptionEnd: '',
   });
+
+  // Honeypot for anti-spam
+  const [bookingHoneypot, setBookingHoneypot] = useState<string>('');
 
   // Flow State
   const [step, setStep] = useState<'form' | 'success'>('form');
@@ -150,6 +158,20 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
     };
   }, [shouldWarn, setNavigationGuard]);
 
+  useEffect(() => {
+    if (step === 'success') return;
+    sessionStorage.setItem(`${BOOKING_DRAFT_KEY}_service`, selectedServiceId);
+    sessionStorage.setItem(`${BOOKING_DRAFT_KEY}_customService`, customServiceText);
+    sessionStorage.setItem(`${BOOKING_DRAFT_KEY}_date`, dateValue);
+    sessionStorage.setItem(`${BOOKING_DRAFT_KEY}_timeframe`, selectedTimeframe);
+    sessionStorage.setItem(`${BOOKING_DRAFT_KEY}_customTime`, customTimeframeText);
+    sessionStorage.setItem(`${BOOKING_DRAFT_KEY}_name`, clientName);
+    sessionStorage.setItem(`${BOOKING_DRAFT_KEY}_email`, clientEmail);
+    sessionStorage.setItem(`${BOOKING_DRAFT_KEY}_phone`, clientPhone);
+    sessionStorage.setItem(`${BOOKING_DRAFT_KEY}_people`, String(peopleCount));
+    sessionStorage.setItem(`${BOOKING_DRAFT_KEY}_notes`, creativeNotes);
+  }, [selectedServiceId, customServiceText, dateValue, selectedTimeframe, customTimeframeText, clientName, clientEmail, clientPhone, peopleCount, creativeNotes, step]);
+
   // Pricing Calculation
   const selectedService = services.find(s => s.id === selectedServiceId);
   const basePrice = preSelectedPackage ? preSelectedPackage.price : (selectedService ? selectedService.price : 0);
@@ -169,6 +191,9 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (bookingHoneypot) return;
+
     const safeName = sanitizeString(clientName);
     const safeEmail = sanitizeEmail(clientEmail);
     const safePhone = sanitizePhone(clientPhone);
@@ -215,15 +240,12 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
     if (emailConfig) {
       try {
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-        const apiKey = import.meta.env.VITE_SEND_EMAIL_SECRET || '';
+        const { getAuthHeaders } = await import('../lib/email');
         const sendFn = async (to: string, subject: string, text: string) => {
           if (!supabaseUrl) return;
           await fetch(`${supabaseUrl}/functions/v1/send-email`, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-api-key': apiKey,
-            },
+            headers: await getAuthHeaders(),
             body: JSON.stringify({ to, subject, html: text.replace(/\n/g, '<br>'), text }),
           });
         };
@@ -328,6 +350,17 @@ ${closing}`);
       amountDue: Math.max(0, totalPrice - depositAmt),
     });
 
+    sessionStorage.removeItem(BOOKING_DRAFT_KEY + '_service');
+    sessionStorage.removeItem(BOOKING_DRAFT_KEY + '_customService');
+    sessionStorage.removeItem(BOOKING_DRAFT_KEY + '_date');
+    sessionStorage.removeItem(BOOKING_DRAFT_KEY + '_timeframe');
+    sessionStorage.removeItem(BOOKING_DRAFT_KEY + '_customTime');
+    sessionStorage.removeItem(BOOKING_DRAFT_KEY + '_name');
+    sessionStorage.removeItem(BOOKING_DRAFT_KEY + '_email');
+    sessionStorage.removeItem(BOOKING_DRAFT_KEY + '_phone');
+    sessionStorage.removeItem(BOOKING_DRAFT_KEY + '_people');
+    sessionStorage.removeItem(BOOKING_DRAFT_KEY + '_notes');
+
     setStep('success');
   };
 
@@ -337,6 +370,17 @@ ${closing}`);
         {step === 'form' ? (
           <form onSubmit={handleSubmit} className="space-y-8">
             
+            {/* Honeypot — invisible to humans, catches bots */}
+            <div aria-hidden="true" className="absolute opacity-0 pointer-events-none" style={{ height: 0, overflow: 'hidden' }}>
+              <input
+                type="text"
+                tabIndex={-1}
+                autoComplete="off"
+                value={bookingHoneypot}
+                onChange={(e) => setBookingHoneypot(e.target.value)}
+              />
+            </div>
+
             {/* INTRO SPEECH */}
             <div className="text-center pb-2 border-b border-white/10 max-w-2xl mx-auto space-y-1.5">
               <h3 className="font-serif text-xl md:text-2xl text-white/80">

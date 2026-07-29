@@ -48,7 +48,7 @@ export default function AdminRemindersTab({
 
     setSendingIds(prev => new Set(prev).add(booking.id));
     try {
-      const apiKey = import.meta.env.VITE_SEND_EMAIL_SECRET || '';
+      const { getAuthHeaders } = await import('../lib/email');
       const dayLabel = booking.date === today
         ? t('HOY', 'TODAY')
         : booking.date === tomorrow
@@ -60,7 +60,7 @@ export default function AdminRemindersTab({
 
       const res = await fetch(`${supabaseUrl}/functions/v1/send-email`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey },
+        headers: await getAuthHeaders(),
         body: JSON.stringify({ to: booking.clientEmail, subject, html: text.replace(/\n/g, '<br>'), text }),
       });
       if (!res.ok) {
@@ -86,7 +86,7 @@ export default function AdminRemindersTab({
     }
   };
 
-  const isConfigured = !!(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SEND_EMAIL_SECRET);
+  const isConfigured = !!import.meta.env.VITE_SUPABASE_URL;
 
   const renderBookingRow = (booking: Booking) => {
     const isSending = sendingIds.has(booking.id);
@@ -195,7 +195,7 @@ export default function AdminRemindersTab({
             <span className="text-xs font-mono text-white/70">
               {isConfigured
                 ? t('Sistema de correo configurado (Supabase + Resend)', 'Email system configured (Supabase + Resend)')
-                : t('Edge Function no configurada. Revisá VITE_SEND_EMAIL_SECRET en .env', 'Edge Function not configured. Check VITE_SEND_EMAIL_SECRET in .env')}
+                : t('Edge Function no configurada. Verificá que las secrets estén en Supabase', 'Edge Function not configured. Check secrets in Supabase Dashboard')}
             </span>
           </div>
           {isConfigured && (

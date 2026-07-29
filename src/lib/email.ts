@@ -1,4 +1,5 @@
 import type { ActiveLanguíage, EmailConfig } from '../types';
+import { getSessionToken } from './db';
 
 function getFunctionUrl(): string {
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -6,21 +7,20 @@ function getFunctionUrl(): string {
   return `${supabaseUrl}/functions/v1/send-email`;
 }
 
-function getApiKey(): string {
-  const key = import.meta.env.VITE_SEND_EMAIL_SECRET;
-  if (!key) console.warn('VITE_SEND_EMAIL_SECRET not set — email sending may fail');
-  return key || '';
+export async function getAuthHeaders(): Promise<Record<string, string>> {
+  const token = await getSessionToken();
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  return headers;
 }
 
 async function callSendEmail(to: string, subject: string, text: string): Promise<boolean> {
   try {
     const html = text.replace(/\n/g, '<br>');
+    const headers = await getAuthHeaders();
     const res = await fetch(getFunctionUrl(), {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': getApiKey(),
-      },
+      headers,
       body: JSON.stringify({ to, subject, html, text }),
     });
     if (!res.ok) {
