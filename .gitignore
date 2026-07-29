@@ -13,7 +13,6 @@ coverage/
 .vercel
 
 # Legacy
-firebase-applet-config.json
 *.key
 credentials.json
 

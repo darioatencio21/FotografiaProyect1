@@ -9,10 +9,15 @@ permissions:
   contents: write
   pull-requests: write
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   release:
     name: Create release PR
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Release Please
         uses: googleapis/release-please-action@v5

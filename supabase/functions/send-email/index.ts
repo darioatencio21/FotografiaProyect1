@@ -1,25 +1,60 @@
 import { serve } from "https://deno.land/std@0.192.0/http/server.ts"
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.8"
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-api-key",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-forwarded-for",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 }
+
+const RATE_LIMIT_WINDOW_MS = 3_600_000 // 1 hour
+const RATE_LIMIT_MAX = 5
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders })
   }
 
-  const apiSecret = Deno.env.get("SEND_EMAIL_SECRET")
-  const authHeader = req.headers.get("x-api-key")
-
-  if (apiSecret && authHeader !== apiSecret) {
-    return new Response("Unauthorized", { status: 401, headers: corsHeaders })
-  }
-
   if (req.method !== "POST") {
     return new Response("Method not allowed", { status: 405, headers: corsHeaders })
+  }
+
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")!
+  const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!
+  const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+  const authHeader = req.headers.get("Authorization") || ""
+
+  let isAdmin = false
+  if (authHeader.startsWith("Bearer ")) {
+    const anonClient = createClient(supabaseUrl, supabaseAnonKey)
+    const { data: { user }, error } = await anonClient.auth.getUser(
+      authHeader.replace("Bearer ", "")
+    )
+    if (!error && user) isAdmin = true
+  }
+
+  if (!isAdmin) {
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
+    const serviceClient = createClient(supabaseUrl, supabaseServiceKey)
+    const since = new Date(Date.now() - RATE_LIMIT_WINDOW_MS).toISOString()
+
+    const { count, error: countError } = await serviceClient
+      .from("email_rate_limits")
+      .select("*", { count: "exact", head: true })
+      .eq("ip_address", ip)
+      .gte("created_at", since)
+
+    if (!countError && count !== null && count >= RATE_LIMIT_MAX) {
+      return new Response(JSON.stringify({ error: "Rate limit exceeded. Try again later." }), {
+        status: 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      })
+    }
+
+    await serviceClient.from("email_rate_limits").insert({
+      ip_address: ip,
+      created_at: new Date().toISOString(),
+    })
   }
 
   const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")

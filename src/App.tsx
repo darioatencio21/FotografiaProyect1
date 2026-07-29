@@ -44,7 +44,6 @@ import {
   getCollectionWithFallback,
   getSingleDocument,
   saveDocument,
-  confirmBookingInDB,
   deleteDocument,
   loginWithSupabase,
   logoutFromSupabase,
@@ -141,7 +140,6 @@ export default function App() {
   // Navigation & Languíage Context
   const [currentView, setCurrentView] = useState<string>(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.has('gallery')) return 'client-portal';
     if (params.has('approval')) return 'booking-approval';
     const view = params.get('view');
     if (view && VALID_VIEWS.has(view)) return view;
@@ -179,7 +177,7 @@ export default function App() {
 
   useEffect(() => {
     const initialView = currentView;
-    const initialUrl = initialView === 'home' ? '/' : '/?view=' + initialView + (galleryPasscode ? '&gallery=' + galleryPasscode : '');
+    const initialUrl = initialView === 'home' ? '/' : '/?view=' + initialView;
     window.history.replaceState({ view: initialView }, '', initialUrl);
 
     const handlePopState = (event: PopStateEvent) => {
@@ -202,10 +200,6 @@ export default function App() {
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
-  const [galleryPasscode, setGalleryPasscode] = useState<string>(() => {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('gallery') || '';
-  });
   const [lang, setLang] = useState<'es' | 'en'>(() => {
     const savedLanguíage = localStorage.getItem('aorea_lang');
     return savedLanguíage === 'es' || savedLanguíage === 'en' ? savedLanguíage : 'en';
@@ -295,15 +289,54 @@ export default function App() {
   const [checkoutDesc, setCheckoutDesc] = useState('');
 
   // Contact form state
-  const [contactName, setContactName] = useState('');
-  const [contactEmail, setContactEmail] = useState('');
-  const [contactSubject, setContactSubject] = useState('');
-  const [contactMsg, setContactMsg] = useState('');
+  const [contactName, setContactName] = useState(() => sessionStorage.getItem('contact_draft_name') || '');
+  const [contactEmail, setContactEmail] = useState(() => sessionStorage.getItem('contact_draft_email') || '');
+  const [contactSubject, setContactSubject] = useState(() => sessionStorage.getItem('contact_draft_subject') || '');
+  const [contactMsg, setContactMsg] = useState(() => sessionStorage.getItem('contact_draft_msg') || '');
   const [contactSuccess, setContactSuccess] = useState(false);
+  const [contactSubmitting, setContactSubmitting] = useState(false);
+  const [contactHoneypot, setContactHoneypot] = useState('');
+
+  useEffect(() => {
+    sessionStorage.setItem('contact_draft_name', contactName);
+    sessionStorage.setItem('contact_draft_email', contactEmail);
+    sessionStorage.setItem('contact_draft_subject', contactSubject);
+    sessionStorage.setItem('contact_draft_msg', contactMsg);
+  }, [contactName, contactEmail, contactSubject, contactMsg]);
 
   // Search filter
   const [activeFilter, setActiveFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+
+  const [approvalBooking, setApprovalBooking] = useState<Booking | null | 'loading'>('loading');
+
+  useEffect(() => {
+    if (!approvalToken) {
+      setApprovalBooking(null);
+      return;
+    }
+    let cancelled = false;
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    if (!supabaseUrl) {
+      if (!cancelled) setApprovalBooking(null);
+      return;
+    }
+    fetch(`${supabaseUrl}/functions/v1/verify-approval`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: approvalToken }),
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (!cancelled) {
+          setApprovalBooking(data.booking || null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setApprovalBooking(null);
+      });
+    return () => { cancelled = true; };
+  }, [approvalToken]);
 
   const t = TRANSLATIONS[lang];
 
@@ -525,18 +558,28 @@ export default function App() {
 
     handleUpdateBookings(bookings.map(b => b.id === bookingId ? updatedBooking : b));
 
-    saveDocument('bookings', bookingId, updatedBooking)
-      .then(() => console.log('[handleConfirmBooking] DB saved OK', bookingId))
-      .catch(err => console.error('[handleConfirmBooking] DB save FAILED:', bookingId, err));
-
-    confirmBookingInDB(bookingId, {
-      status: 'confirmed',
-      isPaid: true,
-      paymentStatus: 'paid',
-      contractStatus: 'signed',
-      contractSignature: signature || booking.contractSignature || '',
-      contractSignedAt: signature ? new Date().toISOString() : booking.contractSignedAt || new Date().toISOString(),
-    }).catch(err => console.error('[handleConfirmBooking] confirmBookingInDB FAILED:', bookingId, err));
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    if (supabaseUrl && booking.approvalToken) {
+      fetch(`${supabaseUrl}/functions/v1/update-booking-status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bookingId,
+          token: booking.approvalToken,
+          updates: {
+            status: 'confirmed',
+            isPaid: true,
+            paymentStatus: 'paid',
+            contractStatus: 'signed',
+            contractSignature: signature || booking.contractSignature || '',
+            contractSignedAt: signature ? new Date().toISOString() : booking.contractSignedAt || new Date().toISOString(),
+          },
+          sendConfirmation: true,
+        }),
+      }).then(res => {
+        if (!res.ok) console.error('[handleConfirmBooking] Edge Function failed:', bookingId);
+      }).catch(err => console.error('[handleConfirmBooking] Edge Function error:', bookingId, err));
+    }
 
     // Create invoice for this confirmed booking
     const existingInvoice = invoices.find(inv => inv.bookingId === bookingId);
@@ -573,23 +616,6 @@ export default function App() {
         paidAt: depositPaid > 0 ? now.toISOString() : undefined,
       };
       handleInvoiceCreated(newInvoice);
-    }
-
-    // Send confirmation email
-    if (emailConfig?.receiverEmail) {
-      import('./lib/email').then(({ sendConfirmationEmail }) => {
-        sendConfirmationEmail(
-          emailConfig,
-          booking.clientName,
-          booking.clientEmail,
-          emailConfig.receiverEmail,
-          booking.date,
-          booking.timeSlot,
-          (booking.depositAmount ?? 0),
-          booking.packageName || 'Photography Session',
-          lang,
-        );
-      });
     }
   };
 
@@ -713,12 +739,17 @@ export default function App() {
   // Submit contact message (inputs sanitized)
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (contactHoneypot) return;
+
     const safeName = sanitizeString(contactName);
     const safeEmail = sanitizeEmail(contactEmail);
     const safeSubject = sanitizeString(contactSubject);
     const safeMsg = sanitizeString(contactMsg);
 
     if (!safeName || !safeEmail || !safeMsg) return;
+
+    setContactSubmitting(true);
 
     const newMessage: Message = {
       id: `msg-${Date.now()}`,
@@ -730,28 +761,18 @@ export default function App() {
       isRead: false
     };
 
-    const updated = [newMessage, ...messages];
-    setMessages(updated);
-    setContactSuccess(true);
-    
-    // Save directly to Firestore collection
     try {
-      await saveDocument('messages', newMessage.id, newMessage);
-    } catch (err) {
-      console.error('Could not save message directly to Firestore:', err);
-    }
+      const updated = [newMessage, ...messages];
+      setMessages(updated);
 
-    if (emailConfig) {
-      try {
-        const { sendConfirmationEmail: _unused, ...emailHelpers } = await import('./lib/email');
+      await saveDocument('messages', newMessage.id, newMessage);
+
+      if (emailConfig) {
+        const { getAuthHeaders } = await import('./lib/email');
         const sendFn = async (to: string, subject: string, text: string) => {
           await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-email`, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              // FIXME: VITE_SEND_EMAIL_SECRET is exposed in client bundle. Move email-sending to a server-side endpoint.
-              'x-api-key': import.meta.env.VITE_SEND_EMAIL_SECRET || '',
-            },
+            headers: await getAuthHeaders(),
             body: JSON.stringify({
               to,
               subject,
@@ -799,16 +820,19 @@ ${autoMessage}
 ${closing}
 ${photographerName}`);
         }
-      } catch (err) {
-        console.error('Could not send contact emails:', err);
       }
-    }
 
-    setContactName('');
-    setContactEmail('');
-    setContactSubject('');
-    setContactMsg('');
-    setTimeout(() => setContactSuccess(false), 4000);
+      setContactSuccess(true);
+      setContactName('');
+      setContactEmail('');
+      setContactSubject('');
+      setContactMsg('');
+      setTimeout(() => setContactSuccess(false), 4000);
+    } catch (err) {
+      console.error('Could not submit contact message:', err);
+    } finally {
+      setContactSubmitting(false);
+    }
   };
 
   const handleAdminAuthSubmit = async (e: React.FormEvent) => {
@@ -1579,9 +1603,6 @@ ${photographerName}`);
               <ClientPortal
                 lang={lang}
                 onOpenCheckout={handleOpenStripeCheckout}
-                clientAccounts={clientAccounts}
-                onUpdateClientAccounts={handleUpdateClientAccounts}
-                autoPasscode={galleryPasscode}
                bookings={bookings}
                 onUpdateBookings={handleUpdateBookings}
                 invoices={invoices}
@@ -1596,7 +1617,7 @@ ${photographerName}`);
           {currentView === 'booking-approval' && approvalToken && (
             <div className="w-full max-w-4xl mx-auto px-4 py-8">
               {(() => {
-                if (!bootstrapped) {
+                if (approvalBooking === 'loading') {
                   return (
                     <div className="glass-premium rounded-lg border border-white/10 p-8 md:p-12 max-w-lg mx-auto text-center space-y-4">
                       <div className="inline-flex p-4 rounded-full bg-white/10 border border-white/10 text-white/30 mx-auto">
@@ -1608,7 +1629,7 @@ ${photographerName}`);
                     </div>
                   );
                 }
-                const booking = bookings.find(b => b.approvalToken === approvalToken);
+                const booking = approvalBooking;
                 if (!booking) {
                   return (
                     <div className="glass-premium rounded-lg border border-white/10 p-8 md:p-12 max-w-lg mx-auto text-center space-y-4">
@@ -1783,6 +1804,15 @@ ${photographerName}`);
                   <AnimatePresence mode="wait">
                     {!contactSuccess ? (
                       <form onSubmit={handleContactSubmit} className="space-y-4 text-left">
+                        <div aria-hidden="true" className="absolute opacity-0 pointer-events-none" style={{ height: 0, overflow: 'hidden' }}>
+                          <input
+                            type="text"
+                            tabIndex={-1}
+                            autoComplete="off"
+                            value={contactHoneypot}
+                            onChange={(e) => setContactHoneypot(e.target.value)}
+                          />
+                        </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="space-y-1">
                             <label className="text-[10px] font-mono text-white/45 uppercase tracking-wider">{t.clientName}</label>
@@ -1830,10 +1860,11 @@ ${photographerName}`);
 
                         <button
                           type="submit"
-                          className="w-full py-3 bg-white/10 hover:bg-white/15 text-white border border-white/10 font-mono text-[10px] tracking-widest uppercase font-bold rounded-lg transition-all flex items-center justify-center space-x-1 cursor-pointer"
+                          disabled={contactSubmitting}
+                          className="w-full py-3 bg-white/10 hover:bg-white/15 text-white border border-white/10 font-mono text-[10px] tracking-widest uppercase font-bold rounded-lg transition-all flex items-center justify-center space-x-1 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                         >
                           <MessageSquare size={13} />
-                          <span>{t.sendMessage}</span>
+                          <span>{contactSubmitting ? (lang === 'en' ? 'Sending...' : 'Enviando...') : t.sendMessage}</span>
                         </button>
                       </form>
                     ) : (

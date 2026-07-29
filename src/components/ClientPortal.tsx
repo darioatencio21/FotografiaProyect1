@@ -1,12 +1,7 @@
-﻿/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ShieldCheck, Heart, ArrowRight, Download, Eye, EyeOff, ChevronLeft, ChevronRight, X, Copy, Mail, MapPin } from 'lucide-react';
-import { ActiveLanguíage, Booking, ClientAccount, ProofPhoto, Invoice } from '../types';
+import { ShieldCheck, Heart, ArrowRight, Download, Eye, EyeOff, ChevronLeft, ChevronRight, X, Mail, MapPin } from 'lucide-react';
+import { ActiveLanguíage, Booking, ProofPhoto, Invoice, GalleryData } from '../types';
 import ContractView from './ContractView';
 import InvoiceReceipt from './InvoiceReceipt';
 import { TRANSLATIONS } from '../data/mockData';
@@ -15,22 +10,19 @@ import { sanitizeString, sanitizeUrl } from '../lib/sanitize';
 interface ClientPortalProps {
   lang: ActiveLanguíage;
   onOpenCheckout: (amount: number, description: string) => void;
-  clientAccounts?: ClientAccount[];
-  onUpdateClientAccounts?: (accounts: ClientAccount[]) => void;
-  autoPasscode?: string;
   bookings?: Booking[];
   onUpdateBookings?: (bookings: Booking[]) => void;
   invoices?: Invoice[];
   onSubmitTestimonial?: (testimonial: any) => void;
 }
 
-export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = [], onUpdateClientAccounts, autoPasscode, bookings = [], onUpdateBookings, invoices = [] }: ClientPortalProps) {
+export default function ClientPortal({ lang, onOpenCheckout, bookings = [], onUpdateBookings, invoices = [] }: ClientPortalProps) {
   const [passcode, setPasscode] = useState('');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [showPasscode, setShowPasscode] = useState(false);
-  const [authenticatedClientId, setAuthenticatedClientId] = useState<string | null>(null);
-  
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [galleryData, setGalleryData] = useState<GalleryData | null>(null);
+
   const [activePhoto, setActivePhoto] = useState<ProofPhoto | null>(null);
   const [activeFilter, setActiveFilter] = useState<'all' | 'favorites'>('all');
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
@@ -39,74 +31,83 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
 
   const t = TRANSLATIONS[lang];
 
-  useEffect(() => {
-    if (autoPasscode) {
-      const cleanCode = sanitizeString(autoPasscode).toUpperCase();
-      const matchedAccount = clientAccounts.find(c => sanitizeString(c.passcode).toUpperCase() === cleanCode);
-      if (matchedAccount) {
-        setAuthenticatedClientId(matchedAccount.id);
-        setIsAuthenticated(true);
-        setErrorMsg('');
-        if (matchedAccount.photos && matchedAccount.photos.length > 0) {
-          setActivePhoto(matchedAccount.photos[0]);
-        } else {
-          setActivePhoto(null);
-        }
-      }
-    }
-  }, [autoPasscode, clientAccounts]);
+  const proofPhotos = galleryData?.photos || [];
+  const signedContractBookings = galleryData ? bookings.filter(b => b.clientName === galleryData.clientName && b.contractData && b.contractSignature) : [];
+  const pendingContractBooking = galleryData ? bookings.find(b => b.clientName === galleryData.clientName && b.contractData && b.isPaid && !b.contractSignature) : undefined;
+  const clientInvoices = galleryData ? invoices.filter(invoice => invoice.clientEmail.toLowerCase() === galleryData.clientEmail?.toLowerCase()) : [];
 
-  const currentAccount = clientAccounts.find(c => c.id === authenticatedClientId);
-  const proofPhotos = currentAccount ? (currentAccount.photos || []) : [];
-  const signedContractBookings = currentAccount ? bookings.filter(b => b.clientName === currentAccount.clientName && b.contractData && b.contractSignature) : [];
-  const pendingContractBooking = currentAccount ? bookings.find(b => b.clientName === currentAccount.clientName && b.contractData && b.isPaid && !b.contractSignature) : undefined;
-  const clientInvoices = currentAccount ? invoices.filter(invoice => invoice.clientEmail.toLowerCase() === currentAccount.clientEmail.toLowerCase()) : [];
-
-  const handleAuth = (e: React.FormEvent) => {
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    const cleanCode = sanitizeString(passcode).toUpperCase();
+    const cleanCode = passcode.trim();
+    if (!cleanCode) return;
 
-    const matchedAccount = clientAccounts.find(c => sanitizeString(c.passcode).toUpperCase() === cleanCode);
+    setIsAuthenticating(true);
+    setErrorMsg('');
 
-    if (matchedAccount) {
-      setAuthenticatedClientId(matchedAccount.id);
-      setIsAuthenticated(true);
-      setErrorMsg('');
-      if (matchedAccount.photos && matchedAccount.photos.length > 0) {
-        setActivePhoto(matchedAccount.photos[0]);
-      } else {
-        setActivePhoto(null);
+    try {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      if (!supabaseUrl) throw new Error('Supabase URL not configured');
+
+      const res = await fetch(`${supabaseUrl}/functions/v1/validate-gallery`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passcode: cleanCode }),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'Invalid passcode');
       }
-    } else {
-      setErrorMsg(t.proofError);
+
+      const data = await res.json();
+
+      if (!data.client || !data.photos) {
+        throw new Error('Invalid response from server');
+      }
+
+      const galleryData: GalleryData = {
+        clientName: data.client.clientName,
+        clientEmail: data.client.clientEmail,
+        sessionTitle: data.client.sessionTitle,
+        sessionDate: data.client.sessionDate,
+        photos: data.photos.map((p: any) => ({
+          id: p.id || '',
+          url: p.signedUrl || p.url || '',
+          title: p.title || '',
+          sharpness: p.sharpness ?? 0,
+          thirdsAlign: p.thirdsAlign ?? 0,
+          emotionScore: p.emotionScore ?? 0,
+          isFav: false,
+          printSize: '',
+          description: p.description,
+          location: p.location,
+        })),
+      };
+
+      setGalleryData(galleryData);
+      if (galleryData.photos.length > 0) {
+        setActivePhoto(galleryData.photos[0]);
+      }
+    } catch (err: any) {
+      setErrorMsg(err.message || t.proofError);
+    } finally {
+      setIsAuthenticating(false);
     }
   };
 
   const handleToggleFav = (id: string) => {
-    if (authenticatedClientId && currentAccount && onUpdateClientAccounts) {
-      const updatedPhotos = proofPhotos.map(p => p.id === id ? { ...p, isFav: !p.isFav } : p);
-      const updatedAccounts = clientAccounts.map(c => c.id === authenticatedClientId ? {
-        ...c,
-        photos: updatedPhotos
-      } : c);
-      onUpdateClientAccounts(updatedAccounts);
-    }
-
+    if (!galleryData) return;
+    const updatedPhotos = proofPhotos.map(p => p.id === id ? { ...p, isFav: !p.isFav } : p);
+    setGalleryData({ ...galleryData, photos: updatedPhotos });
     if (activePhoto && activePhoto.id === id) {
       setActivePhoto(prev => prev ? { ...prev, isFav: !prev.isFav } : null);
     }
   };
 
   const handlePrintSizeChange = (id: string, size: string) => {
-    if (authenticatedClientId && currentAccount && onUpdateClientAccounts) {
-      const updatedPhotos = proofPhotos.map(p => p.id === id ? { ...p, printSize: size } : p);
-      const updatedAccounts = clientAccounts.map(c => c.id === authenticatedClientId ? {
-        ...c,
-        photos: updatedPhotos
-      } : c);
-      onUpdateClientAccounts(updatedAccounts);
-    }
-
+    if (!galleryData) return;
+    const updatedPhotos = proofPhotos.map(p => p.id === id ? { ...p, printSize: size } : p);
+    setGalleryData({ ...galleryData, photos: updatedPhotos });
     if (activePhoto && activePhoto.id === id) {
       setActivePhoto(prev => prev ? { ...prev, printSize: size } : null);
     }
@@ -170,7 +171,7 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
   return (
     <div className="w-full">
       <AnimatePresence mode="wait">
-        {!isAuthenticated ? (
+        {!galleryData ? (
           /* Authentication Screen */
           <motion.div
             key="auth-screen"
@@ -179,7 +180,7 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
           >
-            {/* Header — editorial focal point */}
+            {/* Header */}
             <div className="text-center space-y-8 mb-10">
               <div className="w-16 h-16 mx-auto rounded-full bg-white/5 border border-stone/20 flex items-center justify-center text-white/80">
                 <ShieldCheck size={30} />
@@ -225,10 +226,17 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
 
               <button
                 type="submit"
-                className="w-full py-3 bg-white text-dark hover:bg-white/80 font-mono text-xs tracking-widest uppercase font-semibold rounded-lg transition-all flex items-center justify-center space-x-2 shadow-xl cursor-pointer"
+                disabled={isAuthenticating}
+                className="w-full py-3 bg-white text-dark hover:bg-white/80 font-mono text-xs tracking-widest uppercase font-semibold rounded-lg transition-all flex items-center justify-center space-x-2 shadow-xl cursor-pointer disabled:opacity-50"
               >
-                <span>{t.proofEnter}</span>
-                <ArrowRight size={14} />
+                {isAuthenticating ? (
+                  <span className="w-4 h-4 border-2 border-dark border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <span>{t.proofEnter}</span>
+                    <ArrowRight size={14} />
+                  </>
+                )}
               </button>
             </form>
 
@@ -251,51 +259,14 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                   {lang === 'en' ? 'Client Proof Session' : 'Sesión de Pruebas de Cliente'}
                 </span>
                 <h3 className="font-serif text-3xl text-white font-semibold mt-1">
-                  {currentAccount ? currentAccount.clientName : 'Cliente Verificado'}
+                  {galleryData.clientName}
                 </h3>
                 <p className="text-xs text-white/75 mt-1 font-sans">
-                  {currentAccount 
-                    ? `${currentAccount.sessionTitle} • ${currentAccount.sessionDate}`
+                  {galleryData.sessionTitle
+                    ? `${galleryData.sessionTitle} • ${galleryData.sessionDate}`
                     : 'Sesión Fotográfica'}
                 </p>
               </div>
-
-              {/* Shoreable Link Banner */}
-              {currentAccount && (
-                <div className="bg-dark-gray/40 border border-white/10 rounded-lg p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <div className="flex items-center space-x-2 text-left">
-                    <MapPin size={12} className="text-white/70 shrink-0" />
-                    <span className="text-[10px] text-white/60 font-sans">
-                      {lang === 'en' ? 'Share your gallery:' : 'Compart tu galería:'}
-                    </span>
-                    <code className="text-[9px] font-mono text-white/70 bg-dark/40 px-2 py-0.5 rounded border border-white/10 truncate max-w-[200px] sm:max-w-xs">
-                      {window.location.origin + window.location.pathname + '?gallery=' + currentAccount.passcode}
-                    </code>
-                  </div>
-                  <div className="flex items-center space-x-1.5 shrink-0">
-                    <button
-                      onClick={() => {
-                        const link = window.location.origin + window.location.pathname + '?gallery=' + currentAccount.passcode;
-                        navigator.clipboard.writeText(link).then(() => {
-                          alert(lang === 'en' ? 'Link copied!' : 'Link copiado!');
-                        }).catch(() => {
-                          const textArea = document.createElement('textarea');
-                          textArea.value = link;
-                          document.body.appendChild(textArea);
-                          textArea.select();
-                          document.execCommand('copy');
-                          document.body.removeChild(textArea);
-                          alert(lang === 'en' ? 'Link copied!' : 'Link copiado!');
-                        });
-                      }}
-                      className="py-1.5 px-3 bg-white/10 hover:bg-white/10 text-white/60 border border-white/10 rounded-lg text-[9px] font-mono tracking-widest uppercase font-semibold flex items-center space-x-1 cursor-pointer transition-all"
-                    >
-                      <Copy size={11} />
-                      <span>{lang === 'en' ? 'Copy Link' : 'Copiar Link'}</span>
-                    </button>
-                  </div>
-                </div>
-              )}
 
               {/* Contract signing banner — pending */}
               {pendingContractBooking && !showContract && (
@@ -406,7 +377,6 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
             {proofPhotos.filter(p => activeFilter === 'favorites' ? p.isFav : true).length > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
                 {proofPhotos.map((photo, index) => {
-                  // Skip rendering if filtered out
                   if (activeFilter === 'favorites' && !photo.isFav) return null;
 
                   return (
@@ -414,7 +384,6 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                       key={photo.id}
                       className="group relative rounded-lg overflow-hidden bg-charcoal/20 border border-stone/30 shadow-md transition-all duration-300 hover:border-white/10 text-left flex flex-col justify-between"
                     >
-                      {/* Photo Container */}
                       <div 
                         className="relative aspect-[3/2] overflow-hidden bg-dark-gray/60 cursor-zoom-in"
                         onClick={() => setLightboxIndex(index)}
@@ -426,11 +395,10 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                           referrerPolicy="no-referrer"
                         />
 
-                        {/* Top corner fav status toggle button - Always Visible with elegant Glassmorphism */}
                         <div className="absolute top-2 right-2 z-20">
                           <button
                             onClick={(e) => {
-                              e.stopPropagation(); // Avoid triggering lightbox index
+                              e.stopPropagation();
                               handleToggleFav(photo.id);
                             }}
                             className={`p-2 rounded-full backdrop-blur-md transition-all cursor-pointer ${
@@ -445,19 +413,17 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                         </div>
                       </div>
 
-                      {/* Photo Footer Details */}
                       <div className="p-3 sm:p-4 flex flex-col border-t border-stone/30 bg-dark-gray/10 gap-1.5 text-left">
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0 flex-1">
                             <h4 className="text-[10px] sm:text-xs font-semibold text-white/90 truncate">{photo.title}</h4>
                             {photo.location ? (
-                              <span className="text-[11px] sm:text-[9px] font-mono text-white/70 block truncate mt-0.5">📍 {photo.location}</span>
+                              <span className="text-[11px] sm:text-[9px] font-mono text-white/70 block truncate mt-0.5">{photo.location}</span>
                             ) : (
                               <span className="text-[11px] sm:text-[9px] font-mono text-white/65 block mt-0.5 uppercase tracking-wider">High-Res</span>
                             )}
                           </div>
-                          
-                          {/* Direct Download button on the card for quick mobile access */}
+
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -478,14 +444,13 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                 })}
               </div>
             ) : (
-              /* No items fallback */
               <div className="py-20 text-center text-white/40 space-y-3 glass-premium border border-stone/30 rounded-lg max-w-lg mx-auto">
                 <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mx-auto text-white/30">
                   <Heart size={20} />
                 </div>
                 <h4 className="font-serif text-lg text-white/80 font-medium">No hay fotos en esta sección</h4>
                 <p className="text-xs text-white/50 max-w-sm mx-auto px-4">
-                  Aón no has marcado ninguna fotografía como favorita. Explora el catálogo y pulsa el corazón en tus fotos preferidas!
+                  Aún no has marcado ninguna fotografía como favorita. Explora el catálogo y pulsa el corazón en tus fotos preferidas!
                 </p>
                 <button
                   onClick={() => setActiveFilter('all')}
@@ -505,7 +470,6 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                 >
-                  {/* Lightbox Header */}
                   <div className="flex items-start justify-between w-full gap-4">
                     <div className="text-left max-w-xl">
                       <span className="font-mono text-[9px] text-white/70 tracking-widest uppercase">
@@ -516,7 +480,7 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                       </h2>
                       {proofPhotos[lightboxIndex].location && (
                         <span className="font-mono text-[9px] text-white/50 block mt-1 uppercase">
-                          📍 {proofPhotos[lightboxIndex].location}
+                          {proofPhotos[lightboxIndex].location}
                         </span>
                       )}
                       {proofPhotos[lightboxIndex].description && (
@@ -533,9 +497,7 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                     </button>
                   </div>
 
-                  {/* Main Image View */}
                   <div className="flex-1 flex items-center justify-center relative my-4 max-h-[72vh]">
-                    {/* Navigation arrows (Hidden on mobile touch screens for visual elegance, as thumb bar is available) */}
                     <button
                       onClick={() => {
                         setLightboxIndex(prev => {
@@ -567,9 +529,7 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                     </button>
                   </div>
 
-                  {/* Fully mobile-optimized, thumb-friendly navigation & action bottom bar */}
                   <div className="flex items-center justify-between max-w-sm mx-auto w-full px-4 pb-2 gap-4">
-                    {/* Anterior */}
                     <button
                       onClick={() => {
                         setLightboxIndex(prev => {
@@ -583,7 +543,6 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                       <ChevronLeft size={20} />
                     </button>
 
-                    {/* Favorita Toggle */}
                     <button
                       onClick={() => handleToggleFav(proofPhotos[lightboxIndex!].id)}
                       className={`p-4 rounded-full border transition-all flex items-center justify-center cursor-pointer ${
@@ -596,7 +555,6 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                       <Heart size={20} className={proofPhotos[lightboxIndex!].isFav ? 'fill-dark' : ''} />
                     </button>
 
-                    {/* Descargar Foto */}
                     <button
                       onClick={() => handleDownload(proofPhotos[lightboxIndex!])}
                       className="p-4 bg-white text-dark hover:bg-white/80 border border-stone rounded-full transition-all flex items-center justify-center cursor-pointer active:scale-95 shadow-xl"
@@ -605,7 +563,6 @@ export default function ClientPortal({ lang, onOpenCheckout, clientAccounts = []
                       <Download size={20} />
                     </button>
 
-                    {/* Siguiente */}
                     <button
                       onClick={() => {
                         setLightboxIndex(prev => {

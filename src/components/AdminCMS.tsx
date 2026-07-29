@@ -20,7 +20,7 @@ import {
 import { TRANSLATIONS } from '../data/mockData';
 import { sanitizeString, sanitizeEmail, sanitizeUrl, sanitizeObject } from '../lib/sanitize';
 import { supabase, uploadImageBlob, deleteImageByUrl } from '../lib/db';
-import { sendApprovalEmail, sendRejectionEmail, sendExpirationEmail, sendPendingPaymentReminder, sendConfirmationEmail } from '../lib/email';
+import { sendApprovalEmail, sendRejectionEmail, sendExpirationEmail, sendPendingPaymentReminder, sendConfirmationEmail, getAuthHeaders } from '../lib/email';
 
 import AdminSEOTab from './AdminSEOTab';
 import AdminProfileTab from './AdminProfileTab';
@@ -2329,10 +2329,9 @@ export default function AdminCMS({
                         try {
                           triggerAlert('Enviando correo de prueba...');
                           const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-                          const apiKey = import.meta.env.VITE_SEND_EMAIL_SECRET || '';
                           const res = await fetch(`${supabaseUrl}/functions/v1/send-email`, {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey },
+                            headers: await getAuthHeaders(),
                             body: JSON.stringify({
                               to: toEmail,
                               subject: 'Correo de prueba — Miriam Campos Photography',
@@ -2450,13 +2449,12 @@ export default function AdminCMS({
                             try {
                               triggerAlert('Enviando auto-respuesta de prueba a tu propio correo...');
                               const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-                              const apiKey = import.meta.env.VITE_SEND_EMAIL_SECRET || '';
                               const testSubject = emailForm.autoReplySubject || 'Tu reserva ha sido recibida con éxito! - Miriam Campos Photography';
                               const testMessage = emailForm.autoReplyMessage || 'Hola, esto es un mensaje de prueba de respuesta automática.';
 
                               const res = await fetch(`${supabaseUrl}/functions/v1/send-email`, {
                                 method: 'POST',
-                                headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey },
+                                headers: await getAuthHeaders(),
                                 body: JSON.stringify({
                                   to: toEmail,
                                   subject: testSubject,
@@ -2513,17 +2511,11 @@ export default function AdminCMS({
 
                     <div className="bg-black/30 p-2.5 rounded font-mono text-[9px] text-white/50 space-y-1 ml-7">
                       <div>• <span className="text-white/70">RESEND_API_KEY</span> — Tu API key de Resend</div>
-                      <div>• <span className="text-white/70">SEND_EMAIL_SECRET</span> — Un string secreto compartido (el mismo que en <code>.env</code> como <code>VITE_SEND_EMAIL_SECRET</code>)</div>
                       <div>• <span className="text-white/70">FROM_EMAIL</span> — (Opcional) Correo verificado en Resend</div>
                     </div>
 
                     <div className="flex items-start space-x-2">
                       <span className="font-mono text-white font-semibold bg-white/5 rounded w-5 h-5 flex items-center justify-center shrink-0">3</span>
-                      <p>En tu archivo <code>.env.local</code>, agrega <code>VITE_SEND_EMAIL_SECRET</code> con el mismo valor que usaste en Supabase.</p>
-                    </div>
-
-                    <div className="flex items-start space-x-2">
-                      <span className="font-mono text-white font-semibold bg-white/5 rounded w-5 h-5 flex items-center justify-center shrink-0">4</span>
                       <p>Configura tu correo remitente en el campo de arriba y haz clic en <strong>Enviar Correo de Prueba</strong>.</p>
                     </div>
                   </div>
@@ -3161,14 +3153,13 @@ export default function AdminCMS({
                           setIsSendingEmail(true);
                           try {
                             const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-                            const apiKey = import.meta.env.VITE_SEND_EMAIL_SECRET || '';
                             const link = window.location.origin + window.location.pathname + '?gallery=' + sendingToClient.passcode;
                             const message = sendEmailMessage
                               .replace(/\{name\}/g, sendingToClient.clientName)
                               .replace(/\{link\}/g, link);
                             const res = await fetch(`${supabaseUrl}/functions/v1/send-email`, {
                               method: 'POST',
-                              headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey },
+                              headers: await getAuthHeaders(),
                               body: JSON.stringify({
                                 to: sendingToClient.clientEmail,
                                 subject: sendEmailSubject,
