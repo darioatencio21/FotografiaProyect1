@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.2](https://github.com/darioatencio21/FotografiaProyect1/compare/v1.1.1...v1.1.2) (2026-07-30)
+
+
+### Bug Fixes
+
+* **codeql:** fix action versions, fork-safe SARIF upload, fix setup-node tags across workflows ([6ec5d7d](https://github.com/darioatencio21/FotografiaProyect1/commit/6ec5d7d4ea97409b670c6eb23f9fba09ed7e6440))
+
 ## [1.1.1](https://github.com/darioatencio21/FotografiaProyect1/compare/v1.1.0...v1.1.1) (2026-07-30)
 
 
