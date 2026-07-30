@@ -40,7 +40,10 @@ jobs:
       - name: Autobuild
         uses: github/codeql-action/autobuild@v3
 
-      - name: Perform CodeQL analysis
+      - name: Perform CodeQL analysis & upload results
         uses: github/codeql-action/analyze@v3
+        if: >
+          github.event_name != 'pull_request' ||
+          github.event.pull_request.head.repo.fork == false
         with:
           category: ${{ matrix.language }}
