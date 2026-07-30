@@ -3,6 +3,7 @@ import { Check, UploadCloud } from 'lucide-react';
 import { PhotographerProfile, ActiveLanguíage } from '../types';
 import { sanitizeObject } from '../lib/sanitize';
 import { uploadImageBlob } from '../lib/db';
+import StorageImage from './StorageImage';
 
 interface AdminProfileTabProps {
   profile: PhotographerProfile;
@@ -165,7 +166,7 @@ function AdminProfileTab({ profile, onUpdateProfile, triggerAlert, lang }: Admin
             <div className="flex flex-col items-center space-y-4">
               <div className="relative w-32 h-32 rounded-full overflow-hidden border-2 border-white/10 bg-charcoal shadow-lg">
                 {profileForm.avatarUrl ? (
-                  <img src={profileForm.avatarUrl} className="w-full h-full object-cover" alt="Profile preview" />
+                  <StorageImage src={profileForm.avatarUrl} className="w-full h-full object-cover" alt="Profile preview" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-white/30 text-[10px] font-mono">Sin foto</div>
                 )}
@@ -189,7 +190,7 @@ function AdminProfileTab({ profile, onUpdateProfile, triggerAlert, lang }: Admin
             <div className="border border-stone bg-charcoal rounded-lg p-4 text-left space-y-4">
               <div className="aspect-[4/5] rounded-lg overflow-hidden relative border border-white/10">
                 {profileForm.avatarUrl ? (
-                  <img src={profileForm.avatarUrl} className="w-full h-full object-cover" alt="preview" />
+                  <StorageImage src={profileForm.avatarUrl} className="w-full h-full object-cover" alt="preview" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-white/30 text-[10px] font-mono">Sin foto</div>
                 )}

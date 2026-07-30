@@ -6,6 +6,7 @@ import ContractView from './ContractView';
 import InvoiceReceipt from './InvoiceReceipt';
 import { TRANSLATIONS } from '../data/mockData';
 import { sanitizeString, sanitizeUrl } from '../lib/sanitize';
+import StorageImage from './StorageImage';
 
 interface ClientPortalProps {
   lang: ActiveLanguíage;
@@ -388,8 +389,8 @@ export default function ClientPortal({ lang, onOpenCheckout, bookings = [], onUp
                         className="relative aspect-[3/2] overflow-hidden bg-dark-gray/60 cursor-zoom-in"
                         onClick={() => setLightboxIndex(index)}
                       >
-                        <img
-                          src={sanitizeUrl(photo.url) || undefined}
+                        <StorageImage
+                          src={sanitizeUrl(photo.url)}
                           alt={photo.title}
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                           referrerPolicy="no-referrer"
@@ -510,8 +511,8 @@ export default function ClientPortal({ lang, onOpenCheckout, bookings = [], onUp
                       <ChevronLeft size={20} />
                     </button>
 
-                    <img
-                      src={sanitizeUrl(proofPhotos[lightboxIndex].url) || undefined}
+                    <StorageImage
+                      src={sanitizeUrl(proofPhotos[lightboxIndex].url)}
                       alt={proofPhotos[lightboxIndex].title}
                       className="max-w-full max-h-[65vh] md:max-h-[68vh] object-contain rounded-lg shadow-2xl border border-stone/30"
                     />

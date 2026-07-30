@@ -175,6 +175,7 @@ export async function uploadImageBlob(path: string, blob: Blob): Promise<string>
     .from(bucket)
     .upload(filePath, blob, {
       contentType: blob.type || 'image/jpeg',
+      cacheControl: '31536000',
       upsert: true,
     });
   if (uploadError) throw uploadError;

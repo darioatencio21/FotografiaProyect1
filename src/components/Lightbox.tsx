@@ -3,12 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Camera, Eye, Heart, Download, Share2, X, ChevronLeft, ChevronRight, Sliders, Layers } from 'lucide-react';
 import { Photograph, ActiveLanguíage } from '../types';
 import { TRANSLATIONS } from '../data/mockData';
 import { sanitizeUrl } from '../lib/sanitize';
+import StorageImage from './StorageImage';
 
 interface LightboxProps {
   photo: Photograph;
@@ -41,6 +42,15 @@ export default function Lightbox({
 
     return photo.description;
   }
+
+  const handleImgRetry = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget;
+    if (!img.dataset.retried) {
+      img.dataset.retried = 'true';
+      const sep = img.src.includes('?') ? '&' : '?';
+      img.src = `${img.src}${sep}retry=${Date.now()}`;
+    }
+  };
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -172,6 +182,7 @@ export default function Lightbox({
                 key={photo.id}
                 src={sanitizeUrl(photo.url) || undefined}
                 alt={photo.title}
+                onError={handleImgRetry}
                 className="max-h-[60vh] max-w-full object-contain rounded-sm shadow-2xl pointer-events-none transition-transform duration-300"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -186,8 +197,8 @@ export default function Lightbox({
               >
                 {/* Underlay RAW image (greyscale or desaturated slightly to replicate sensor RAW data) */}
                 <div className="absolute inset-0 w-full h-full">
-                  <img
-                    src={sanitizeUrl(photo.url) || undefined}
+                  <StorageImage
+                    src={sanitizeUrl(photo.url)}
                     alt="RAW"
                     className="w-full h-full object-cover"
                   />
@@ -201,8 +212,8 @@ export default function Lightbox({
                   className="absolute inset-y-0 left-0 overflow-hidden"
                   style={{ width: `${compareSlider}%` }}
                 >
-                  <img
-                    src={sanitizeUrl(photo.url) || undefined}
+                  <StorageImage
+                    src={sanitizeUrl(photo.url)}
                     alt="Master Color Graded"
                     className="absolute inset-0 w-full h-full object-cover"
                     style={{ width: '100%', maxWidth: 'none' }}

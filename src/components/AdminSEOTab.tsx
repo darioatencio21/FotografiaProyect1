@@ -3,6 +3,7 @@ import { RefreshCw, UploadCloud } from 'lucide-react';
 import { SEOMetadata, ActiveLanguíage } from '../types';
 import { sanitizeObject } from '../lib/sanitize';
 import { uploadImageBlob } from '../lib/db';
+import StorageImage from './StorageImage';
 
 interface AdminSEOTabProps {
   seo: SEOMetadata;
@@ -120,7 +121,7 @@ function AdminSEOTab({ seo, onUpdateSeo, triggerAlert, lang }: AdminSEOTabProps)
               </div>
               {seoForm.heroImageLeft && (
                 <div className="mt-1 aspect-[3/2] rounded-lg overflow-hidden border border-white/10 bg-charcoal">
-                  <img src={seoForm.heroImageLeft} alt="Left hero preview" className="w-full h-full object-cover" />
+                  <StorageImage src={seoForm.heroImageLeft} alt="Left hero preview" className="w-full h-full object-cover" />
                 </div>
               )}
             </div>
@@ -138,7 +139,7 @@ function AdminSEOTab({ seo, onUpdateSeo, triggerAlert, lang }: AdminSEOTabProps)
               </div>
               {seoForm.heroImageRight && (
                 <div className="mt-1 aspect-[3/2] rounded-lg overflow-hidden border border-white/10 bg-charcoal">
-                  <img src={seoForm.heroImageRight} alt="Right hero preview" className="w-full h-full object-cover" />
+                  <StorageImage src={seoForm.heroImageRight} alt="Right hero preview" className="w-full h-full object-cover" />
                 </div>
               )}
             </div>
@@ -166,7 +167,7 @@ function AdminSEOTab({ seo, onUpdateSeo, triggerAlert, lang }: AdminSEOTabProps)
           <div className="border border-stone bg-charcoal rounded-lg overflow-hidden shadow-2xl flex flex-col">
             <div className="relative aspect-[1.91/1] overflow-hidden bg-charcoal">
               {seoForm.ogImage ? (
-                <img src={seoForm.ogImage} className="w-full h-full object-cover" alt="og preview" />
+                <StorageImage src={seoForm.ogImage} className="w-full h-full object-cover" alt="og preview" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-white/30 text-[10px] font-mono">{lang === 'es' ? 'Sin imagen' : 'No image'}</div>
               )}

@@ -2,6 +2,7 @@
 import { Save, Plus, Trash2, Edit3, X, Upload, Star } from 'lucide-react';
 import { PhotographyPackage, ActiveLanguíage, SessionCategory } from '../types';
 import { uploadImageBlob } from '../lib/db';
+import StorageImage from './StorageImage';
 
 async function compressToBlob(file: File, maxSize = 1200, quality = 0.8): Promise<Blob> {
   const rawUrl = await new Promise<string>((resolve, reject) => {
@@ -346,7 +347,7 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
                   </div>
                   {editForm.image && (
                     <div className="rounded-lg overflow-hidden border border-white/10 mt-1">
-                      <img src={editForm.image} alt="Preview" className="w-full h-20 object-cover" />
+                      <StorageImage src={editForm.image} alt="Preview" className="w-full h-20 object-cover" />
                     </div>
                   )}
                 </div>
@@ -428,7 +429,7 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
                       <span className="text-[10px] font-mono text-white/30 w-6 text-right">{pkg.sortOrder}</span>
                       {pkg.image && (
                         <div className="w-8 h-8 rounded overflow-hidden shrink-0 bg-charcoal border border-white/10">
-                          <img src={pkg.image} alt="" className="w-full h-full object-cover" />
+                          <StorageImage src={pkg.image} alt="" className="w-full h-full object-cover" />
                         </div>
                       )}
                       <span className="text-sm font-serif text-white truncate">{pName || '(sin nombre)'}</span>

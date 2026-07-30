@@ -23,6 +23,7 @@ import {
  } from './data/mockData';
 import { Photograph, Service, Testimonial, BlogPost, FAQ, Booking, Message, SEOMetadata, PhotographerProfile, BookingConfig, EmailConfig, ClientAccount, AnalyticsStats, SessionCategory, PhotographyPackage, Invoice } from './types';
 
+import StorageImage from './components/StorageImage';
 import CustomCursor from './components/CustomCursor';
 import Lightbox from './components/Lightbox';
 import BookingCalendar from './components/BookingCalendar';
@@ -989,7 +990,7 @@ ${photographerName}`);
               }}
               className="w-full h-full"
             >
-              <img
+              <StorageImage
                 src={seo.heroImageLeft || 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=85&w=1200'}
                 alt="Fine Art Photography"
                 className="w-full h-full object-cover object-center"
@@ -1012,7 +1013,7 @@ ${photographerName}`);
               }}
               className="w-full h-full"
             >
-              <img
+              <StorageImage
                 src={seo.heroImageLeft || 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=85&w=1600'}
                 alt="Fine Art Wedding"
                 className="w-full h-full object-cover object-center"
@@ -1035,7 +1036,7 @@ ${photographerName}`);
               }}
               className="w-full h-full"
             >
-              <img
+              <StorageImage
                 src={seo.heroImageRight || 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&q=85&w=1600'}
                 alt="Editorial Fashion"
                 className="w-full h-full object-cover object-center"
@@ -1252,7 +1253,7 @@ ${photographerName}`);
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                   {packages.filter(pkg => pkg.active && pkg.featured).slice(0, 3).map(pkg => (
                     <article key={pkg.id} className="group bg-dark-gray border border-white/10 rounded-lg overflow-hidden hover:border-white/30 transition-all duration-500 shadow-sm">
-                      {pkg.image && <div className="h-32 sm:h-36 lg:h-40 overflow-hidden"><img src={sanitizeUrl(pkg.image) || undefined} alt={lang === 'es' ? pkg.name_es : pkg.name_en} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" /></div>}
+                      {pkg.image && <div className="h-32 sm:h-36 lg:h-40 overflow-hidden"><StorageImage src={sanitizeUrl(pkg.image)} alt={lang === 'es' ? pkg.name_es : pkg.name_en} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" /></div>}
                       <div className="p-4 sm:p-5 space-y-4">
                         <div className="flex items-start justify-between gap-3">
                           <div>
@@ -1396,7 +1397,7 @@ ${photographerName}`);
                           >
                             {/* Background image */}
                             <div className="absolute inset-0">
-                              <img
+                              <StorageImage
                                 src={cat.image}
                                 alt={cName}
                                 className="w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-105"
@@ -1493,7 +1494,7 @@ ${photographerName}`);
                                   <div className="space-y-5">
                                     {pkg.image && (
                                       <div className="rounded-lg overflow-hidden sm:-mx-2 sm:-mt-2">
-                                        <img src={pkg.image} alt={pName} className="w-full h-36 sm:h-40 object-cover transition-all duration-700 group-hover:scale-105" />
+                                        <StorageImage src={pkg.image} alt={pName} className="w-full h-36 sm:h-40 object-cover transition-all duration-700 group-hover:scale-105" />
                                       </div>
                                     )}
 

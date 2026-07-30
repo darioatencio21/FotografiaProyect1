@@ -20,6 +20,7 @@ import {
 import { TRANSLATIONS } from '../data/mockData';
 import { sanitizeString, sanitizeEmail, sanitizeUrl, sanitizeObject } from '../lib/sanitize';
 import { supabase, uploadImageBlob, deleteImageByUrl } from '../lib/db';
+import StorageImage from './StorageImage';
 import { sendApprovalEmail, sendRejectionEmail, sendExpirationEmail, sendPendingPaymentReminder, sendConfirmationEmail, getAuthHeaders } from '../lib/email';
 
 import AdminSEOTab from './AdminSEOTab';
@@ -1238,7 +1239,7 @@ export default function AdminCMS({
                   {/* Photo Preview Column */}
                   <div className="lg:col-span-4 space-y-4">
                     <div className="aspect-[3/2] rounded-lg overflow-hidden border border-white/10 relative">
-                       <img src={sanitizeUrl(photoEditItem.url) || undefined} alt="" className="w-full h-full object-cover" />
+                       <StorageImage src={sanitizeUrl(photoEditItem.url)} alt="" className="w-full h-full object-cover" />
                       <span className="absolute bottom-2 left-2 bg-overlay/70 border border-white/10 text-[9px] font-mono text-white/70 px-2 py-0.5 rounded uppercase">
                         {photoEditItem.category}
                       </span>
@@ -1358,7 +1359,7 @@ export default function AdminCMS({
               {photographs.map(photo => (
                 <div key={photo.id} className="bg-charcoal border border-white/10 rounded-lg overflow-hidden flex flex-col justify-between animate-fadeIn">
                   <div className="relative aspect-[3/2] overflow-hidden">
-                     <img src={sanitizeUrl(photo.url) || undefined} alt="" className="w-full h-full object-cover" />
+                     <StorageImage src={sanitizeUrl(photo.url)} alt="" className="w-full h-full object-cover" />
                     <span className="absolute top-2 left-2 bg-dark/75 border border-white/10 px-1.5 py-0.5 text-[11px] font-mono text-white/70 rounded uppercase tracking-wider">
                       {photo.category}
                     </span>
@@ -1437,7 +1438,7 @@ export default function AdminCMS({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {testimonials.map(testimonial => (
                 <article key={testimonial.id} className="bg-dark-gray/70 border border-white/10 rounded-lg p-5 flex gap-4">
-                  <img src={sanitizeUrl(testimonial.image) || undefined} alt={testimonial.name} className="w-12 h-12 rounded-full object-cover grayscale shrink-0" />
+                  <StorageImage src={sanitizeUrl(testimonial.image)} alt={testimonial.name} className="w-12 h-12 rounded-full object-cover grayscale shrink-0" />
                   <div className="min-w-0 flex-1">
                     <div className="flex justify-between gap-3"><div><h3 className="text-sm text-white">{testimonial.name}</h3><p className="text-[9px] text-white/35 uppercase tracking-wider mt-1">{testimonial.role}</p></div><div className="text-right"><div className="flex gap-0.5 text-white/70 justify-end">{Array.from({ length: testimonial.rating }).map((_, index) => <span key={index}>★</span>)}</div>{testimonial.approved === false && <span className="text-[11px] font-mono uppercase tracking-wider text-amber-400">{t('Pendiente', 'Pending', 'Pendente')}</span>}</div></div>
                     <p className="text-xs text-white/55 leading-relaxed mt-4">✓{testimonial.comment}❞</p>
@@ -2792,7 +2793,7 @@ export default function AdminCMS({
                       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
                         {clientForm.photos?.map((p) => (
                           <div key={p.id} className="relative aspect-square bg-dark border border-white/10 rounded-lg overflow-hidden group">
-                             <img src={sanitizeUrl(p.url) || undefined} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                             <StorageImage src={sanitizeUrl(p.url)} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
                             <div className="absolute inset-0 bg-black/75 opacity-0 group-hover:opacity-100 transition-opacity p-2 flex flex-col justify-between text-left text-[11px] font-mono">
                               <div>
                                 <span className="text-white/90 font-semibold block truncate">{p.title}</span>
@@ -2864,7 +2865,7 @@ export default function AdminCMS({
                               </div>
 
                               <div className="aspect-[3/2] rounded-lg overflow-hidden border border-white/10">
-                                 <img src={sanitizeUrl(photoToEdit.url) || undefined} alt="" className="w-full h-full object-cover" />
+                                 <StorageImage src={sanitizeUrl(photoToEdit.url)} alt="" className="w-full h-full object-cover" />
                               </div>
 
                               <div className="space-y-3">
@@ -3540,7 +3541,7 @@ function SessionCategoriesEditor({ categories, onUpdate, triggerAlert, lang }: S
               {/* Image preview */}
               {editingCat.image && (
                 <div className="rounded-lg overflow-hidden border border-white/10">
-                  <img src={editingCat.image} alt="Preview" className="w-full h-32 object-cover" />
+                   <StorageImage src={editingCat.image} alt="Preview" className="w-full h-32 object-cover" />
                 </div>
               )}
             </div>
@@ -3565,7 +3566,7 @@ function SessionCategoriesEditor({ categories, onUpdate, triggerAlert, lang }: S
             <div key={cat.id} className={`flex items-center justify-between p-3 rounded-lg border transition-all ${cat.active ? 'border-stone bg-dark-gray' : 'border-stone/30 bg-dark-gray opacity-60'}`}>
               <div className="flex items-center space-x-3 flex-1 min-w-0">
                 <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-charcoal border border-white/10">
-                  {cat.image && <img src={cat.image} alt={cName} className="w-full h-full object-cover" />}
+                  {cat.image && <StorageImage src={cat.image} alt={cName} className="w-full h-full object-cover" />}
                 </div>
                 <div className="min-w-0">
                   <span className="text-sm font-serif text-white truncate block">{cName}</span>

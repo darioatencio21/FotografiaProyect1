@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { PhotographerProfile, ActiveLanguíage } from '../types';
 import { MILESTONES } from '../data/mockData';
+import StorageImage from './StorageImage';
 
 interface Props {
   profile: PhotographerProfile;
@@ -110,7 +111,7 @@ export default function AboutSection({ profile, lang, t }: Props) {
           className="md:col-span-5"
         >
           <div className="aspect-[3/4] md:aspect-[4/5] relative overflow-hidden">
-            <img
+            <StorageImage
               src={avatarUrl}
               alt={profile.name || 'Miriam Campos'}
               className="w-full h-full object-cover"
