@@ -15,7 +15,7 @@ const supabase = createClient(supabaseUrl, serviceRoleKey);
 async function reset() {
   console.log('Resetting bookings and analytics...\n');
 
-  const { error: err1, count: c1 } = await supabase.from('bookings').delete().neq('id', '');
+  const { error: err1 } = await supabase.from('bookings').delete().neq('id', '');
   console.log(`Deleted bookings: ${err1 ? 'Error: ' + err1.message : 'ok'}`);
 
   const { error: err2 } = await supabase.from('analytics').upsert({

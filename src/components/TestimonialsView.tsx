@@ -13,7 +13,6 @@ export default function TestimonialsView({ testimonials, lang, onSubmitTestimoni
   const [review, setReview] = useState({ name: '', role: '', comment: '', rating: 5 });
   const [reviewSent, setReviewSent] = useState(false);
 
-  const t = TRANSLATIONS[lang];
   const approvedTestimonials = testimonials.filter(item => item.approved !== false);
 
   const handleReviewSubmit = (event: React.FormEvent) => {

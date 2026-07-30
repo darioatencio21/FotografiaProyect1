@@ -1,10 +1,9 @@
-import React, { useState, useMemo } from 'react';
-import { Bell, BellOff, Send, Check, X, Calendar, Clock, User, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
-import { Booking, EmailConfig, PhotographerProfile, ActiveLanguíage } from '../types';
+import { useState, useMemo } from 'react';
+import { Bell, BellOff, Send, Check, X, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
+import { Booking, PhotographerProfile, ActiveLanguíage } from '../types';
 
 interface AdminRemindersTabProps {
   bookings: Booking[];
-  emailConfig: EmailConfig;
   profile: PhotographerProfile;
   onUpdateBookings: (bookings: Booking[]) => void;
   triggerAlert: (msg: string) => void;
@@ -12,7 +11,7 @@ interface AdminRemindersTabProps {
 }
 
 export default function AdminRemindersTab({
-  bookings, emailConfig, profile,
+  bookings, profile,
   onUpdateBookings, triggerAlert, lang,
 }: AdminRemindersTabProps) {
   const [sendingIds, setSendingIds] = useState<Set<string>>(new Set());

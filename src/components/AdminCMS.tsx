@@ -6,8 +6,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  BarChart3, Camera, Calendar, BookOpen, MessageSquare, HelpCircle, 
-  Settings, LogOut, Check, X, ShieldAlert, Edit, Edit3, Trash2, Plus, Menu, Save,
+  BarChart3, Camera, Calendar, MessageSquare, 
+  Settings, LogOut, Check, X, Edit, Edit3, Trash2, Plus, Menu, Save,
   ArrowUpRight, Eye, RefreshCw, Upload, Sliders, FileCode, CheckSquare,
   User, Mail, ChevronDown, ChevronUp, Phone, Users, FileText, ShoppingBag, Copy, 
   Receipt, Bell, Clock
@@ -19,9 +19,9 @@ import {
 } from '../types';
 import { TRANSLATIONS } from '../data/mockData';
 import { sanitizeString, sanitizeEmail, sanitizeUrl, sanitizeObject } from '../lib/sanitize';
-import { supabase, uploadImageBlob, deleteImageByUrl } from '../lib/db';
+import { supabase, uploadImageBlob } from '../lib/db';
 import StorageImage from './StorageImage';
-import { sendApprovalEmail, sendRejectionEmail, sendExpirationEmail, sendPendingPaymentReminder, sendConfirmationEmail, getAuthHeaders } from '../lib/email';
+import { sendApprovalEmail, sendRejectionEmail, sendExpirationEmail, sendConfirmationEmail, getAuthHeaders } from '../lib/email';
 
 import AdminSEOTab from './AdminSEOTab';
 import AdminProfileTab from './AdminProfileTab';
@@ -2043,7 +2043,6 @@ export default function AdminCMS({
         {activeTab === 'reminders' && (
           <AdminRemindersTab
             bookings={bookings}
-            emailConfig={emailConfig}
             profile={profile}
             onUpdateBookings={onUpdateBookings}
             triggerAlert={triggerAlert}

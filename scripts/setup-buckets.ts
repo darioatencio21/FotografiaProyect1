@@ -18,7 +18,7 @@ async function setupBuckets() {
   const buckets = ['photographs', 'proofs', 'profile', 'seo', 'packages', 'session_categories'];
 
   for (const bucket of buckets) {
-    const { data, error } = await supabase.storage.createBucket(bucket, {
+    const { error } = await supabase.storage.createBucket(bucket, {
       public: true,
     });
     if (error) {

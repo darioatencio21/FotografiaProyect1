@@ -9,7 +9,7 @@ import {
     Heart, ArrowRight, MessageSquare, MapPin, 
     Mail, Phone, ShieldCheck, Sparkles, AlertCircle, ChevronDown,
      Eye, EyeOff, X, Camera, Users, Calendar, Clock, PartyPopper,
-     CheckCircle2, ShoppingBag, Star, Baby, GraduationCap, Gift, Briefcase,
+      CheckCircle2, ShoppingBag, Star, Baby, GraduationCap, Briefcase,
      Gem, Utensils, Package, Award
 } from 'lucide-react';
 import { Instagram } from './components/BrandIcons';
@@ -24,7 +24,7 @@ import {
 import { Photograph, Service, Testimonial, BlogPost, FAQ, Booking, Message, SEOMetadata, PhotographerProfile, BookingConfig, EmailConfig, ClientAccount, AnalyticsStats, SessionCategory, PhotographyPackage, Invoice } from './types';
 
 import StorageImage from './components/StorageImage';
-import CustomCursor from './components/CustomCursor';
+
 import Lightbox from './components/Lightbox';
 import BookingCalendar from './components/BookingCalendar';
 import BookingApproval from './components/BookingApproval';
@@ -65,8 +65,8 @@ async function syncCollection<T extends { id: string }>(
 ) {
   try {
     const newIds = new Set(newList.map(item => item.id));
-    const deletedItemás = oldList.filter(item => !newIds.has(item.id));
-    for (const item of deletedItemás) {
+    const deletedItems = oldList.filter(item => !newIds.has(item.id));
+    for (const item of deletedItems) {
       await deleteDocument(collectionPath, item.id);
     }
 
@@ -272,7 +272,6 @@ export default function App() {
 
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
-  const [activeBlogModal, setActiveBlogModal] = useState<BlogPost | null>(null);
   const [activeFaqId, setActiveFaqId] = useState<string | null>(null);
 
   // Administrative Workspace credentials
@@ -319,7 +318,7 @@ export default function App() {
     let cancelled = false;
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
     if (!supabaseUrl) {
-      if (!cancelled) setApprovalBooking(null);
+      setApprovalBooking(null);
       return;
     }
     fetch(`${supabaseUrl}/functions/v1/verify-approval`, {
@@ -498,11 +497,6 @@ export default function App() {
     setPhotographs(newPhotos);
   };
 
-  const handleUpdateServices = (newServices: Service[]) => {
-    syncCollection('services', services, newServices);
-    setServices(newServices);
-  };
-
   const handleUpdateTestimonials = (newTestimonials: Testimonial[]) => {
     syncCollection('testimonials', testimonials, newTestimonials);
     setTestimonials(newTestimonials);
@@ -538,7 +532,7 @@ export default function App() {
     setInvoices(newInvoices);
   };
 
-  const handleConfirmBooking = (bookingId: string, signature?: string) => {
+  const handleConfirmBooking = async (bookingId: string, signature?: string) => {
     const booking = bookings.find(b => b.id === bookingId);
     if (!booking) {
       console.error('[handleConfirmBooking] booking not found:', bookingId);
@@ -561,25 +555,28 @@ export default function App() {
 
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
     if (supabaseUrl && booking.approvalToken) {
-      fetch(`${supabaseUrl}/functions/v1/update-booking-status`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          bookingId,
-          token: booking.approvalToken,
-          updates: {
-            status: 'confirmed',
-            isPaid: true,
-            paymentStatus: 'paid',
-            contractStatus: 'signed',
-            contractSignature: signature || booking.contractSignature || '',
-            contractSignedAt: signature ? new Date().toISOString() : booking.contractSignedAt || new Date().toISOString(),
-          },
-          sendConfirmation: true,
-        }),
-      }).then(res => {
+      try {
+        const res = await fetch(`${supabaseUrl}/functions/v1/update-booking-status`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            bookingId,
+            token: booking.approvalToken,
+            updates: {
+              status: 'confirmed',
+              isPaid: true,
+              paymentStatus: 'paid',
+              contractStatus: 'signed',
+              contractSignature: signature || booking.contractSignature || '',
+              contractSignedAt: signature ? new Date().toISOString() : booking.contractSignedAt || new Date().toISOString(),
+            },
+            sendConfirmation: true,
+          }),
+        });
         if (!res.ok) console.error('[handleConfirmBooking] Edge Function failed:', bookingId);
-      }).catch(err => console.error('[handleConfirmBooking] Edge Function error:', bookingId, err));
+      } catch (err) {
+        console.error('[handleConfirmBooking] Edge Function error:', bookingId, err);
+      }
     }
 
     // Create invoice for this confirmed booking
@@ -924,44 +921,6 @@ ${photographerName}`);
       setSelectedPhotoForLightbox(filteredPhotos[filteredPhotos.length - 1]);
     }
   };
-
-  // Categories translation tags
-  const filterCategories = [
-    { value: 'all', label: t.all },
-    { value: 'retrato', label: t.retrato },
-    { value: 'boda', label: t.boda },
-    { value: 'moda', label: t.moda },
-    { value: 'drone', label: t.drone },
-    { value: 'producto', label: t.producto },
-    { value: 'viajes', label: t.viajes },
-    { value: 'evento', label: t.evento },
-    { value: 'naturaleza', label: t.naturaleza },
-    { value: 'compromiso', label: t.compromiso },
-    { value: 'familia', label: t.familia },
-    { value: 'infantil', label: t.infantil },
-    { value: 'maternidad', label: t.maternidad },
-    { value: 'cumpleanos', label: t.cumpleanos },
-    { value: 'graduacion', label: t.graduacion },
-    { value: 'corporativo', label: t.corporativo },
-    { value: 'gastronomia', label: t.gastronomia },
-    { value: 'galeria', label: t.galeria }
-  ];
-
-  // Filtered photograph collection
-  const filteredPhotographs = photographs.filter(photo => {
-    const matchesCategory = activeFilter === 'all' || photo.category === activeFilter;
-    
-    // Text search query by tag, metadata, location, colors
-    const matchesSearch = !searchQuery ? true : (
-      getPhotoTitle(photo, lang).toLowerCase().includes(searchQuery.toLowerCase()) ||
-      getPhotoDescription(photo, lang).toLowerCase().includes(searchQuery.toLowerCase()) ||
-      photo.exif.camera.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      photo.exif.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      photo.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-    );
-
-    return matchesCategory && matchesSearch;
-  });
 
   return (
     <div className="bg-dark text-white min-h-screen relative w-full overflow-x-hidden font-sans select-none selection:bg-white/15">

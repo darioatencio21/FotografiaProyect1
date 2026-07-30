@@ -1,11 +1,11 @@
-﻿import React, { useState, useEffect } from 'react';
+﻿import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ShieldCheck, Heart, ArrowRight, Download, Eye, EyeOff, ChevronLeft, ChevronRight, X, Mail, MapPin } from 'lucide-react';
+import { ShieldCheck, Heart, ArrowRight, Download, Eye, EyeOff, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { ActiveLanguíage, Booking, ProofPhoto, Invoice, GalleryData } from '../types';
 import ContractView from './ContractView';
 import InvoiceReceipt from './InvoiceReceipt';
 import { TRANSLATIONS } from '../data/mockData';
-import { sanitizeString, sanitizeUrl } from '../lib/sanitize';
+import { sanitizeUrl } from '../lib/sanitize';
 import StorageImage from './StorageImage';
 
 interface ClientPortalProps {

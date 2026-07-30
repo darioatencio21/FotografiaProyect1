@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Camera, Eye, Heart, Download, Share2, X, ChevronLeft, ChevronRight, Sliders, Layers } from 'lucide-react';
+import { Camera, Heart, Download, Share2, X, ChevronLeft, ChevronRight, Sliders } from 'lucide-react';
 import { Photograph, ActiveLanguíage } from '../types';
 import { TRANSLATIONS } from '../data/mockData';
 import { sanitizeUrl } from '../lib/sanitize';

@@ -1,6 +1,4 @@
-import React from 'react';
-import { motion } from 'motion/react';
-import { Shield, FileText, ArrowLeft, Calendar, HelpCircle, CheckCircle } from 'lucide-react';
+import { Shield, FileText, ArrowLeft, CheckCircle } from 'lucide-react';
 import { ActiveLanguíage } from '../types';
 
 interface LegalViewProps {

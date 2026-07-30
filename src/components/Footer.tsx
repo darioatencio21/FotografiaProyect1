@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Mail, ArrowUp, Send, Check } from 'lucide-react';
+import { ArrowUp, Send, Check } from 'lucide-react';
 import { Instagram, Facebook } from './BrandIcons';
 import { ActiveLanguíage } from '../types';
 import { TRANSLATIONS } from '../data/mockData';

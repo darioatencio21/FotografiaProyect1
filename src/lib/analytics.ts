@@ -4,16 +4,6 @@ import type { AnalyticsStats, Booking } from '../types';
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-const EMPTY_MONTHS = () => {
-  const now = new Date();
-  const result = [];
-  for (let i = 5; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    result.push({ month: MONTHS[d.getMonth()], value: 0 });
-  }
-  return result;
-};
-
 const EMPTY_DAYS = () => DAYS.map(d => ({ day: d, count: 0 }));
 
 function getLast6Months(monthMap: Record<string, number>) {

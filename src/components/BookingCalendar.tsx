@@ -11,20 +11,16 @@ import {
   Users, 
   CheckCircle2, 
   DollarSign, 
-  Camera, 
   Sparkles,
   Phone,
   Mail,
   User,
   Heart,
   ChevronRight,
-  MapPin,
-  Printer
+  MapPin
 } from 'lucide-react';
 import { Service, ActiveLanguíage, Booking, BookingConfig, EmailConfig, PhotographyPackage, ContractData } from '../types';
 import { sanitizeString, sanitizeEmail, sanitizePhone } from '../lib/sanitize';
-import { TRANSLATIONS } from '../data/mockData';
-
 interface BookingCalendarProps {
   services: Service[];
   lang: ActiveLanguíage;
