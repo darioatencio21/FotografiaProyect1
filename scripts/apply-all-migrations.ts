@@ -2,15 +2,29 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 import { createClient } from '@supabase/supabase-js';
 import { readFileSync } from 'fs';
-import { join, dirname } from 'path';
+import { join, dirname, resolve, relative } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const PROJECT_ROOT = resolve(__dirname, '..');
+const MIGRATIONS_DIR = resolve(PROJECT_ROOT, 'supabase', 'migrations');
+
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !serviceRoleKey) {
   console.error('Missing VITE_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in .env.local');
+  process.exit(1);
+}
+
+let parsedUrl;
+try {
+  parsedUrl = new URL(supabaseUrl);
+  if (!parsedUrl.hostname.endsWith('.supabase.co')) {
+    throw new Error('not a Supabase URL');
+  }
+} catch (err) {
+  console.error('Invalid VITE_SUPABASE_URL:', err.message);
   process.exit(1);
 }
 
@@ -24,12 +38,20 @@ const migrations = [
   '009_approval_flow.sql',
 ];
 
+function resolveMigrationPath(filename: string): string {
+  const resolved = resolve(MIGRATIONS_DIR, filename);
+  if (relative(MIGRATIONS_DIR, resolved).startsWith('..')) {
+    throw new Error(`Path traversal blocked: ${filename}`);
+  }
+  return resolved;
+}
+
 async function execSql(sql: string, label: string): Promise<boolean> {
   const { error } = await supabase.rpc('exec_sql', { query: sql });
   if (error) {
     console.warn(`  exec_sql RPC failed for ${label}: ${error.message}`);
     console.log('  Trying direct REST API...');
-    const resp = await fetch(`${supabaseUrl}/rest/v1/rpc/exec_sql`, {
+    const resp = await fetch(`${parsedUrl.origin}/rest/v1/rpc/exec_sql`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -51,7 +73,7 @@ async function applyAll() {
   console.log('Applying pending migrations...\n');
 
   for (const file of migrations) {
-    const sqlPath = join(__dirname, '..', 'supabase', 'migrations', file);
+    const sqlPath = resolveMigrationPath(file);
     const sql = readFileSync(sqlPath, 'utf8').trim();
     if (!sql) {
       console.log(`  ${file}: empty, skipping`);

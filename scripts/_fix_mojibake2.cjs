@@ -12,30 +12,27 @@ const files = [
   'src/data/mockData.ts',
 ];
 // Bytes that were mis-decoded as Windows-1252 then re-encoded as UTF-8.
-// Source bytes (in file): C3 AD = í, C3 B3 = ó, C2 A1 = ¡, etc.
+// Source bytes (in file): C3 AD = ï¿½, C3 B3 = ï¿½, C2 A1 = ï¿½, etc.
 // Reverse: take a substring of length N where the previous byte(s) was a control/high bit,
 // then check if the resulting bytes form a valid UTF-8 character we want to restore.
-// Simpler: scan file, find sequences like 0xC3 0xAD (í) / 0xC3 0xB3 (ó) / 0xC3 0xA1 (á)
+// Simpler: scan file, find sequences like 0xC3 0xAD (ï¿½) / 0xC3 0xB3 (ï¿½) / 0xC3 0xA1 (ï¿½)
 // that occur *outside* of originally-valid UTF-8 mojibake (we are decoding wrong-encoding).
 // Strategy: re-decode UTF-8 as if it were Latin-1, then re-encode as UTF-8 -- only when
 // the resulting character was originally a printable Spanish/Portuguese letter that
 // when correctly encoded as UTF-8 equals the bytes 0xC3 0xXX we observed.
-const raw = fs.readFileSync(files[0]);
-fs.readdirSync('.').forEach(() => {});
-
 for (const f of files) {
   const buf = fs.readFileSync(f);
   const out = Buffer.alloc(buf.length);
   let i = 0, j = 0;
   while (i < buf.length) {
     const b = buf[i];
-    // C3 XX pattern that comes from mis-decoded Latin1 (e.g. 0xC3 0xAD -> í)
+    // C3 XX pattern that comes from mis-decoded Latin1 (e.g. 0xC3 0xAD -> ï¿½)
     if (b === 0xC3 && i + 1 < buf.length) {
       const n = buf[i + 1];
       const map = {
-        0xA1: 'á', 0xA9: 'é', 0xAD: 'í', 0xB3: 'ó', 0xBA: 'ú', 0xBC: 'ü',
-        0x81: 'Á', 0x89: 'É', 0x8D: 'Í', 0x93: 'Ó', 0x9A: 'Ú',
-        0xB1: 'ñ', 0x91: 'Ñ',
+        0xA1: 'ï¿½', 0xA9: 'ï¿½', 0xAD: 'ï¿½', 0xB3: 'ï¿½', 0xBA: 'ï¿½', 0xBC: 'ï¿½',
+        0x81: 'ï¿½', 0x89: 'ï¿½', 0x8D: 'ï¿½', 0x93: 'ï¿½', 0x9A: 'ï¿½',
+        0xB1: 'ï¿½', 0x91: 'ï¿½',
       };
       if (map[n]) {
         // output UTF-8 of map[n]
@@ -55,10 +52,10 @@ for (const f of files) {
         continue;
       }
     }
-    // C2 XX pattern: 0xC2 0xA1 = ¡, 0xC2 0xBF = ¿
+    // C2 XX pattern: 0xC2 0xA1 = ï¿½, 0xC2 0xBF = ï¿½
     if (b === 0xC2 && i + 1 < buf.length) {
       const n = buf[i + 1];
-      const map = { 0xA1: '¡', 0xBF: '¿', 0xA3: '£', 0xA2: '¢' };
+      const map = { 0xA1: 'ï¿½', 0xBF: 'ï¿½', 0xA3: 'ï¿½', 0xA2: 'ï¿½' };
       if (map[n]) {
         const ch = map[n];
         const code = ch.codePointAt(0);

@@ -1,4 +1,4 @@
-﻿import React, { useState, useCallback, useEffect } from 'react';
+﻿import { useState, useCallback, useEffect } from 'react';
 import { Save, Plus, Trash2, Edit3, X, Upload, Star } from 'lucide-react';
 import { PhotographyPackage, ActiveLanguíage, SessionCategory } from '../types';
 import { uploadImageBlob } from '../lib/db';

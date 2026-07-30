@@ -99,16 +99,6 @@ export const getHeroScaleClass = (scale?: number) => {
   return 'scale-105'; // default
 };
 
-function getPhotoTitle(photo: Photograph, lang: string) {
-  if (lang === 'es') return photo.title_es || photo.title;
-  return photo.title;
-}
-
-function getPhotoDescription(photo: Photograph, lang: string) {
-  if (lang === 'es') return photo.description_es || photo.description;
-  return photo.description;
-}
-
 function CountUp({ end, suffix = '', duration = 2000, delay = 0 }: { end: number; suffix?: string; duration?: number; delay?: number }) {
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLSpanElement>(null);
@@ -306,8 +296,6 @@ export default function App() {
 
   // Search filter
   const [activeFilter, setActiveFilter] = useState<string>('all');
-  const [searchQuery, setSearchQuery] = useState('');
-
   const [approvalBooking, setApprovalBooking] = useState<Booking | null | 'loading'>('loading');
 
   useEffect(() => {

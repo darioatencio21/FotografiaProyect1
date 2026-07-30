@@ -2,16 +2,39 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 import { createClient } from '@supabase/supabase-js';
 import { readFileSync } from 'fs';
-import { join, dirname } from 'path';
+import { join, dirname, resolve, relative } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const PROJECT_ROOT = resolve(__dirname, '..');
+const MIGRATIONS_DIR = resolve(PROJECT_ROOT, 'supabase', 'migrations');
+
 const supabaseUrl = process.env.VITE_SUPABASE_URL!;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+let parsedUrl;
+try {
+  parsedUrl = new URL(supabaseUrl);
+  if (!parsedUrl.hostname.endsWith('.supabase.co')) {
+    throw new Error('not a Supabase URL');
+  }
+} catch (err) {
+  console.error('Invalid VITE_SUPABASE_URL:', (err as Error).message);
+  process.exit(1);
+}
+
 const supabase = createClient(supabaseUrl, serviceRoleKey);
 
+function resolveMigrationPath(filename: string): string {
+  const resolved = resolve(MIGRATIONS_DIR, filename);
+  if (relative(MIGRATIONS_DIR, resolved).startsWith('..')) {
+    throw new Error(`Path traversal blocked: ${filename}`);
+  }
+  return resolved;
+}
+
 async function apply() {
-  const sqlPath = join(__dirname, '..', 'supabase', 'migrations', '004_fix_rls_policies.sql');
+  const sqlPath = resolveMigrationPath('004_fix_rls_policies.sql');
   const sql = readFileSync(sqlPath, 'utf8');
   console.log('Applying 004_fix_rls_policies.sql...');
 
@@ -19,7 +42,7 @@ async function apply() {
   if (error) {
     console.warn('exec_sql RPC failed:', error.message);
     console.log('Trying direct REST API...');
-    const resp = await fetch(`${supabaseUrl}/rest/v1/rpc/exec_sql`, {
+    const resp = await fetch(`${parsedUrl.origin}/rest/v1/rpc/exec_sql`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

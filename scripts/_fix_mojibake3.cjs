@@ -13,11 +13,6 @@ const files = [
 ];
 // Replace EF BF BD (U+FFFD replacement char) sequences that came from decoded invalid
 // UTF-8 sequences of C3 XX bytes. Map them back to the correct character.
-const map = {
-  0xA1: '�', 0xA9: '�', 0xAD: '�', 0xB3: '�', 0xBA: '�', 0xBC: '�',
-  0x81: '�', 0x89: '�', 0x8D: '�', 0x93: '�', 0x9A: '�',
-  0xB1: '�', 0x91: '�',
-};
 for (const f of files) {
   let buf = fs.readFileSync(f);
   // Iterate
