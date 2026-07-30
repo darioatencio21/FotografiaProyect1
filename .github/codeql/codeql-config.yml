@@ -1,0 +1,8 @@
+name: CodeQL configuration
+
+paths-ignore:
+  - '.github/skills/impeccable/**'
+  - '**/node_modules/**'
+  - '**/dist/**'
+  - '**/build/**'
+  - '**/.vite/**'
