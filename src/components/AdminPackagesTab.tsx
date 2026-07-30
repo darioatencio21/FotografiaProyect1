@@ -87,12 +87,6 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
     return es;
   };
 
-  const catName = (catId: string) => {
-    const cat = sessionCategories.find(c => c.id === catId);
-    if (!cat) return catId;
-    return lang === 'es' ? cat.name_es : cat.name_en;
-  };
-
   const handleSaveAll = useCallback(() => {
     const cleaned = localPackages.map(p => ({
       ...p,

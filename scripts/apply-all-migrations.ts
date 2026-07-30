@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 import { createClient } from '@supabase/supabase-js';
 import { readFileSync } from 'fs';
-import { join, dirname, resolve, relative } from 'path';
+import { dirname, resolve, relative } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -44,6 +44,16 @@ function resolveMigrationPath(filename: string): string {
     throw new Error(`Path traversal blocked: ${filename}`);
   }
   return resolved;
+}
+
+function validateSqlContent(sql: string, label: string): void {
+  if (sql.length > 1_048_576) {
+    throw new Error(`Migration ${label} exceeds 1MB size limit`);
+  }
+  const upper = sql.trim().toUpperCase();
+  if (!/^(CREATE|ALTER|DROP|INSERT|UPDATE|DELETE|GRANT|REVOKE|BEGIN|COMMIT|ROLLBACK|--)/.test(upper)) {
+    throw new Error(`Migration ${label} contains unexpected SQL patterns`);
+  }
 }
 
 async function execSql(sql: string, label: string): Promise<boolean> {

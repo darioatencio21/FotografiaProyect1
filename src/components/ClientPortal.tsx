@@ -105,15 +105,6 @@ export default function ClientPortal({ lang, onOpenCheckout, bookings = [], onUp
     }
   };
 
-  const handlePrintSizeChange = (id: string, size: string) => {
-    if (!galleryData) return;
-    const updatedPhotos = proofPhotos.map(p => p.id === id ? { ...p, printSize: size } : p);
-    setGalleryData({ ...galleryData, photos: updatedPhotos });
-    if (activePhoto && activePhoto.id === id) {
-      setActivePhoto(prev => prev ? { ...prev, printSize: size } : null);
-    }
-  };
-
   // Pricing for prints
   const printPrices: Record<string, number> = {
     '12x18': 45,
@@ -162,11 +153,6 @@ export default function ClientPortal({ lang, onOpenCheckout, bookings = [], onUp
       link.click();
       document.body.removeChild(link);
     }
-  };
-
-  const handlePurchasePrints = () => {
-    if (printTotal === 0) return;
-    onOpenCheckout(printTotal, `Luxury Archival Prints - Client Proof Compilation (${selectedPrints.length} Prints)`);
   };
 
   return (

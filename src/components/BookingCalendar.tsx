@@ -105,11 +105,11 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
   const BOOKING_DRAFT_KEY = 'booking_draft';
 
   // Form State
-  const [selectedServiceId, setSelectedServiceId] = useState<string>(() => sessionStorage.getItem(`${BOOKING_DRAFT_KEY}_service`) || services[0]?.id || 'custom');
+  const [selectedServiceId] = useState<string>(() => sessionStorage.getItem(`${BOOKING_DRAFT_KEY}_service`) || services[0]?.id || 'custom');
   const [customServiceText, setCustomServiceText] = useState<string>(() => sessionStorage.getItem(`${BOOKING_DRAFT_KEY}_customService`) || '');
   const [dateValue, setDateValue] = useState<string>(() => sessionStorage.getItem(`${BOOKING_DRAFT_KEY}_date`) || '');
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  
+  const [, setSelectedDate] = useState<Date | null>(null);
+
   // Timeframe choice
   const [selectedTimeframe, setSelectedTimeframe] = useState<'morning' | 'afternoon' | 'goldenHour' | 'other'>(() => (sessionStorage.getItem(`${BOOKING_DRAFT_KEY}_timeframe`) as any) || 'goldenHour');
   const [customTimeframeText, setCustomTimeframeText] = useState<string>(() => sessionStorage.getItem(`${BOOKING_DRAFT_KEY}_customTime`) || '');
@@ -172,8 +172,6 @@ export default function BookingCalendar({ services, lang, config, emailConfig, p
   const selectedService = services.find(s => s.id === selectedServiceId);
   const basePrice = preSelectedPackage ? preSelectedPackage.price : (selectedService ? selectedService.price : 0);
   const totalPrice = basePrice;
-  const bookingId = useMemo(() => `AUREA-${Math.floor(Math.random() * 8999 + 1000)}`, []);
-
   // Handle Date Selection Input
   const handleDateChange = (val: string) => {
     setDateValue(val);

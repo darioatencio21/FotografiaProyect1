@@ -27,7 +27,7 @@ const supabase = createClient(supabaseUrl, serviceKey);
 // Try 1: Check if the table is already in the publication
 // by querying the bookings table to see if it has replica identity
 try {
-  const { data: bookingsReplica, error: err1 } = await supabase
+  const { error: err1 } = await supabase
     .from('bookings')
     .select('id', { count: 'exact', head: true });
   console.log('Bookings accessible:', err1 ? 'NO - ' + err1.message : 'YES');

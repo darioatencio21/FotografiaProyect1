@@ -138,7 +138,7 @@ export default function App() {
     return 'home';
   });
 
-  const [approvalToken, setApprovalToken] = useState<string>(() => {
+  const [approvalToken] = useState<string>(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get('approval') || '';
   });
@@ -271,7 +271,6 @@ export default function App() {
   const [adminPassword, setAdminPassword] = useState('');
   const [showAdminPassword, setShowAdminPassword] = useState(false);
   const [adminLoginError, setAdminLoginError] = useState('');
-  const [isAdminAuthLoading, setIsAdminAuthLoading] = useState(false);
 
   // Stripe Checkout Integrations
   const [checkoutOpen, setCheckoutOpen] = useState(false);
@@ -295,7 +294,7 @@ export default function App() {
   }, [contactName, contactEmail, contactSubject, contactMsg]);
 
   // Search filter
-  const [activeFilter, setActiveFilter] = useState<string>('all');
+  const [activeFilter] = useState<string>('all');
   const [approvalBooking, setApprovalBooking] = useState<Booking | null | 'loading'>('loading');
 
   useEffect(() => {
@@ -823,7 +822,6 @@ ${photographerName}`);
 
   const handleAdminAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsAdminAuthLoading(true);
     setAdminLoginError('');
 
     const email = sanitizeEmail(adminUseráname);
@@ -831,7 +829,6 @@ ${photographerName}`);
 
     if (!email || !email.includes('@')) {
       setAdminLoginError('INTRODUCE UN CORREO ELECTRÓNICO VÁLIDO.');
-      setIsAdminAuthLoading(false);
       return;
     }
 
@@ -841,7 +838,6 @@ ${photographerName}`);
       setIsAdminLoggedIn(true);
       setShowAdminLogin(false);
       navigateTo('admin');
-      setIsAdminAuthLoading(false);
       return;
     } catch (err: any) {
       const msg = err?.message || err?.error_description || err?.code || '';
@@ -856,7 +852,6 @@ ${photographerName}`);
       const matched = Object.keys(errorMessages).find(k => msg.includes(k));
       setAdminLoginError(matched ? errorMessages[matched] : 'NO SE PUDO INICIAR SESIÓN EN SUPABASE AUTHENTICATION.');
     } finally {
-      setIsAdminAuthLoading(false);
     }
   };
 

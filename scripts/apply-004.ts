@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 import { createClient } from '@supabase/supabase-js';
 import { readFileSync } from 'fs';
-import { join, dirname, resolve, relative } from 'path';
+import { dirname, resolve, relative } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -33,9 +33,20 @@ function resolveMigrationPath(filename: string): string {
   return resolved;
 }
 
+function validateSqlContent(sql: string, label: string): void {
+  if (sql.length > 1_048_576) {
+    throw new Error(`Migration ${label} exceeds 1MB size limit`);
+  }
+  const upper = sql.trim().toUpperCase();
+  if (!/^(CREATE|ALTER|DROP|INSERT|UPDATE|DELETE|GRANT|REVOKE|BEGIN|COMMIT|ROLLBACK|--)/.test(upper)) {
+    throw new Error(`Migration ${label} contains unexpected SQL patterns`);
+  }
+}
+
 async function apply() {
   const sqlPath = resolveMigrationPath('004_fix_rls_policies.sql');
   const sql = readFileSync(sqlPath, 'utf8');
+  validateSqlContent(sql, '004_fix_rls_policies.sql');
   console.log('Applying 004_fix_rls_policies.sql...');
 
   const { error } = await supabase.rpc('exec_sql', { query: sql });

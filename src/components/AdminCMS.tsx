@@ -141,9 +141,7 @@ export default function AdminCMS({
   const [emailForm, setEmailForm] = useState<EmailConfig>(emailConfig);
 
   // Availability / Schedule state
-  const [configForm, setConfigForm] = useState<BookingConfig>(bookingConfig);
-  const [newTimeSlot, setNewTimeSlot] = useState('');
-  const [newBlockedDate, setNewBlockedDate] = useState('');
+  const [, setConfigForm] = useState<BookingConfig>(bookingConfig);
 
   // Photo state
   const [dragActive, setDragActive] = useState(false);
@@ -549,36 +547,6 @@ export default function AdminCMS({
       }
   };
 
-  // Confirm booking after payment+signature from client
-  const handleConfirmBooking = (id: string) => {
-    const booking = bookings.find(b => b.id === id);
-    if (!booking) return;
-
-    onUpdateBookings(bookings.map(b => b.id === id ? {
-      ...b,
-      status: 'confirmed',
-      isPaid: true,
-      paymentStatus: 'paid',
-      contractStatus: 'signed',
-    } : b));
-
-    createInvoiceForBooking(booking);
-
-    triggerAlert(`Booking confirmed — ${booking.clientName}`);
-
-    sendConfirmationEmail(
-      emailConfig,
-      booking.clientName,
-      booking.clientEmail,
-      emailConfig.receiverEmail,
-      booking.date,
-      booking.timeSlot,
-      (booking.depositAmount ?? 0),
-      booking.packageName || 'Photography Session',
-      lang,
-    );
-  };
-
   const handleToggleBookingRead = (id: string) => {
     onUpdateBookings(bookings.map(b => b.id === id ? { ...b, isRead: true } : b));
   };
@@ -664,46 +632,6 @@ export default function AdminCMS({
     setReplyingToId(null);
     setReplyText('');
   };
-
-  // Blog management
-  const handleEditBlog = (post: BlogPost) => {
-    setBlogEditItem(post);
-    setBlogForm(post);
-  };
-
-  const handleSaveBlog = (e: React.FormEvent) => {
-    e.preventDefault();
-    const safeTitle = sanitizeString(blogForm.title || '');
-    if (!safeTitle) return;
-
-    const safeForm = sanitizeObject(blogForm as Record<string, unknown>) as Partial<BlogPost>;
-
-    if (blogEditItem) {
-      onUpdateBlogPosts(blogPosts.map(p => p.id === blogEditItem.id ? { ...p, ...safeForm } as BlogPost : p));
-      triggerAlert('Journal post modified and updated');
-    } else {
-      const newPost: BlogPost = {
-        id: `blog-${Date.now()}`,
-        title: safeTitle,
-        excerpt: sanitizeString(safeForm.excerpt || ''),
-        content: sanitizeString(safeForm.content || ''),
-        category: sanitizeString(safeForm.category || 'General'),
-        tags: ['Inspiration'],
-        image: safeForm.image || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800',
-        date: new Date().toISOString().split('T')[0],
-        readTime: '5 min read',
-        seoKeywords: sanitizeString(safeForm.seoKeywords || ''),
-        status: safeForm.status || 'draft'
-      };
-      onUpdateBlogPosts([newPost, ...blogPosts]);
-      triggerAlert('New Journal post created successfully');
-    }
-
-    setBlogEditItem(null);
-    setBlogForm({});
-  };
-
-  // handleEditService, handleSaveService, handleAddInclusion, handleRemoveInclusion, handleSaveSEO moved to extracted components
 
   const handleSaveClientAccount = (e: React.FormEvent) => {
     e.preventDefault();

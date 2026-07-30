@@ -80,16 +80,6 @@ export default function Header({
     };
   }, [isMobileMenuOpen]);
 
-  const handleDrawerDragEnd = (_: unknown, info: { offset: { x: number }; velocity: { x: number } }) => {
-    isDragging.set(0);
-    const shouldClose = info.offset.x > CLOSE_THRESHOLD_PX || info.velocity.x > CLOSE_VELOCITY;
-    if (shouldClose) {
-      closeDrawer();
-    } else {
-      animate(drawerX, 0, { type: 'spring', stiffness: 500, damping: 40 });
-    }
-  };
-
   const handleHandleDragEnd = (_: unknown, info: { offset: { x: number }; velocity: { x: number } }) => {
     const shouldOpen = info.offset.x < -HANDLE_OPEN_THRESHOLD_PX || info.velocity.x < -CLOSE_VELOCITY;
     if (shouldOpen) {
