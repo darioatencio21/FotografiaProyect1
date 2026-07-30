@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.1.1](https://github.com/darioatencio21/FotografiaProyect1/compare/v1.1.0...v1.1.1) (2026-07-30)
+
+
+### Bug Fixes
+
+* **codeql:** exclude .github/skills/impeccable from analysis, add config file ([9b7c4c9](https://github.com/darioatencio21/FotografiaProyect1/commit/9b7c4c93808f5c0e6c7032af95490d0cda32011b))
+* resolve CodeQL alerts — file data validation, overwritten property, unused imports/vars ([d9fd986](https://github.com/darioatencio21/FotografiaProyect1/commit/d9fd9869c7704010ecbe7e58eced476240472127))
+* resolve CodeQL alerts — SQL content validation, unused vars/imports in 10 files ([daf3361](https://github.com/darioatencio21/FotografiaProyect1/commit/daf33617df65db03637fa935bb34c45430c493f0))
+* resolve CodeQL warnings — useless conditional, missing await, unused imports/vars ([11b3b30](https://github.com/darioatencio21/FotografiaProyect1/commit/11b3b309e4e7de8187d537173302a889f2ced673))
+
 ## [1.1.0](https://github.com/darioatencio21/FotografiaProyect1/compare/v1.0.0...v1.1.0) (2026-07-30)
 
 
