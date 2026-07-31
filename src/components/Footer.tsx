@@ -178,7 +178,7 @@ export default function Footer({ onSetView, lang, isAdminLoggedIn, onOpenAdminLo
       {/* Footer copyright block */}
       <div className="max-w-7xl mx-auto pt-8 flex flex-col md:flex-row items-center justify-between text-xs text-white/65 space-y-4 md:space-y-0">
         <div className="flex flex-wrap justify-center md:justify-start gap-4">
-          <span>&copy; {new Date().getFullYear()} Estudio Camaleón. {t.footerRights}</span>
+          <span>&copy; {new Date().getFullYear()} Chameleon Studio. {t.footerRights}</span>
           <button onClick={() => handleNav('privacy')} className="hover:text-white transition-colors cursor-pointer">{t.privacy}</button>
           <button onClick={() => handleNav('terms')} className="hover:text-white transition-colors cursor-pointer">{t.terms}</button>
           <button

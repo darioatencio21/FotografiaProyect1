@@ -105,13 +105,6 @@ export default function ClientPortal({ lang, onOpenCheckout, bookings = [], onUp
     }
   };
 
-  // Pricing for prints
-  const printPrices: Record<string, number> = {
-    '12x18': 45,
-    '24x36': 95,
-    'canvas': 160
-  };
-
   const handleDownload = async (photo: ProofPhoto) => {
     const safeUrl = sanitizeUrl(photo.url);
     if (!safeUrl) return;
