@@ -73,3 +73,18 @@ if (isSupabaseConfigured) {
     }
   });
 }
+
+// Returns true when a Supabase session exists. Deliberately does NOT call
+// refreshSession(): with no stored session that call would fire a pointless
+// network request to /auth/v1/token that fails (logged-out visits must stay
+// network-silent). Token refresh only happens in saveDocument after a real 401.
+// In offline/demo mode writes are no-ops, so the session is always "active".
+export async function ensureActiveSession(): Promise<boolean> {
+  if (!isSupabaseConfigured) return true;
+  try {
+    const { data } = await supabase.auth.getSession();
+    return !!data.session;
+  } catch {
+    return false;
+  }
+}

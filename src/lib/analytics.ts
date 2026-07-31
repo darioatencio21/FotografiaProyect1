@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { supabase, ensureActiveSession } from './supabase';
 import type { AnalyticsStats, Booking } from '../types';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -81,6 +81,9 @@ export async function computeAnalytics(): Promise<AnalyticsStats> {
 }
 
 export async function trackPageView(): Promise<void> {
+  // Analytics only allows authenticated writes, so skip the write for anonymous
+  // visitors instead of firing an upsert that Supabase rejects with 401.
+  if (!(await ensureActiveSession())) return;
   try {
     const { data: existing } = await supabase
       .from('analytics')
@@ -109,6 +112,7 @@ export async function trackPageView(): Promise<void> {
 }
 
 export async function saveAnalytics(stats: AnalyticsStats): Promise<void> {
+  if (!(await ensureActiveSession())) return;
   try {
     await supabase
       .from('analytics')

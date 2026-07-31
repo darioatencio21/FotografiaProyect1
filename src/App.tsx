@@ -369,140 +369,144 @@ export default function App() {
     sessionStorage.removeItem('aurea_missing_tables');
   }, []);
 
-  useEffect(() => {
-    let cancelled = false;
-    async function syncSupabase() {
-      const [photosRes, servicesRes, testimonialsRes, blogRes, faqsRes,
-        bookingsRes, messagesRes, clientAccsRes, invoicesRes] = await Promise.all([
-        getCollectionWithFallback<Photograph>('photographs', INITIAL_PHOTOGRAPHS),
-        getCollectionWithFallback<Service>('services', INITIAL_SERVICES),
-        getCollectionWithFallback<Testimonial>('testimonials', INITIAL_TESTIMONIALS),
-        getCollectionWithFallback<BlogPost>('blogPosts', INITIAL_BLOG_POSTS),
-        getCollectionWithFallback<FAQ>('faqs', INITIAL_FAQS),
-        getCollectionWithFallback<Booking>('bookings', INITIAL_BOOKINGS),
-        getCollectionWithFallback<Message>('messages', INITIAL_MESSAGES),
-         getCollectionWithFallback<ClientAccount>('clientAccounts', INITIAL_CLIENT_ACCOUNTS),
-         getCollectionWithFallback<Invoice>('invoices', INITIAL_INVOICES),
-      ]);
+  const loadAllData = useCallback(async (shouldAbort?: () => boolean) => {
+    const [photosRes, servicesRes, testimonialsRes, blogRes, faqsRes,
+      bookingsRes, messagesRes, clientAccsRes, invoicesRes] = await Promise.all([
+      getCollectionWithFallback<Photograph>('photographs', INITIAL_PHOTOGRAPHS),
+      getCollectionWithFallback<Service>('services', INITIAL_SERVICES),
+      getCollectionWithFallback<Testimonial>('testimonials', INITIAL_TESTIMONIALS),
+      getCollectionWithFallback<BlogPost>('blogPosts', INITIAL_BLOG_POSTS),
+      getCollectionWithFallback<FAQ>('faqs', INITIAL_FAQS),
+      getCollectionWithFallback<Booking>('bookings', INITIAL_BOOKINGS),
+      getCollectionWithFallback<Message>('messages', INITIAL_MESSAGES),
+       getCollectionWithFallback<ClientAccount>('clientAccounts', INITIAL_CLIENT_ACCOUNTS),
+       getCollectionWithFallback<Invoice>('invoices', INITIAL_INVOICES),
+    ]);
 
-      const packagesRes = await getCollectionWithFallback<PhotographyPackage>('photography_packages', []);
-      const [seoRes, profileRes, bookingConfigRes, emailConfigRes] = await Promise.all([
-        getSingleDocument<SEOMetadata>('seo', 'config'),
-        getSingleDocument<PhotographerProfile>('profile', 'photographer'),
-        getSingleDocument<BookingConfig>('bookingConfig', 'config'),
-        getSingleDocument<EmailConfig>('emailConfig', 'config'),
-      ]);
+    const packagesRes = await getCollectionWithFallback<PhotographyPackage>('photography_packages', []);
+    const [seoRes, profileRes, bookingConfigRes, emailConfigRes] = await Promise.all([
+      getSingleDocument<SEOMetadata>('seo', 'config'),
+      getSingleDocument<PhotographerProfile>('profile', 'photographer'),
+      getSingleDocument<BookingConfig>('bookingConfig', 'config'),
+      getSingleDocument<EmailConfig>('emailConfig', 'config'),
+    ]);
 
-      if (cancelled) return;
+    if (shouldAbort?.()) return;
 
-      const { data: _sessionData } = await supabase.auth.getSession();
-      const isAuthed = !!_sessionData?.session;
+    const { data: _sessionData } = await supabase.auth.getSession();
+    const isAuthed = !!_sessionData?.session;
 
-      // One-time migration: repair data corrupted by old sanitizeString HTML escaping
-      // Only persists to DB if admin is authenticated — otherwise runs in-memory only
-      const MIGRATE_FLAG = 'aorea_html_entities_migrated_v2';
-      const needsMigration = !localStorage.getItem(MIGRATE_FLAG);
+    // One-time migration: repair data corrupted by old sanitizeString HTML escaping.
+    // Persists to Supabase when the admin is authenticated; otherwise the data is
+    // shown unescaped locally and the persistence is retried on the next admin
+    // sign-in (loadAllData re-runs from handleAdminAuthSubmit).
+    const MIGRATE_FLAG = 'aorea_html_entities_migrated_v2';
+    const needsMigration = !localStorage.getItem(MIGRATE_FLAG);
 
-      if (needsMigration) {
-        function migrateStrings(obj: unknown): unknown {
-          if (typeof obj === 'string') return unescapeHTMLEntities(obj);
-          if (Array.isArray(obj)) return obj.map(migrateStrings);
-          if (obj && typeof obj === 'object') {
-            const result: Record<string, unknown> = {};
-            for (const [k, v] of Object.entries(obj as Record<string, unknown>)) {
-              result[k] = migrateStrings(v);
-            }
-            return result;
+    if (needsMigration) {
+      function migrateStrings(obj: unknown): unknown {
+        if (typeof obj === 'string') return unescapeHTMLEntities(obj);
+        if (Array.isArray(obj)) return obj.map(migrateStrings);
+        if (obj && typeof obj === 'object') {
+          const result: Record<string, unknown> = {};
+          for (const [k, v] of Object.entries(obj as Record<string, unknown>)) {
+            result[k] = migrateStrings(v);
           }
-          return obj;
+          return result;
         }
-        const migratedPhotos = photosRes.map(p => migrateStrings(p));
-        const migratedServices = servicesRes.map(s => migrateStrings(s));
-        const migratedTestimonials = testimonialsRes.map(t => migrateStrings(t));
-        const migratedBlogs = blogRes.map(b => migrateStrings(b));
-        const migratedFaqs = faqsRes.map(f => migrateStrings(f));
-        const migratedBookings = bookingsRes.map(b => migrateStrings(b));
-         const migratedMessages = messagesRes.map(m => migrateStrings(m));
-         const migratedClients = clientAccsRes.map(c => migrateStrings(c));
-         const migratedInvoices = invoicesRes.map(i => migrateStrings(i));
-        const migratedSeo = seoRes ? migrateStrings(seoRes) : seoRes;
-        const migratedProfile = profileRes ? migrateStrings(profileRes) : profileRes;
-        const migratedEmailCfg = emailConfigRes ? migrateStrings(emailConfigRes) : emailConfigRes;
-        const persist = isAuthed;
-        if (persist) {
-          Promise.all([
-            ...(migratedPhotos as Photograph[]).map((p, i) => p !== photosRes[i] ? saveDocument('photographs', p.id, p, { silent: true }) : Promise.resolve()),
-            ...(migratedServices as Service[]).map((s, i) => s !== servicesRes[i] ? saveDocument('services', s.id, s, { silent: true }) : Promise.resolve()),
-            ...(migratedTestimonials as Testimonial[]).map((t, i) => t !== testimonialsRes[i] ? saveDocument('testimonials', t.id, t, { silent: true }) : Promise.resolve()),
-            ...(migratedBlogs as BlogPost[]).map((b, i) => b !== blogRes[i] ? saveDocument('blogPosts', b.id, b, { silent: true }) : Promise.resolve()),
-            ...(migratedFaqs as FAQ[]).map((f, i) => f !== faqsRes[i] ? saveDocument('faqs', f.id, f, { silent: true }) : Promise.resolve()),
-            ...(migratedBookings as Booking[]).map((b, i) => b !== bookingsRes[i] ? saveDocument('bookings', b.id, b, { silent: true }) : Promise.resolve()),
-            ...(migratedMessages as Message[]).map((m, i) => m !== messagesRes[i] ? saveDocument('messages', m.id, m, { silent: true }) : Promise.resolve()),
-             ...(migratedClients as ClientAccount[]).map((c, i) => c !== clientAccsRes[i] ? saveDocument('clientAccounts', c.id, c, { silent: true }) : Promise.resolve()),
-            ...(migratedInvoices as Invoice[]).map((i, index) => i !== invoicesRes[index] ? saveDocument('invoices', i.id, i, { silent: true }) : Promise.resolve()),
-             migratedSeo && migratedSeo !== seoRes ? saveDocument('seo', 'config', migratedSeo, { silent: true }) : Promise.resolve(),
-             migratedProfile && migratedProfile !== profileRes ? saveDocument('profile', 'photographer', migratedProfile, { silent: true }) : Promise.resolve(),
-             migratedEmailCfg && migratedEmailCfg !== emailConfigRes ? saveDocument('emailConfig', 'config', migratedEmailCfg, { silent: true }) : Promise.resolve(),
-           ]).then(() => {
-            localStorage.setItem(MIGRATE_FLAG, 'true');
-            console.log('Data migration complete: HTML entities unescaped in Supabase');
-          }).catch(() => {
-            // Migration persist failed (expected if not authenticated) — keep MIGRATE_FLAG unset so it retries on next login
-          });
-        } else {
-          console.log('[syncSupabase] Admin not authenticated — HTML migration applied in-memory only, will persist on next login');
-        }
-        setPhotographs(migratedPhotos);
-        setServices(migratedServices);
-        setTestimonials(migratedTestimonials);
-        setBlogPosts(migratedBlogs);
-        setFaqs(migratedFaqs);
-        setBookings(migratedBookings);
-         setMessages(migratedMessages);
-         setClientAccounts(migratedClients);
-          setInvoices(migratedInvoices as Invoice[]);
-        setSeo(migratedSeo ?? INITIAL_SEO);
-        setProfile(migratedProfile ?? INITIAL_PROFILE);
-      } else {
-        setPhotographs(photosRes);
-        setServices(servicesRes);
-        setTestimonials(testimonialsRes);
-        setBlogPosts(blogRes);
-        setFaqs(faqsRes);
-        setBookings(bookingsRes);
-        setMessages(messagesRes);
-       setClientAccounts(clientAccsRes);
-       setInvoices(invoicesRes);
-        setSeo(seoRes ?? INITIAL_SEO);
-        setProfile(profileRes ?? INITIAL_PROFILE);
+        return obj;
       }
+      const migratedPhotos = photosRes.map(p => migrateStrings(p));
+      const migratedServices = servicesRes.map(s => migrateStrings(s));
+      const migratedTestimonials = testimonialsRes.map(t => migrateStrings(t));
+      const migratedBlogs = blogRes.map(b => migrateStrings(b));
+      const migratedFaqs = faqsRes.map(f => migrateStrings(f));
+      const migratedBookings = bookingsRes.map(b => migrateStrings(b));
+       const migratedMessages = messagesRes.map(m => migrateStrings(m));
+       const migratedClients = clientAccsRes.map(c => migrateStrings(c));
+       const migratedInvoices = invoicesRes.map(i => migrateStrings(i));
+      const migratedSeo = seoRes ? migrateStrings(seoRes) : seoRes;
+      const migratedProfile = profileRes ? migrateStrings(profileRes) : profileRes;
+      const migratedEmailCfg = emailConfigRes ? migrateStrings(emailConfigRes) : emailConfigRes;
+      const persist = isAuthed;
+      if (persist) {
+        Promise.all([
+          ...(migratedPhotos as Photograph[]).map((p, i) => p !== photosRes[i] ? saveDocument('photographs', p.id, p, { silent: true }) : Promise.resolve()),
+          ...(migratedServices as Service[]).map((s, i) => s !== servicesRes[i] ? saveDocument('services', s.id, s, { silent: true }) : Promise.resolve()),
+          ...(migratedTestimonials as Testimonial[]).map((t, i) => t !== testimonialsRes[i] ? saveDocument('testimonials', t.id, t, { silent: true }) : Promise.resolve()),
+          ...(migratedBlogs as BlogPost[]).map((b, i) => b !== blogRes[i] ? saveDocument('blogPosts', b.id, b, { silent: true }) : Promise.resolve()),
+          ...(migratedFaqs as FAQ[]).map((f, i) => f !== faqsRes[i] ? saveDocument('faqs', f.id, f, { silent: true }) : Promise.resolve()),
+          ...(migratedBookings as Booking[]).map((b, i) => b !== bookingsRes[i] ? saveDocument('bookings', b.id, b, { silent: true }) : Promise.resolve()),
+          ...(migratedMessages as Message[]).map((m, i) => m !== messagesRes[i] ? saveDocument('messages', m.id, m, { silent: true }) : Promise.resolve()),
+           ...(migratedClients as ClientAccount[]).map((c, i) => c !== clientAccsRes[i] ? saveDocument('clientAccounts', c.id, c, { silent: true }) : Promise.resolve()),
+          ...(migratedInvoices as Invoice[]).map((i, index) => i !== invoicesRes[index] ? saveDocument('invoices', i.id, i, { silent: true }) : Promise.resolve()),
+           migratedSeo && migratedSeo !== seoRes ? saveDocument('seo', 'config', migratedSeo, { silent: true }) : Promise.resolve(),
+           migratedProfile && migratedProfile !== profileRes ? saveDocument('profile', 'photographer', migratedProfile, { silent: true }) : Promise.resolve(),
+           migratedEmailCfg && migratedEmailCfg !== emailConfigRes ? saveDocument('emailConfig', 'config', migratedEmailCfg, { silent: true }) : Promise.resolve(),
+         ]).then(() => {
+          localStorage.setItem(MIGRATE_FLAG, 'true');
+          console.log('Data migration complete: HTML entities unescaped in Supabase');
+        }).catch(() => {
+          // Migration persist failed (expected if not authenticated) — keep MIGRATE_FLAG unset so it retries on next login
+        });
+      } else {
+        console.warn('[syncSupabase] Admin not signed in — showing local data; the migration will be persisted once the admin signs in.');
+      }
+      setPhotographs(migratedPhotos);
+      setServices(migratedServices);
+      setTestimonials(migratedTestimonials);
+      setBlogPosts(migratedBlogs);
+      setFaqs(migratedFaqs);
+      setBookings(migratedBookings);
+       setMessages(migratedMessages);
+       setClientAccounts(migratedClients);
+        setInvoices(migratedInvoices as Invoice[]);
+      setSeo(migratedSeo ?? INITIAL_SEO);
+      setProfile(migratedProfile ?? INITIAL_PROFILE);
+    } else {
+      setPhotographs(photosRes);
+      setServices(servicesRes);
+      setTestimonials(testimonialsRes);
+      setBlogPosts(blogRes);
+      setFaqs(faqsRes);
+      setBookings(bookingsRes);
+      setMessages(messagesRes);
+     setClientAccounts(clientAccsRes);
+     setInvoices(invoicesRes);
+      setSeo(seoRes ?? INITIAL_SEO);
+      setProfile(profileRes ?? INITIAL_PROFILE);
+    }
 
-      setPackages(packagesRes.length > 0 ? packagesRes : INITIAL_PHOTOGRAPHY_PACKAGES);
-      setBookingConfig(bookingConfigRes ?? INITIAL_BOOKING_CONFIG);
-      setEmailConfig(emailConfigRes ? { ...INITIAL_EMAIL_CONFIG, ...emailConfigRes } : INITIAL_EMAIL_CONFIG);
-      const computedStats = await computeAnalytics();
-      setSeoAnalytics(computedStats);
+    setPackages(packagesRes.length > 0 ? packagesRes : INITIAL_PHOTOGRAPHY_PACKAGES);
+    setBookingConfig(bookingConfigRes ?? INITIAL_BOOKING_CONFIG);
+    setEmailConfig(emailConfigRes ? { ...INITIAL_EMAIL_CONFIG, ...emailConfigRes } : INITIAL_EMAIL_CONFIG);
+    const computedStats = await computeAnalytics();
+    setSeoAnalytics(computedStats);
 
-      // Only persist singleton configs if admin is authenticated (avoids 401 spam when not logged in)
-      if (isAuthed) {
-        if (!seoRes) saveDocument('seo', 'config', INITIAL_SEO, { silent: true });
-        if (!profileRes) saveDocument('profile', 'photographer', INITIAL_PROFILE, { silent: true });
-        if (!bookingConfigRes) saveDocument('bookingConfig', 'config', INITIAL_BOOKING_CONFIG, { silent: true });
-        if (!emailConfigRes) saveDocument('emailConfig', 'config', INITIAL_EMAIL_CONFIG, { silent: true });
-        if (packagesRes.length === 0) {
-          for (const pkg of INITIAL_PHOTOGRAPHY_PACKAGES) {
-            await saveDocument('photography_packages', pkg.id, pkg, { silent: true });
-          }
+    // Only persist singleton configs if admin is authenticated (avoids 401 spam when not logged in).
+    // When the admin signs in later, loadAllData re-runs and seeds them here.
+    if (isAuthed) {
+      if (!seoRes) saveDocument('seo', 'config', INITIAL_SEO, { silent: true });
+      if (!profileRes) saveDocument('profile', 'photographer', INITIAL_PROFILE, { silent: true });
+      if (!bookingConfigRes) saveDocument('bookingConfig', 'config', INITIAL_BOOKING_CONFIG, { silent: true });
+      if (!emailConfigRes) saveDocument('emailConfig', 'config', INITIAL_EMAIL_CONFIG, { silent: true });
+      if (packagesRes.length === 0) {
+        for (const pkg of INITIAL_PHOTOGRAPHY_PACKAGES) {
+          await saveDocument('photography_packages', pkg.id, pkg, { silent: true });
         }
       }
     }
-    syncSupabase()
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    loadAllData(() => cancelled)
       .catch(console.error)
       .finally(() => {
         if (!cancelled) setBootstrapped(true);
       });
     return () => { cancelled = true; };
-  }, []);
+  }, [loadAllData]);
 
   useEffect(() => {
     trackPageView();
@@ -868,6 +872,10 @@ ${photographerName}`);
       setIsAdminLoggedIn(true);
       setShowAdminLogin(false);
       navigateTo('admin');
+      // Reload all data with the authenticated session: seeds admin-only tables
+      // (bookings/messages/invoices/clientAccounts) and persists the HTML-entities
+      // migration that was only applied in-memory during the anonymous bootstrap.
+      loadAllData().catch(console.error);
       return;
     } catch (err: any) {
       const msg = err?.message || err?.error_description || err?.code || '';

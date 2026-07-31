@@ -1,4 +1,4 @@
-import { supabase, isSupabaseConfigured } from './supabase';
+import { supabase, ensureActiveSession } from './supabase';
 
 export const SEEDED_FLAG_KEY = 'aurea_firestore_seeded';
 const MISSING_TABLES_KEY = 'aurea_missing_tables';
@@ -88,21 +88,6 @@ function getCompatiblePayload(table: string, data: Record<string, unknown>): Rec
   return Object.fromEntries(Object.entries(data).filter(([key]) => BOOKING_BASE_COLUMNS.has(key)));
 }
 
-// Returns true when a valid Supabase session exists, attempting a token refresh if
-// the stored session is missing or expired. In offline/demo mode writes are no-ops,
-// so the session is treated as always active to keep the mock-data flow working.
-async function ensureActiveSession(): Promise<boolean> {
-  if (!isSupabaseConfigured) return true;
-  try {
-    const { data } = await supabase.auth.getSession();
-    if (data.session) return true;
-    const { data: refreshed } = await supabase.auth.refreshSession();
-    return !!refreshed.session;
-  } catch {
-    return false;
-  }
-}
-
 export async function getCollectionWithFallback<T extends { id: string }>(
   collectionPath: string,
   fallbackData: T[]
@@ -116,6 +101,13 @@ export async function getCollectionWithFallback<T extends { id: string }>(
 
     if (!data || data.length === 0) {
       if (fallbackData && fallbackData.length > 0) {
+        // Only seed while authenticated. Admin-only tables (bookings, messages,
+        // invoices, clientaccounts) have no public READ policy, so anonymous
+        // requests legitimately read as empty — seeding then would re-insert the
+        // fallback rows on every visit and collide with rows that already exist.
+        if (!(await ensureActiveSession())) {
+          return fallbackData;
+        }
         const seededFlag = localStorage.getItem(SEEDED_FLAG_KEY);
         if (!seededFlag) {
           const { error: insertError } = await supabase.from(table).insert(fallbackData as any[]);
@@ -186,21 +178,26 @@ export async function saveDocument<T>(collectionPath: string, docId: string, dat
     console.error(`[saveDocument] ${table}/${docId} failed:`, code, msg, err?.details);
 
     if (code === '401' || err?.status === 401 || /unauthorized|invalid.?jwt|expired/i.test(msg)) {
-      // Access token expired mid-session: refresh once and retry before surfacing the error.
-      if (await ensureActiveSession()) {
-        try {
-          await doUpsert(payload);
-          return;
-        } catch (retryErr: any) {
-          if (isMissingTableError(retryErr)) {
-            markTableMissing(table);
+      // Access token expired mid-session: refresh once and retry before surfacing
+      // the error. Only reached when a session existed (the pre-check above blocks
+      // logged-out writes), so a refresh token is available — no phantom requests.
+      try {
+        const { data: refreshed } = await supabase.auth.refreshSession();
+        if (refreshed.session) {
+          try {
+            await doUpsert(payload);
+            return;
+          } catch (retryErr: any) {
+            if (isMissingTableError(retryErr)) {
+              markTableMissing(table);
+              return;
+            }
+            dispatchSaveError({ table, docId, code: String(retryErr?.code || retryErr?.status || ''), message: retryErr?.message || String(retryErr) });
+            if (!options?.silent) throw retryErr;
             return;
           }
-          dispatchSaveError({ table, docId, code: String(retryErr?.code || retryErr?.status || ''), message: retryErr?.message || String(retryErr) });
-          if (!options?.silent) throw retryErr;
-          return;
         }
-      }
+      } catch { /* refresh failed — fall through to the auth error below */ }
       dispatchSaveError({ table, docId, code: '401', message: msg });
       if (!options?.silent) throw err;
       return;
