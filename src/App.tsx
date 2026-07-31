@@ -348,10 +348,12 @@ export default function App() {
   const [bootstrapped, setBootstrapped] = useState(false);
 
   useEffect(() => {
+    // Keeps the admin UI in sync with the real Supabase session: restores login on
+    // reload and — critically — logs the admin out of the CMS when the session
+    // expires (SIGNED_OUT), instead of leaving a "visually logged in" state that
+    // produces 401s on every save.
     const unsub = onAuthChange((user) => {
-      if (user) {
-        setIsAdminLoggedIn(true);
-      }
+      setIsAdminLoggedIn(!!user);
     });
     return () => unsub();
   }, []);
@@ -369,7 +371,7 @@ export default function App() {
 
   useEffect(() => {
     let cancelled = false;
-    async function syncFirestore() {
+    async function syncSupabase() {
       const [photosRes, servicesRes, testimonialsRes, blogRes, faqsRes,
         bookingsRes, messagesRes, clientAccsRes, invoicesRes] = await Promise.all([
         getCollectionWithFallback<Photograph>('photographs', INITIAL_PHOTOGRAPHS),
@@ -443,12 +445,12 @@ export default function App() {
              migratedEmailCfg && migratedEmailCfg !== emailConfigRes ? saveDocument('emailConfig', 'config', migratedEmailCfg, { silent: true }) : Promise.resolve(),
            ]).then(() => {
             localStorage.setItem(MIGRATE_FLAG, 'true');
-            console.log('Data migration complete: HTML entities unescaped in Firestore');
+            console.log('Data migration complete: HTML entities unescaped in Supabase');
           }).catch(() => {
             // Migration persist failed (expected if not authenticated) — keep MIGRATE_FLAG unset so it retries on next login
           });
         } else {
-          console.log('[syncFirestore] Admin not authenticated — HTML migration applied in-memory only, will persist on next login');
+          console.log('[syncSupabase] Admin not authenticated — HTML migration applied in-memory only, will persist on next login');
         }
         setPhotographs(migratedPhotos);
         setServices(migratedServices);
@@ -494,7 +496,7 @@ export default function App() {
         }
       }
     }
-    syncFirestore()
+    syncSupabase()
       .catch(console.error)
       .finally(() => {
         if (!cancelled) setBootstrapped(true);
@@ -506,7 +508,7 @@ export default function App() {
     trackPageView();
   }, []);
 
-  // Custom state wrappers that write changes to both local state and sync them to Firestore
+  // Custom state wrappers that write changes to both local state and sync them to Supabase
   const handleUpdatePhotographs = (newPhotos: Photograph[]) => {
     syncCollection('photographs', photographs, newPhotos);
     setPhotographs(newPhotos);

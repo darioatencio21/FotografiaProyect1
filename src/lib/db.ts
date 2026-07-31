@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { supabase, isSupabaseConfigured } from './supabase';
 
 export const SEEDED_FLAG_KEY = 'aurea_firestore_seeded';
 const MISSING_TABLES_KEY = 'aurea_missing_tables';
@@ -88,6 +88,21 @@ function getCompatiblePayload(table: string, data: Record<string, unknown>): Rec
   return Object.fromEntries(Object.entries(data).filter(([key]) => BOOKING_BASE_COLUMNS.has(key)));
 }
 
+// Returns true when a valid Supabase session exists, attempting a token refresh if
+// the stored session is missing or expired. In offline/demo mode writes are no-ops,
+// so the session is treated as always active to keep the mock-data flow working.
+async function ensureActiveSession(): Promise<boolean> {
+  if (!isSupabaseConfigured) return true;
+  try {
+    const { data } = await supabase.auth.getSession();
+    if (data.session) return true;
+    const { data: refreshed } = await supabase.auth.refreshSession();
+    return !!refreshed.session;
+  } catch {
+    return false;
+  }
+}
+
 export async function getCollectionWithFallback<T extends { id: string }>(
   collectionPath: string,
   fallbackData: T[]
@@ -154,6 +169,14 @@ export async function saveDocument<T>(collectionPath: string, docId: string, dat
     if (error) throw error;
   };
 
+  // Block the write up front when there is no active session instead of firing a
+  // pointless request that Supabase would reject with 401 anyway.
+  if (!(await ensureActiveSession())) {
+    dispatchSaveError({ table, docId, code: '401', message: 'Sesión expirada o no iniciaste sesión. Recargá la página y volvé a iniciar sesión.' });
+    if (!options?.silent) throw new Error(`No active Supabase session for ${table}/${docId}`);
+    return;
+  }
+
   try {
     await doUpsert(payload);
     return;
@@ -161,6 +184,27 @@ export async function saveDocument<T>(collectionPath: string, docId: string, dat
     const code = err?.code || err?.status || '';
     const msg = err?.message || String(err);
     console.error(`[saveDocument] ${table}/${docId} failed:`, code, msg, err?.details);
+
+    if (code === '401' || err?.status === 401 || /unauthorized|invalid.?jwt|expired/i.test(msg)) {
+      // Access token expired mid-session: refresh once and retry before surfacing the error.
+      if (await ensureActiveSession()) {
+        try {
+          await doUpsert(payload);
+          return;
+        } catch (retryErr: any) {
+          if (isMissingTableError(retryErr)) {
+            markTableMissing(table);
+            return;
+          }
+          dispatchSaveError({ table, docId, code: String(retryErr?.code || retryErr?.status || ''), message: retryErr?.message || String(retryErr) });
+          if (!options?.silent) throw retryErr;
+          return;
+        }
+      }
+      dispatchSaveError({ table, docId, code: '401', message: msg });
+      if (!options?.silent) throw err;
+      return;
+    }
 
     dispatchSaveError({ table, docId, code: String(code), message: msg });
 
@@ -189,6 +233,9 @@ export async function saveDocument<T>(collectionPath: string, docId: string, dat
 export async function deleteDocument(collectionPath: string, docId: string): Promise<void> {
   const table = tn(collectionPath);
   if (isTableMissing(table)) return;
+  if (!(await ensureActiveSession())) {
+    throw new Error(`No active Supabase session for ${table}/${docId}`);
+  }
 
   try {
     const { error } = await supabase

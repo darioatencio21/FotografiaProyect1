@@ -290,7 +290,7 @@ export default function AdminCMS({
   const newProofPhotoComposition = 90;
   const newProofPhotoEmotion = 85;
 
-  // Sync form states when async props load from Firestore
+  // Sync form states when async props load from Supabase
   useEffect(() => {
     if (emailConfig) {
       setEmailForm(emailConfig);
