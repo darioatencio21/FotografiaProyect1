@@ -307,6 +307,40 @@ export default function App() {
     sessionStorage.setItem('contact_draft_msg', contactMsg);
   }, [contactName, contactEmail, contactSubject, contactMsg]);
 
+  // Contact form validation (mirrors the messages RLS policy in migration 018)
+  const CONTACT_MAX_NAME = 100;
+  const CONTACT_MAX_EMAIL = 150;
+  const CONTACT_MAX_SUBJECT = 150;
+  const CONTACT_MIN_MESSAGE = 10;
+  const CONTACT_MAX_MESSAGE = 2000;
+  const CONTACT_EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  const contactNameError = !contactName.trim()
+    ? (lang === 'en' ? 'Name is required.' : 'El nombre es obligatorio.')
+    : contactName.trim().length > CONTACT_MAX_NAME
+      ? (lang === 'en' ? `Name must be ${CONTACT_MAX_NAME} characters or fewer.` : `El nombre debe tener como máximo ${CONTACT_MAX_NAME} caracteres.`)
+      : '';
+  const contactEmailError = !contactEmail.trim()
+    ? (lang === 'en' ? 'Email is required.' : 'El email es obligatorio.')
+    : contactEmail.trim().length > CONTACT_MAX_EMAIL
+      ? (lang === 'en' ? `Email must be ${CONTACT_MAX_EMAIL} characters or fewer.` : `El email debe tener como máximo ${CONTACT_MAX_EMAIL} caracteres.`)
+      : !CONTACT_EMAIL_REGEX.test(contactEmail.trim())
+        ? (lang === 'en' ? 'Enter a valid email address.' : 'Ingresá un email válido.')
+        : '';
+  const contactSubjectError = !contactSubject.trim()
+    ? (lang === 'en' ? 'Subject is required.' : 'El asunto es obligatorio.')
+    : contactSubject.trim().length > CONTACT_MAX_SUBJECT
+      ? (lang === 'en' ? `Subject must be ${CONTACT_MAX_SUBJECT} characters or fewer.` : `El asunto debe tener como máximo ${CONTACT_MAX_SUBJECT} caracteres.`)
+      : '';
+  const contactMsgError = !contactMsg
+    ? (lang === 'en' ? 'Message is required.' : 'El mensaje es obligatorio.')
+    : contactMsg.length < CONTACT_MIN_MESSAGE
+      ? (lang === 'en' ? `Message must be at least ${CONTACT_MIN_MESSAGE} characters.` : `El mensaje debe tener al menos ${CONTACT_MIN_MESSAGE} caracteres.`)
+      : contactMsg.length > CONTACT_MAX_MESSAGE
+        ? (lang === 'en' ? `Message must be ${CONTACT_MAX_MESSAGE} characters or fewer.` : `El mensaje debe tener como máximo ${CONTACT_MAX_MESSAGE} caracteres.`)
+        : '';
+  const contactFormValid = !contactNameError && !contactEmailError && !contactSubjectError && !contactMsgError;
+
   // Search filter
   const [activeFilter] = useState<string>('all');
   const [approvalBooking, setApprovalBooking] = useState<Booking | null | 'loading'>('loading');
@@ -761,12 +795,14 @@ export default function App() {
 
     if (contactHoneypot) return;
 
+    if (!contactFormValid) return;
+
     const safeName = sanitizeString(contactName);
     const safeEmail = sanitizeEmail(contactEmail);
     const safeSubject = sanitizeString(contactSubject);
     const safeMsg = sanitizeString(contactMsg);
 
-    if (!safeName || !safeEmail || !safeMsg) return;
+    if (!safeName || !safeEmail || !safeSubject || !safeMsg) return;
 
     setContactSubmitting(true);
 
@@ -1795,7 +1831,7 @@ ${photographerName}`);
                 <div className="lg:col-span-7 bg-dark-gray border border-white/10 rounded-lg p-6 md:p-8 shadow-md">
                   <AnimatePresence mode="wait">
                     {!contactSuccess ? (
-                      <form onSubmit={handleContactSubmit} className="space-y-4 text-left">
+                      <form onSubmit={handleContactSubmit} noValidate className="space-y-4 text-left">
                         <div aria-hidden="true" className="absolute opacity-0 pointer-events-none" style={{ height: 0, overflow: 'hidden' }}>
                           <input
                             type="text"
@@ -1811,20 +1847,30 @@ ${photographerName}`);
                             <input
                               type="text"
                               required
+                              maxLength={CONTACT_MAX_NAME}
                               value={contactName}
                               onChange={(e) => setContactName(e.target.value)}
+                              aria-invalid={!!contactNameError}
                               className="w-full bg-charcoal border-stone rounded p-2.5 text-xs text-white focus:outline-none focus:border-white/30 font-sans"
                             />
+                            {contactNameError && (
+                              <p className="text-[10px] text-red-400 font-sans">{contactNameError}</p>
+                            )}
                           </div>
                           <div className="space-y-1">
                             <label className="text-[10px] font-mono text-white/45 uppercase tracking-wider">{t.clientEmail}</label>
                             <input
                               type="email"
                               required
+                              maxLength={CONTACT_MAX_EMAIL}
                               value={contactEmail}
                               onChange={(e) => setContactEmail(e.target.value)}
+                              aria-invalid={!!contactEmailError}
                               className="w-full bg-charcoal border-stone rounded p-2.5 text-xs text-white focus:outline-none focus:border-white/30 font-sans"
                             />
+                            {contactEmailError && (
+                              <p className="text-[10px] text-red-400 font-sans">{contactEmailError}</p>
+                            )}
                           </div>
                         </div>
 
@@ -1833,10 +1879,15 @@ ${photographerName}`);
                           <input
                             type="text"
                             required
-                              value={contactSubject}
-                              onChange={(e) => setContactSubject(e.target.value)}
-                              className="w-full bg-charcoal border-stone rounded p-2.5 text-xs text-white focus:outline-none focus:border-white/30 font-sans"
+                            maxLength={CONTACT_MAX_SUBJECT}
+                            value={contactSubject}
+                            onChange={(e) => setContactSubject(e.target.value)}
+                            aria-invalid={!!contactSubjectError}
+                            className="w-full bg-charcoal border-stone rounded p-2.5 text-xs text-white focus:outline-none focus:border-white/30 font-sans"
                           />
+                          {contactSubjectError && (
+                            <p className="text-[10px] text-red-400 font-sans">{contactSubjectError}</p>
+                          )}
                         </div>
 
                         <div className="space-y-1">
@@ -1844,15 +1895,25 @@ ${photographerName}`);
                           <textarea
                             rows={4}
                             required
-                              value={contactMsg}
-                              onChange={(e) => setContactMsg(e.target.value)}
-                              className="w-full bg-charcoal border-stone rounded p-3 text-xs text-white focus:outline-none focus:border-white/30 font-sans resize-none"
+                            maxLength={CONTACT_MAX_MESSAGE}
+                            value={contactMsg}
+                            onChange={(e) => setContactMsg(e.target.value)}
+                            aria-invalid={!!contactMsgError}
+                            className="w-full bg-charcoal border-stone rounded p-3 text-xs text-white focus:outline-none focus:border-white/30 font-sans resize-none"
                           />
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="text-[10px] text-red-400 font-sans">
+                              {contactMsgError || (contactMsg && contactMsg.length < CONTACT_MIN_MESSAGE
+                                ? (lang === 'en' ? `Minimum ${CONTACT_MIN_MESSAGE} characters.` : `Mínimo ${CONTACT_MIN_MESSAGE} caracteres.`)
+                                : '')}
+                            </p>
+                            <span className="ml-auto text-[10px] font-mono text-white/45">{contactMsg.length}/{CONTACT_MAX_MESSAGE}</span>
+                          </div>
                         </div>
 
                         <button
                           type="submit"
-                          disabled={contactSubmitting}
+                          disabled={contactSubmitting || !contactFormValid}
                           className="w-full py-3 bg-white/10 hover:bg-white/15 text-white border border-white/10 font-mono text-[10px] tracking-widest uppercase font-bold rounded-lg transition-all flex items-center justify-center space-x-1 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                         >
                           <MessageSquare size={13} />

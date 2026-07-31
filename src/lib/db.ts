@@ -142,9 +142,31 @@ export async function saveDocument<T>(collectionPath: string, docId: string, dat
     if (error) throw error;
   };
 
+  const hasSession = await ensureActiveSession();
+
+  // Anonymous visitors can only submit the public contact form: messages exposes
+  // an RLS INSERT-only policy for anon (migration 018), so use a plain insert
+  // (no upsert) that never touches the UPDATE path. All other tables keep
+  // requiring an authenticated admin session.
+  if (!hasSession && table === 'messages') {
+    try {
+      const { error } = await supabase.from(table).insert(payload);
+      if (error) throw error;
+      return;
+    } catch (err: any) {
+      if (isMissingTableError(err)) {
+        markTableMissing(table);
+        return;
+      }
+      dispatchSaveError({ table, docId, code: String(err?.code || err?.status || ''), message: err?.message || String(err) });
+      if (!options?.silent) throw err;
+      return;
+    }
+  }
+
   // Block the write up front when there is no active session instead of firing a
   // pointless request that Supabase would reject with 401 anyway.
-  if (!(await ensureActiveSession())) {
+  if (!hasSession) {
     dispatchSaveError({ table, docId, code: '401', message: 'Sesión expirada o no iniciaste sesión. Recargá la página y volvé a iniciar sesión.' });
     if (!options?.silent) throw new Error(`No active Supabase session for ${table}/${docId}`);
     return;
