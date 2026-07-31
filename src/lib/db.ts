@@ -17,25 +17,6 @@ export function onSaveError(cb: (detail: { table: string; docId: string; code: s
   return () => window.removeEventListener(SAVE_ERROR_EVENT, handler);
 }
 
-function getAuthErrorMessage(err: any): string {
-  if (!err) return 'Error desconocido al guardar';
-  const code = err?.code || '';
-  const msg = (err?.message || String(err)).toLowerCase();
-  if (code === '401' || msg.includes('401') || msg.includes('unauthorized')) {
-    return 'Sesión expirada o no iniciaste sesión. Recargá la página y volvé a iniciar sesión.';
-  }
-  if (code === '409' || msg.includes('409') || msg.includes('conflict')) {
-    return 'Conflicto al guardar: el registro ya existe y no se pudo actualizar.';
-  }
-  if (code === '42501' || msg.includes('42501') || msg.includes('row-level security')) {
-    return 'No tenés permisos para escribir en esta tabla. Iniciá sesión como administrador.';
-  }
-  if (msg.includes('relation') && msg.includes('does not exist')) {
-    return 'La tabla no existe en la base de datos. Ejecutá las migraciones pendientes.';
-  }
-  return `Error al guardar: ${err?.message || err}`;
-}
-
 function tn(table: string): string {
   return table.toLowerCase();
 }
