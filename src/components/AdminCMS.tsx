@@ -19,7 +19,7 @@ import {
 } from '../types';
 import { TRANSLATIONS } from '../data/mockData';
 import { sanitizeString, sanitizeEmail, sanitizeUrl } from '../lib/sanitize';
-import { supabase, uploadImageBlob } from '../lib/db';
+import { supabase, uploadImageBlob, onSaveError } from '../lib/db';
 import StorageImage from './StorageImage';
 import { sendApprovalEmail, sendRejectionEmail, sendExpirationEmail, getAuthHeaders } from '../lib/email';
 
@@ -268,6 +268,16 @@ export default function AdminCMS({
         });
     } catch { /* Realtime not supported */ }
     return () => { if (channel) supabase.removeChannel(channel); };
+  }, []);
+
+  // Listen for save errors from the data layer and show them in the admin UI
+  useEffect(() => {
+    return onSaveError((detail) => {
+      const userMsg = detail.code === '401' || detail.message?.toLowerCase().includes('unauthorized')
+        ? 'Sesión expirada. Guardá los cambios localmente, recargá la página y volvé a iniciar sesión.'
+        : `Error al guardar en ${detail.table}: ${detail.message}`;
+      triggerAlert(userMsg);
+    });
   }, []);
 
   // Client Account management state

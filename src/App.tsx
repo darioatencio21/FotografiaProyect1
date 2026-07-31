@@ -48,7 +48,8 @@ import {
   deleteDocument,
   loginWithSupabase,
   logoutFromSupabase,
-  onAuthChange
+  onAuthChange,
+  supabase
 } from './lib/db';
 import { sanitizeString, sanitizeEmail, sanitizeUrl, unescapeHTMLEntities } from './lib/sanitize';
 import { computeAnalytics, trackPageView } from './lib/analytics';
@@ -379,7 +380,11 @@ export default function App() {
 
       if (cancelled) return;
 
+      const { data: _sessionData } = await supabase.auth.getSession();
+      const isAuthed = !!_sessionData?.session;
+
       // One-time migration: repair data corrupted by old sanitizeString HTML escaping
+      // Only persists to DB if admin is authenticated — otherwise runs in-memory only
       const MIGRATE_FLAG = 'aorea_html_entities_migrated_v2';
       const needsMigration = !localStorage.getItem(MIGRATE_FLAG);
 
@@ -408,23 +413,30 @@ export default function App() {
         const migratedSeo = seoRes ? migrateStrings(seoRes) : seoRes;
         const migratedProfile = profileRes ? migrateStrings(profileRes) : profileRes;
         const migratedEmailCfg = emailConfigRes ? migrateStrings(emailConfigRes) : emailConfigRes;
-        Promise.all([
-          ...(migratedPhotos as Photograph[]).map((p, i) => p !== photosRes[i] ? saveDocument('photographs', p.id, p) : Promise.resolve()),
-          ...(migratedServices as Service[]).map((s, i) => s !== servicesRes[i] ? saveDocument('services', s.id, s) : Promise.resolve()),
-          ...(migratedTestimonials as Testimonial[]).map((t, i) => t !== testimonialsRes[i] ? saveDocument('testimonials', t.id, t) : Promise.resolve()),
-          ...(migratedBlogs as BlogPost[]).map((b, i) => b !== blogRes[i] ? saveDocument('blogPosts', b.id, b) : Promise.resolve()),
-          ...(migratedFaqs as FAQ[]).map((f, i) => f !== faqsRes[i] ? saveDocument('faqs', f.id, f) : Promise.resolve()),
-          ...(migratedBookings as Booking[]).map((b, i) => b !== bookingsRes[i] ? saveDocument('bookings', b.id, b) : Promise.resolve()),
-          ...(migratedMessages as Message[]).map((m, i) => m !== messagesRes[i] ? saveDocument('messages', m.id, m) : Promise.resolve()),
-           ...(migratedClients as ClientAccount[]).map((c, i) => c !== clientAccsRes[i] ? saveDocument('clientAccounts', c.id, c) : Promise.resolve()),
-          ...(migratedInvoices as Invoice[]).map((i, index) => i !== invoicesRes[index] ? saveDocument('invoices', i.id, i) : Promise.resolve()),
-           migratedSeo && migratedSeo !== seoRes ? saveDocument('seo', 'config', migratedSeo) : Promise.resolve(),
-           migratedProfile && migratedProfile !== profileRes ? saveDocument('profile', 'photographer', migratedProfile) : Promise.resolve(),
-           migratedEmailCfg && migratedEmailCfg !== emailConfigRes ? saveDocument('emailConfig', 'config', migratedEmailCfg) : Promise.resolve(),
-         ]).then(() => {
-          localStorage.setItem(MIGRATE_FLAG, 'true');
-          console.log('Data migration complete: HTML entities unescaped in Firestore');
-        }).catch(console.error);
+        const persist = isAuthed;
+        if (persist) {
+          Promise.all([
+            ...(migratedPhotos as Photograph[]).map((p, i) => p !== photosRes[i] ? saveDocument('photographs', p.id, p, { silent: true }) : Promise.resolve()),
+            ...(migratedServices as Service[]).map((s, i) => s !== servicesRes[i] ? saveDocument('services', s.id, s, { silent: true }) : Promise.resolve()),
+            ...(migratedTestimonials as Testimonial[]).map((t, i) => t !== testimonialsRes[i] ? saveDocument('testimonials', t.id, t, { silent: true }) : Promise.resolve()),
+            ...(migratedBlogs as BlogPost[]).map((b, i) => b !== blogRes[i] ? saveDocument('blogPosts', b.id, b, { silent: true }) : Promise.resolve()),
+            ...(migratedFaqs as FAQ[]).map((f, i) => f !== faqsRes[i] ? saveDocument('faqs', f.id, f, { silent: true }) : Promise.resolve()),
+            ...(migratedBookings as Booking[]).map((b, i) => b !== bookingsRes[i] ? saveDocument('bookings', b.id, b, { silent: true }) : Promise.resolve()),
+            ...(migratedMessages as Message[]).map((m, i) => m !== messagesRes[i] ? saveDocument('messages', m.id, m, { silent: true }) : Promise.resolve()),
+             ...(migratedClients as ClientAccount[]).map((c, i) => c !== clientAccsRes[i] ? saveDocument('clientAccounts', c.id, c, { silent: true }) : Promise.resolve()),
+            ...(migratedInvoices as Invoice[]).map((i, index) => i !== invoicesRes[index] ? saveDocument('invoices', i.id, i, { silent: true }) : Promise.resolve()),
+             migratedSeo && migratedSeo !== seoRes ? saveDocument('seo', 'config', migratedSeo, { silent: true }) : Promise.resolve(),
+             migratedProfile && migratedProfile !== profileRes ? saveDocument('profile', 'photographer', migratedProfile, { silent: true }) : Promise.resolve(),
+             migratedEmailCfg && migratedEmailCfg !== emailConfigRes ? saveDocument('emailConfig', 'config', migratedEmailCfg, { silent: true }) : Promise.resolve(),
+           ]).then(() => {
+            localStorage.setItem(MIGRATE_FLAG, 'true');
+            console.log('Data migration complete: HTML entities unescaped in Firestore');
+          }).catch(() => {
+            // Migration persist failed (expected if not authenticated) — keep MIGRATE_FLAG unset so it retries on next login
+          });
+        } else {
+          console.log('[syncFirestore] Admin not authenticated — HTML migration applied in-memory only, will persist on next login');
+        }
         setPhotographs(migratedPhotos);
         setServices(migratedServices);
         setTestimonials(migratedTestimonials);
@@ -456,13 +468,16 @@ export default function App() {
       const computedStats = await computeAnalytics();
       setSeoAnalytics(computedStats);
 
-      if (!seoRes) saveDocument('seo', 'config', INITIAL_SEO);
-      if (!profileRes) saveDocument('profile', 'photographer', INITIAL_PROFILE);
-      if (!bookingConfigRes) saveDocument('bookingConfig', 'config', INITIAL_BOOKING_CONFIG);
-      if (!emailConfigRes) saveDocument('emailConfig', 'config', INITIAL_EMAIL_CONFIG);
-      if (packagesRes.length === 0) {
-        for (const pkg of INITIAL_PHOTOGRAPHY_PACKAGES) {
-          await saveDocument('photography_packages', pkg.id, pkg);
+      // Only persist singleton configs if admin is authenticated (avoids 401 spam when not logged in)
+      if (isAuthed) {
+        if (!seoRes) saveDocument('seo', 'config', INITIAL_SEO, { silent: true });
+        if (!profileRes) saveDocument('profile', 'photographer', INITIAL_PROFILE, { silent: true });
+        if (!bookingConfigRes) saveDocument('bookingConfig', 'config', INITIAL_BOOKING_CONFIG, { silent: true });
+        if (!emailConfigRes) saveDocument('emailConfig', 'config', INITIAL_EMAIL_CONFIG, { silent: true });
+        if (packagesRes.length === 0) {
+          for (const pkg of INITIAL_PHOTOGRAPHY_PACKAGES) {
+            await saveDocument('photography_packages', pkg.id, pkg, { silent: true });
+          }
         }
       }
     }
@@ -1078,9 +1093,9 @@ ${photographerName}`);
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -15 }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
-          className={currentView === 'admin'
-            ? "pt-[70px] lg:pt-20 pb-32 space-y-16 md:space-y-32"
-            : "pt-[70px] lg:pt-20 pb-32 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto space-y-16 md:space-y-32"
+           className={currentView === 'admin'
+            ? "pt-24 lg:pt-28 pb-32 space-y-16 md:space-y-32"
+            : "pt-24 lg:pt-28 pb-32 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto space-y-16 md:space-y-32"
           }>
 
           {/* ======================================================= */}

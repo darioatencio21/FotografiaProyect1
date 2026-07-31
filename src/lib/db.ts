@@ -3,6 +3,39 @@ import { supabase } from './supabase';
 export const SEEDED_FLAG_KEY = 'aurea_firestore_seeded';
 const MISSING_TABLES_KEY = 'aurea_missing_tables';
 
+const SAVE_ERROR_EVENT = 'aurea:save-error';
+
+export function dispatchSaveError(detail: { table: string; docId: string; code: string; message: string }) {
+  try {
+    window.dispatchEvent(new CustomEvent(SAVE_ERROR_EVENT, { detail }));
+  } catch { /* ignore in SSR */ }
+}
+
+export function onSaveError(cb: (detail: { table: string; docId: string; code: string; message: string }) => void): () => void {
+  const handler = (e: Event) => cb((e as CustomEvent).detail);
+  window.addEventListener(SAVE_ERROR_EVENT, handler);
+  return () => window.removeEventListener(SAVE_ERROR_EVENT, handler);
+}
+
+function getAuthErrorMessage(err: any): string {
+  if (!err) return 'Error desconocido al guardar';
+  const code = err?.code || '';
+  const msg = (err?.message || String(err)).toLowerCase();
+  if (code === '401' || msg.includes('401') || msg.includes('unauthorized')) {
+    return 'Sesión expirada o no iniciaste sesión. Recargá la página y volvé a iniciar sesión.';
+  }
+  if (code === '409' || msg.includes('409') || msg.includes('conflict')) {
+    return 'Conflicto al guardar: el registro ya existe y no se pudo actualizar.';
+  }
+  if (code === '42501' || msg.includes('42501') || msg.includes('row-level security')) {
+    return 'No tenés permisos para escribir en esta tabla. Iniciá sesión como administrador.';
+  }
+  if (msg.includes('relation') && msg.includes('does not exist')) {
+    return 'La tabla no existe en la base de datos. Ejecutá las migraciones pendientes.';
+  }
+  return `Error al guardar: ${err?.message || err}`;
+}
+
 function tn(table: string): string {
   return table.toLowerCase();
 }
@@ -109,7 +142,7 @@ export async function getSingleDocument<T>(collectionPath: string, docId: string
   }
 }
 
-export async function saveDocument<T>(collectionPath: string, docId: string, data: T): Promise<void> {
+export async function saveDocument<T>(collectionPath: string, docId: string, data: T, options?: { silent?: boolean }): Promise<void> {
   const table = tn(collectionPath);
 
   const payload = { id: docId, ...(data as Record<string, unknown>) };
@@ -125,7 +158,12 @@ export async function saveDocument<T>(collectionPath: string, docId: string, dat
     await doUpsert(payload);
     return;
   } catch (err: any) {
-    console.error(`[saveDocument] ${table}/${docId} first attempt failed:`, err?.code, err?.message ?? err, err?.details);
+    const code = err?.code || err?.status || '';
+    const msg = err?.message || String(err);
+    console.error(`[saveDocument] ${table}/${docId} failed:`, code, msg, err?.details);
+
+    dispatchSaveError({ table, docId, code: String(code), message: msg });
+
     if (table === 'bookings' && isSchemaMismatchError(err)) {
       const compatibleData = getCompatiblePayload(table, data as Record<string, unknown>);
       try {
@@ -136,14 +174,15 @@ export async function saveDocument<T>(collectionPath: string, docId: string, dat
           markTableMissing(table);
           return;
         }
-        throw retryErr;
+        if (!options?.silent) throw retryErr;
+        return;
       }
     }
     if (isMissingTableError(err)) {
       markTableMissing(table);
       return;
     }
-    throw err;
+    if (!options?.silent) throw err;
   }
 }
 
