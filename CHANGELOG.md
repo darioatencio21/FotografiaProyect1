@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.3](https://github.com/darioatencio21/FotografiaProyect1/compare/v1.1.2...v1.1.3) (2026-07-31)
+
+
+### Bug Fixes
+
+* remove orphaned printPrices const in ClientPortal, translate Estudio Camaleón to English in Footer ([6166187](https://github.com/darioatencio21/FotografiaProyect1/commit/61661873d605091c3ef2f6e52f99ab846e3d20c7))
+* remove unused code flagged by CodeQL alerts ([c779a58](https://github.com/darioatencio21/FotografiaProyect1/commit/c779a58c29b5194b8df8637b67e40127b62adf7c))
+
 ## [1.1.2](https://github.com/darioatencio21/FotografiaProyect1/compare/v1.1.1...v1.1.2) (2026-07-30)
 
 
