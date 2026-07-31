@@ -18,10 +18,10 @@ import {
   ClientAccount, ProofPhoto, SessionCategory, PhotographyPackage, Invoice
 } from '../types';
 import { TRANSLATIONS } from '../data/mockData';
-import { sanitizeString, sanitizeEmail, sanitizeUrl, sanitizeObject } from '../lib/sanitize';
+import { sanitizeString, sanitizeEmail, sanitizeUrl } from '../lib/sanitize';
 import { supabase, uploadImageBlob } from '../lib/db';
 import StorageImage from './StorageImage';
-import { sendApprovalEmail, sendRejectionEmail, sendExpirationEmail, sendConfirmationEmail, getAuthHeaders } from '../lib/email';
+import { sendApprovalEmail, sendRejectionEmail, sendExpirationEmail, getAuthHeaders } from '../lib/email';
 
 import AdminSEOTab from './AdminSEOTab';
 import AdminProfileTab from './AdminProfileTab';
@@ -154,8 +154,6 @@ export default function AdminCMS({
   const [isSendingEmail, setIsSendingEmail] = useState(false);
 
   // Blog state
-  const [blogEditItem, setBlogEditItem] = useState<BlogPost | null>(null);
-  const [blogForm, setBlogForm] = useState<Partial<BlogPost>>({});
 
   // Service, SEO, Profile form states moved to extracted components AdminServicesTab, AdminSEOTab, AdminProfileTab
 
@@ -278,9 +276,9 @@ export default function AdminCMS({
   const [isDragOver, setIsDragOver] = useState(false);
   const [newProofPhotoUrl, setNewProofPhotoUrl] = useState('');
   const [newProofPhotoTitle, setNewProofPhotoTitle] = useState('');
-  const [newProofPhotoSharpness, setNewProofPhotoSharpness] = useState(95);
-  const [newProofPhotoComposition, setNewProofPhotoComposition] = useState(90);
-  const [newProofPhotoEmotion, setNewProofPhotoEmotion] = useState(85);
+  const newProofPhotoSharpness = 95;
+  const newProofPhotoComposition = 90;
+  const newProofPhotoEmotion = 85;
 
   // Sync form states when async props load from Firestore
   useEffect(() => {

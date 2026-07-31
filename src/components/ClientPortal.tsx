@@ -112,11 +112,6 @@ export default function ClientPortal({ lang, onOpenCheckout, bookings = [], onUp
     'canvas': 160
   };
 
-  const selectedPrints = proofPhotos.filter(p => p.printSize !== '');
-  const printTotal = selectedPrints.reduce((sum, current) => {
-    return sum + (printPrices[current.printSize] || 0);
-  }, 0);
-
   const handleDownload = async (photo: ProofPhoto) => {
     const safeUrl = sanitizeUrl(photo.url);
     if (!safeUrl) return;

@@ -18,7 +18,6 @@ interface HeaderProps {
 }
 
 const DRAWER_WIDTH_VW = 85;
-const CLOSE_THRESHOLD_PX = 80;
 const CLOSE_VELOCITY = 400;
 const HANDLE_OPEN_THRESHOLD_PX = 40;
 

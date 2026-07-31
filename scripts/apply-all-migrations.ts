@@ -89,6 +89,7 @@ async function applyAll() {
       console.log(`  ${file}: empty, skipping`);
       continue;
     }
+    validateSqlContent(sql, file);
     process.stdout.write(`  ${file}... `);
     const ok = await execSql(sql, file);
     console.log(ok ? '✓' : '✗');
