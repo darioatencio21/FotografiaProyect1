@@ -514,6 +514,7 @@ ${closing}`);
                     <input
                       type="text"
                       required
+                      maxLength={15}
                       value={clientName}
                       onChange={(e) => setClientName(e.target.value)}
                       placeholder="Nombre Completo *"
@@ -529,6 +530,7 @@ ${closing}`);
                     <input
                       type="email"
                       required
+                      maxLength={50}
                       value={clientEmail}
                       onChange={(e) => setClientEmail(e.target.value)}
                       placeholder="Correo Electrónico *"
@@ -544,6 +546,7 @@ ${closing}`);
                     <input
                       type="tel"
                       required
+                      maxLength={20}
                       value={clientPhone}
                       onChange={(e) => setClientPhone(e.target.value)}
                       placeholder={lang === 'es' ? 'Número de Teléfono *' : 'Phone Number *'}
@@ -574,6 +577,7 @@ ${closing}`);
                   <div className="md:col-span-3">
                     <textarea
                       rows={2}
+                      maxLength={150}
                       value={creativeNotes}
                       onChange={(e) => setCreativeNotes(e.target.value)}
                       placeholder={t.notesLabel}
@@ -594,9 +598,9 @@ ${closing}`);
                       <p className="text-[10px] font-mono tracking-widest text-white/70 uppercase">
                         {lang === 'es' ? 'Novia' : 'Bride'}
                       </p>
-                      <input type="text" required placeholder={lang === 'es' ? 'Nombre de la Novia' : 'Bride Name'} value={weddingData.brideName} onChange={(e) => setWeddingData({...weddingData, brideName: e.target.value})} className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-sans" />
-                      <input type="email" required placeholder={lang === 'es' ? 'Correo de la Novia' : 'Bride Email'} value={weddingData.brideEmail} onChange={(e) => setWeddingData({...weddingData, brideEmail: e.target.value})} className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-sans" />
-                      <input type="text" required placeholder={lang === 'es' ? 'Dirección de la Novia' : 'Bride Address'} value={weddingData.brideAddress} onChange={(e) => setWeddingData({...weddingData, brideAddress: e.target.value})} className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-sans" />
+                      <input type="text" required maxLength={15} placeholder={lang === 'es' ? 'Nombre de la Novia' : 'Bride Name'} value={weddingData.brideName} onChange={(e) => setWeddingData({...weddingData, brideName: e.target.value})} className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-sans" />
+                      <input type="email" required maxLength={50} placeholder={lang === 'es' ? 'Correo de la Novia' : 'Bride Email'} value={weddingData.brideEmail} onChange={(e) => setWeddingData({...weddingData, brideEmail: e.target.value})} className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-sans" />
+                      <input type="text" required maxLength={100} placeholder={lang === 'es' ? 'Dirección de la Novia' : 'Bride Address'} value={weddingData.brideAddress} onChange={(e) => setWeddingData({...weddingData, brideAddress: e.target.value})} className="w-full bg-dark/60 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 font-sans" />
                     </div>
                     <div className="space-y-3 p-4 border border-white/10 rounded-lg">
                       <p className="text-[10px] font-mono tracking-widest text-white/70 uppercase">

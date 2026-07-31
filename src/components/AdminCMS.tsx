@@ -3352,6 +3352,9 @@ interface SessionCatEditorProps {
 }
 
 const CATEGORY_ICONS = ['Heart', 'Gem', 'Camera', 'Users', 'Baby', 'Sparkles', 'PartyPopper', 'GraduationCap', 'Briefcase', 'Utensils', 'Package', 'Calendar'];
+const CATEGORY_NAME_MAX = 100;
+const CATEGORY_DESC_MAX = 500;
+const CATEGORY_IMAGE_MAX = 500;
 
 function SessionCategoriesEditor({ categories, onUpdate, triggerAlert, lang }: SessionCatEditorProps) {
   const [localCats, setLocalCats] = useState<SessionCategory[]>(categories);
@@ -3424,23 +3427,27 @@ function SessionCategoriesEditor({ categories, onUpdate, triggerAlert, lang }: S
               <div className="space-y-1">
                 <label className={labelClass}>Nombre / Name</label>
                 <div className="grid grid-cols-2 gap-2">
-                  <input value={editingCat.name_es} onChange={(e) => updateField('name_es', e.target.value)} placeholder="Español" className={inputClass} />
-                  <input value={editingCat.name_en} onChange={(e) => updateField('name_en', e.target.value)} placeholder="English" className={inputClass} />
+                  <input value={editingCat.name_es} onChange={(e) => updateField('name_es', e.target.value)} maxLength={CATEGORY_NAME_MAX} placeholder="Español" className={inputClass} />
+                  <input value={editingCat.name_en} onChange={(e) => updateField('name_en', e.target.value)} maxLength={CATEGORY_NAME_MAX} placeholder="English" className={inputClass} />
                 </div>
               </div>
 
               <div className="space-y-1">
                 <label className={labelClass}>{t('Descripción', 'Description')}</label>
                 <div className="grid grid-cols-2 gap-2">
-                   <textarea rows={2} value={editingCat.description_es} onChange={(e) => updateField('description_es', e.target.value)} placeholder="Español" className={inputClass + " resize-none"} />
-                   <textarea rows={2} value={editingCat.description_en} onChange={(e) => updateField('description_en', e.target.value)} placeholder="English" className={inputClass + " resize-none"} />
+                   <textarea rows={2} value={editingCat.description_es} onChange={(e) => updateField('description_es', e.target.value)} maxLength={CATEGORY_DESC_MAX} placeholder="Español" className={inputClass + " resize-none"} />
+                   <textarea rows={2} value={editingCat.description_en} onChange={(e) => updateField('description_en', e.target.value)} maxLength={CATEGORY_DESC_MAX} placeholder="English" className={inputClass + " resize-none"} />
+                </div>
+                <div className="flex justify-end gap-4">
+                  <span className="text-[9px] font-mono text-white/40">{editingCat.description_es.length}/{CATEGORY_DESC_MAX}</span>
+                  <span className="text-[9px] font-mono text-white/40">{editingCat.description_en.length}/{CATEGORY_DESC_MAX}</span>
                 </div>
               </div>
 
               <div className="space-y-1">
                 <label className={labelClass}>{t('Imagen', 'Image')}</label>
                 <div className="flex items-center space-x-2">
-                  <input value={editingCat.image} onChange={(e) => updateField('image', e.target.value)} placeholder="https://..." className={inputClass} />
+                  <input value={editingCat.image} onChange={(e) => updateField('image', e.target.value)} maxLength={CATEGORY_IMAGE_MAX} placeholder="https://..." className={inputClass} />
                   <label className="shrink-0 py-2 px-3 bg-white/10 hover:bg-white/20 border border-stone rounded text-[9px] font-mono text-white/70 hover:text-white uppercase tracking-widest cursor-pointer transition-all whitespace-nowrap">
                     {t('Subir', 'Upload')}
                     <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
