@@ -51,6 +51,8 @@ const GalleryCard: React.FC<{ gallery: typeof GALLERIES[number] }> = ({ gallery 
           src={`https:${gallery.cover}`}
           alt={gallery.title}
           referrerPolicy="no-referrer"
+          loading="lazy"
+          decoding="async"
           onError={() => setImgError(true)}
           className="w-full aspect-[3/2] object-cover transition-all duration-[800más] ease-out group-hover:scale-[1.04]"
         />

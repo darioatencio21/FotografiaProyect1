@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowUp, Send, Check } from 'lucide-react';
 import { Instagram, Facebook } from './BrandIcons';
@@ -18,7 +18,7 @@ interface FooterProps {
   onOpenAdminLogin: () => void;
 }
 
-export default function Footer({ onSetView, lang, isAdminLoggedIn, onOpenAdminLogin }: FooterProps) {
+function Footer({ onSetView, lang, isAdminLoggedIn, onOpenAdminLogin }: FooterProps) {
   const [email, setEmail] = useState('');
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -207,3 +207,5 @@ export default function Footer({ onSetView, lang, isAdminLoggedIn, onOpenAdminLo
     </footer>
   );
 }
+
+export default memo(Footer);

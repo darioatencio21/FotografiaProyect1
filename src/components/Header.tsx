@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'motion/react';
 import { X, Globe, ChevronLeft } from 'lucide-react';
 import { ActiveLanguíage } from '../types';
@@ -21,7 +21,7 @@ const DRAWER_WIDTH_VW = 85;
 const CLOSE_VELOCITY = 400;
 const HANDLE_OPEN_THRESHOLD_PX = 40;
 
-export default function Header({
+function Header({
   currentView,
   onSetView,
   lang,
@@ -336,3 +336,5 @@ export default function Header({
     </header>
   );
 }
+
+export default memo(Header);

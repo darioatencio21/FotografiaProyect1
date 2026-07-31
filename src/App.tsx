@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, lazy, Suspense, useCallback } from 'react';
 import { motion, AnimatePresence, useInView } from 'motion/react';
 import { 
     Heart, ArrowRight, MessageSquare, MapPin, 
@@ -25,20 +25,24 @@ import { Photograph, Service, Testimonial, BlogPost, FAQ, Booking, Message, SEOM
 
 import StorageImage from './components/StorageImage';
 
-import Lightbox from './components/Lightbox';
-import BookingCalendar from './components/BookingCalendar';
-import BookingApproval from './components/BookingApproval';
-import ClientPortal from './components/ClientPortal';
-import StripeCheckout from './components/StripeCheckout';
-import { PaymentResult } from './components/StripeCheckout';
-import AboutSection from './components/AboutSection';
-import PixiesetGallery from './components/PixiesetGallery';
-import TestimonialsView from './components/TestimonialsView';
+import type { PaymentResult } from './components/StripeCheckout';
 
-import AdminCMS from './components/AdminCMS';
+// View components are lazy-loaded so only the code needed for the active view
+// is downloaded, shrinking the initial bundle (AdminCMS, ClientPortal and the
+// gallery/booking flows are the heaviest chunks).
+const Lightbox = lazy(() => import('./components/Lightbox'));
+const BookingCalendar = lazy(() => import('./components/BookingCalendar'));
+const BookingApproval = lazy(() => import('./components/BookingApproval'));
+const ClientPortal = lazy(() => import('./components/ClientPortal'));
+const StripeCheckout = lazy(() => import('./components/StripeCheckout'));
+const AboutSection = lazy(() => import('./components/AboutSection'));
+const PixiesetGallery = lazy(() => import('./components/PixiesetGallery'));
+const TestimonialsView = lazy(() => import('./components/TestimonialsView'));
+const AdminCMS = lazy(() => import('./components/AdminCMS'));
+const LegalViews = lazy(() => import('./components/LegalViews'));
+
 import Header from './components/Header';
 import Footer from './components/Footer';
-import LegalViews from './components/LegalViews';
 import NotFound from './components/NotFound';
 
 import {
@@ -128,6 +132,14 @@ function CountUp({ end, suffix = '', duration = 2000, delay = 0 }: { end: number
   return <span ref={ref}>{count}{suffix}</span>;
 }
 
+function ViewLoader() {
+  return (
+    <div className="flex items-center justify-center py-32" aria-hidden="true">
+      <div className="w-6 h-6 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
+    </div>
+  );
+}
+
 export default function App() {
   // Navigation & Languíage Context
   const [currentView, setCurrentView] = useState<string>(() => {
@@ -147,7 +159,12 @@ export default function App() {
   const navigationGuardRef = useRef(false);
   const setNavigationGuard = (v: boolean) => { navigationGuardRef.current = v; };
 
-  const navigateTo = (view: string) => {
+  const [lang, setLang] = useState<'es' | 'en'>(() => {
+    const savedLanguíage = localStorage.getItem('aorea_lang');
+    return savedLanguíage === 'es' || savedLanguíage === 'en' ? savedLanguíage : 'en';
+  });
+
+  const navigateTo = useCallback((view: string) => {
     if (navigationGuardRef.current) {
       const msg = lang === 'es'
         ? 'Tienes información sin guardar. ¿Seguro que quieres salir?'
@@ -165,7 +182,7 @@ export default function App() {
     const url = view === 'home' ? '/' : '/?view=' + view;
     window.history.pushState({ view }, '', url);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  }, [lang]);
 
   useEffect(() => {
     const initialView = currentView;
@@ -192,10 +209,6 @@ export default function App() {
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
-  const [lang, setLang] = useState<'es' | 'en'>(() => {
-    const savedLanguíage = localStorage.getItem('aorea_lang');
-    return savedLanguíage === 'es' || savedLanguíage === 'en' ? savedLanguíage : 'en';
-  });
 
   const [photographs, setPhotographs] = useState<Photograph[]>(() => {
     try { const saved = localStorage.getItem('aorea_photos'); return saved ? JSON.parse(saved) : INITIAL_PHOTOGRAPHS; } catch { return INITIAL_PHOTOGRAPHS; }
@@ -880,6 +893,8 @@ ${photographerName}`);
     navigateTo('home');
   };
 
+  const openAdminLogin = useCallback(() => setShowAdminLogin(true), []);
+
   // Trigger Stripe print or service booking Checkout overlay
   const pendingPaymentRef = useRef<((result?: PaymentResult) => void) | null>(null);
   const pendingCancelRef = useRef<(() => void) | null>(null);
@@ -950,6 +965,8 @@ ${photographerName}`);
               <StorageImage
                 src={seo.heroImageLeft || 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=85&w=1200'}
                 alt="Fine Art Photography"
+                loading="eager"
+                fetchPriority="high"
                 className="w-full h-full object-cover object-center"
               />
             </motion.div>
@@ -973,6 +990,8 @@ ${photographerName}`);
               <StorageImage
                 src={seo.heroImageLeft || 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=85&w=1600'}
                 alt="Fine Art Wedding"
+                loading="eager"
+                fetchPriority="high"
                 className="w-full h-full object-cover object-center"
               />
             </motion.div>
@@ -996,6 +1015,8 @@ ${photographerName}`);
               <StorageImage
                 src={seo.heroImageRight || 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&q=85&w=1600'}
                 alt="Editorial Fashion"
+                loading="eager"
+                fetchPriority="high"
                 className="w-full h-full object-cover object-center"
               />
             </motion.div>
@@ -1097,7 +1118,7 @@ ${photographerName}`);
             ? "pt-24 lg:pt-28 pb-32 space-y-16 md:space-y-32"
             : "pt-24 lg:pt-28 pb-32 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto space-y-16 md:space-y-32"
           }>
-
+          <Suspense fallback={<ViewLoader />}>
           {/* ======================================================= */}
           {/* HOME SCREEN (content below hero) */}
           {/* ======================================================= */}
@@ -1716,13 +1737,16 @@ ${photographerName}`);
                       <AnimatePresence initial={false}>
                         {isOpen && (
                           <motion.div
-                            initial={{ height: 0 }}
-                            animate={{ height: 'auto' }}
-                            exit={{ height: 0 }}
-                            className="overflow-hidden"
+                            initial={{ gridTemplateRows: '0fr' }}
+                            animate={{ gridTemplateRows: '1fr' }}
+                            exit={{ gridTemplateRows: '0fr' }}
+                            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                            className="grid"
                           >
-                            <div className="p-5 pt-0 text-xs text-white/60 leading-relaxed font-sans border-t border-white/10 bg-charcoal">
-                              {fAnswer}
+                            <div className="overflow-hidden">
+                              <div className="p-5 pt-0 text-xs text-white/60 leading-relaxed font-sans border-t border-white/10 bg-charcoal">
+                                {fAnswer}
+                              </div>
                             </div>
                           </motion.div>
                         )}
@@ -1943,6 +1967,7 @@ ${photographerName}`);
               onNavigatePortfolio={() => navigateTo('portfolio')}
             />
           )}
+          </Suspense>
         </motion.main>
       </AnimatePresence>
 
@@ -1951,7 +1976,7 @@ ${photographerName}`);
         onSetView={navigateTo}
         lang={lang}
         isAdminLoggedIn={isAdminLoggedIn}
-        onOpenAdminLogin={() => setShowAdminLogin(true)}
+        onOpenAdminLogin={openAdminLogin}
       />
 
       {/* ======================================================= */}
@@ -1959,17 +1984,19 @@ ${photographerName}`);
       {/* ======================================================= */}
 
       {/* Premium Lightbox Overlay */}
-      {selectedPhotoForLightbox && (
-        <Lightbox
-          photo={selectedPhotoForLightbox}
-          onClose={() => setSelectedPhotoForLightbox(null)}
-          onNext={handleLightboxNext}
-          onPrev={handleLightboxPrev}
-          isFavorite={favorites.includes(selectedPhotoForLightbox.id)}
-          onToggleFavorite={() => handleToggleFavorite(selectedPhotoForLightbox.id)}
-          lang={lang}
-        />
-      )}
+      <Suspense fallback={null}>
+        {selectedPhotoForLightbox && (
+          <Lightbox
+            photo={selectedPhotoForLightbox}
+            onClose={() => setSelectedPhotoForLightbox(null)}
+            onNext={handleLightboxNext}
+            onPrev={handleLightboxPrev}
+            isFavorite={favorites.includes(selectedPhotoForLightbox.id)}
+            onToggleFavorite={() => handleToggleFavorite(selectedPhotoForLightbox.id)}
+            lang={lang}
+          />
+        )}
+      </Suspense>
 
       {/* Secure Admin CMS Access login Dialog */}
       <AnimatePresence>
@@ -2057,36 +2084,40 @@ ${photographerName}`);
       </AnimatePresence>
 
       {/* Secure Stripe Checkout Popup overlay */}
-      <StripeCheckout
-        isOpen={checkoutOpen}
-        amount={checkoutAmount}
-        description={checkoutDesc}
-        onClose={() => {
-          setCheckoutOpen(false);
-          pendingCancelRef.current?.();
-          pendingCancelRef.current = null;
-        }}
-        onSuccess={(result) => {
-          pendingPaymentRef.current?.(result);
-          if (pendingPaymentBookingRef.current) {
-            const info = pendingPaymentBookingRef.current;
-            import('./lib/email').then(({ sendDepositReceivedEmail }) => {
-              sendDepositReceivedEmail(
-                emailConfig,
-                info.clientName,
-                info.clientEmail,
-                info.photographerEmail,
-                info.amount,
-                info.packageName,
-                lang,
-              );
-            });
-            pendingPaymentBookingRef.current = null;
-          }
-          pendingPaymentRef.current = null;
-          pendingCancelRef.current = null;
-        }}
-      />
+      <Suspense fallback={null}>
+        {checkoutOpen && (
+        <StripeCheckout
+          isOpen={checkoutOpen}
+          amount={checkoutAmount}
+          description={checkoutDesc}
+          onClose={() => {
+            setCheckoutOpen(false);
+            pendingCancelRef.current?.();
+            pendingCancelRef.current = null;
+          }}
+          onSuccess={(result) => {
+            pendingPaymentRef.current?.(result);
+            if (pendingPaymentBookingRef.current) {
+              const info = pendingPaymentBookingRef.current;
+              import('./lib/email').then(({ sendDepositReceivedEmail }) => {
+                sendDepositReceivedEmail(
+                  emailConfig,
+                  info.clientName,
+                  info.clientEmail,
+                  info.photographerEmail,
+                  info.amount,
+                  info.packageName,
+                  lang,
+                );
+              });
+              pendingPaymentBookingRef.current = null;
+            }
+            pendingPaymentRef.current = null;
+            pendingCancelRef.current = null;
+          }}
+        />
+        )}
+      </Suspense>
     </div>
   );
 }

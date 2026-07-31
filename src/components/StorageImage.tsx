@@ -16,5 +16,13 @@ export default function StorageImage({ src, ...props }: StorageImageProps) {
 
   if (!imgSrc) return null;
 
-  return <img src={imgSrc} onError={handleError} {...props} />;
+  return (
+    <img
+      src={imgSrc}
+      onError={handleError}
+      loading="lazy"
+      decoding="async"
+      {...props}
+    />
+  );
 }
