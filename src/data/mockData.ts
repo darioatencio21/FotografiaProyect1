@@ -580,13 +580,8 @@ export const INITIAL_BOOKING_CONFIG: BookingConfig = {
 };
 
 export const INITIAL_EMAIL_CONFIG: EmailConfig = {
-  emailjsServiceId: '',
-  emailjsTemplateId: '',
-  emailjsPublicKey: '',
-  emailjsPrivateKey: '',
   receiverEmail: '',
   enableAutoResponse: false,
-  emailjsAutoTemplateId: '',
   autoReplySubject: 'Tu reserva ha sido recibida con éxito! - Aorea Studio',
   autoReplyMessage: 'Hola,\n\nMuchas gracias por reservar tu sesión fotográfica con nosotros. Hemos recibido tus datos correctamente y tu espacio ha sido bloqueado en nuestro calendario.\n\nEn las próximas horas nos pondremos en contacto contigo para coordinar los detalles finales, locación y responder cualquier consulta adicional.\n\nEstamos muy emocionados de crear arte juntos!\n\nAtentamente,\nEl equipo de Aorea Studio.'
 };

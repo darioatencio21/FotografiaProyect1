@@ -2203,19 +2203,14 @@ export default function AdminCMS({
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <div>
                 <h2 className="font-serif text-2xl text-white">{t('Configuración de Correo Electrónico', 'Email Configuration', 'Configuração de E-mail')}</h2>
-                <p className="text-xs text-white/50">{t('Vincula tu cuenta de EmailJS para automatizar y recibir las alertas reales en tu casilla de correo', 'Link your EmailJS credentials to automate client confirmations and receive notification alerts', 'Vincule sua conta do EmailJS para automatizar e receber alertas reais em sua caixa de entrada')}</p>
+                <p className="text-xs text-white/50">{t('Configura el correo de notificaciones (Resend) para recibir las alertas reales en tu casilla', 'Configure the notification email (Resend) to receive real alerts in your inbox', 'Configure o e-mail de notificações (Resend) para receber alertas reais na sua caixa de entrada')}</p>
               </div>
               <button
                 type="button"
                 onClick={async () => {
                   const trimmedConfig: EmailConfig = {
-                    emailjsServiceId: sanitizeString(emailForm.emailjsServiceId),
-                    emailjsTemplateId: sanitizeString(emailForm.emailjsTemplateId),
-                    emailjsPublicKey: sanitizeString(emailForm.emailjsPublicKey),
-                    emailjsPrivateKey: sanitizeString(emailForm.emailjsPrivateKey || ''),
                     receiverEmail: sanitizeEmail(emailForm.receiverEmail),
                     enableAutoResponse: emailForm.enableAutoResponse || false,
-                    emailjsAutoTemplateId: sanitizeString(emailForm.emailjsAutoTemplateId || ''),
                     autoReplySubject: sanitizeString(emailForm.autoReplySubject || ''),
                     autoReplyMessage: sanitizeString(emailForm.autoReplyMessage || '')
                   };
@@ -2313,27 +2308,11 @@ export default function AdminCMS({
                   </div>
 
                   <p className="text-[10px] text-white/50 leading-relaxed">
-                    Cuando un cliente complete un agendamiento en el calendario o envíe un mensaje en el formulario de contacto, el sistema le enviará un correo automático usando tus credenciales de EmailJS.
+                    Cuando un cliente complete un agendamiento en el calendario o envíe un mensaje en el formulario de contacto, el sistema le enviará un correo automático mediante la Edge Function send-email (Resend).
                   </p>
 
                   {emailForm.enableAutoResponse && (
                     <div className="space-y-4 pt-2">
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-mono text-white/45 uppercase tracking-wider">
-                          ID de Plantilla de Auto-Respuesta (Opcional)
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="Ej: template_auto_reply (Dejar vacío para usar la misma plantilla)"
-                          value={emailForm.emailjsAutoTemplateId || ''}
-                          onChange={(e) => setEmailForm({ ...emailForm, emailjsAutoTemplateId: e.target.value })}
-                          className="w-full bg-charcoal border border-stone rounded p-2.5 text-xs text-white font-mono placeholder-white/20 focus:outline-none focus:border-white/30"
-                        />
-                        <span className="text-[9px] text-white/30 block leading-tight">
-                          Recomendamos usar una plantilla de EmailJS específica para el cliente, donde configures que el destinatario (To Email) sea <code>{"{{to_email}}"}</code> o <code>{"{{client_email}}"}</code>, y uses las variables <code>{"{{reply_subject}}"}</code> y <code>{"{{reply_message}}"}</code> en el cuerpo. Si dejas este campo vacío, se usará la misma plantilla principal de arriba.
-                        </span>
-                      </div>
-
                       <div className="space-y-1.5">
                         <label className="text-[10px] font-mono text-white/45 uppercase tracking-wider">Asunto del Correo de Respuesta</label>
                         <input
@@ -2355,7 +2334,7 @@ export default function AdminCMS({
                           className="w-full bg-charcoal border border-stone rounded p-2.5 text-xs text-white placeholder-white/20 focus:outline-none focus:border-white/30 font-sans resize-none"
                         />
                         <span className="text-[9px] text-white/30 block leading-tight">
-                          Puedes usar texto plano. Este contenido se enviará en el campo <code>{"{{reply_message}}"}</code> a tu plantilla de EmailJS.
+                          Puedes usar texto plano. Este contenido se enviará en el campo de mensaje del correo de respuesta automática.
                         </span>
                       </div>
 
@@ -2364,13 +2343,8 @@ export default function AdminCMS({
                           type="button"
                           onClick={async () => {
                             const trimmedConfig = {
-                              emailjsServiceId: emailForm.emailjsServiceId.trim(),
-                              emailjsTemplateId: emailForm.emailjsTemplateId.trim(),
-                              emailjsPublicKey: emailForm.emailjsPublicKey.trim(),
-                              emailjsPrivateKey: (emailForm.emailjsPrivateKey || '').trim(),
                               receiverEmail: emailForm.receiverEmail.trim(),
                               enableAutoResponse: true,
-                              emailjsAutoTemplateId: (emailForm.emailjsAutoTemplateId || '').trim(),
                               autoReplySubject: (emailForm.autoReplySubject || '').trim(),
                               autoReplyMessage: (emailForm.autoReplyMessage || '')
                             };
