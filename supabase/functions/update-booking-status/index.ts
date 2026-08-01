@@ -51,9 +51,13 @@ serve(async (req) => {
       )
     }
 
+    // Only contract-signing fields may be set by the client via the approval
+    // token. Payment/status fields (isPaid, paymentStatus, paymentTxHash,
+    // status, ...) are set exclusively server-side by the simulate-payment edge
+    // function with the service role — the client never decides that a payment
+    // or confirmation happened.
     const allowedFields = new Set([
       "contractSignature", "contractSignedAt", "contractStatus",
-      "paymentStatus", "isPaid", "paymentTxHash", "status",
     ])
 
     const sanitizedUpdates: Record<string, unknown> = {}
