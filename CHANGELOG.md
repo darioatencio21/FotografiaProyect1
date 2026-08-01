@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/darioatencio21/FotografiaProyect1/compare/v1.2.0...v1.2.1) (2026-08-01)
+
+
+### Bug Fixes
+
+* recompute dashboard analytics on session restore, add authenticated insert policy on messages ([#34](https://github.com/darioatencio21/FotografiaProyect1/issues/34)) ([90e6fa2](https://github.com/darioatencio21/FotografiaProyect1/commit/90e6fa2c13d2e7c36af09123f461bddc3de18cb6))
+
 ## [1.2.0](https://github.com/darioatencio21/FotografiaProyect1/compare/v1.1.3...v1.2.0) (2026-07-31)
 
 
