@@ -1,8 +1,22 @@
 # Miriam Campos Photography
 
+[![CI](https://img.shields.io/github/actions/workflow/status/darioatencio21/FotografiaProyect1/ci.yml?label=build)](https://github.com/darioatencio21/FotografiaProyect1/actions/workflows/ci.yml)
+[![Licencia](https://img.shields.io/badge/Licencia-Todos%20los%20derechos%20reservados-blue)](https://github.com/darioatencio21/FotografiaProyect1)
+[![Vercel](https://img.shields.io/badge/Vercel-En%20l%C3%ADnea-black?logo=vercel&logoColor=white)](https://fotografia-proyect1.vercel.app/)
+
+**Demo en vivo:** [fotografia-proyect1.vercel.app](https://fotografia-proyect1.vercel.app/)
+
 Una web completa para un estudio fotográfico de alta gama: un **portafolio público elegante** donde los visitantes descubren el trabajo de la fotógrafa, y un **panel privado** desde el que se administra todo el estudio (reservas, clientes, fotografías, facturas y más).
 
 La estética sigue una línea editorial premium: beiges cálidos, acentos en bronce y tipografía serif, inspirada en revistas como Leica, Hasselblad o Kinfolk.
+
+## Screenshots
+
+<!-- TODO: agregar screenshot del portafolio -->
+![Portafolio público](assets/screenshots/portafolio.png)
+
+<!-- TODO: agregar screenshot del dashboard -->
+![Panel de administración](assets/screenshots/dashboard.png)
 
 ---
 
@@ -98,7 +112,7 @@ La web queda disponible en `http://localhost:3000`.
 
 - Las claves de acceso se guardan en el archivo `.env.local`, que **no se sube** a Git.
 - La web pública solo usa la **clave anónima** de Supabase (segura para el navegador).
-- La **clave de administración** (service role) tiene acceso total a los datos: solo se usa en el panel y en las funciones de servidor, nunca se expone en el navegador. Las funciones de servidor la leen desde la variable `apykeysecret_new` en Supabase → Edge Functions → Secrets.
+- La **clave de administración** (service role) tiene acceso total a los datos: solo se usa en el panel y en las funciones de servidor, nunca se expone en el navegador. Las funciones de servidor la leen desde una variable de entorno secreta configurada en Supabase → Edge Functions → Secrets.
 - En Vercel hay que configurar `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` y `APP_URL` en Project Settings → Environment Variables (entornos Production, Preview y Development).
 
 ---
