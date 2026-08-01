@@ -2405,7 +2405,7 @@ export default function AdminCMS({
                   </h3>
                   
                   <p className="text-xs text-white/70 leading-relaxed font-sans">
-                    Los correos se envían mediante una <strong>Edge Function de Supabase</strong> que utiliza la API de <strong>Resend</strong>. No necesitas EmailJS.
+                    Los correos se envían mediante una <strong>Edge Function de Supabase</strong> que utiliza la API de <strong>Resend</strong>.
                   </p>
 
                   <div className="space-y-3 pt-2 text-[11px] font-sans text-white/80">
