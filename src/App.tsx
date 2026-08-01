@@ -388,6 +388,15 @@ export default function App() {
     // produces 401s on every save.
     const unsub = onAuthChange((user) => {
       setIsAdminLoggedIn(!!user);
+      // Recompute the dashboard analytics once the admin session becomes active.
+      // The mount-time loadAllData() can run before Supabase restores a persisted
+      // session, so bookings (authenticated-only read) is read as anonymous and
+      // the Revenue/Traffic charts are left empty until this re-runs as admin.
+      if (user) {
+        computeAnalytics()
+          .then(setSeoAnalytics)
+          .catch(() => {});
+      }
     });
     return () => unsub();
   }, []);
