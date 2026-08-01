@@ -50,6 +50,23 @@ function isSchemaMismatchError(err: any): boolean {
   return err?.status === 400 || err?.code === 'PGRST204' || /column .* does not exist|could not find the .* column/i.test(message);
 }
 
+// Collections anonymous visitors may INSERT into (public forms only). Every
+// other collection requires an authenticated (admin) session. This is an
+// explicit allow-list: new collections stay blocked for anon until added here
+// on purpose — never a denylist that lets new tables through by default.
+const ANON_INSERT_TABLES = new Set(['messages', 'bookings']);
+
+// Columns the anonymous booking form may INSERT, mirroring the GRANT in
+// supabase/migrations/021_anon_insert_bookings.sql. The anon payload is built
+// from scratch with exactly these keys so the frontend and the DB column grant
+// stay in sync by construction, not by manual maintenance in two places.
+const BOOKING_ANON_INSERT_COLUMNS = new Set([
+  'id', 'clientName', 'clientEmail', 'clientPhone', 'date', 'timeSlot',
+  'serviceId', 'peopleCount', 'notes', 'createdAt', 'amount',
+  'depositAmount', 'amountDue', 'packageName', 'packageDetails',
+  'contractType', 'contractData',
+]);
+
 // All columns currently used by the booking workflow.
 // Used as a fallback when the Supabase schema is missing newer columns.
 const BOOKING_BASE_COLUMNS = new Set([
@@ -67,6 +84,19 @@ const BOOKING_BASE_COLUMNS = new Set([
 function getCompatiblePayload(table: string, data: Record<string, unknown>): Record<string, unknown> {
   if (table !== 'bookings') return data;
   return Object.fromEntries(Object.entries(data).filter(([key]) => BOOKING_BASE_COLUMNS.has(key)));
+}
+
+// Build the anonymous INSERT payload from scratch using only the whitelisted
+// columns for the table. Anything else the client sends (status, isRead, flags,
+// signatures, tokens, ...) is dropped regardless of how it is named, so the
+// frontend can never push a column the DB grant does not allow.
+function buildAnonInsertPayload(table: string, data: Record<string, unknown>): Record<string, unknown> {
+  if (table !== 'bookings') return data;
+  const payload: Record<string, unknown> = {};
+  for (const key of BOOKING_ANON_INSERT_COLUMNS) {
+    if (key in data) payload[key] = data[key];
+  }
+  return payload;
 }
 
 export async function getCollectionWithFallback<T extends { id: string }>(
@@ -144,13 +174,14 @@ export async function saveDocument<T>(collectionPath: string, docId: string, dat
 
   const hasSession = await ensureActiveSession();
 
-  // Anonymous visitors can only submit the public contact form: messages exposes
-  // an RLS INSERT-only policy for anon (migration 018), so use a plain insert
-  // (no upsert) that never touches the UPDATE path. All other tables keep
-  // requiring an authenticated admin session.
-  if (!hasSession && table === 'messages') {
+  // Anonymous visitors can only INSERT into the explicitly allow-listed public
+  // form tables (ANON_INSERT_TABLES: messages, bookings). Uses a plain insert
+  // (no upsert) so it never touches the UPDATE path, and builds the payload
+  // from only the columns each table's RLS column grant allows. Every other
+  // table keeps requiring an authenticated (admin) session.
+  if (!hasSession && ANON_INSERT_TABLES.has(table)) {
     try {
-      const { error } = await supabase.from(table).insert(payload);
+      const { error } = await supabase.from(table).insert(buildAnonInsertPayload(table, payload));
       if (error) throw error;
       return;
     } catch (err: any) {
