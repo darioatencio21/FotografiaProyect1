@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.2.0](https://github.com/darioatencio21/FotografiaProyect1/compare/v1.1.3...v1.2.0) (2026-07-31)
+
+
+### Features
+
+* add character limits to booking and session category forms ([a4f9dff](https://github.com/darioatencio21/FotografiaProyect1/commit/a4f9dff02f7ef85b6fa6911c24eaefddd3ceac63))
+* validate contact form and allow anonymous message inserts ([1d9202a](https://github.com/darioatencio21/FotografiaProyect1/commit/1d9202a71097cfcc98a34f8c6ba4e9b4d0e8829a))
+
+
+### Bug Fixes
+
+* add auth guard to boostrap sync, RLS migration 017, increase layout spacing ([d01602a](https://github.com/darioatencio21/FotografiaProyect1/commit/d01602a1f7bab55635a74bc27055d2e12255b23e))
+* block CMS saves without a valid Supabase session, retry once on 401, drop stale sessions ([5702710](https://github.com/darioatencio21/FotografiaProyect1/commit/5702710d8a3cadfc755192bc4f8ced9349426f72))
+* stop seeding/auth-refresh requests on anonymous visits, reload data on admin login ([da73ba7](https://github.com/darioatencio21/FotografiaProyect1/commit/da73ba7ce80d2cdaef6898352a13eac1d90e02ce))
+
+
+### Performance Improvements
+
+* code-split heavy views, lazy images, preconnect fonts, memo header/footer ([f301898](https://github.com/darioatencio21/FotografiaProyect1/commit/f301898a3fd08c568fbfc807fb0c4178edf096a5))
+
 ## [1.1.3](https://github.com/darioatencio21/FotografiaProyect1/compare/v1.1.2...v1.1.3) (2026-07-31)
 
 
