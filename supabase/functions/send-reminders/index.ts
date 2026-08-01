@@ -7,7 +7,7 @@ const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "onboarding@resend.dev"
 serve(async (req) => {
   const authHeader = req.headers.get("Authorization")
   const cronSecret = Deno.env.get("CRON_SECRET")
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return new Response("Unauthorized", { status: 401 })
   }
 
@@ -32,7 +32,7 @@ serve(async (req) => {
     .eq("reminderSent", false)
 
   if (error) {
-    return new Response(JSON.stringify({ error: error.message }), { status: 500 })
+    return new Response(JSON.stringify({ error: "Internal error" }), { status: 500 })
   }
 
   if (!bookings || bookings.length === 0) {

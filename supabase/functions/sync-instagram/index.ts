@@ -61,7 +61,7 @@ serve(async (req) => {
   }
 
   const authHeader = req.headers.get("x-cron-secret") || ""
-  if (CRON_SECRET && authHeader !== CRON_SECRET) {
+  if (!CRON_SECRET || authHeader !== CRON_SECRET) {
     return new Response("Unauthorized", { status: 401, headers: corsHeaders })
   }
 
@@ -115,7 +115,7 @@ serve(async (req) => {
   } catch (err) {
     console.error("sync-instagram error:", err)
     return new Response(
-      JSON.stringify({ status: "error", error: err.message }),
+      JSON.stringify({ status: "error", error: "Internal error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     )
   }

@@ -12,6 +12,9 @@ coverage/
 # Vercel
 .vercel
 
+# Supabase CLI local cache
+supabase/.temp/
+
 # Legacy
 *.key
 credentials.json

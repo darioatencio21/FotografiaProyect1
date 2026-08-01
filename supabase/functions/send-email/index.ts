@@ -10,6 +10,39 @@ const corsHeaders = {
 const RATE_LIMIT_WINDOW_MS = 3_600_000 // 1 hour
 const RATE_LIMIT_MAX = 5
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const MAX_TO_LENGTH = 254
+const MAX_SUBJECT_LENGTH = 200
+const MAX_BODY_LENGTH = 50_000
+
+const ADMIN_EMAILS = (Deno.env.get("ADMIN_EMAILS") || "")
+  .split(",")
+  .map((email) => email.trim().toLowerCase())
+  .filter(Boolean)
+
+function isValidEmail(value: unknown): boolean {
+  if (typeof value !== "string") return false
+  if (value.length === 0 || value.length > MAX_TO_LENGTH) return false
+  if (value !== value.trim()) return false
+  if (/[\r\n]/.test(value)) return false
+  return EMAIL_REGEX.test(value)
+}
+
+function isValidSubject(value: unknown): boolean {
+  if (typeof value !== "string") return false
+  if (value.length === 0 || value.length > MAX_SUBJECT_LENGTH) return false
+  return !/[\r\n]/.test(value)
+}
+
+function getClientIp(req: Request): string {
+  const forwarded = (req.headers.get("x-forwarded-for") || "")
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean)
+  if (forwarded.length > 0) return forwarded[forwarded.length - 1]
+  return req.headers.get("x-real-ip") || "unknown"
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders })
@@ -30,11 +63,13 @@ serve(async (req) => {
     const { data: { user }, error } = await anonClient.auth.getUser(
       authHeader.replace("Bearer ", "")
     )
-    if (!error && user) isAdmin = true
+    if (!error && user?.email && ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+      isAdmin = true
+    }
   }
 
   if (!isAdmin) {
-    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
+    const ip = getClientIp(req)
     const serviceClient = createClient(supabaseUrl, supabaseServiceKey)
     const since = new Date(Date.now() - RATE_LIMIT_WINDOW_MS).toISOString()
 
@@ -77,8 +112,36 @@ serve(async (req) => {
     })
   }
 
-  if (!body.to || !body.subject || (!body.html && !body.text)) {
-    return new Response(JSON.stringify({ error: "Missing required fields: to, subject, html or text" }), {
+  if (!isValidEmail(body.to)) {
+    return new Response(JSON.stringify({ error: "Invalid 'to' email address" }), {
+      status: 400,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    })
+  }
+
+  if (!isValidSubject(body.subject)) {
+    return new Response(JSON.stringify({ error: "Invalid 'subject'" }), {
+      status: 400,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    })
+  }
+
+  if (typeof body.html === "string" && body.html.length > MAX_BODY_LENGTH) {
+    return new Response(JSON.stringify({ error: "'html' content too long" }), {
+      status: 400,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    })
+  }
+
+  if (typeof body.text === "string" && body.text.length > MAX_BODY_LENGTH) {
+    return new Response(JSON.stringify({ error: "'text' content too long" }), {
+      status: 400,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    })
+  }
+
+  if (!body.html && !body.text) {
+    return new Response(JSON.stringify({ error: "Missing required fields: html or text" }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     })
