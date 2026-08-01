@@ -10,14 +10,6 @@ Una web completa para un estudio fotográfico de alta gama: un **portafolio púb
 
 La estética sigue una línea editorial premium: beiges cálidos, acentos en bronce y tipografía serif, inspirada en revistas como Leica, Hasselblad o Kinfolk.
 
-## Screenshots
-
-<!-- TODO: agregar screenshot del portafolio -->
-![Portafolio público](assets/screenshots/portafolio.png)
-
-<!-- TODO: agregar screenshot del dashboard -->
-![Panel de administración](assets/screenshots/dashboard.png)
-
 ---
 
 ## Qué puede hacer el visitante
@@ -64,56 +56,6 @@ Con su cuenta, desde el panel puede:
 | Correos electrónicos| EmailJS (formularios, reservas, galerías) |
 | Galerías externas   | Pixieset                                |
 | Hosting y publicación automática | Vercel + GitHub Actions      |
-
----
-
-## Cómo levantar el proyecto en tu computadora
-
-Necesitás tener instalados **Node.js** (18 o superior) y **npm**.
-
-```bash
-# 1. Instalar las dependencias
-npm install
-
-# 2. Configurar las claves de acceso
-cp .env.example .env.local
-#   Abrí .env.local y completá VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY
-#   (se obtienen en Supabase → Settings → API Keys)
-
-# 3. Crear las carpetas de archivos en Supabase
-npm run setup:buckets
-
-# 4. Iniciar el servidor de desarrollo
-npm run dev
-```
-
-La web queda disponible en `http://localhost:3000`.
-
-> Para crear el proyecto de base de datos (tablas), pegá el contenido de
-> `supabase/migrations/001_init.sql` en el **SQL Editor** de Supabase y ejecutalo.
-> Si el proyecto se crea desde cero, esos archivos también se pueden aplicar
-> con la línea de comandos de Supabase (`supabase db push`).
-
----
-
-## Comandos útiles
-
-| Comando                | Qué hace                                  |
-| ---------------------- | ----------------------------------------- |
-| `npm run dev`          | Inicia el servidor de desarrollo          |
-| `npm run build`        | Genera la versión final para publicar     |
-| `npm run lint`         | Verifica que el código esté correcto      |
-| `npm run seed`         | Carga datos de ejemplo de estadísticas    |
-| `npm run setup:buckets`| Crea las carpetas de archivos en Supabase |
-
----
-
-## Notas importantes sobre las claves
-
-- Las claves de acceso se guardan en el archivo `.env.local`, que **no se sube** a Git.
-- La web pública solo usa la **clave anónima** de Supabase (segura para el navegador).
-- La **clave de administración** (service role) tiene acceso total a los datos: solo se usa en el panel y en las funciones de servidor, nunca se expone en el navegador. Las funciones de servidor la leen desde una variable de entorno secreta configurada en Supabase → Edge Functions → Secrets.
-- En Vercel hay que configurar `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` y `APP_URL` en Project Settings → Environment Variables (entornos Production, Preview y Development).
 
 ---
 
