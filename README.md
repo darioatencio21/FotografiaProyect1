@@ -377,13 +377,16 @@ El token se auto-gestiona:
 
 #### Variables de entorno en Supabase Edge Functions
 
-Configura estos secrets en Supabase Dashboard → Edge Functions → `sync-instagram` → Environment Variables:
+Configura estos secrets en Supabase Dashboard → Edge Functions → Secrets. Aplica a todas las funciones del proyecto:
 
-| Variable                  | Descripción                              |
-| ------------------------- | ---------------------------------------- |
-| `INSTAGRAM_ACCESS_TOKEN`  | Token long-lived inicial de Instagram    |
-| `INSTAGRAM_USER_ID`       | ID de usuario de Instagram (opcional)    |
-| `CRON_SECRET`             | Clave secreta para proteger el endpoint  |
+| Variable                  | Descripción                                                       |
+| ------------------------- | ----------------------------------------------------------------- |
+| `apykeysecret_new`        | Clave service_role (reemplaza a `SUPABASE_SERVICE_ROLE_KEY`)      |
+| `INSTAGRAM_ACCESS_TOKEN`  | Token long-lived inicial de Instagram (`sync-instagram`)          |
+| `INSTAGRAM_USER_ID`       | ID de usuario de Instagram, opcional (`sync-instagram`)           |
+| `CRON_SECRET`             | Clave secreta para proteger los endpoints de cron (`sync-instagram`, `send-reminders`) |
+
+> **Nota**: `SUPABASE_SERVICE_ROLE_KEY` es una variable reservada de Supabase (empieza con `SUPABASE_`), no se puede editar en el Dashboard y conserva el valor antiguo. Por eso las Edge Functions leen la key de `apykeysecret_new` (creada manualmente). Cambiar el nombre en el código requiere redesplegar la función (`supabase functions deploy <nombre>`).
 
 ### Almacenamiento (Storage)
 
@@ -533,7 +536,8 @@ vercel --prod
 | ---------------------------- | ---------------------------------------- | --------------------------------------------- |
 | `VITE_SUPABASE_URL`          | URL del proyecto Supabase                | `https://pkdzxqsplfeobhflgmyu.supabase.co`    |
 | `VITE_SUPABASE_ANON_KEY`     | Clave anónima (frontend)                 | `eyJhbGciOi...`                               |
-| `SUPABASE_SERVICE_ROLE_KEY`  | Clave service_role (solo scripts)        | `sb_secret_...`                               |
+| `SUPABASE_SERVICE_ROLE_KEY`  | Clave service_role (solo scripts locales) | `sb_secret_...`                               |
+| `apykeysecret_new`           | Clave service_role (Edge Functions)       | `sb_secret_...`                               |
 | `APP_URL`                    | URL base de la aplicación                | `http://localhost:3000`                        |
 | `INSTAGRAM_ACCESS_TOKEN`     | Token long-lived de Instagram (Edge Function secret) | `EAA...`                    |
 | `INSTAGRAM_USER_ID`          | ID de usuario de Instagram (opcional)    | `178414...`                                  |
@@ -543,7 +547,7 @@ Copia `.env.example` a `.env.local` y completa los valores antes de ejecutar la 
 
 **Importante en Vercel**: Agrega `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` y `APP_URL` en Project Settings → Environment Variables para los entornos Production, Preview y Development.
 
-**Importante**: `SUPABASE_SERVICE_ROLE_KEY` tiene acceso completo a tu base de datos. Nunca la incluyas en código frontend ni la expongas al navegador. Solo se usa en scripts del lado del servidor (`scripts/seed.ts`, `scripts/setup-buckets.ts`, `scripts/reset-analytics.ts`) y en las Edge Functions de Supabase. Los scripts `apply-*.ts` ya no la envían por red: validan el SQL localmente y muestran el comando `supabase db push` a ejecutar.
+**Importante**: `SUPABASE_SERVICE_ROLE_KEY` (y su equivalente `apykeysecret_new` en Edge Functions) tiene acceso completo a tu base de datos. Nunca la incluyas en código frontend ni la expongas al navegador. Solo se usa en scripts del lado del servidor (`scripts/seed.ts`, `scripts/setup-buckets.ts`, `scripts/reset-analytics.ts`) y en las Edge Functions de Supabase. Los scripts `apply-*.ts` ya no la envían por red: validan el SQL localmente y muestran el comando `supabase db push` a ejecutar.
 
 ---
 
