@@ -49,7 +49,7 @@ Technical constraints:
 - React 19 + Vite 6 + Tailwind CSS v4
 - Supabase for backend (auth, DB, storage)
 - Motion library for animations
-- EmailJS for contact/auto-reply
+- Supabase Edge Functions + Resend for contact/auto-reply emails
 - No SSR — fully client-side rendered SPA
 
 ## Brand Commitments

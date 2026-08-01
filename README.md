@@ -53,7 +53,7 @@ Con su cuenta, desde el panel puede:
 | Interfaz            | React + TypeScript                      |
 | Diseño y estilo     | Tailwind CSS + animaciones Motion       |
 | Base de datos, archivos y acceso | Supabase (PostgreSQL, Storage, Auth, Edge Functions) |
-| Correos electrónicos| EmailJS (formularios, reservas, galerías) |
+| Correos electrónicos| Supabase Edge Functions + Resend |
 | Galerías externas   | Pixieset                                |
 | Hosting y publicación automática | Vercel + GitHub Actions      |
 
