@@ -203,7 +203,11 @@ Panel completo accesible vía Supabase Auth con las siguientes secciones:
 ├── scripts/
 │   ├── seed.ts                        # Siembra datos de analytics vía service_role
 │   ├── setup-buckets.ts               # Crea buckets de Storage en Supabase
-│   └── apply-migration.ts             # Aplica migración SQL (fallback)
+│   ├── reset-analytics.ts             # Resetea analytics y bookings (destructivo)
+│   ├── apply-004.ts                   # Valida 004_fix_rls_policies.sql y muestra `supabase db push`
+│   ├── apply-migration.ts             # Valida 001_init.sql y crea buckets (no aplica SQL vía HTTP)
+│   ├── apply-all-migrations.ts        # Valida migraciones 005-009 y muestra `supabase db push`
+│   └── pending-migrations.sql         # SQL de migraciones pendientes (005-009, idempotente)
 ├── .github/
 │   ├── dependabot.yml                 # Actualizaciones semanales de npm y mensuales de Actions
 │   └── workflows/
@@ -529,7 +533,7 @@ vercel --prod
 | ---------------------------- | ---------------------------------------- | --------------------------------------------- |
 | `VITE_SUPABASE_URL`          | URL del proyecto Supabase                | `https://pkdzxqsplfeobhflgmyu.supabase.co`    |
 | `VITE_SUPABASE_ANON_KEY`     | Clave anónima (frontend)                 | `eyJhbGciOi...`                               |
-| `SUPABASE_SERVICE_ROLE_KEY`  | Clave service_role (solo scripts)        | `eyJhbGciOi...`                               |
+| `SUPABASE_SERVICE_ROLE_KEY`  | Clave service_role (solo scripts)        | `sb_secret_...`                               |
 | `APP_URL`                    | URL base de la aplicación                | `http://localhost:3000`                        |
 | `INSTAGRAM_ACCESS_TOKEN`     | Token long-lived de Instagram (Edge Function secret) | `EAA...`                    |
 | `INSTAGRAM_USER_ID`          | ID de usuario de Instagram (opcional)    | `178414...`                                  |
@@ -539,7 +543,7 @@ Copia `.env.example` a `.env.local` y completa los valores antes de ejecutar la 
 
 **Importante en Vercel**: Agrega `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` y `APP_URL` en Project Settings → Environment Variables para los entornos Production, Preview y Development.
 
-**Importante**: `SUPABASE_SERVICE_ROLE_KEY` tiene acceso completo a tu base de datos. Nunca la incluyas en código frontend ni la expongas al navegador. Solo se usa en scripts del lado del servidor (`scripts/seed.ts`, `scripts/setup-buckets.ts`).
+**Importante**: `SUPABASE_SERVICE_ROLE_KEY` tiene acceso completo a tu base de datos. Nunca la incluyas en código frontend ni la expongas al navegador. Solo se usa en scripts del lado del servidor (`scripts/seed.ts`, `scripts/setup-buckets.ts`, `scripts/reset-analytics.ts`) y en las Edge Functions de Supabase. Los scripts `apply-*.ts` ya no la envían por red: validan el SQL localmente y muestran el comando `supabase db push` a ejecutar.
 
 ---
 
