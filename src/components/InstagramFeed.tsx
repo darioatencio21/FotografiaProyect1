@@ -15,7 +15,7 @@ interface InstagramFeedProps {
   posts?: InstagramPost[];
 }
 
-export default function InstagramFeed({ lang, posts = [] }: InstagramFeedProps) {
+export default function InstagramFeed({ lang: _lang, posts = [] }: InstagramFeedProps) {
   const displayPosts = posts.length > 0 ? posts : [];
   const maxPosts = 12;
 

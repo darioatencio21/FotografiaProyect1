@@ -17,7 +17,7 @@ interface ClientPortalProps {
   onSubmitTestimonial?: (testimonial: any) => void;
 }
 
-export default function ClientPortal({ lang, onOpenCheckout, bookings = [], onUpdateBookings, invoices = [] }: ClientPortalProps) {
+export default function ClientPortal({ lang, onOpenCheckout: _onOpenCheckout, bookings = [], onUpdateBookings, invoices = [] }: ClientPortalProps) {
   const [passcode, setPasscode] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [showPasscode, setShowPasscode] = useState(false);

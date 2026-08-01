@@ -77,7 +77,7 @@ const GalleryCard: React.FC<{ gallery: typeof GALLERIES[number] }> = ({ gallery 
   );
 };
 
-export default function PixiesetGallery({ lang, t }: Props) {
+export default function PixiesetGallery({ lang: _lang, t }: Props) {
   return (
     <div className="space-y-8">
       <div className="space-y-2">
