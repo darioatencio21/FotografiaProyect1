@@ -36,7 +36,7 @@ async function callSendEmail(to: string, subject: string, text: string): Promise
 }
 
 export async function sendApprovalEmail(
-  emailConfig: EmailConfig,
+  _emailConfig: EmailConfig,
   clientName: string,
   clientEmail: string,
   approvalLink: string,
@@ -80,7 +80,7 @@ Miriam Campos Photography`;
 }
 
 export async function sendRejectionEmail(
-  emailConfig: EmailConfig,
+  _emailConfig: EmailConfig,
   clientName: string,
   clientEmail: string,
   sessionDate: string,
@@ -108,7 +108,7 @@ export async function sendRejectionEmail(
 }
 
 export async function sendConfirmationEmail(
-  emailConfig: EmailConfig,
+  _emailConfig: EmailConfig,
   clientName: string,
   clientEmail: string,
   photographerEmail: string,
@@ -167,7 +167,7 @@ La reserva está confirmada.`;
 }
 
 export async function sendExpirationEmail(
-  emailConfig: EmailConfig,
+  _emailConfig: EmailConfig,
   clientName: string,
   clientEmail: string,
   sessionDate: string,
@@ -198,7 +198,7 @@ Miriam Campos Photography`;
 }
 
 export async function sendDepositReceivedEmail(
-  emailConfig: EmailConfig,
+  _emailConfig: EmailConfig,
   clientName: string,
   clientEmail: string,
   photographerEmail: string,
@@ -229,7 +229,7 @@ El pago fue procesado exitosamente. Revisá el panel de administración para má
 }
 
 export async function sendPendingPaymentReminder(
-  emailConfig: EmailConfig,
+  _emailConfig: EmailConfig,
   clientName: string,
   clientEmail: string,
   approvalLink: string,

@@ -117,7 +117,7 @@ const InvoiceReceipt: React.FC<InvoiceReceiptProps> = ({ invoice, lang, compact 
 </div>
 <div class="items">
 <div class="items-header"><span>${t.invoiceItemás}</span><span>${t.invoiceSubtotal}</span></div>
-${invoice.items.map((item, i) => `<div class="item-row"><span class="item-desc">${item.description}</span><span class="item-amount">${formatCurrency(item.amount)}</span></div>`).join('')}
+${invoice.items.map((item) => `<div class="item-row"><span class="item-desc">${item.description}</span><span class="item-amount">${formatCurrency(item.amount)}</span></div>`).join('')}
 </div>
 <div class="totals">
 <div class="totals-inner">

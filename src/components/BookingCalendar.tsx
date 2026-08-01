@@ -99,7 +99,7 @@ const LOCAL_TRANSLATIONS = {
   },
 };
 
-export default function BookingCalendar({ services, lang, config, emailConfig, preSelectedPackage, onClearPackage, onAddBooking, setNavigationGuard }: BookingCalendarProps) {
+export default function BookingCalendar({ services, lang, config: _config, emailConfig, preSelectedPackage, onClearPackage: _onClearPackage, onAddBooking, setNavigationGuard }: BookingCalendarProps) {
   const t = LOCAL_TRANSLATIONS[lang] || LOCAL_TRANSLATIONS.es;
 
   const BOOKING_DRAFT_KEY = 'booking_draft';

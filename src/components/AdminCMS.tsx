@@ -111,9 +111,9 @@ function formatDate(dateStr: string) {
 }
 
 export default function AdminCMS({
-  photographs, services, testimonials, blogPosts, faqs, bookings, messages, clientAccounts = [], seo, profile, bookingConfig, emailConfig, stats, lang,
-  onUpdatePhotographs, onUpdateTestimonials, onUpdateBlogPosts,
-  onUpdateFaqs, onUpdateBookings, onUpdateMessages, onUpdateClientAccounts, onUpdateSeo, onUpdateProfile, onUpdateBookingConfig, onUpdateEmailConfig, sessionCategories, onUpdateSessionCategories, packages, onUpdatePackages, invoices, onUpdateInvoices, onLogout, onBackToSite
+  photographs, services, testimonials, blogPosts: _blogPosts, faqs: _faqs, bookings, messages, clientAccounts = [], seo, profile, bookingConfig, emailConfig, stats, lang,
+  onUpdatePhotographs, onUpdateTestimonials, onUpdateBlogPosts: _onUpdateBlogPosts,
+  onUpdateFaqs: _onUpdateFaqs, onUpdateBookings, onUpdateMessages, onUpdateClientAccounts, onUpdateSeo, onUpdateProfile, onUpdateBookingConfig: _onUpdateBookingConfig, onUpdateEmailConfig, sessionCategories, onUpdateSessionCategories, packages, onUpdatePackages, invoices, onUpdateInvoices, onLogout, onBackToSite
 }: AdminCMSProps) {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'photos' | 'testimonials' | 'bookings' | 'invoices' | 'messages' | 'seo' | 'profile' | 'email_settings' | 'clients' | 'packages' | 'session-categories' | 'reminders'>('dashboard');
   const [expandedBookingId, setExpandedBookingId] = useState<string | null>(null);
@@ -216,7 +216,7 @@ export default function AdminCMS({
               if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
                 new Notification('Nueva Reserva - Aorea Studio', {
                   body: `${cName} ha solicitado una sesión. Revisa la cola de reservas.`,
-                  icon: '/favicon.svg',
+                  icon: '/favicon-32x32.png',
                 });
               }
             }
@@ -255,7 +255,7 @@ export default function AdminCMS({
               if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
                 new Notification('Nuevo Mensaje - Aorea Studio', {
                   body: `${cName} te ha escrito. Revisa la bandeja de entrada.`,
-                  icon: '/favicon.svg',
+                  icon: '/favicon-32x32.png',
                 });
               }
             }

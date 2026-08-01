@@ -479,12 +479,9 @@ export default function App() {
            migratedEmailCfg && migratedEmailCfg !== emailConfigRes ? saveDocument('emailConfig', 'config', migratedEmailCfg, { silent: true }) : Promise.resolve(),
          ]).then(() => {
           localStorage.setItem(MIGRATE_FLAG, 'true');
-          console.log('Data migration complete: HTML entities unescaped in Supabase');
         }).catch(() => {
           // Migration persist failed (expected if not authenticated) — keep MIGRATE_FLAG unset so it retries on next login
         });
-      } else {
-        console.warn('[syncSupabase] Admin not signed in — showing local data; the migration will be persisted once the admin signs in.');
       }
       setPhotographs(migratedPhotos);
       setServices(migratedServices);
@@ -593,8 +590,6 @@ export default function App() {
       console.error('[handleConfirmBooking] booking not found:', bookingId);
       return;
     }
-
-    console.log('[handleConfirmBooking] CONFIRMING', bookingId, booking.clientName, { signature: !!signature });
 
     const updatedBooking: Booking = {
       ...booking,
