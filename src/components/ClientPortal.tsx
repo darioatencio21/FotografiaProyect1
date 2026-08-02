@@ -110,7 +110,7 @@ export default function ClientPortal({ lang, onOpenCheckout: _onOpenCheckout, bo
     if (!safeUrl) return;
 
     try {
-      const fileName = `${photo.title.toLowerCase().replace(/\s+/g, '-')}-master.webp`;
+      const fileName = `${photo.title.toLowerCase().replace(/\s+/g, '-')}-master.jpg`;
       if (safeUrl.startsWith('data:')) {
         const link = document.createElement('a');
         link.href = safeUrl;
@@ -136,7 +136,7 @@ export default function ClientPortal({ lang, onOpenCheckout: _onOpenCheckout, bo
       link.href = safeUrl;
       link.target = '_blank';
       link.rel = 'noopener noreferrer';
-      link.download = `${photo.title.toLowerCase().replace(/\s+/g, '-')}-master.webp`;
+      link.download = `${photo.title.toLowerCase().replace(/\s+/g, '-')}-master.jpg`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

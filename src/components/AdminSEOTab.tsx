@@ -19,11 +19,16 @@ function AdminSEOTab({ seo, onUpdateSeo, triggerAlert, lang }: AdminSEOTabProps)
     setSeoForm(seo);
   }, [seo]);
 
-  const handleSaveSEO = useCallback((e: React.FormEvent) => {
+  const handleSaveSEO = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     const safeSeo = sanitizeObject(seoForm as Record<string, unknown>) as unknown as SEOMetadata;
-    onUpdateSeo(safeSeo);
-    triggerAlert('SEO Schema, Meta tags and Robots.txt deployed to production');
+    try {
+      await onUpdateSeo(safeSeo);
+      triggerAlert('SEO Schema, Meta tags and Robots.txt deployed to production');
+    } catch (err) {
+      console.error('[seo] save failed:', err);
+      triggerAlert('Error al guardar SEO. Intentá de nuevo.');
+    }
   }, [seoForm, onUpdateSeo, triggerAlert]);
 
   const handleImageUpload = useCallback((field: 'heroImageLeft' | 'heroImageRight' | 'ogImage') => async (file: File) => {

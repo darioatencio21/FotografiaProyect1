@@ -2215,8 +2215,13 @@ export default function AdminCMS({
                     autoReplyMessage: sanitizeString(emailForm.autoReplyMessage || '')
                   };
                   setEmailForm(trimmedConfig);
-                  onUpdateEmailConfig(trimmedConfig);
-                  triggerAlert(t('Configuración de correo guíardada correctamente', 'Email settings saved successfully', 'Configurações de e-mail salvas com sucesso'));
+                  try {
+                    await onUpdateEmailConfig(trimmedConfig);
+                    triggerAlert(t('Configuración de correo guíardada correctamente', 'Email settings saved successfully', 'Configurações de e-mail salvas com sucesso'));
+                  } catch (err) {
+                    console.error('[emailConfig] save failed:', err);
+                    triggerAlert(t('Error al guardar configuración de correo', 'Failed to save email settings', 'Erro ao salvar configurações de e-mail'));
+                  }
                 }}
                 className="py-1.5 px-4 bg-white/10 text-white hover:bg-white/15 border border-white/10 rounded-lg text-[10px] font-mono tracking-widest uppercase font-semibold flex items-center space-x-1 cursor-pointer"
               >
@@ -3340,9 +3345,14 @@ function SessionCategoriesEditor({ categories, onUpdate, triggerAlert, lang }: S
 
   const sorted = [...localCats].sort((a, b) => a.sortOrder - b.sortOrder);
 
-  const handleSaveAll = () => {
-    onUpdate(localCats);
-    triggerAlert(t('✓ Categorías guíardadas.', '✓ Categories saved.'));
+  const handleSaveAll = async () => {
+    try {
+      await onUpdate(localCats);
+      triggerAlert(t('✓ Categorías guíardadas.', '✓ Categories saved.'));
+    } catch (err) {
+      console.error('[sessionCategories] save failed:', err);
+      triggerAlert(t('Error al guardar categorías', 'Failed to save categories'));
+    }
   };
 
   const startEdit = (cat: SessionCategory) => setEditingCat({ ...cat });

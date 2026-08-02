@@ -87,15 +87,20 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
     return es;
   };
 
-  const handleSaveAll = useCallback(() => {
+  const handleSaveAll = useCallback(async () => {
     const cleaned = localPackages.map(p => ({
       ...p,
       benefits: p.benefits.filter(b => b.trim() !== ''),
       benefits_es: p.benefits_es?.filter(b => b.trim() !== ''),
       benefits_en: p.benefits_en?.filter(b => b.trim() !== ''),
     }));
-    onUpdatePackages(cleaned);
-    triggerAlert(t('✓ Paquetes guíardados.', '✓ Packages saved.'));
+    try {
+      await onUpdatePackages(cleaned);
+      triggerAlert(t('✓ Paquetes guíardados.', '✓ Packages saved.'));
+    } catch (err) {
+      console.error('[packages] save failed:', err);
+      triggerAlert(t('Error al guardar paquetes', 'Failed to save packages'));
+    }
   }, [localPackages, onUpdatePackages, triggerAlert, t]);
 
   const toggleActive = useCallback((id: string) => {

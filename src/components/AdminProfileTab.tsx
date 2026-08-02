@@ -19,11 +19,16 @@ function AdminProfileTab({ profile, onUpdateProfile, triggerAlert, lang }: Admin
     setProfileForm(profile);
   }, [profile]);
 
-  const handleSaveProfile = useCallback((e: React.FormEvent) => {
+  const handleSaveProfile = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     const safeProfile = sanitizeObject(profileForm as Record<string, unknown>) as unknown as PhotographerProfile;
-    onUpdateProfile(safeProfile);
-    triggerAlert('✓ Biografía y datos de perfil guíardados correctamente.');
+    try {
+      await onUpdateProfile(safeProfile);
+      triggerAlert('✓ Biografía y datos de perfil guíardados correctamente.');
+    } catch (err) {
+      console.error('[profile] save failed:', err);
+      triggerAlert('Error al guardar perfil. Intentá de nuevo.');
+    }
   }, [profileForm, onUpdateProfile, triggerAlert]);
 
   const handleAvatarImageUpload = useCallback(async (file: File) => {
