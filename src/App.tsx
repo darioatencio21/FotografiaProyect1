@@ -998,13 +998,60 @@ ${photographerName}`);
     }
     const res = await fetch(`${supabaseUrl}/functions/v1/simulate-payment`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+      },
       body: JSON.stringify({ bookingId: paymentBooking.id, token: paymentBooking.approvalToken }),
     });
     const data = await res.json().catch(() => null);
     if (!res.ok) {
       throw new Error(data?.error || 'Payment could not be processed. Please try again.');
     }
+
+    // Update local booking state to reflect the confirmed payment.
+    setBookings(prev => prev.map(b =>
+      b.id === paymentBooking.id
+        ? { ...b, isPaid: true, paymentStatus: 'paid', status: 'confirmed', paymentTxHash: data.txHash, paymentProvider: 'demo-simulation' }
+        : b
+    ));
+
+    // Create an invoice for this booking (mirrors AdminCMS.createInvoiceForBooking).
+    setInvoices(prev => {
+      if (prev.some(inv => inv.bookingId === paymentBooking.id)) return prev;
+      const now = new Date();
+      const yearMonth = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}`;
+      const seq = String(prev.filter(inv => inv.invoiceNumber?.startsWith(`INV-${yearMonth}`)).length + 1).padStart(4, '0');
+      const totalAmount = Number(paymentBooking.amount) || 0;
+      const depositPaid = Number(paymentBooking.depositAmount) || 0;
+      const travelExpenses = Number(paymentBooking.travelExpenses) || 0;
+      const total = totalAmount + travelExpenses;
+      const newInvoice: Invoice = {
+        id: `inv-${Date.now()}`,
+        bookingId: paymentBooking.id,
+        invoiceNumber: `INV-${yearMonth}-${seq}`,
+        clientName: paymentBooking.clientName,
+        clientEmail: paymentBooking.clientEmail,
+        packageName: paymentBooking.packageName || 'Photography Session',
+        items: [
+          { description: `${paymentBooking.packageName || 'Photography Session'} Package`, amount: totalAmount },
+          ...(travelExpenses > 0 ? [{ description: 'Travel Expenses', amount: travelExpenses }] : []),
+          ...(depositPaid > 0 ? [{ description: 'Booking Deposit', amount: -depositPaid }] : []),
+        ],
+        subtotal: total,
+        depositPaid,
+        total,
+        amountPaid: depositPaid,
+        balanceDue: Math.max(0, total - depositPaid),
+        status: depositPaid >= total ? 'paid' : 'partial',
+        paymentMethod: 'Demo Simulation',
+        stripeTxHash: data.txHash,
+        createdAt: now.toISOString(),
+        paidAt: now.toISOString(),
+      };
+      return [...prev, newInvoice];
+    });
+
     return data.txHash;
   }, []);
 

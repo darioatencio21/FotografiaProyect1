@@ -1046,62 +1046,60 @@ export default function AdminCMS({
             {/* Bespoke Custom SVG Visual Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Monthly Revenue Chart */}
-              <div className="bg-charcoal border border-white/10 rounded-lg p-4">
-                <h4 className="text-xs font-mono tracking-widest text-white/60 uppercase mb-4 text-left">Revenue Progression (Last 6 Months)</h4>
-                <div className="h-44 w-full flex items-end justify-between px-4 pb-2 relative">
-                  {/* Grid Lines */}
-                  <div className="absolute inset-y-0 inset-x-4 flex flex-col justify-between pointer-events-none border-b border-white/10">
-                    <div className="border-t border-white/10 w-full h-px" />
-                    <div className="border-t border-white/10 w-full h-px" />
-                    <div className="border-t border-white/10 w-full h-px" />
-                    <div className="border-t border-white/10 w-full h-px" />
+              {(() => {
+                const CHART_HEIGHT_PX = 176; // h-44
+                const maxRevenue = Math.max(...stats.revenueByMonth.map(d => d.value), 1);
+                return (
+                  <div className="bg-charcoal border border-white/10 rounded-lg p-4">
+                    <h4 className="text-xs font-mono tracking-widest text-white/60 uppercase mb-4 text-left">Revenue Progression (Last 6 Months)</h4>
+                    <div className="h-44 w-full flex items-end justify-between px-4 pb-2 relative">
+                      {stats.revenueByMonth.map((item, index) => {
+                        const barPx = maxRevenue > 0 ? (item.value / maxRevenue) * CHART_HEIGHT_PX : 0;
+                        return (
+                          <div key={index} className="flex-1 flex flex-col items-center group relative z-10">
+                            <div className="text-[10px] font-mono text-white/70 opacity-0 group-hover:opacity-100 transition-opacity mb-1 font-bold">
+                              ${item.value / 1000}k
+                            </div>
+                            <div 
+                              className="w-8 bg-white/25 rounded-t-sm group-hover:bg-white/35 transition-all shadow-[0_0_8px_rgba(255,255,255,0.12)]"
+                              style={{ height: `${barPx}px` }}
+                            />
+                            <span className="text-[9px] font-mono text-white/40 mt-2">{item.month}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                  {stats.revenueByMonth.map((item, index) => {
-                    const pct = (item.value / 35000) * 100;
-                    return (
-                      <div key={index} className="flex-1 flex flex-col items-center group relative z-10">
-                        <div className="text-[10px] font-mono text-white/70 opacity-0 group-hover:opacity-100 transition-opacity mb-1 font-bold">
-                          ${item.value / 1000}k
-                        </div>
-                        <div 
-                          className="w-8 bg-white/10 rounded-t-sm group-hover:bg-white/15 transition-all shadow-[0_0_8px_rgba(255,255,255,0.08)]"
-                          style={{ height: `${pct}%` }}
-                        />
-                        <span className="text-[9px] font-mono text-white/40 mt-2">{item.month}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+                );
+              })()}
 
               {/* Visitors Daily Activity Chart */}
-              <div className="bg-charcoal border border-white/10 rounded-lg p-4">
-                <h4 className="text-xs font-mono tracking-widest text-white/60 uppercase mb-4 text-left">Traffic Density (Weekly visits)</h4>
-                <div className="h-44 w-full flex items-end justify-between px-4 pb-2 relative">
-                  {/* Grid Lines */}
-                  <div className="absolute inset-y-0 inset-x-4 flex flex-col justify-between pointer-events-none border-b border-white/10">
-                    <div className="border-t border-white/10 w-full h-px" />
-                    <div className="border-t border-white/10 w-full h-px" />
-                    <div className="border-t border-white/10 w-full h-px" />
-                    <div className="border-t border-white/10 w-full h-px" />
+              {(() => {
+                const CHART_HEIGHT_PX = 176; // h-44
+                const maxVisits = Math.max(...stats.visitsByDay.map(d => d.count), 1);
+                return (
+                  <div className="bg-charcoal border border-white/10 rounded-lg p-4">
+                    <h4 className="text-xs font-mono tracking-widest text-white/60 uppercase mb-4 text-left">Traffic Density (Weekly visits)</h4>
+                    <div className="h-44 w-full flex items-end justify-between px-4 pb-2 relative">
+                      {stats.visitsByDay.map((item, index) => {
+                        const barPx = maxVisits > 0 ? (item.count / maxVisits) * CHART_HEIGHT_PX : 0;
+                        return (
+                          <div key={index} className="flex-1 flex flex-col items-center group relative z-10">
+                            <div className="text-[10px] font-mono text-white/80 opacity-0 group-hover:opacity-100 transition-opacity mb-1">
+                              {item.count}
+                            </div>
+                            <div 
+                              className="w-6 bg-white/20 hover:bg-white/30 rounded-t-sm transition-all border border-white/15"
+                              style={{ height: `${barPx}px` }}
+                            />
+                            <span className="text-[9px] font-mono text-white/40 mt-2">{item.day}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                  {stats.visitsByDay.map((item, index) => {
-                    const pct = (item.count / 1000) * 100;
-                    return (
-                      <div key={index} className="flex-1 flex flex-col items-center group relative z-10">
-                        <div className="text-[10px] font-mono text-white/80 opacity-0 group-hover:opacity-100 transition-opacity mb-1">
-                          {item.count}
-                        </div>
-                        <div 
-                          className="w-6 bg-charcoal hover:bg-white/15 rounded-t-sm transition-all border border-white/10"
-                          style={{ height: `${pct}%` }}
-                        />
-                        <span className="text-[9px] font-mono text-white/40 mt-2">{item.day}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+                );
+              })()}
             </div>
           </div>
         )}

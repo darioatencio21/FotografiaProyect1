@@ -9,7 +9,10 @@ function getFunctionUrl(): string {
 
 export async function getAuthHeaders(): Promise<Record<string, string>> {
   const token = await getSessionToken();
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+  };
   if (token) headers['Authorization'] = `Bearer ${token}`;
   return headers;
 }
