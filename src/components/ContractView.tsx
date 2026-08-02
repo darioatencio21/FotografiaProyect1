@@ -1,6 +1,7 @@
 import React from 'react';
 import { Printer, CheckCircle } from 'lucide-react';
 import { Booking, ActiveLanguíage } from '../types';
+import { sanitizeHTML } from '../lib/sanitize';
 
 interface Props {
   booking: Booking;
@@ -34,8 +35,8 @@ export default function ContractView({ booking, lang, t, mode = 'view', onClient
     const pl = lang === 'es' ? 'Fotógrafa' : 'Photographer';
     const win = window.open('', '_blank');
     if (!win) { window.print(); return; }
-    const priceRow = (label: string, val: string) => `<div style="text-align:center"><p style="font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:#8C8076;margin:0 0 4px">${label}</p><p style="font-size:18px;font-family:Georgia,serif;color:#2D2A28;margin:0">${val}</p></div>`;
-    const labelVal = (l: string, v: string) => `<p style="margin:0;font-size:11px;color:#2D2A28"><span style="color:#8C8076">${l}:</span> ${v}</p>`;
+    const priceRow = (label: string, val: string) => `<div style="text-align:center"><p style="font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:#8C8076;margin:0 0 4px">${sanitizeHTML(label)}</p><p style="font-size:18px;font-family:Georgia,serif;color:#2D2A28;margin:0">${sanitizeHTML(val)}</p></div>`;
+    const labelVal = (l: string, v: string) => `<p style="margin:0;font-size:11px;color:#2D2A28"><span style="color:#8C8076">${sanitizeHTML(l)}:</span> ${sanitizeHTML(v)}</p>`;
     win.document.write('<!DOCTYPE html>' +
 '<html><head><meta charset="utf-8">' +
 '<style>' +
@@ -72,15 +73,15 @@ export default function ContractView({ booking, lang, t, mode = 'view', onClient
 '<div style="text-align:right">' +
 `<p style="font-size:9px;text-transform:uppercase;letter-spacing:0.15em;color:#B58A4A;margin:0 0 4px;font-weight:600">${isSession ? t.contractSessionDate : t.contractWeddingDate}</p>` +
 `<p style="margin:0;font-size:16px;font-family:Georgia,serif;color:#2D2A28">${booking.date ? formatDate(booking.date) : '—'}</p>` +
-(isSession && booking.timeSlot ? `<p style="margin:2px 0 0;font-size:11px;color:#8C8076">${t.contractSessionTime}: ${booking.timeSlot}</p>` : '') +
+    (isSession && booking.timeSlot ? `<p style="margin:2px 0 0;font-size:11px;color:#8C8076">${t.contractSessionTime}: ${sanitizeHTML(booking.timeSlot)}</p>` : '') +
 '</div>' +
 '</div>' +
 (cd ? (isSession ?
 '<div class="box">' +
 `<p class="box-title">${t.contractClient}</p>` +
-`<p style="margin:0;font-size:13px;color:#2D2A28">${cd.brideName || '—'}</p>` +
-`<p style="margin:0;font-size:11px;color:#8C8076">${cd.brideEmail || '—'}</p>` +
-`<p style="margin:0;font-size:11px;color:#8C8076">${cd.groomPhone || '—'}</p>` +
+`<p style="margin:0;font-size:13px;color:#2D2A28">${sanitizeHTML(cd.brideName || '—')}</p>` +
+`<p style="margin:0;font-size:11px;color:#8C8076">${sanitizeHTML(cd.brideEmail || '—')}</p>` +
+`<p style="margin:0;font-size:11px;color:#8C8076">${sanitizeHTML(cd.groomPhone || '—')}</p>` +
 '</div>' +
 '<div class="box" style="margin-top:12px">' +
 `<p class="box-title">${t.contractSessionInfo}</p>` +
@@ -91,35 +92,35 @@ export default function ContractView({ booking, lang, t, mode = 'view', onClient
 '<div class="grid2">' +
 '<div class="box">' +
 `<p class="box-title">${t.contractBride}</p>` +
-`<p style="margin:0;font-size:13px;color:#2D2A28">${cd.brideName || '—'}</p>` +
-`<p style="margin:0;font-size:11px;color:#8C8076">${cd.brideEmail || '—'}</p>` +
-`<p style="margin:0;font-size:11px;color:#8C8076">${cd.brideAddress || '—'}</p>` +
+`<p style="margin:0;font-size:13px;color:#2D2A28">${sanitizeHTML(cd.brideName || '—')}</p>` +
+`<p style="margin:0;font-size:11px;color:#8C8076">${sanitizeHTML(cd.brideEmail || '—')}</p>` +
+`<p style="margin:0;font-size:11px;color:#8C8076">${sanitizeHTML(cd.brideAddress || '—')}</p>` +
 '</div>' +
 '<div class="box">' +
 `<p class="box-title">${t.contractGroom}</p>` +
-`<p style="margin:0;font-size:13px;color:#2D2A28">${cd.groomName || '—'}</p>` +
-`<p style="margin:0;font-size:11px;color:#8C8076">${cd.groomPhone || '—'}</p>` +
+`<p style="margin:0;font-size:13px;color:#2D2A28">${sanitizeHTML(cd.groomName || '—')}</p>` +
+`<p style="margin:0;font-size:11px;color:#8C8076">${sanitizeHTML(cd.groomPhone || '—')}</p>` +
 '</div>' +
 '</div>' +
 '<div class="grid2" style="margin-top:12px">' +
 '<div class="box">' +
 `<p class="box-title">${t.contractCeremony}</p>` +
-`<p style="margin:0;font-size:12px;color:#2D2A28">${cd.ceremonyLocation || '—'}</p>` +
-`<p style="margin:0;font-size:11px;color:#8C8076">${cd.ceremonyAddress || '—'}</p>` +
-`<p style="margin:0;font-size:11px;color:#8C8076;margin-top:4px">${cd.ceremonyStart ? cd.ceremonyStart + ' — ' + (cd.ceremonyEnd || '') : '—'}</p>` +
+`<p style="margin:0;font-size:12px;color:#2D2A28">${sanitizeHTML(cd.ceremonyLocation || '—')}</p>` +
+`<p style="margin:0;font-size:11px;color:#8C8076">${sanitizeHTML(cd.ceremonyAddress || '—')}</p>` +
+`<p style="margin:0;font-size:11px;color:#8C8076;margin-top:4px">${sanitizeHTML(cd.ceremonyStart ? cd.ceremonyStart + ' — ' + (cd.ceremonyEnd || '') : '—')}</p>` +
 '</div>' +
 '<div class="box">' +
 `<p class="box-title">${t.contractReception}</p>` +
-`<p style="margin:0;font-size:12px;color:#2D2A28">${cd.receptionLocation || '—'}</p>` +
-`<p style="margin:0;font-size:11px;color:#8C8076">${cd.receptionAddress || '—'}</p>` +
-`<p style="margin:0;font-size:11px;color:#8C8076;margin-top:4px">${cd.receptionStart ? cd.receptionStart + ' — ' + (cd.receptionEnd || '') : '—'}</p>` +
+`<p style="margin:0;font-size:12px;color:#2D2A28">${sanitizeHTML(cd.receptionLocation || '—')}</p>` +
+`<p style="margin:0;font-size:11px;color:#8C8076">${sanitizeHTML(cd.receptionAddress || '—')}</p>` +
+`<p style="margin:0;font-size:11px;color:#8C8076;margin-top:4px">${sanitizeHTML(cd.receptionStart ? cd.receptionStart + ' — ' + (cd.receptionEnd || '') : '—')}</p>` +
 '</div>' +
 '</div>') : '') +
 '<hr class="hr"/>' +
 '<div class="box">' +
 `<p class="box-title">${t.contractPackage}</p>` +
-`<p style="margin:0;font-size:16px;font-family:Georgia,serif;color:#2D2A28">${booking.packageName || '—'}</p>` +
-(booking.packageDetails ? `<p style="margin:4px 0 0;font-size:11px;color:#8C8076">${booking.packageDetails}</p>` : '') +
+`<p style="margin:0;font-size:16px;font-family:Georgia,serif;color:#2D2A28">${sanitizeHTML(booking.packageName || '—')}</p>` +
+(booking.packageDetails ? `<p style="margin:4px 0 0;font-size:11px;color:#8C8076">${sanitizeHTML(booking.packageDetails)}</p>` : '') +
 '<hr style="border:0;border-top:1px solid #ddd;margin:12px 0"/>' +
 '<div class="price-grid">' +
 `${priceRow(t.contractAmountAgreed, '$' + (Number(booking.amount) || 0).toLocaleString())}` +
@@ -136,11 +137,11 @@ clauses.map(c => `<div class="clause"><h4>${c.title}</h4><p>${c.text}</p></div>`
 '<div class="sig-grid">' +
 '<div>' +
 `<p class="sig-label">${t.contractSignatureClient}</p>` +
-(booking.contractSignature ? `<div class="sig-line">${booking.contractSignature}</div><p class="sig-date">${t.contractSignatureDate}: ${booking.contractSignedAt ? formatDate(booking.contractSignedAt) : '—'}</p>` : '<p style="color:#aaa;font-style:italic">—</p>') +
+(booking.contractSignature ? `<div class="sig-line">${sanitizeHTML(booking.contractSignature)}</div><p class="sig-date">${t.contractSignatureDate}: ${booking.contractSignedAt ? formatDate(booking.contractSignedAt) : '—'}</p>` : '<p style="color:#aaa;font-style:italic">—</p>') +
 '</div>' +
 '<div>' +
 `<p class="sig-label">${t.contractSignaturePhotographer}</p>` +
-(booking.contractPhotographerSignature ? `<div class="sig-line">${booking.contractPhotographerSignature}</div><p class="sig-date">${t.contractSignatureDate}: ${booking.contractPhotographerSignedAt ? formatDate(booking.contractPhotographerSignedAt) : '—'}</p>` : '<p style="color:#aaa;font-style:italic">—</p>') +
+(booking.contractPhotographerSignature ? `<div class="sig-line">${sanitizeHTML(booking.contractPhotographerSignature)}</div><p class="sig-date">${t.contractSignatureDate}: ${booking.contractPhotographerSignedAt ? formatDate(booking.contractPhotographerSignedAt) : '—'}</p>` : '<p style="color:#aaa;font-style:italic">—</p>') +
 '</div>' +
 '</div>' +
 '</div>' +

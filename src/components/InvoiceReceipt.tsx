@@ -2,6 +2,7 @@
 import { CheckCircle2, Clock3, FileText, Printer, Download, Loader2 } from 'lucide-react';
 import { ActiveLanguíage, Invoice } from '../types';
 import { TRANSLATIONS } from '../data/mockData';
+import { sanitizeHTML } from '../lib/sanitize';
 
 interface InvoiceReceiptProps {
   invoice: Invoice;
@@ -99,25 +100,25 @@ const InvoiceReceipt: React.FC<InvoiceReceiptProps> = ({ invoice, lang, compact 
 </div>
 <div class="header-right">
 <p class="inv-label">${t.invoiceNumber}</p>
-<p class="inv-num">${invoice.invoiceNumber}</p>
+<p class="inv-num">${sanitizeHTML(invoice.invoiceNumber)}</p>
 <div class="status-badge ${isPaid ? 'status-paid' : isPartial ? 'status-partial' : 'status-other'}">${isPaid ? t.invoiceStatusPaid : isPartial ? t.invoiceStatusPartial : invoice.status === 'cancelled' ? t.invoiceStatusCancelled : t.invoiceStatusUnpaid}</div>
 </div>
 </div>
 <div class="client-grid">
 <div>
 <p class="label">${t.invoiceClient}</p>
-<p class="name">${invoice.clientName}</p>
-<p class="email">${invoice.clientEmail}</p>
+<p class="name">${sanitizeHTML(invoice.clientName)}</p>
+<p class="email">${sanitizeHTML(invoice.clientEmail)}</p>
 </div>
 <div class="client-right">
 <p class="label">${t.invoiceDate}</p>
 <p class="name">${formatDate(invoice.createdAt, lang)}</p>
-<p class="email">#${invoice.bookingId}</p>
+<p class="email">#${sanitizeHTML(invoice.bookingId)}</p>
 </div>
 </div>
 <div class="items">
 <div class="items-header"><span>${t.invoiceItemás}</span><span>${t.invoiceSubtotal}</span></div>
-${invoice.items.map((item) => `<div class="item-row"><span class="item-desc">${item.description}</span><span class="item-amount">${formatCurrency(item.amount)}</span></div>`).join('')}
+${invoice.items.map((item) => `<div class="item-row"><span class="item-desc">${sanitizeHTML(item.description)}</span><span class="item-amount">${formatCurrency(item.amount)}</span></div>`).join('')}
 </div>
 <div class="totals">
 <div class="totals-inner">
@@ -129,11 +130,11 @@ ${invoice.depositPaid > 0 ? `<div class="total-row green"><span>${t.invoiceDepos
 </div>
 <div class="footer">
 <div>
-<p>${t.invoicePaymentMethod}: <strong>${invoice.paymentMethod || '-'}</strong></p>
+<p>${t.invoicePaymentMethod}: <strong>${sanitizeHTML(invoice.paymentMethod || '-')}</strong></p>
 ${invoice.paidAt ? `<p>${t.invoicePaidOn}: <strong>${formatDate(invoice.paidAt, lang)}</strong></p>` : ''}
-${invoice.stripeTxHash ? `<p style="font-family:monospace;font-size:8px;word-break:break-all;color:#8C8076">Ref: ${invoice.stripeTxHash}</p>` : ''}
+${invoice.stripeTxHash ? `<p style="font-family:monospace;font-size:8px;word-break:break-all;color:#8C8076">Ref: ${sanitizeHTML(invoice.stripeTxHash)}</p>` : ''}
 </div>
-<div class="footer-mono"><p>${invoice.invoiceNumber}</p></div>
+<div class="footer-mono"><p>${sanitizeHTML(invoice.invoiceNumber)}</p></div>
 </div>
 </div>
 </div>

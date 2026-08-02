@@ -15,11 +15,12 @@ interface StripeCheckoutProps {
   description: string;
   onClose: () => void;
   onSuccess: (result?: PaymentResult) => void;
+  onProcessPayment: () => Promise<string>;
 }
 
 type PaymentMethod = 'stripe' | 'paypal';
 
-export default function StripeCheckout({ isOpen, amount, description, onClose, onSuccess }: StripeCheckoutProps) {
+export default function StripeCheckout({ isOpen, amount, description, onClose, onSuccess, onProcessPayment }: StripeCheckoutProps) {
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
@@ -45,23 +46,24 @@ export default function StripeCheckout({ isOpen, amount, description, onClose, o
     setTxHash('');
   };
 
-  const simulatePayment = (methodType: PaymentMethod) => {
+  const minProcessingDelay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+  const simulatePayment = async (methodType: PaymentMethod) => {
     setStatus('processing');
     setFormError('');
 
-    const delay = 2000 + Math.random() * 1500;
+    try {
+      // The transaction reference comes from the server (simulate-payment edge
+      // function). This component never generates a hash or marks anything paid
+      // on its own.
+      const [serverTxHash] = await Promise.all([onProcessPayment(), minProcessingDelay(1800)]);
 
-    setTimeout(() => {
-      const hash = methodType === 'stripe'
-        ? 'pi_' + Math.random().toString(36).substring(2, 12)
-        : 'PAYID-' + Math.random().toString(36).substring(2, 12).toUpperCase();
-
-      setTxHash(hash);
+      setTxHash(serverTxHash);
       setStatus('success');
 
       setTimeout(() => {
         const result: PaymentResult = {
-          txHash: hash,
+          txHash: serverTxHash,
           amount,
           paymentMethod: methodType === 'stripe' ? 'Visa •••• 4242' : 'PayPal',
           status: 'success',
@@ -70,7 +72,10 @@ export default function StripeCheckout({ isOpen, amount, description, onClose, o
         onClose();
         resetForm();
       }, 2500);
-    }, delay);
+    } catch (err: any) {
+      setStatus('idle');
+      setFormError(err?.message || 'Payment could not be processed. Please try again.');
+    }
   };
 
   const handleStripePay = (e: React.FormEvent) => {

@@ -65,7 +65,6 @@ ALTER TABLE testimonials ADD COLUMN IF NOT EXISTS approved BOOLEAN DEFAULT TRUE;
 -- === 007_add_reminder.sql ===
 ALTER TABLE bookings ADD COLUMN IF NOT EXISTS "reminderSent" BOOLEAN DEFAULT false;
 ALTER TABLE bookings ADD COLUMN IF NOT EXISTS "reminderSentAt" TEXT DEFAULT '';
-ALTER TABLE emailconfig ADD COLUMN IF NOT EXISTS "emailjsPrivateKey" TEXT DEFAULT '';
 
 
 

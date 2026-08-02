@@ -40,6 +40,16 @@ function markTableMissing(table: string): void {
   } catch { /* ignore */ }
 }
 
+function clearTableMissing(table: string): void {
+  try {
+    const missing = JSON.parse(sessionStorage.getItem(MISSING_TABLES_KEY) || '[]');
+    const next = missing.filter((t: string) => t !== table);
+    if (next.length !== missing.length) {
+      sessionStorage.setItem(MISSING_TABLES_KEY, JSON.stringify(next));
+    }
+  } catch { /* ignore */ }
+}
+
 function isMissingTableError(err: any): boolean {
   const msg = err?.message || String(err);
   return /relation.*does not exist|not found.*table|PGRST(?:104|205|301)/i.test(msg);
@@ -49,6 +59,29 @@ function isSchemaMismatchError(err: any): boolean {
   const message = err?.message || String(err);
   return err?.status === 400 || err?.code === 'PGRST204' || /column .* does not exist|could not find the .* column/i.test(message);
 }
+
+// Collections anonymous visitors may INSERT into (public forms only). Every
+// other collection requires an authenticated (admin) session. This is an
+// explicit allow-list: new collections stay blocked for anon until added here
+// on purpose — never a denylist that lets new tables through by default.
+const ANON_INSERT_TABLES = new Set(['messages', 'bookings']);
+
+// Admin-only collections: no public READ policy, so anonymous sessions must not
+// fetch them at all. Those fetches used to return empty via RLS while anon still
+// held a table-level SELECT grant; once the grant is gone they surface as a 401
+// instead. The admin reloads them after authentication.
+const ADMIN_ONLY_TABLES = new Set(['bookings', 'messages', 'invoices', 'clientaccounts']);
+
+// Columns the anonymous booking form may INSERT, mirroring the GRANT in
+// supabase/migrations/021_anon_insert_bookings.sql. The anon payload is built
+// from scratch with exactly these keys so the frontend and the DB column grant
+// stay in sync by construction, not by manual maintenance in two places.
+const BOOKING_ANON_INSERT_COLUMNS = new Set([
+  'id', 'clientName', 'clientEmail', 'clientPhone', 'date', 'timeSlot',
+  'serviceId', 'peopleCount', 'notes', 'createdAt', 'amount',
+  'depositAmount', 'amountDue', 'packageName', 'packageDetails',
+  'contractType', 'contractData',
+]);
 
 // All columns currently used by the booking workflow.
 // Used as a fallback when the Supabase schema is missing newer columns.
@@ -69,12 +102,31 @@ function getCompatiblePayload(table: string, data: Record<string, unknown>): Rec
   return Object.fromEntries(Object.entries(data).filter(([key]) => BOOKING_BASE_COLUMNS.has(key)));
 }
 
+// Build the anonymous INSERT payload from scratch using only the whitelisted
+// columns for the table. Anything else the client sends (status, isRead, flags,
+// signatures, tokens, ...) is dropped regardless of how it is named, so the
+// frontend can never push a column the DB grant does not allow.
+function buildAnonInsertPayload(table: string, data: Record<string, unknown>): Record<string, unknown> {
+  if (table !== 'bookings') return data;
+  const payload: Record<string, unknown> = {};
+  for (const key of BOOKING_ANON_INSERT_COLUMNS) {
+    if (key in data) payload[key] = data[key];
+  }
+  return payload;
+}
+
 export async function getCollectionWithFallback<T extends { id: string }>(
   collectionPath: string,
   fallbackData: T[]
 ): Promise<T[]> {
   const table = tn(collectionPath);
   if (isTableMissing(table)) return fallbackData;
+
+  // Anonymous sessions must not read admin-only tables (they have no public
+  // READ policy). Return the fallback without firing a SELECT that RLS rejects.
+  if (ADMIN_ONLY_TABLES.has(table) && !(await ensureActiveSession())) {
+    return fallbackData;
+  }
 
   try {
     const { data, error } = await supabase.from(table).select('*');
@@ -109,25 +161,37 @@ export async function getCollectionWithFallback<T extends { id: string }>(
   }
 }
 
-export async function getSingleDocument<T>(collectionPath: string, docId: string): Promise<T | null> {
+export async function getSingleDocument<T>(collectionPath: string, docId: string, retries = 2): Promise<T | null> {
   const table = tn(collectionPath);
   if (isTableMissing(table)) return null;
 
-  try {
-    const { data, error } = await supabase
-      .from(table)
-      .select('*')
-      .eq('id', docId)
-      .single();
-    if (error) {
-      if (error.code === 'PGRST116') return null;
-      throw error;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const { data, error } = await supabase
+        .from(table)
+        .select('*')
+        .eq('id', docId)
+        .single();
+      if (error) {
+        if (error.code === 'PGRST116') return null;
+        throw error;
+      }
+      if (isTableMissing(table)) clearTableMissing(table);
+      return data as T;
+    } catch (err: any) {
+      const last = attempt === retries;
+      if (isMissingTableError(err)) {
+        if (last) markTableMissing(table);
+        return null;
+      }
+      if (last) {
+        console.warn(`[db] ${table}/${docId}: fetch failed after ${attempt + 1} attempt(s) — returning null`, err);
+        return null;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 300 * (attempt + 1)));
     }
-    return data as T;
-  } catch (err: any) {
-    if (isMissingTableError(err)) markTableMissing(table);
-    return null;
   }
+  return null;
 }
 
 export async function saveDocument<T>(collectionPath: string, docId: string, data: T, options?: { silent?: boolean }): Promise<void> {
@@ -144,13 +208,14 @@ export async function saveDocument<T>(collectionPath: string, docId: string, dat
 
   const hasSession = await ensureActiveSession();
 
-  // Anonymous visitors can only submit the public contact form: messages exposes
-  // an RLS INSERT-only policy for anon (migration 018), so use a plain insert
-  // (no upsert) that never touches the UPDATE path. All other tables keep
-  // requiring an authenticated admin session.
-  if (!hasSession && table === 'messages') {
+  // Anonymous visitors can only INSERT into the explicitly allow-listed public
+  // form tables (ANON_INSERT_TABLES: messages, bookings). Uses a plain insert
+  // (no upsert) so it never touches the UPDATE path, and builds the payload
+  // from only the columns each table's RLS column grant allows. Every other
+  // table keeps requiring an authenticated (admin) session.
+  if (!hasSession && ANON_INSERT_TABLES.has(table)) {
     try {
-      const { error } = await supabase.from(table).insert(payload);
+      const { error } = await supabase.from(table).insert(buildAnonInsertPayload(table, payload));
       if (error) throw error;
       return;
     } catch (err: any) {

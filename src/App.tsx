@@ -501,8 +501,10 @@ export default function App() {
        setMessages(migratedMessages);
        setClientAccounts(migratedClients);
         setInvoices(migratedInvoices as Invoice[]);
-      setSeo(migratedSeo ?? INITIAL_SEO);
-      setProfile(migratedProfile ?? INITIAL_PROFILE);
+      if (!migratedSeo) console.warn('[bootstrap] seo: Supabase fetch failed/empty — keeping currently loaded value');
+      setSeo((prev) => migratedSeo ?? prev);
+      if (!migratedProfile) console.warn('[bootstrap] profile: Supabase fetch failed/empty — keeping currently loaded value');
+      setProfile((prev) => migratedProfile ?? prev);
     } else {
       setPhotographs(photosRes);
       setServices(servicesRes);
@@ -513,13 +515,18 @@ export default function App() {
       setMessages(messagesRes);
      setClientAccounts(clientAccsRes);
      setInvoices(invoicesRes);
-      setSeo(seoRes ?? INITIAL_SEO);
-      setProfile(profileRes ?? INITIAL_PROFILE);
+      if (!seoRes) console.warn('[bootstrap] seo: Supabase fetch failed/empty — keeping currently loaded value');
+      setSeo((prev) => seoRes ?? prev);
+      if (!profileRes) console.warn('[bootstrap] profile: Supabase fetch failed/empty — keeping currently loaded value');
+      setProfile((prev) => profileRes ?? prev);
     }
 
-    setPackages(packagesRes.length > 0 ? packagesRes : INITIAL_PHOTOGRAPHY_PACKAGES);
-    setBookingConfig(bookingConfigRes ?? INITIAL_BOOKING_CONFIG);
-    setEmailConfig(emailConfigRes ? { ...INITIAL_EMAIL_CONFIG, ...emailConfigRes } : INITIAL_EMAIL_CONFIG);
+    if (packagesRes.length === 0) console.warn('[bootstrap] photography_packages: Supabase fetch failed/empty — keeping currently loaded value');
+    setPackages((prev) => (packagesRes.length > 0 ? packagesRes : prev));
+    if (!bookingConfigRes) console.warn('[bootstrap] bookingConfig: Supabase fetch failed/empty — keeping currently loaded value');
+    setBookingConfig((prev) => bookingConfigRes ?? prev);
+    if (!emailConfigRes) console.warn('[bootstrap] emailConfig: Supabase fetch failed/empty — keeping currently loaded value');
+    setEmailConfig((prev) => (emailConfigRes ? { ...INITIAL_EMAIL_CONFIG, ...emailConfigRes } : prev));
     const computedStats = await computeAnalytics();
     setSeoAnalytics(computedStats);
 
@@ -622,9 +629,6 @@ export default function App() {
             bookingId,
             token: booking.approvalToken,
             updates: {
-              status: 'confirmed',
-              isPaid: true,
-              paymentStatus: 'paid',
               contractStatus: 'signed',
               contractSignature: signature || booking.contractSignature || '',
               contractSignedAt: signature ? new Date().toISOString() : booking.contractSignedAt || new Date().toISOString(),
@@ -949,6 +953,7 @@ ${photographerName}`);
   const pendingPaymentRef = useRef<((result?: PaymentResult) => void) | null>(null);
   const pendingCancelRef = useRef<(() => void) | null>(null);
   const pendingPaymentBookingRef = useRef<{ clientName: string; clientEmail: string; photographerEmail: string; amount: number; packageName: string } | null>(null);
+  const paymentBookingRef = useRef<{ id: string; approvalToken?: string } | null>(null);
 
   const handleOpenStripeCheckout = (amount: number, description: string) => {
     setCheckoutAmount(amount);
@@ -961,6 +966,28 @@ ${photographerName}`);
     pendingCancelRef.current = onCancel ?? null;
     handleOpenStripeCheckout(amount, description);
   };
+
+  // Server-side payment simulation. StripeCheckout awaits this before showing
+  // "confirmed"; the tx hash and the isPaid/paymentStatus/status writes are
+  // owned by the simulate-payment edge function (service role), never the
+  // client.
+  const handleProcessPayment = useCallback(async (): Promise<string> => {
+    const paymentBooking = paymentBookingRef.current;
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    if (!paymentBooking?.approvalToken || !supabaseUrl) {
+      throw new Error('Missing payment information. Please try again.');
+    }
+    const res = await fetch(`${supabaseUrl}/functions/v1/simulate-payment`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bookingId: paymentBooking.id, token: paymentBooking.approvalToken }),
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) {
+      throw new Error(data?.error || 'Payment could not be processed. Please try again.');
+    }
+    return data.txHash;
+  }, []);
 
   // Next / Prev photo in Lightbox
   const handleLightboxNext = () => {
@@ -1735,6 +1762,7 @@ ${photographerName}`);
                     lang={lang}
                     onConfirm={handleConfirmBooking}
                     onCheckout={(amount, desc, onDone, onCancel) => {
+                      paymentBookingRef.current = { id: booking.id, approvalToken: booking.approvalToken };
                       pendingPaymentBookingRef.current = {
                         clientName: booking.clientName,
                         clientEmail: booking.clientEmail,
@@ -2165,13 +2193,16 @@ ${photographerName}`);
           isOpen={checkoutOpen}
           amount={checkoutAmount}
           description={checkoutDesc}
+          onProcessPayment={handleProcessPayment}
           onClose={() => {
             setCheckoutOpen(false);
+            paymentBookingRef.current = null;
             pendingCancelRef.current?.();
             pendingCancelRef.current = null;
           }}
           onSuccess={(result) => {
             pendingPaymentRef.current?.(result);
+            paymentBookingRef.current = null;
             if (pendingPaymentBookingRef.current) {
               const info = pendingPaymentBookingRef.current;
               import('./lib/email').then(({ sendDepositReceivedEmail }) => {

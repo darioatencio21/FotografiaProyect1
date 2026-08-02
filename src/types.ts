@@ -229,13 +229,8 @@ export interface BookingConfig {
 }
 
 export interface EmailConfig {
-  emailjsServiceId: string;
-  emailjsTemplateId: string;
-  emailjsPublicKey: string;
-  emailjsPrivateKey?: string;
   receiverEmail: string; // The email where admin notifications are sent
   enableAutoResponse?: boolean; // Enable automatic replies to clients
-  emailjsAutoTemplateId?: string; // Optional custom EmailJS template ID for client auto-reply
   autoReplySubject?: string; // Auto-reply subject line
   autoReplyMessage?: string; // Auto-reply custom body message
 }

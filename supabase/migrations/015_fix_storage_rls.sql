@@ -17,12 +17,14 @@ DROP POLICY IF EXISTS "Authenticated users can update images" ON storage.objects
 DROP POLICY IF EXISTS "Authenticated users can delete images" ON storage.objects;
 
 -- 2. Public read — ONLY for the 'photographs' bucket (portfolio display)
+DROP POLICY IF EXISTS "Public read photographs bucket" ON storage.objects;
 CREATE POLICY "Public read photographs bucket" ON storage.objects
   FOR SELECT
   TO public
   USING (bucket_id = 'photographs');
 
 -- 3. Authenticated users (admin) can read all buckets
+DROP POLICY IF EXISTS "Auth read all buckets" ON storage.objects;
 CREATE POLICY "Auth read all buckets" ON storage.objects
   FOR SELECT
   TO authenticated
@@ -32,6 +34,7 @@ CREATE POLICY "Auth read all buckets" ON storage.objects
   ));
 
 -- 4. Authenticated upload
+DROP POLICY IF EXISTS "Auth upload" ON storage.objects;
 CREATE POLICY "Auth upload" ON storage.objects
   FOR INSERT
   TO authenticated
@@ -41,6 +44,7 @@ CREATE POLICY "Auth upload" ON storage.objects
   ));
 
 -- 5. Authenticated update
+DROP POLICY IF EXISTS "Auth update" ON storage.objects;
 CREATE POLICY "Auth update" ON storage.objects
   FOR UPDATE
   TO authenticated
@@ -54,6 +58,7 @@ CREATE POLICY "Auth update" ON storage.objects
   ));
 
 -- 6. Authenticated delete
+DROP POLICY IF EXISTS "Auth delete" ON storage.objects;
 CREATE POLICY "Auth delete" ON storage.objects
   FOR DELETE
   TO authenticated
