@@ -40,6 +40,16 @@ function markTableMissing(table: string): void {
   } catch { /* ignore */ }
 }
 
+function clearTableMissing(table: string): void {
+  try {
+    const missing = JSON.parse(sessionStorage.getItem(MISSING_TABLES_KEY) || '[]');
+    const next = missing.filter((t: string) => t !== table);
+    if (next.length !== missing.length) {
+      sessionStorage.setItem(MISSING_TABLES_KEY, JSON.stringify(next));
+    }
+  } catch { /* ignore */ }
+}
+
 function isMissingTableError(err: any): boolean {
   const msg = err?.message || String(err);
   return /relation.*does not exist|not found.*table|PGRST(?:104|205|301)/i.test(msg);
@@ -55,6 +65,12 @@ function isSchemaMismatchError(err: any): boolean {
 // explicit allow-list: new collections stay blocked for anon until added here
 // on purpose — never a denylist that lets new tables through by default.
 const ANON_INSERT_TABLES = new Set(['messages', 'bookings']);
+
+// Admin-only collections: no public READ policy, so anonymous sessions must not
+// fetch them at all. Those fetches used to return empty via RLS while anon still
+// held a table-level SELECT grant; once the grant is gone they surface as a 401
+// instead. The admin reloads them after authentication.
+const ADMIN_ONLY_TABLES = new Set(['bookings', 'messages', 'invoices', 'clientaccounts']);
 
 // Columns the anonymous booking form may INSERT, mirroring the GRANT in
 // supabase/migrations/021_anon_insert_bookings.sql. The anon payload is built
@@ -106,6 +122,12 @@ export async function getCollectionWithFallback<T extends { id: string }>(
   const table = tn(collectionPath);
   if (isTableMissing(table)) return fallbackData;
 
+  // Anonymous sessions must not read admin-only tables (they have no public
+  // READ policy). Return the fallback without firing a SELECT that RLS rejects.
+  if (ADMIN_ONLY_TABLES.has(table) && !(await ensureActiveSession())) {
+    return fallbackData;
+  }
+
   try {
     const { data, error } = await supabase.from(table).select('*');
     if (error) throw error;
@@ -139,25 +161,37 @@ export async function getCollectionWithFallback<T extends { id: string }>(
   }
 }
 
-export async function getSingleDocument<T>(collectionPath: string, docId: string): Promise<T | null> {
+export async function getSingleDocument<T>(collectionPath: string, docId: string, retries = 2): Promise<T | null> {
   const table = tn(collectionPath);
   if (isTableMissing(table)) return null;
 
-  try {
-    const { data, error } = await supabase
-      .from(table)
-      .select('*')
-      .eq('id', docId)
-      .single();
-    if (error) {
-      if (error.code === 'PGRST116') return null;
-      throw error;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const { data, error } = await supabase
+        .from(table)
+        .select('*')
+        .eq('id', docId)
+        .single();
+      if (error) {
+        if (error.code === 'PGRST116') return null;
+        throw error;
+      }
+      if (isTableMissing(table)) clearTableMissing(table);
+      return data as T;
+    } catch (err: any) {
+      const last = attempt === retries;
+      if (isMissingTableError(err)) {
+        if (last) markTableMissing(table);
+        return null;
+      }
+      if (last) {
+        console.warn(`[db] ${table}/${docId}: fetch failed after ${attempt + 1} attempt(s) — returning null`, err);
+        return null;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 300 * (attempt + 1)));
     }
-    return data as T;
-  } catch (err: any) {
-    if (isMissingTableError(err)) markTableMissing(table);
-    return null;
   }
+  return null;
 }
 
 export async function saveDocument<T>(collectionPath: string, docId: string, data: T, options?: { silent?: boolean }): Promise<void> {

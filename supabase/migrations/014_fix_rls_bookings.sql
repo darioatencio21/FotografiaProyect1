@@ -44,6 +44,7 @@ CREATE POLICY "Auth delete bookings" ON bookings
 -- Fix instagram_posts: remove dangerously permissive admin policy
 -- =============================================================================
 DROP POLICY IF EXISTS "Admin can manage instagram_posts" ON instagram_posts;
+DROP POLICY IF EXISTS "Auth manage instagram_posts" ON instagram_posts;
 CREATE POLICY "Auth manage instagram_posts" ON instagram_posts
   FOR ALL
   TO authenticated

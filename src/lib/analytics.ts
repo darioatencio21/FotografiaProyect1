@@ -42,8 +42,14 @@ export async function computeAnalytics(): Promise<AnalyticsStats> {
   let services: { id: string; title_en: string; title: string }[] = [];
 
   try {
-    const { data: b } = await supabase.from('bookings').select('*');
-    if (b) bookings = b as Booking[];
+    // bookings is admin-only (no public READ policy). Skip it for anonymous
+    // sessions: it used to return empty via RLS while anon held a table-level
+    // grant, and now surfaces as a 401. The dashboard recomputes as soon as the
+    // admin session restores (see App.tsx onAuthChange).
+    if (await ensureActiveSession()) {
+      const { data: b } = await supabase.from('bookings').select('*');
+      if (b) bookings = b as Booking[];
+    }
   } catch { /* table may not exist */ }
 
   try {

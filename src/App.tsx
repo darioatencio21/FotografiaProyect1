@@ -501,8 +501,10 @@ export default function App() {
        setMessages(migratedMessages);
        setClientAccounts(migratedClients);
         setInvoices(migratedInvoices as Invoice[]);
-      setSeo(migratedSeo ?? INITIAL_SEO);
-      setProfile(migratedProfile ?? INITIAL_PROFILE);
+      if (!migratedSeo) console.warn('[bootstrap] seo: Supabase fetch failed/empty — keeping currently loaded value');
+      setSeo((prev) => migratedSeo ?? prev);
+      if (!migratedProfile) console.warn('[bootstrap] profile: Supabase fetch failed/empty — keeping currently loaded value');
+      setProfile((prev) => migratedProfile ?? prev);
     } else {
       setPhotographs(photosRes);
       setServices(servicesRes);
@@ -513,13 +515,18 @@ export default function App() {
       setMessages(messagesRes);
      setClientAccounts(clientAccsRes);
      setInvoices(invoicesRes);
-      setSeo(seoRes ?? INITIAL_SEO);
-      setProfile(profileRes ?? INITIAL_PROFILE);
+      if (!seoRes) console.warn('[bootstrap] seo: Supabase fetch failed/empty — keeping currently loaded value');
+      setSeo((prev) => seoRes ?? prev);
+      if (!profileRes) console.warn('[bootstrap] profile: Supabase fetch failed/empty — keeping currently loaded value');
+      setProfile((prev) => profileRes ?? prev);
     }
 
-    setPackages(packagesRes.length > 0 ? packagesRes : INITIAL_PHOTOGRAPHY_PACKAGES);
-    setBookingConfig(bookingConfigRes ?? INITIAL_BOOKING_CONFIG);
-    setEmailConfig(emailConfigRes ? { ...INITIAL_EMAIL_CONFIG, ...emailConfigRes } : INITIAL_EMAIL_CONFIG);
+    if (packagesRes.length === 0) console.warn('[bootstrap] photography_packages: Supabase fetch failed/empty — keeping currently loaded value');
+    setPackages((prev) => (packagesRes.length > 0 ? packagesRes : prev));
+    if (!bookingConfigRes) console.warn('[bootstrap] bookingConfig: Supabase fetch failed/empty — keeping currently loaded value');
+    setBookingConfig((prev) => bookingConfigRes ?? prev);
+    if (!emailConfigRes) console.warn('[bootstrap] emailConfig: Supabase fetch failed/empty — keeping currently loaded value');
+    setEmailConfig((prev) => (emailConfigRes ? { ...INITIAL_EMAIL_CONFIG, ...emailConfigRes } : prev));
     const computedStats = await computeAnalytics();
     setSeoAnalytics(computedStats);
 
