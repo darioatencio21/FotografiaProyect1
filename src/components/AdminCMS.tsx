@@ -1214,14 +1214,14 @@ export default function AdminCMS({
                           onChange={(e) => setPhotoEditItem({ ...photoEditItem, category: e.target.value })}
                           className="w-full bg-charcoal border border-stone rounded p-2.5 text-xs text-white focus:outline-none focus:border-white/30"
                         >
-                          <option value="retrato">Retrato / Portrait</option>
-                          <option value="boda">Boda / Wedding</option>
-                          <option value="moda">Moda / Fashion</option>
-                          <option value="drone">Drone / Aerial</option>
-                          <option value="viajes">Viajes / Travel</option>
-                          <option value="producto">Producto / Product</option>
-                          <option value="evento">Evento / Event</option>
-                          <option value="naturaleza">Naturaleza / Nature</option>
+                          <option value="retrato" style={{ backgroundColor: '#1a1b1e', color: '#F0F0F0' }}>Retrato / Portrait</option>
+                          <option value="boda" style={{ backgroundColor: '#1a1b1e', color: '#F0F0F0' }}>Boda / Wedding</option>
+                          <option value="moda" style={{ backgroundColor: '#1a1b1e', color: '#F0F0F0' }}>Moda / Fashion</option>
+                          <option value="drone" style={{ backgroundColor: '#1a1b1e', color: '#F0F0F0' }}>Drone / Aerial</option>
+                          <option value="viajes" style={{ backgroundColor: '#1a1b1e', color: '#F0F0F0' }}>Viajes / Travel</option>
+                          <option value="producto" style={{ backgroundColor: '#1a1b1e', color: '#F0F0F0' }}>Producto / Product</option>
+                          <option value="evento" style={{ backgroundColor: '#1a1b1e', color: '#F0F0F0' }}>Evento / Event</option>
+                          <option value="naturaleza" style={{ backgroundColor: '#1a1b1e', color: '#F0F0F0' }}>Naturaleza / Nature</option>
                           <option value="compromiso">Compromiso / Engagement</option>
                           <option value="familia">Familia / Family</option>
                           <option value="infantil">Infantil / Children</option>
@@ -1363,7 +1363,7 @@ export default function AdminCMS({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <label className="space-y-2"><span className="block text-[10px] uppercase tracking-wider text-white/50">{t('Nombre', 'Name', 'Nome')}</span><input value={testimonialForm.name} onChange={event => setTestimonialForm({ ...testimonialForm, name: event.target.value })} className="w-full bg-dark border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-white/30" placeholder="Ana García" /></label>
                   <label className="space-y-2"><span className="block text-[10px] uppercase tracking-wider text-white/50">{t('Tipo de sesión / Rol', 'Session type / Role', 'Tipo de sessão / Função')}</span><input value={testimonialForm.role} onChange={event => setTestimonialForm({ ...testimonialForm, role: event.target.value })} className="w-full bg-dark border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-white/30" placeholder="Boda - Madrid" /></label>
-                  <label className="space-y-2"><span className="block text-[10px] uppercase tracking-wider text-white/50">{t('Valoración', 'Rating', 'Avaliação')}</span><select value={testimonialForm.rating} onChange={event => setTestimonialForm({ ...testimonialForm, rating: Number(event.target.value) })} className="w-full bg-dark border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-white/30">{[5, 4, 3, 2, 1].map(rating => <option key={rating} value={rating}>{rating} / 5</option>)}</select></label>
+                  <label className="space-y-2"><span className="block text-[10px] uppercase tracking-wider text-white/50">{t('Valoración', 'Rating', 'Avaliação')}</span><select value={testimonialForm.rating} onChange={event => setTestimonialForm({ ...testimonialForm, rating: Number(event.target.value) })} className="w-full bg-dark border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-white/30">{[5, 4, 3, 2, 1].map(rating => <option key={rating} value={rating} style={{ backgroundColor: '#1a1b1e', color: '#F0F0F0' }}>{rating} / 5</option>)}</select></label>
                   <label className="space-y-2"><span className="block text-[10px] uppercase tracking-wider text-white/50">{t('URL de foto', 'Photo URL', 'URL da foto')}</span><input value={testimonialForm.image} onChange={event => setTestimonialForm({ ...testimonialForm, image: event.target.value })} className="w-full bg-dark border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-white/30" placeholder="https://..." /></label>
                 </div>
                 <label className="space-y-2 block"><span className="block text-[10px] uppercase tracking-wider text-white/50">{t('Comentario', 'Comment', 'Comentário')}</span><textarea rows={4} value={testimonialForm.comment} onChange={event => setTestimonialForm({ ...testimonialForm, comment: event.target.value })} className="w-full bg-dark border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-white/30 resize-y" placeholder={t('Escribe la experiencia del cliente...', 'Write the client experience...', 'Escreva a experiência do cliente...')} /></label>
@@ -3404,7 +3404,7 @@ function SessionCategoriesEditor({ categories, onUpdate, triggerAlert, lang }: S
                 <label className={labelClass}>{t('Icono', 'Icon')}</label>
                 <select value={editingCat.icon} onChange={(e) => updateField('icon', e.target.value)}
                   className="w-full bg-charcoal border border-stone rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-white/30">
-                  {CATEGORY_ICONS.map(ico => <option key={ico} value={ico} className="bg-charcoal">{ico}</option>)}
+                  {CATEGORY_ICONS.map(ico => <option key={ico} value={ico} style={{ backgroundColor: '#1a1b1e', color: '#F0F0F0' }}>{ico}</option>)}
                 </select>
               </div>
 

@@ -252,9 +252,9 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
                   <label className={labelClass}>{t('Categoría', 'Category')}</label>
                   <select value={editForm.category} onChange={(e) => updateField('category', e.target.value)}
                     className="w-full bg-charcoal border border-stone rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-white/30">
-                    <option value="" className="bg-charcoal text-white/50">{t('Seleccionar categoría...', 'Select category...')}</option>
+                    <option value="" style={{ backgroundColor: '#1a1b1e', color: 'rgba(255,255,255,0.5)' }}>{t('Seleccionar categoría...', 'Select category...')}</option>
                     {activeCategories.map(cat => (
-                      <option key={cat.id} value={cat.id} className="bg-charcoal">
+                      <option key={cat.id} value={cat.id} style={{ backgroundColor: '#1a1b1e', color: '#F0F0F0' }}>
                         {lang === 'es' ? cat.name_es : cat.name_en}
                       </option>
                     ))}
