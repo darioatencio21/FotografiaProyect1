@@ -87,15 +87,20 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
     return es;
   };
 
-  const handleSaveAll = useCallback(() => {
+  const handleSaveAll = useCallback(async () => {
     const cleaned = localPackages.map(p => ({
       ...p,
       benefits: p.benefits.filter(b => b.trim() !== ''),
       benefits_es: p.benefits_es?.filter(b => b.trim() !== ''),
       benefits_en: p.benefits_en?.filter(b => b.trim() !== ''),
     }));
-    onUpdatePackages(cleaned);
-    triggerAlert(t('✓ Paquetes guíardados.', '✓ Packages saved.'));
+    try {
+      await onUpdatePackages(cleaned);
+      triggerAlert(t('✓ Paquetes guíardados.', '✓ Packages saved.'));
+    } catch (err) {
+      console.error('[packages] save failed:', err);
+      triggerAlert(t('Error al guardar paquetes', 'Failed to save packages'));
+    }
   }, [localPackages, onUpdatePackages, triggerAlert, t]);
 
   const toggleActive = useCallback((id: string) => {
@@ -247,9 +252,9 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
                   <label className={labelClass}>{t('Categoría', 'Category')}</label>
                   <select value={editForm.category} onChange={(e) => updateField('category', e.target.value)}
                     className="w-full bg-charcoal border border-stone rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-white/30">
-                    <option value="" className="bg-charcoal text-white/50">{t('Seleccionar categoría...', 'Select category...')}</option>
+                    <option value="" style={{ backgroundColor: '#1a1b1e', color: 'rgba(255,255,255,0.5)' }}>{t('Seleccionar categoría...', 'Select category...')}</option>
                     {activeCategories.map(cat => (
-                      <option key={cat.id} value={cat.id} className="bg-charcoal">
+                      <option key={cat.id} value={cat.id} style={{ backgroundColor: '#1a1b1e', color: '#F0F0F0' }}>
                         {lang === 'es' ? cat.name_es : cat.name_en}
                       </option>
                     ))}

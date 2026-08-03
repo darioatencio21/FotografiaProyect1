@@ -8,7 +8,7 @@
   --color-dark: #0C0D0E;
   --color-dark-gray: rgba(255, 255, 255, 0.04);
   --color-charcoal: rgba(255, 255, 255, 0.08);
-  --color-white: #F0F0F0;
+  --color-white: #FFFFFF;
   --color-overlay: rgba(0, 0, 0, 0.75);
   --color-stone: rgb(40, 42, 46);
   --color-hero: #F0F0F0;
@@ -36,7 +36,7 @@ html {
       radial-gradient(circle at top left, rgba(255, 255, 255, 0.02) 0%, #0C0D0E 100%);
     color: var(--color-white);
     font-family: var(--font-sans);
-    font-weight: 510;
+    font-weight: 600;
     margin: 0;
     padding: 0;
     width: 100%;
@@ -72,6 +72,11 @@ html {
 
   ::selection {
     background-color: rgba(255, 255, 255, 0.15);
+    color: #F0F0F0;
+  }
+
+  select option {
+    background-color: #1a1b1e;
     color: #F0F0F0;
   }
 }

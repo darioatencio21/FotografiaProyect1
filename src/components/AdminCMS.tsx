@@ -1046,62 +1046,60 @@ export default function AdminCMS({
             {/* Bespoke Custom SVG Visual Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Monthly Revenue Chart */}
-              <div className="bg-charcoal border border-white/10 rounded-lg p-4">
-                <h4 className="text-xs font-mono tracking-widest text-white/60 uppercase mb-4 text-left">Revenue Progression (Last 6 Months)</h4>
-                <div className="h-44 w-full flex items-end justify-between px-4 pb-2 relative">
-                  {/* Grid Lines */}
-                  <div className="absolute inset-y-0 inset-x-4 flex flex-col justify-between pointer-events-none border-b border-white/10">
-                    <div className="border-t border-white/10 w-full h-px" />
-                    <div className="border-t border-white/10 w-full h-px" />
-                    <div className="border-t border-white/10 w-full h-px" />
-                    <div className="border-t border-white/10 w-full h-px" />
+              {(() => {
+                const CHART_HEIGHT_PX = 176; // h-44
+                const maxRevenue = Math.max(...stats.revenueByMonth.map(d => d.value), 1);
+                return (
+                  <div className="bg-charcoal border border-white/10 rounded-lg p-4">
+                    <h4 className="text-xs font-mono tracking-widest text-white/60 uppercase mb-4 text-left">Revenue Progression (Last 6 Months)</h4>
+                    <div className="h-44 w-full flex items-end justify-between px-4 pb-2 relative">
+                      {stats.revenueByMonth.map((item, index) => {
+                        const barPx = maxRevenue > 0 ? (item.value / maxRevenue) * CHART_HEIGHT_PX : 0;
+                        return (
+                          <div key={index} className="flex-1 flex flex-col items-center group relative z-10">
+                            <div className="text-[10px] font-mono text-white/70 opacity-0 group-hover:opacity-100 transition-opacity mb-1 font-bold">
+                              ${item.value / 1000}k
+                            </div>
+                            <div 
+                              className="w-8 bg-white/25 rounded-t-sm group-hover:bg-white/35 transition-all shadow-[0_0_8px_rgba(255,255,255,0.12)]"
+                              style={{ height: `${barPx}px` }}
+                            />
+                            <span className="text-[9px] font-mono text-white/40 mt-2">{item.month}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                  {stats.revenueByMonth.map((item, index) => {
-                    const pct = (item.value / 35000) * 100;
-                    return (
-                      <div key={index} className="flex-1 flex flex-col items-center group relative z-10">
-                        <div className="text-[10px] font-mono text-white/70 opacity-0 group-hover:opacity-100 transition-opacity mb-1 font-bold">
-                          ${item.value / 1000}k
-                        </div>
-                        <div 
-                          className="w-8 bg-white/10 rounded-t-sm group-hover:bg-white/15 transition-all shadow-[0_0_8px_rgba(255,255,255,0.08)]"
-                          style={{ height: `${pct}%` }}
-                        />
-                        <span className="text-[9px] font-mono text-white/40 mt-2">{item.month}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+                );
+              })()}
 
               {/* Visitors Daily Activity Chart */}
-              <div className="bg-charcoal border border-white/10 rounded-lg p-4">
-                <h4 className="text-xs font-mono tracking-widest text-white/60 uppercase mb-4 text-left">Traffic Density (Weekly visits)</h4>
-                <div className="h-44 w-full flex items-end justify-between px-4 pb-2 relative">
-                  {/* Grid Lines */}
-                  <div className="absolute inset-y-0 inset-x-4 flex flex-col justify-between pointer-events-none border-b border-white/10">
-                    <div className="border-t border-white/10 w-full h-px" />
-                    <div className="border-t border-white/10 w-full h-px" />
-                    <div className="border-t border-white/10 w-full h-px" />
-                    <div className="border-t border-white/10 w-full h-px" />
+              {(() => {
+                const CHART_HEIGHT_PX = 176; // h-44
+                const maxVisits = Math.max(...stats.visitsByDay.map(d => d.count), 1);
+                return (
+                  <div className="bg-charcoal border border-white/10 rounded-lg p-4">
+                    <h4 className="text-xs font-mono tracking-widest text-white/60 uppercase mb-4 text-left">Traffic Density (Weekly visits)</h4>
+                    <div className="h-44 w-full flex items-end justify-between px-4 pb-2 relative">
+                      {stats.visitsByDay.map((item, index) => {
+                        const barPx = maxVisits > 0 ? (item.count / maxVisits) * CHART_HEIGHT_PX : 0;
+                        return (
+                          <div key={index} className="flex-1 flex flex-col items-center group relative z-10">
+                            <div className="text-[10px] font-mono text-white/80 opacity-0 group-hover:opacity-100 transition-opacity mb-1">
+                              {item.count}
+                            </div>
+                            <div 
+                              className="w-6 bg-white/20 hover:bg-white/30 rounded-t-sm transition-all border border-white/15"
+                              style={{ height: `${barPx}px` }}
+                            />
+                            <span className="text-[9px] font-mono text-white/40 mt-2">{item.day}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                  {stats.visitsByDay.map((item, index) => {
-                    const pct = (item.count / 1000) * 100;
-                    return (
-                      <div key={index} className="flex-1 flex flex-col items-center group relative z-10">
-                        <div className="text-[10px] font-mono text-white/80 opacity-0 group-hover:opacity-100 transition-opacity mb-1">
-                          {item.count}
-                        </div>
-                        <div 
-                          className="w-6 bg-charcoal hover:bg-white/15 rounded-t-sm transition-all border border-white/10"
-                          style={{ height: `${pct}%` }}
-                        />
-                        <span className="text-[9px] font-mono text-white/40 mt-2">{item.day}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+                );
+              })()}
             </div>
           </div>
         )}
@@ -1214,14 +1212,14 @@ export default function AdminCMS({
                           onChange={(e) => setPhotoEditItem({ ...photoEditItem, category: e.target.value })}
                           className="w-full bg-charcoal border border-stone rounded p-2.5 text-xs text-white focus:outline-none focus:border-white/30"
                         >
-                          <option value="retrato">Retrato / Portrait</option>
-                          <option value="boda">Boda / Wedding</option>
-                          <option value="moda">Moda / Fashion</option>
-                          <option value="drone">Drone / Aerial</option>
-                          <option value="viajes">Viajes / Travel</option>
-                          <option value="producto">Producto / Product</option>
-                          <option value="evento">Evento / Event</option>
-                          <option value="naturaleza">Naturaleza / Nature</option>
+                          <option value="retrato" style={{ backgroundColor: '#1a1b1e', color: '#F0F0F0' }}>Retrato / Portrait</option>
+                          <option value="boda" style={{ backgroundColor: '#1a1b1e', color: '#F0F0F0' }}>Boda / Wedding</option>
+                          <option value="moda" style={{ backgroundColor: '#1a1b1e', color: '#F0F0F0' }}>Moda / Fashion</option>
+                          <option value="drone" style={{ backgroundColor: '#1a1b1e', color: '#F0F0F0' }}>Drone / Aerial</option>
+                          <option value="viajes" style={{ backgroundColor: '#1a1b1e', color: '#F0F0F0' }}>Viajes / Travel</option>
+                          <option value="producto" style={{ backgroundColor: '#1a1b1e', color: '#F0F0F0' }}>Producto / Product</option>
+                          <option value="evento" style={{ backgroundColor: '#1a1b1e', color: '#F0F0F0' }}>Evento / Event</option>
+                          <option value="naturaleza" style={{ backgroundColor: '#1a1b1e', color: '#F0F0F0' }}>Naturaleza / Nature</option>
                           <option value="compromiso">Compromiso / Engagement</option>
                           <option value="familia">Familia / Family</option>
                           <option value="infantil">Infantil / Children</option>
@@ -1363,7 +1361,7 @@ export default function AdminCMS({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <label className="space-y-2"><span className="block text-[10px] uppercase tracking-wider text-white/50">{t('Nombre', 'Name', 'Nome')}</span><input value={testimonialForm.name} onChange={event => setTestimonialForm({ ...testimonialForm, name: event.target.value })} className="w-full bg-dark border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-white/30" placeholder="Ana García" /></label>
                   <label className="space-y-2"><span className="block text-[10px] uppercase tracking-wider text-white/50">{t('Tipo de sesión / Rol', 'Session type / Role', 'Tipo de sessão / Função')}</span><input value={testimonialForm.role} onChange={event => setTestimonialForm({ ...testimonialForm, role: event.target.value })} className="w-full bg-dark border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-white/30" placeholder="Boda - Madrid" /></label>
-                  <label className="space-y-2"><span className="block text-[10px] uppercase tracking-wider text-white/50">{t('Valoración', 'Rating', 'Avaliação')}</span><select value={testimonialForm.rating} onChange={event => setTestimonialForm({ ...testimonialForm, rating: Number(event.target.value) })} className="w-full bg-dark border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-white/30">{[5, 4, 3, 2, 1].map(rating => <option key={rating} value={rating}>{rating} / 5</option>)}</select></label>
+                  <label className="space-y-2"><span className="block text-[10px] uppercase tracking-wider text-white/50">{t('Valoración', 'Rating', 'Avaliação')}</span><select value={testimonialForm.rating} onChange={event => setTestimonialForm({ ...testimonialForm, rating: Number(event.target.value) })} className="w-full bg-dark border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-white/30">{[5, 4, 3, 2, 1].map(rating => <option key={rating} value={rating} style={{ backgroundColor: '#1a1b1e', color: '#F0F0F0' }}>{rating} / 5</option>)}</select></label>
                   <label className="space-y-2"><span className="block text-[10px] uppercase tracking-wider text-white/50">{t('URL de foto', 'Photo URL', 'URL da foto')}</span><input value={testimonialForm.image} onChange={event => setTestimonialForm({ ...testimonialForm, image: event.target.value })} className="w-full bg-dark border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-white/30" placeholder="https://..." /></label>
                 </div>
                 <label className="space-y-2 block"><span className="block text-[10px] uppercase tracking-wider text-white/50">{t('Comentario', 'Comment', 'Comentário')}</span><textarea rows={4} value={testimonialForm.comment} onChange={event => setTestimonialForm({ ...testimonialForm, comment: event.target.value })} className="w-full bg-dark border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-white/30 resize-y" placeholder={t('Escribe la experiencia del cliente...', 'Write the client experience...', 'Escreva a experiência do cliente...')} /></label>
@@ -2215,8 +2213,13 @@ export default function AdminCMS({
                     autoReplyMessage: sanitizeString(emailForm.autoReplyMessage || '')
                   };
                   setEmailForm(trimmedConfig);
-                  onUpdateEmailConfig(trimmedConfig);
-                  triggerAlert(t('Configuración de correo guíardada correctamente', 'Email settings saved successfully', 'Configurações de e-mail salvas com sucesso'));
+                  try {
+                    await onUpdateEmailConfig(trimmedConfig);
+                    triggerAlert(t('Configuración de correo guíardada correctamente', 'Email settings saved successfully', 'Configurações de e-mail salvas com sucesso'));
+                  } catch (err) {
+                    console.error('[emailConfig] save failed:', err);
+                    triggerAlert(t('Error al guardar configuración de correo', 'Failed to save email settings', 'Erro ao salvar configurações de e-mail'));
+                  }
                 }}
                 className="py-1.5 px-4 bg-white/10 text-white hover:bg-white/15 border border-white/10 rounded-lg text-[10px] font-mono tracking-widest uppercase font-semibold flex items-center space-x-1 cursor-pointer"
               >
@@ -3340,9 +3343,14 @@ function SessionCategoriesEditor({ categories, onUpdate, triggerAlert, lang }: S
 
   const sorted = [...localCats].sort((a, b) => a.sortOrder - b.sortOrder);
 
-  const handleSaveAll = () => {
-    onUpdate(localCats);
-    triggerAlert(t('✓ Categorías guíardadas.', '✓ Categories saved.'));
+  const handleSaveAll = async () => {
+    try {
+      await onUpdate(localCats);
+      triggerAlert(t('✓ Categorías guíardadas.', '✓ Categories saved.'));
+    } catch (err) {
+      console.error('[sessionCategories] save failed:', err);
+      triggerAlert(t('Error al guardar categorías', 'Failed to save categories'));
+    }
   };
 
   const startEdit = (cat: SessionCategory) => setEditingCat({ ...cat });
@@ -3394,7 +3402,7 @@ function SessionCategoriesEditor({ categories, onUpdate, triggerAlert, lang }: S
                 <label className={labelClass}>{t('Icono', 'Icon')}</label>
                 <select value={editingCat.icon} onChange={(e) => updateField('icon', e.target.value)}
                   className="w-full bg-charcoal border border-stone rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-white/30">
-                  {CATEGORY_ICONS.map(ico => <option key={ico} value={ico} className="bg-charcoal">{ico}</option>)}
+                  {CATEGORY_ICONS.map(ico => <option key={ico} value={ico} style={{ backgroundColor: '#1a1b1e', color: '#F0F0F0' }}>{ico}</option>)}
                 </select>
               </div>
 

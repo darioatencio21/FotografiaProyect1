@@ -169,15 +169,17 @@ serve(async (req) => {
 
     if (!res.ok) {
       const errBody = await res.text()
+      console.error(`[send-email] Resend API failure — status: ${res.status}, body: ${errBody}`)
       throw new Error(`Resend error ${res.status}: ${errBody}`)
     }
 
     const data = await res.json()
+    console.log(`[send-email] Resend success — id: ${data.id}`)
     return new Response(JSON.stringify({ sent: true, id: data.id }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     })
   } catch (err) {
-    console.error("send-email error:", err)
+    console.error("[send-email] caught:", err?.message || err)
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

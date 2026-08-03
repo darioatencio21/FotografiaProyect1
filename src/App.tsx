@@ -299,6 +299,7 @@ export default function App() {
   const [contactSuccess, setContactSuccess] = useState(false);
   const [contactSubmitting, setContactSubmitting] = useState(false);
   const [contactHoneypot, setContactHoneypot] = useState('');
+  const [contactEmailWarning, setContactEmailWarning] = useState('');
 
   useEffect(() => {
     sessionStorage.setItem('contact_draft_name', contactName);
@@ -308,11 +309,11 @@ export default function App() {
   }, [contactName, contactEmail, contactSubject, contactMsg]);
 
   // Contact form validation (mirrors the messages RLS policy in migration 018)
-  const CONTACT_MAX_NAME = 100;
+  const CONTACT_MAX_NAME = 20;
   const CONTACT_MAX_EMAIL = 150;
-  const CONTACT_MAX_SUBJECT = 150;
+  const CONTACT_MAX_SUBJECT = 100;
   const CONTACT_MIN_MESSAGE = 10;
-  const CONTACT_MAX_MESSAGE = 2000;
+  const CONTACT_MAX_MESSAGE = 500;
   const CONTACT_EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const contactNameError = !contactName.trim()
@@ -395,7 +396,7 @@ export default function App() {
       if (user) {
         computeAnalytics()
           .then(setSeoAnalytics)
-          .catch(() => {});
+          .catch((err) => console.warn('[analytics] recompute after auth failed:', err));
       }
     });
     return () => unsub();
@@ -527,12 +528,14 @@ export default function App() {
     setBookingConfig((prev) => bookingConfigRes ?? prev);
     if (!emailConfigRes) console.warn('[bootstrap] emailConfig: Supabase fetch failed/empty — keeping currently loaded value');
     setEmailConfig((prev) => (emailConfigRes ? { ...INITIAL_EMAIL_CONFIG, ...emailConfigRes } : prev));
-    const computedStats = await computeAnalytics();
-    setSeoAnalytics(computedStats);
 
-    // Only persist singleton configs if admin is authenticated (avoids 401 spam when not logged in).
+    // Only persist singleton configs and compute analytics if admin is authenticated
+    // (avoids 401 spam when not logged in, and ensures bookings query has a real session).
     // When the admin signs in later, loadAllData re-runs and seeds them here.
+    // onAuthChange also re-runs computeAnalytics() for live login/logout.
     if (isAuthed) {
+      const computedStats = await computeAnalytics();
+      setSeoAnalytics(computedStats);
       if (!seoRes) saveDocument('seo', 'config', INITIAL_SEO, { silent: true });
       if (!profileRes) saveDocument('profile', 'photographer', INITIAL_PROFILE, { silent: true });
       if (!bookingConfigRes) saveDocument('bookingConfig', 'config', INITIAL_BOOKING_CONFIG, { silent: true });
@@ -830,10 +833,11 @@ export default function App() {
 
       await saveDocument('messages', newMessage.id, newMessage);
 
+      let emailFailed = false;
       if (emailConfig) {
         const { getAuthHeaders } = await import('./lib/email');
         const sendFn = async (to: string, subject: string, text: string) => {
-          await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-email`, {
+          const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-email`, {
             method: 'POST',
             headers: await getAuthHeaders(),
             body: JSON.stringify({
@@ -843,48 +847,63 @@ export default function App() {
               text,
             }),
           });
+          if (!res.ok) {
+            const errBody = await res.text();
+            throw new Error(`send-email ${res.status}: ${errBody}`);
+          }
         };
 
-        const isEn = lang === 'en';
-        const photographerName = sanitizeString(profile.name || 'Miriam Campos');
-        const subject = isEn
-          ? `New contact message: ${safeSubject || 'Inquiry'}`
-          : `Nuevo mensaje de contacto: ${safeSubject || 'Consulta'}`;
-        const photographerText = isEn
-          ? `You received a new contact message:
+        try {
+          const isEn = lang === 'en';
+          const photographerName = sanitizeString(profile.name || 'Miriam Campos');
+          const subject = isEn
+            ? `New contact message: ${safeSubject || 'Inquiry'}`
+            : `Nuevo mensaje de contacto: ${safeSubject || 'Consulta'}`;
+          const photographerText = isEn
+            ? `You received a new contact message:
 
 From: ${safeName} (${safeEmail})
 Subject: ${safeSubject || 'General Inquiry'}
 Message:
 ${safeMsg}`
-          : `Recibiste un nuevo mensaje de contacto:
+            : `Recibiste un nuevo mensaje de contacto:
 
 De: ${safeName} (${safeEmail})
 Asunto: ${safeSubject || 'Consulta General'}
 Mensaje:
 ${safeMsg}`;
 
-        await sendFn(emailConfig.receiverEmail || safeEmail, subject, photographerText);
+          await sendFn(emailConfig.receiverEmail || safeEmail, subject, photographerText);
 
-        if (emailConfig.enableAutoResponse) {
-          const autoSubject = isEn
-            ? (emailConfig.autoReplySubject || 'Your message has been received! - Miriam Campos Photography')
-            : (emailConfig.autoReplySubject || 'Tu mensaje ha sido recibido! - Miriam Campos Photography');
-          const autoMessage = isEn
-            ? (emailConfig.autoReplyMessage || 'Thank you for contacting us. We will get back to you shortly.')
-            : (emailConfig.autoReplyMessage || 'Gracias por contactarte con nosotros. Responderemos a la brevedad.');
-          const greeting = isEn ? 'Hi' : 'Hola';
-          const closing = isEn ? 'Best regards,' : 'Saludos,';
+          if (emailConfig.enableAutoResponse) {
+            const autoSubject = isEn
+              ? (emailConfig.autoReplySubject || 'Your message has been received! - Miriam Campos Photography')
+              : (emailConfig.autoReplySubject || 'Tu mensaje ha sido recibido! - Miriam Campos Photography');
+            const autoMessage = isEn
+              ? (emailConfig.autoReplyMessage || 'Thank you for contacting us. We will get back to you shortly.')
+              : (emailConfig.autoReplyMessage || 'Gracias por contactarte con nosotros. Responderemos a la brevedad.');
+            const greeting = isEn ? 'Hi' : 'Hola';
+            const closing = isEn ? 'Best regards,' : 'Saludos,';
 
-          await sendFn(safeEmail, autoSubject, `${greeting} ${safeName},
+            await sendFn(safeEmail, autoSubject, `${greeting} ${safeName},
 
 ${autoMessage}
 
 ${closing}
 ${photographerName}`);
+          }
+        } catch (emailErr) {
+          console.error('[contact] email notification failed:', emailErr);
+          emailFailed = true;
         }
       }
 
+      if (emailFailed) {
+        setContactEmailWarning(lang === 'en'
+          ? 'Message saved but email notification failed. Please try again later or contact us directly.'
+          : 'Mensaje guardado pero la notificación por email falló. Intentá de nuevo o contactanos directamente.');
+        setTimeout(() => setContactEmailWarning(''), 6000);
+      }
       setContactSuccess(true);
       setContactName('');
       setContactEmail('');
@@ -979,13 +998,60 @@ ${photographerName}`);
     }
     const res = await fetch(`${supabaseUrl}/functions/v1/simulate-payment`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+      },
       body: JSON.stringify({ bookingId: paymentBooking.id, token: paymentBooking.approvalToken }),
     });
     const data = await res.json().catch(() => null);
     if (!res.ok) {
       throw new Error(data?.error || 'Payment could not be processed. Please try again.');
     }
+
+    // Update local booking state to reflect the confirmed payment.
+    setBookings(prev => prev.map(b =>
+      b.id === paymentBooking.id
+        ? { ...b, isPaid: true, paymentStatus: 'paid', status: 'confirmed', paymentTxHash: data.txHash, paymentProvider: 'demo-simulation' }
+        : b
+    ));
+
+    // Create an invoice for this booking (mirrors AdminCMS.createInvoiceForBooking).
+    setInvoices(prev => {
+      if (prev.some(inv => inv.bookingId === paymentBooking.id)) return prev;
+      const now = new Date();
+      const yearMonth = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}`;
+      const seq = String(prev.filter(inv => inv.invoiceNumber?.startsWith(`INV-${yearMonth}`)).length + 1).padStart(4, '0');
+      const totalAmount = Number(paymentBooking.amount) || 0;
+      const depositPaid = Number(paymentBooking.depositAmount) || 0;
+      const travelExpenses = Number(paymentBooking.travelExpenses) || 0;
+      const total = totalAmount + travelExpenses;
+      const newInvoice: Invoice = {
+        id: `inv-${Date.now()}`,
+        bookingId: paymentBooking.id,
+        invoiceNumber: `INV-${yearMonth}-${seq}`,
+        clientName: paymentBooking.clientName,
+        clientEmail: paymentBooking.clientEmail,
+        packageName: paymentBooking.packageName || 'Photography Session',
+        items: [
+          { description: `${paymentBooking.packageName || 'Photography Session'} Package`, amount: totalAmount },
+          ...(travelExpenses > 0 ? [{ description: 'Travel Expenses', amount: travelExpenses }] : []),
+          ...(depositPaid > 0 ? [{ description: 'Booking Deposit', amount: -depositPaid }] : []),
+        ],
+        subtotal: total,
+        depositPaid,
+        total,
+        amountPaid: depositPaid,
+        balanceDue: Math.max(0, total - depositPaid),
+        status: depositPaid >= total ? 'paid' : 'partial',
+        paymentMethod: 'Demo Simulation',
+        stripeTxHash: data.txHash,
+        createdAt: now.toISOString(),
+        paidAt: now.toISOString(),
+      };
+      return [...prev, newInvoice];
+    });
+
     return data.txHash;
   }, []);
 
@@ -1014,13 +1080,15 @@ ${photographerName}`);
 
   return (
     <div className="bg-dark text-white min-h-screen relative w-full overflow-x-hidden font-sans select-none selection:bg-white/15">
-      {/* CORE HEADER */}
-      <Header
-        currentView={currentView}
-        onSetView={navigateTo}
-        lang={lang}
-        onSetLang={setLang}
-      />
+      {/* CORE HEADER — hidden in admin panel */}
+      {currentView !== 'admin' && (
+        <Header
+          currentView={currentView}
+          onSetView={navigateTo}
+          lang={lang}
+          onSetLang={setLang}
+        />
+      )}
 
       {/* Full-width hero outside max-w-7xl container */}
       {currentView === 'home' && (
@@ -1629,6 +1697,9 @@ ${photographerName}`);
                               preSelectedPackage={selectedPackageId ? packages.find(p => p.id === selectedPackageId) ?? null : null}
                               onClearPackage={() => setSelectedPackageId(null)}
                               setNavigationGuard={setNavigationGuard}
+                              onEmailError={(msg) => {
+                                console.warn('[booking]', msg);
+                              }}
                               onAddBooking={(newBook) => {
                                 setSelectedPackageId(null);
                                 const savedBook: Booking = {
@@ -1877,8 +1948,11 @@ ${photographerName}`);
                           <div className="space-y-1">
                             <label className="text-[10px] font-mono text-white/45 uppercase tracking-wider">{t.clientName}</label>
                             <input
+                              id="contact-name"
+                              name="name"
                               type="text"
                               required
+                              autoComplete="name"
                               maxLength={CONTACT_MAX_NAME}
                               value={contactName}
                               onChange={(e) => setContactName(e.target.value)}
@@ -1892,8 +1966,11 @@ ${photographerName}`);
                           <div className="space-y-1">
                             <label className="text-[10px] font-mono text-white/45 uppercase tracking-wider">{t.clientEmail}</label>
                             <input
+                              id="contact-email"
+                              name="email"
                               type="email"
                               required
+                              autoComplete="email"
                               maxLength={CONTACT_MAX_EMAIL}
                               value={contactEmail}
                               onChange={(e) => setContactEmail(e.target.value)}
@@ -1909,8 +1986,11 @@ ${photographerName}`);
                         <div className="space-y-1">
                           <label className="text-[10px] font-mono text-white/45 uppercase tracking-wider">Subject</label>
                           <input
+                            id="contact-subject"
+                            name="subject"
                             type="text"
                             required
+                            autoComplete="off"
                             maxLength={CONTACT_MAX_SUBJECT}
                             value={contactSubject}
                             onChange={(e) => setContactSubject(e.target.value)}
@@ -1925,8 +2005,11 @@ ${photographerName}`);
                         <div className="space-y-1">
                           <label className="text-[10px] font-mono text-white/45 uppercase tracking-wider">Message</label>
                           <textarea
+                            id="contact-message"
+                            name="message"
                             rows={4}
                             required
+                            autoComplete="off"
                             maxLength={CONTACT_MAX_MESSAGE}
                             value={contactMsg}
                             onChange={(e) => setContactMsg(e.target.value)}
@@ -1965,6 +2048,9 @@ ${photographerName}`);
                         <p className="text-xs text-white/50 max-w-sm mx-auto leading-relaxed">
                           Your creative request has been filed directly to Helena Jenkins (Studio Manager). We will reply to your registered email in under 24 business hours.
                         </p>
+                        {contactEmailWarning && (
+                          <p className="text-[10px] text-amber-400/90 max-w-sm mx-auto leading-relaxed mt-2">{contactEmailWarning}</p>
+                        )}
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -2074,13 +2160,15 @@ ${photographerName}`);
         </motion.main>
       </AnimatePresence>
 
-      {/* FOOTER */}
-      <Footer
-        onSetView={navigateTo}
-        lang={lang}
-        isAdminLoggedIn={isAdminLoggedIn}
-        onOpenAdminLogin={openAdminLogin}
-      />
+      {/* FOOTER — hidden in admin panel */}
+      {currentView !== 'admin' && (
+        <Footer
+          onSetView={navigateTo}
+          lang={lang}
+          isAdminLoggedIn={isAdminLoggedIn}
+          onOpenAdminLogin={openAdminLogin}
+        />
+      )}
 
       {/* ======================================================= */}
       {/* DETAILED DIALOG MODALS OVERLAYS */}

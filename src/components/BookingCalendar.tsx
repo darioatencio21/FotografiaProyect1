@@ -30,6 +30,7 @@ interface BookingCalendarProps {
   onClearPackage?: () => void;
   onAddBooking: (booking: Omit<Booking, 'id' | 'status' | 'createdAt'>) => void;
   setNavigationGuard?: (v: boolean) => void;
+  onEmailError?: (msg: string) => void;
 }
 
 const LOCAL_TRANSLATIONS = {
@@ -99,7 +100,7 @@ const LOCAL_TRANSLATIONS = {
   },
 };
 
-export default function BookingCalendar({ services, lang, config: _config, emailConfig, preSelectedPackage, onClearPackage: _onClearPackage, onAddBooking, setNavigationGuard }: BookingCalendarProps) {
+export default function BookingCalendar({ services, lang, config: _config, emailConfig, preSelectedPackage, onClearPackage: _onClearPackage, onAddBooking, setNavigationGuard, onEmailError }: BookingCalendarProps) {
   const t = LOCAL_TRANSLATIONS[lang] || LOCAL_TRANSLATIONS.es;
 
   const BOOKING_DRAFT_KEY = 'booking_draft';
@@ -231,17 +232,22 @@ export default function BookingCalendar({ services, lang, config: _config, email
            `\n- Fecha solicitada: ${formattedDate}` +
            `\n- Horario preferido: ${finalSchedule}`;
 
+    let emailFailed = false;
     if (emailConfig) {
       try {
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
         const { getAuthHeaders } = await import('../lib/email');
         const sendFn = async (to: string, subject: string, text: string) => {
           if (!supabaseUrl) return;
-          await fetch(`${supabaseUrl}/functions/v1/send-email`, {
+          const res = await fetch(`${supabaseUrl}/functions/v1/send-email`, {
             method: 'POST',
             headers: await getAuthHeaders(),
             body: JSON.stringify({ to, subject, html: text.replace(/\n/g, '<br>'), text }),
           });
+          if (!res.ok) {
+            const errBody = await res.text();
+            throw new Error(`send-email ${res.status}: ${errBody}`);
+          }
         };
 
         const isEn = lang === 'en';
@@ -310,8 +316,15 @@ ${summaryTitle}
 ${closing}`);
         }
       } catch (err) {
-        console.error('Could not send email notifications:', err);
+        console.error('[booking] email notification failed:', err);
+        emailFailed = true;
       }
+    }
+
+    if (emailFailed) {
+      onEmailError?.(lang === 'en'
+        ? 'Booking saved but email notification failed. Please try again later or contact us directly.'
+        : 'Reserva guardada pero la notificación por email falló. Intentá de nuevo o contactanos directamente.');
     }
 
     setIsSyncing(false);
