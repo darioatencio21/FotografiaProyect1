@@ -325,6 +325,7 @@ export default function App() {
   const [contactSubmitting, setContactSubmitting] = useState(false);
   const [contactHoneypot, setContactHoneypot] = useState('');
   const [contactEmailWarning, setContactEmailWarning] = useState('');
+  const [contactTouched, setContactTouched] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     sessionStorage.setItem('contact_draft_name', contactName);
@@ -831,7 +832,10 @@ export default function App() {
 
     if (contactHoneypot) return;
 
-    if (!contactFormValid) return;
+    if (!contactFormValid) {
+      setContactTouched({ name: true, email: true, subject: true, msg: true });
+      return;
+    }
 
     const safeName = sanitizeString(contactName);
     const safeEmail = sanitizeEmail(contactEmail);
@@ -934,6 +938,7 @@ ${photographerName}`);
       setContactEmail('');
       setContactSubject('');
       setContactMsg('');
+      setContactTouched({});
       setTimeout(() => setContactSuccess(false), 4000);
     } catch (err) {
       console.error('Could not submit contact message:', err);
@@ -2059,10 +2064,11 @@ ${photographerName}`);
                               maxLength={CONTACT_MAX_NAME}
                               value={contactName}
                               onChange={(e) => setContactName(e.target.value)}
-                              aria-invalid={!!contactNameError}
+                              onBlur={() => setContactTouched(prev => ({ ...prev, name: true }))}
+                              aria-invalid={!!contactTouched.name && !!contactNameError}
                               className="w-full bg-charcoal border-stone rounded p-2.5 text-xs text-white focus:outline-none focus:border-white/30 font-sans"
                             />
-                            {contactNameError && (
+                            {contactTouched.name && contactNameError && (
                               <p className="text-[10px] text-red-400 font-sans">{contactNameError}</p>
                             )}
                           </div>
@@ -2077,10 +2083,11 @@ ${photographerName}`);
                               maxLength={CONTACT_MAX_EMAIL}
                               value={contactEmail}
                               onChange={(e) => setContactEmail(e.target.value)}
-                              aria-invalid={!!contactEmailError}
+                              onBlur={() => setContactTouched(prev => ({ ...prev, email: true }))}
+                              aria-invalid={!!contactTouched.email && !!contactEmailError}
                               className="w-full bg-charcoal border-stone rounded p-2.5 text-xs text-white focus:outline-none focus:border-white/30 font-sans"
                             />
-                            {contactEmailError && (
+                            {contactTouched.email && contactEmailError && (
                               <p className="text-[10px] text-red-400 font-sans">{contactEmailError}</p>
                             )}
                           </div>
@@ -2097,10 +2104,11 @@ ${photographerName}`);
                             maxLength={CONTACT_MAX_SUBJECT}
                             value={contactSubject}
                             onChange={(e) => setContactSubject(e.target.value)}
-                            aria-invalid={!!contactSubjectError}
+                            onBlur={() => setContactTouched(prev => ({ ...prev, subject: true }))}
+                            aria-invalid={!!contactTouched.subject && !!contactSubjectError}
                             className="w-full bg-charcoal border-stone rounded p-2.5 text-xs text-white focus:outline-none focus:border-white/30 font-sans"
                           />
-                          {contactSubjectError && (
+                          {contactTouched.subject && contactSubjectError && (
                             <p className="text-[10px] text-red-400 font-sans">{contactSubjectError}</p>
                           )}
                         </div>
@@ -2116,14 +2124,15 @@ ${photographerName}`);
                             maxLength={CONTACT_MAX_MESSAGE}
                             value={contactMsg}
                             onChange={(e) => setContactMsg(e.target.value)}
-                            aria-invalid={!!contactMsgError}
+                            onBlur={() => setContactTouched(prev => ({ ...prev, msg: true }))}
+                            aria-invalid={!!contactTouched.msg && !!contactMsgError}
                             className="w-full bg-charcoal border-stone rounded p-3 text-xs text-white focus:outline-none focus:border-white/30 font-sans resize-none"
                           />
                           <div className="flex items-start justify-between gap-2">
                             <p className="text-[10px] text-red-400 font-sans">
-                              {contactMsgError || (contactMsg && contactMsg.length < CONTACT_MIN_MESSAGE
+                              {contactTouched.msg ? (contactMsgError || (contactMsg && contactMsg.length < CONTACT_MIN_MESSAGE
                                 ? (lang === 'en' ? `Minimum ${CONTACT_MIN_MESSAGE} characters.` : `Mínimo ${CONTACT_MIN_MESSAGE} caracteres.`)
-                                : '')}
+                                : '')) : ''}
                             </p>
                             <span className="ml-auto text-[10px] font-mono text-white/45">{contactMsg.length}/{CONTACT_MAX_MESSAGE}</span>
                           </div>
@@ -2131,7 +2140,7 @@ ${photographerName}`);
 
                         <button
                           type="submit"
-                          disabled={contactSubmitting || !contactFormValid}
+                          disabled={contactSubmitting}
                           className="w-full py-3 bg-white/10 hover:bg-white/15 text-white border border-white/10 font-mono text-[10px] tracking-widest uppercase font-bold rounded-lg transition-all flex items-center justify-center space-x-1 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                         >
                           <MessageSquare size={13} />
