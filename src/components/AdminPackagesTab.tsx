@@ -3,6 +3,7 @@ import { Save, Plus, Trash2, Edit3, X, Upload, Star } from 'lucide-react';
 import { PhotographyPackage, ActiveLanguíage, SessionCategory } from '../types';
 import { uploadImageBlob } from '../lib/db';
 import StorageImage from './StorageImage';
+import { formatPrice } from '../config/site';
 
 async function compressToBlob(file: File, maxSize = 1200, quality = 0.8): Promise<Blob> {
   const rawUrl = await new Promise<string>((resolve, reject) => {
@@ -432,7 +433,7 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
                         </div>
                       )}
                       <span className="text-sm font-serif text-white truncate">{pName || '(sin nombre)'}</span>
-                      <span className="text-[10px] font-mono text-white/90 font-bold">${pkg.price.toLocaleString()}</span>
+                      <span className="text-[10px] font-mono text-white/90 font-bold">{formatPrice(pkg.price, lang)}</span>
                       {pkg.featured && (
                         <span className="text-[11px] font-mono text-white/90 border border-white/10 bg-white/5 px-1.5 py-0.5 rounded uppercase">Featured</span>
                       )}
@@ -487,7 +488,7 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
               <div key={pkg.id} className={`flex items-center justify-between p-3 rounded-lg border transition-all ${pkg.active ? 'border-stone bg-dark-gray' : 'border-stone/30 bg-dark-gray opacity-60'}`}>
                 <div className="flex items-center space-x-3 flex-1 min-w-0">
                   <span className="text-sm font-serif text-white truncate">{pkg.name_es || pkg.name_en || '(sin nombre)'}</span>
-                  <span className="text-[10px] font-mono text-white/90 font-bold">${pkg.price.toLocaleString()}</span>
+                  <span className="text-[10px] font-mono text-white/90 font-bold">{formatPrice(pkg.price, lang)}</span>
                 </div>
                 <div className="flex items-center space-x-1.5 shrink-0">
                   <button onClick={() => toggleFeatured(pkg.id)} className={`p-1.5 cursor-pointer transition-colors ${pkg.featured ? 'text-amber-400 hover:text-amber-300' : 'text-white/30 hover:text-amber-400'}`} title={pkg.featured ? t('Quitar de destacados', 'Unfeature') : t('Marcar como destacado', 'Feature')}>

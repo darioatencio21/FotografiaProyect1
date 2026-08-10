@@ -30,6 +30,7 @@ import AdminRemindersTab from './AdminRemindersTab';
 import ContractView from './ContractView';
 import RevealableField from './RevealableField';
 import { maskToken } from '../utils/maskData';
+import { formatPrice } from '../config/site';
 
 function compressImage(file: File, maxSize = 1600, quality = 0.85): Promise<{ blob: Blob; width: number; height: number }> {
   return new Promise((resolve, reject) => {
@@ -1011,7 +1012,7 @@ export default function AdminCMS({
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-charcoal border border-white/10 rounded-lg p-4 flex flex-col text-left">
                 <span className="text-[9px] font-mono text-white/40 uppercase">{t('Ingresos Estimados', 'Estimated Revenue', 'Receita Estimada')}</span>
-                <span className="text-2xl font-mono font-bold text-white/70 mt-1">${stats.totalRevenue.toLocaleString()}</span>
+                <span className="text-2xl font-mono font-bold text-white/70 mt-1">{formatPrice(stats.totalRevenue, lang)}</span>
                 <span className="text-[10px] font-mono text-emerald-400 mt-2 flex items-center space-x-1">
                   <ArrowUpRight size={10} />
                   <span>{t('+12.4% vs mes anterior', '+12.4% vs Last month', '+12.4% vs mês anterior')}</span>
@@ -1437,7 +1438,7 @@ export default function AdminCMS({
                                 {services.find(s=>s.id === b.serviceId)?.title || 'Custom Session'}
                               </span>
                             </td>
-                            <td className="p-4 font-semibold text-white/60 font-mono">${b.amount || 1800}</td>
+                            <td className="p-4 font-semibold text-white/60 font-mono">{formatPrice(b.amount || 1800, lang)}</td>
                             <td className="p-4">
                               <span className={`px-2 py-0.5 rounded text-[9px] font-mono font-semibold uppercase ${
                                 b.status === 'confirmed' || b.status === 'completed'
@@ -1585,7 +1586,7 @@ export default function AdminCMS({
                                       <div className="pt-2 border-t border-white/10 flex items-center justify-between">
                                         <div>
                                           <span className="text-white/40 block text-[9px] uppercase font-mono tracking-wider">{t('Monto Presupuestado:', 'Estimated Amount:', 'Valor Orçado:')}</span>
-                                          <span className="text-lg font-serif text-white/60 font-semibold">${b.amount || 1800}</span>
+                                          <span className="text-lg font-serif text-white/60 font-semibold">{formatPrice(b.amount || 1800, lang)}</span>
                                         </div>
                                         <div>
                                           <span className="text-white/40 block text-[9px] uppercase font-mono tracking-wider text-right">{t('Estado Solicitud:', 'Request Status:', 'Estado da Solicitação:')}</span>
@@ -1781,7 +1782,7 @@ export default function AdminCMS({
                         </div>
                       </div>
                       <div className="flex items-center justify-between mt-2">
-                        <span className="font-semibold text-white/60 font-mono text-sm">${b.amount || 1800}</span>
+                        <span className="font-semibold text-white/60 font-mono text-sm">{formatPrice(b.amount || 1800, lang)}</span>
                       </div>
                     </div>
 
@@ -1999,7 +2000,7 @@ export default function AdminCMS({
                   <div><p className="text-[9px] text-white/40 uppercase">{t('Factura', 'Invoice', 'Fatura')}</p><p className="font-mono text-white/60">{invoice.invoiceNumber}</p></div>
                    <div><p className="text-[9px] text-white/40 uppercase">{t('Cliente', 'Client', 'Cliente')}</p><p className="text-white/80"><RevealableField value={invoice.clientName} type="name" /></p></div>
                   <div className="md:col-span-2"><p className="text-[9px] text-white/40 uppercase">{t('Paquete', 'Package', 'Pacote')}</p><p className="text-white/70 truncate">{invoice.packageName}</p></div>
-                  <div><p className="text-[9px] text-white/40 uppercase">{t('Total', 'Total', 'Total')}</p><p className="text-white/60 font-mono">${invoice.total.toLocaleString()}</p></div>
+                  <div><p className="text-[9px] text-white/40 uppercase">{t('Total', 'Total', 'Total')}</p><p className="text-white/60 font-mono">{formatPrice(invoice.total, lang)}</p></div>
                   <div className="flex items-center justify-between gap-2"><span className={invoice.status === 'paid' ? 'text-emerald-400' : 'text-white/60'}>{invoice.status === 'paid' ? t('Pagada', 'Paid', 'Paga') : invoice.status === 'partial' ? t('Parcial', 'Partial', 'Parcial') : t('Pendiente', 'Pending', 'Pendente')}</span><button onClick={() => window.print()} className="text-white/70 hover:text-white"><FileText size={14} /></button></div>
                 </div>
               ))}

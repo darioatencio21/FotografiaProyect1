@@ -280,7 +280,7 @@ Package: ${serviceName}
 Date: ${formattedDate}
 Time: ${finalSchedule}
 Guests: ${peopleCount}
-Estimated Total: $${totalPrice > 0 ? totalPrice : 'TBD'}
+Estimated Total: ${totalPrice > 0 ? formatPrice(totalPrice, lang) : 'TBD'}
 
 Client notes:
 ${safeNotes || 'No notes'}`
@@ -293,7 +293,7 @@ Paquete: ${serviceName}
 Fecha: ${formattedDate}
 Horario: ${finalSchedule}
 Personas: ${peopleCount}
-Total Estimado: $${totalPrice > 0 ? totalPrice : 'A Definir'}
+Total Estimado: ${totalPrice > 0 ? formatPrice(totalPrice, lang) : 'A Definir'}
 
 Notas del cliente:
 ${safeNotes || 'Sin notas'}`;
