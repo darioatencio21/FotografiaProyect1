@@ -57,7 +57,7 @@ import {
 } from './lib/db';
 import { sanitizeString, sanitizeEmail, sanitizeUrl, unescapeHTMLEntities } from './lib/sanitize';
 import { computeAnalytics, trackPageView } from './lib/analytics';
-import { formatPrice, SOCIAL } from './config/site';
+import { formatPrice, SOCIAL, METRICS, CONTACT } from './config/site';
 
 // Storage-key migration: legacy aorea_*/aurea_* prefixes → miriamcampos_*.
 // Runs at module load (before the App component's useState initializers read
@@ -1148,7 +1148,7 @@ ${photographerName}`);
                 className="w-full h-full object-cover object-center"
               />
             </motion.div>
-            <div className="absolute inset-0 bg-gradient-to-b from-overlay/5 via-overlay/40 to-overlay/70 z-10 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-b from-overlay/10 via-overlay/50 to-overlay/80 z-10 pointer-events-none" />
           </div>
 
           {/* Desktop: Left image */}
@@ -1173,7 +1173,7 @@ ${photographerName}`);
                 className="w-full h-full object-cover object-center"
               />
             </motion.div>
-            <div className="absolute inset-0 bg-gradient-to-b from-overlay/5 via-overlay/40 to-overlay/70 z-10 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-b from-overlay/10 via-overlay/50 to-overlay/80 z-10 pointer-events-none" />
           </div>
 
           {/* Desktop: Right image */}
@@ -1198,11 +1198,14 @@ ${photographerName}`);
                 className="w-full h-full object-cover object-center"
               />
             </motion.div>
-            <div className="absolute inset-0 bg-gradient-to-b from-overlay/5 via-overlay/40 to-overlay/70 z-10 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-b from-overlay/10 via-overlay/50 to-overlay/80 z-10 pointer-events-none" />
           </div>
 
           {/* Subtle divider line */}
           <div className="absolute inset-y-[15%] left-1/2 w-px bg-white/10 z-20 hidden md:block" />
+
+          {/* Radial contrast scrim behind hero copy for text legibility */}
+          <div className="absolute inset-0 z-[15] bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.5),transparent_70%)] pointer-events-none" />
 
           {/* Central content overlay */}
           <div className="absolute inset-0 z-20 flex flex-col justify-center pointer-events-none">
@@ -1247,12 +1250,6 @@ ${photographerName}`);
                 className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-4 mt-5 md:mt-12"
               >
                 <button
-                  onClick={() => navigateTo('portfolio')}
-                  className="px-4 sm:px-6 md:px-7 py-2 md:py-3 bg-white/10 hover:bg-white/15 text-white border border-white/20 font-mono text-[clamp(7px,2vw,10px)] tracking-widest uppercase font-semibold transition-all duration-300 cursor-pointer whitespace-normal sm:whitespace-nowrap"
-                >
-                  {t.ctaPortfolio}
-                </button>
-                <button
                   onClick={() => {
                     navigateTo('services');
                     setTimeout(() => {
@@ -1260,9 +1257,15 @@ ${photographerName}`);
                       if (element) element.scrollIntoView({ behavior: 'smooth' });
                     }, 200);
                   }}
-                  className="px-4 sm:px-6 md:px-7 py-2 md:py-3 border border-white/30 text-white/80 hover:border-white font-mono text-[clamp(7px,2vw,10px)] tracking-widest uppercase font-semibold transition-all duration-300 cursor-pointer bg-transparent whitespace-normal sm:whitespace-nowrap drop-shadow-sm"
+                  className="px-4 sm:px-6 md:px-8 py-2 md:py-3 bg-white text-dark hover:bg-white/80 font-mono text-[clamp(7px,2vw,10px)] tracking-widest uppercase font-bold transition-all duration-300 cursor-pointer whitespace-normal sm:whitespace-nowrap shadow-lg shadow-black/20"
                 >
                   {t.ctaBook}
+                </button>
+                <button
+                  onClick={() => navigateTo('portfolio')}
+                  className="px-4 sm:px-6 md:px-7 py-2 md:py-3 border border-white/25 text-white/85 hover:border-white/60 hover:text-white font-mono text-[clamp(7px,2vw,10px)] tracking-widest uppercase font-semibold transition-all duration-300 cursor-pointer bg-white/5 backdrop-blur-sm whitespace-normal sm:whitespace-nowrap shadow-md shadow-black/10"
+                >
+                  {t.ctaPortfolio}
                 </button>
               </motion.div>
             </div>
@@ -1324,7 +1327,7 @@ ${photographerName}`);
                     <div className="hidden md:block absolute top-[18%] bottom-[18%] left-1/3 w-px bg-gradient-to-b from-transparent via-white/[0.06] to-transparent" />
                     <div className="hidden md:block absolute top-[18%] bottom-[18%] right-1/3 w-px bg-gradient-to-b from-transparent via-white/[0.06] to-transparent" />
 
-                    {/* 15+ Years */}
+                    {/* YEARS — from METRICS */}
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       whileInView={{ opacity: 1, y: 0 }}
@@ -1334,7 +1337,7 @@ ${photographerName}`);
                     >
                       <Camera size={18} strokeWidth={1.5} className="text-white/40 mx-auto mb-4" />
                       <p className="font-serif text-3xl md:text-4xl text-white font-light leading-none group-hover:scale-[1.03] transition-transform duration-500">
-                        <CountUp end={15} suffix="+" duration={2000} />
+                        <CountUp end={METRICS.years} suffix="+" duration={2000} />
                       </p>
                       <p className="text-[10px] font-mono tracking-[0.3em] text-white/20 uppercase mt-3">
                         {t.yearsExp}
@@ -1344,7 +1347,7 @@ ${photographerName}`);
                       </p>
                     </motion.div>
 
-                    {/* 2000+ Sessions — Center hero metric, 40% larger */}
+                    {/* SESSIONS — Center hero metric, 40% larger */}
                     <motion.div
                       initial={{ opacity: 0, y: 24 }}
                       whileInView={{ opacity: 1, y: 0 }}
@@ -1354,7 +1357,7 @@ ${photographerName}`);
                     >
                       <Award size={20} strokeWidth={1.5} className="text-white/50 mx-auto mb-5" />
                       <p className="font-serif text-[clamp(2.5rem,8vw,5rem)] text-white font-light leading-none group-hover:scale-[1.03] transition-transform duration-500">
-                        <CountUp end={2000} suffix="+" duration={2500} />
+                        <CountUp end={METRICS.sessions} suffix="+" duration={2500} />
                       </p>
                       <p className="text-[11px] font-mono tracking-[0.35em] text-white/25 uppercase mt-3">
                         {t.sessions}
@@ -1364,7 +1367,7 @@ ${photographerName}`);
                       </p>
                     </motion.div>
 
-                    {/* 98% Satisfied */}
+                    {/* SATISFACTION — from METRICS */}
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       whileInView={{ opacity: 1, y: 0 }}
@@ -1374,7 +1377,7 @@ ${photographerName}`);
                     >
                       <Star size={18} strokeWidth={1.5} className="text-white/40 mx-auto mb-4" />
                       <p className="font-serif text-3xl md:text-4xl text-white font-light leading-none group-hover:scale-[1.03] transition-transform duration-500">
-                        <CountUp end={98} suffix="%" duration={2000} />
+                        <CountUp end={METRICS.satisfaction} suffix="%" duration={2000} />
                       </p>
                       <p className="text-[10px] font-mono tracking-[0.3em] text-white/20 uppercase mt-3">
                         {t.satisfied}
@@ -1480,7 +1483,30 @@ ${photographerName}`);
           {/* ABOUT SCREEN */}
           {/* ======================================================= */}
           {currentView === 'about' && (
-            <AboutSection profile={profile} lang={lang} t={t} />
+            <div className="space-y-20 md:space-y-28">
+              <AboutSection profile={profile} lang={lang} t={t} />
+
+              <section className="relative overflow-hidden rounded-lg border border-white/10 bg-gradient-to-br from-dark-gray to-charcoal p-8 md:p-12 text-left shadow-md">
+                <div className="max-w-2xl">
+                  <span className="text-[10px] font-mono text-white/70 tracking-widest uppercase block">{lang === 'es' ? '15 años capturando luz' : '15 years of capturing light'}</span>
+                  <h2 className="font-serif text-2xl md:text-3xl text-white tracking-wide mt-2">
+                    {lang === 'es' ? '¿Listo para crear tu historia juntos?' : 'Ready to create your story together?'}
+                  </h2>
+                  <p className="text-xs text-white/50 mt-3 leading-relaxed">
+                    {lang === 'es'
+                      ? 'Cuéntame tu visión y diseñemos una sesión única, hecha a medida.'
+                      : 'Share your vision and let\'s design a unique, made-to-measure session.'}
+                  </p>
+                  <button
+                    onClick={() => navigateTo('services')}
+                    className="mt-6 inline-flex items-center gap-2 px-6 py-3 bg-white hover:bg-white/85 text-dark rounded-lg font-mono text-[10px] tracking-widest uppercase font-bold transition-all shadow-lg"
+                  >
+                    {lang === 'es' ? 'Explorar sesiones' : 'Explore sessions'}
+                    <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
+                  </button>
+                </div>
+              </section>
+            </div>
           )}
 
           {/* ======================================================= */}
@@ -1582,6 +1608,49 @@ ${photographerName}`);
                         );
                       })}
                     </div>
+
+                    {/* Custom proposal banner — tailored session CTA */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 24 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, margin: "-40px" }}
+                      transition={{ duration: 0.5 }}
+                      className="relative overflow-hidden border border-white/10 rounded-lg p-6 sm:p-8 md:p-10 bg-gradient-to-br from-dark-gray via-charcoal to-white/[0.03]"
+                    >
+                      <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-white/[0.03] pointer-events-none" />
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
+                        <div className="space-y-2 max-w-2xl">
+                          <span className="text-[10px] font-mono text-white/50 tracking-[0.25em] uppercase block">
+                            {lang === 'es'
+                              ? '¿Tienes una visión diferente en mente?'
+                              : lang === 'pt'
+                                ? 'Tem uma visão diferente em mente?'
+                                : 'Have a different vision in mind?'}
+                          </span>
+                          <h3 className="font-serif text-2xl sm:text-3xl text-white tracking-wide">
+                            {lang === 'es' ? 'Propuesta a medida' : lang === 'pt' ? 'Proposta personalizada' : 'Custom proposal'}
+                          </h3>
+                          <p className="text-xs sm:text-sm text-white/50 leading-relaxed">
+                            {lang === 'es'
+                              ? 'Crea una sesión totalmente personalizada — locación, estilo, producción. Cuéntame tu idea y preparo un concepto editorial único para ti.'
+                              : lang === 'pt'
+                                ? 'Crie uma sessão totalmente personalizada — local, estilo, produção. Conte-me a sua ideia e preparo um conceito editorial único para você.'
+                                : 'Create a fully tailored session — location, styling, production. Share your idea and I\'ll craft a one-of-a-kind editorial concept for you.'}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => navigateTo('contact')}
+                          className="shrink-0 inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-dark hover:bg-white/80 rounded-md font-mono text-[10px] tracking-widest uppercase font-bold transition-all duration-300 cursor-pointer whitespace-nowrap"
+                        >
+                          {lang === 'es'
+                            ? 'Solicitar propuesta a medida'
+                            : lang === 'pt'
+                              ? 'Solicitar proposta personalizada'
+                              : 'Request a custom proposal'}
+                          <ArrowRight size={12} className="transition-transform duration-300 group-hover:translate-x-0.5" />
+                        </button>
+                      </div>
+                    </motion.div>
                   </motion.section>
                 ) : (
                   /* ——— STEP 2: PACKAGES FOR SELECTED CATEGORY ——— */
@@ -1958,7 +2027,7 @@ ${photographerName}`);
           {currentView === 'contact' && (
             <div className="space-y-12 pt-12 md:pt-20">
               <section className="text-center max-w-md mx-auto space-y-3">
-                <span className="text-[10px] font-mono text-white/70 tracking-widest uppercase block">GET IN TOUCH</span>
+                <span className="text-[10px] font-mono text-white/70 tracking-widest uppercase block">{lang === 'es' ? 'PONTE EN CONTACTO' : 'GET IN TOUCH'}</span>
                 <h2 className="font-serif text-3xl text-white tracking-wide">{t.contactTitle}</h2>
                 <p className="text-xs text-white/55">{t.contactSubtitle}</p>
               </section>
@@ -2018,7 +2087,7 @@ ${photographerName}`);
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[10px] font-mono text-white/45 uppercase tracking-wider">Subject</label>
+                          <label className="text-[10px] font-mono text-white/45 uppercase tracking-wider">{lang === 'es' ? 'Asunto' : 'Subject'}</label>
                           <input
                             id="contact-subject"
                             name="subject"
@@ -2037,7 +2106,7 @@ ${photographerName}`);
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[10px] font-mono text-white/45 uppercase tracking-wider">Message</label>
+                          <label className="text-[10px] font-mono text-white/45 uppercase tracking-wider">{lang === 'es' ? 'Mensaje' : 'Message'}</label>
                           <textarea
                             id="contact-message"
                             name="message"
@@ -2078,9 +2147,11 @@ ${photographerName}`);
                         <div className="inline-flex p-3 rounded-full bg-white/10/10 border border-white/10 text-white/70 mx-auto">
                           <ShieldCheck size={36} />
                         </div>
-                        <h4 className="font-serif text-lg text-white font-semibold">Message Dispatched</h4>
+                        <h4 className="font-serif text-lg text-white font-semibold">{lang === 'es' ? 'Mensaje Enviado' : 'Message Dispatched'}</h4>
                         <p className="text-xs text-white/50 max-w-sm mx-auto leading-relaxed">
-                          Your creative request has been filed directly to Helena Jenkins (Studio Manager). We will reply to your registered email in under 24 business hours.
+                          {lang === 'es'
+                            ? 'Tu solicitud ha llegado al estudio de Miriam Campos. Responderemos a tu correo en menos de 24 horas hábiles.'
+                            : 'Your request has been filed directly to the Miriam Campos studio. We will reply to your registered email within 24 business hours.'}
                         </p>
                         {contactEmailWarning && (
                           <p className="text-[10px] text-amber-400/90 max-w-sm mx-auto leading-relaxed mt-2">{contactEmailWarning}</p>
@@ -2093,30 +2164,40 @@ ${photographerName}`);
                 {/* Contact Coordinates (Cols 5) */}
                 <div className="lg:col-span-5 bg-dark-gray border border-white/10 rounded-lg p-6 md:p-8 text-left flex flex-col justify-between space-y-6 shadow-md">
                   <div className="space-y-5">
-                    <h4 className="text-xs font-mono tracking-widest text-white/70 uppercase font-semibold">Studio Coordinates</h4>
+                    <h4 className="text-xs font-mono tracking-widest text-white/70 uppercase font-semibold">{lang === 'es' ? 'Coordenadas del Estudio' : 'Studio Coordinates'}</h4>
                     
                     <div className="space-y-4">
                       <div className="flex items-start space-x-3 text-xs">
                         <MapPin size={14} className="text-white/70 mt-0.5 shrink-0" />
                         <div className="space-y-0.5">
-                          <span className="font-semibold text-white/90">Main Studio Office</span>
-                          <span className="text-white/50 block">Via della Moscova 24, Milan, Italy</span>
+                          <span className="font-semibold text-white/90">{lang === 'es' ? 'Ubicación' : 'Location'}</span>
+                          <span className="text-white/50 block">{lang === 'es' ? CONTACT.locationLine_es : CONTACT.locationLine_en}</span>
                         </div>
                       </div>
 
                       <div className="flex items-start space-x-3 text-xs">
                         <Mail size={14} className="text-white/70 mt-0.5 shrink-0" />
                         <div className="space-y-0.5">
-                          <span className="font-semibold text-white/90">E-mail Inquiries</span>
-                          <span className="text-white/50 block hover:text-white/60 transition-colors cursor-pointer">studio@áureastudio.com</span>
+                          <span className="font-semibold text-white/90">{lang === 'es' ? 'Consultas por Email' : 'E-mail Inquiries'}</span>
+                          <a href={`mailto:${CONTACT.email}`} className="text-white/50 block hover:text-white/70 transition-colors cursor-pointer break-all">{CONTACT.email}</a>
                         </div>
                       </div>
 
+                      {CONTACT.phone && (
+                        <div className="flex items-start space-x-3 text-xs">
+                          <Phone size={14} className="text-white/70 mt-0.5 shrink-0" />
+                          <div className="space-y-0.5">
+                            <span className="font-semibold text-white/90">{lang === 'es' ? 'Teléfono del Estudio' : 'Studio Telephone'}</span>
+                            <span className="text-white/50 block">{CONTACT.phone}</span>
+                          </div>
+                        </div>
+                      )}
+
                       <div className="flex items-start space-x-3 text-xs">
-                        <Phone size={14} className="text-white/70 mt-0.5 shrink-0" />
+                        <Instagram size={14} className="text-white/70 mt-0.5 shrink-0" />
                         <div className="space-y-0.5">
-                          <span className="font-semibold text-white/90">Studio Telephone</span>
-                          <span className="text-white/50 block">+39 02 1234 5678</span>
+                          <span className="font-semibold text-white/90">Instagram</span>
+                          <a href={SOCIAL.instagram} target="_blank" rel="noopener noreferrer" className="text-white/50 block hover:text-white/70 transition-colors cursor-pointer">{SOCIAL.instagramHandle}</a>
                         </div>
                       </div>
                     </div>
@@ -2243,7 +2324,7 @@ ${photographerName}`);
                   <ShieldCheck size={24} />
                 </div>
                 <h4 className="font-serif text-xl text-white font-semibold">CMS Authenticator</h4>
-                <p className="text-[10px] font-mono text-white/45 uppercase tracking-widest">AUREA SECURITY GATE</p>
+                <p className="text-[10px] font-mono text-white/45 uppercase tracking-widest">MIRIAM CAMPOS SECURITY GATE</p>
               </div>
 
               <form onSubmit={handleAdminAuthSubmit} className="space-y-4 text-left">

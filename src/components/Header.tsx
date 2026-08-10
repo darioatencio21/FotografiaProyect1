@@ -47,6 +47,14 @@ function Header({
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleBookNow = () => {
+    onSetView('services');
+    setIsMobileMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const bookNowLabel = lang === 'es' ? 'Reservar' : 'Book Now';
+
   const languíages: { code: ActiveLanguíage; name: string }[] = [
     { code: 'es', name: 'ESP' },
     { code: 'en', name: 'ENG' },
@@ -157,6 +165,9 @@ function Header({
           <div className="relative">
             <button
               onClick={() => setShowLanguíageDropdown(!showLanguíageDropdown)}
+              aria-haspopup="true"
+              aria-expanded={showLanguíageDropdown}
+              aria-label={lang === 'es' ? 'Cambiar idioma' : 'Change language'}
               className="flex items-center space-x-1.5 bg-white/10 hover:bg-white/15 border border-white/15 px-2.5 py-1.5 rounded-md text-white/90 hover:text-white text-xs font-mono tracking-widest uppercase cursor-pointer transition-all"
             >
               <Globe size={12} className="text-white" />
@@ -176,6 +187,7 @@ function Header({
                     {languíages.map(item => (
                       <button
                         key={item.code}
+                        aria-current={lang === item.code}
                         onClick={() => {
                           onSetLang(item.code);
                           setShowLanguíageDropdown(false);
@@ -194,6 +206,15 @@ function Header({
               )}
             </AnimatePresence>
           </div>
+
+          {/* Book Now CTA */}
+          <button
+            onClick={handleBookNow}
+            aria-label={bookNowLabel}
+            className="flex items-center space-x-1.5 bg-white hover:bg-white/85 border border-white px-4 py-1.5 rounded-md text-dark text-xs font-mono tracking-widest uppercase font-bold cursor-pointer transition-all shadow-[0_0_16px_rgba(255,255,255,0.15)]"
+          >
+            {bookNowLabel}
+          </button>
 
         </div>
       </div>
@@ -310,6 +331,12 @@ function Header({
             </div>
 
             <div className="space-y-4 pb-8">
+              <button
+                onClick={handleBookNow}
+                className="w-full py-3 bg-white hover:bg-white/85 text-dark rounded-md font-mono text-xs tracking-widest uppercase font-bold cursor-pointer transition-all"
+              >
+                {bookNowLabel}
+              </button>
               <div className="flex items-center justify-center space-x-3 pb-4">
                 {languíages.map(item => (
                   <button

@@ -809,7 +809,7 @@ export default function AdminCMS({
         <div className="space-y-6">
           <div className="flex items-center space-x-2 px-2">
             <Settings className="text-white/70" size={18} />
-            <span className="font-serif text-sm tracking-widest text-white/90 font-bold">AUREA BACKOFFICE</span>
+            <span className="font-serif text-sm tracking-widest text-white/90 font-bold">MIRIAM CAMPOS BACKOFFICE</span>
           </div>
 
           <div className="space-y-1.5">
@@ -2092,7 +2092,7 @@ export default function AdminCMS({
                         rows={5}
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
-                        placeholder="Escribe tu respuesta profesional aqu o usa la plantilla de arriba..."
+                        placeholder="Escribe tu respuesta profesional aquí o usa la plantilla de arriba..."
                         className="w-full bg-dark-gray border-stone rounded-lg p-3 text-xs text-white placeholder-white/20 focus:outline-none focus:border-white/30 font-sans resize-none leading-relaxed"
                       />
                       <p className="text-[10px] font-mono text-white/40 leading-relaxed">
@@ -2653,7 +2653,7 @@ export default function AdminCMS({
                           />
                           <Upload size={32} className={`mb-3 transition-colors ${isDragOver ? 'text-white/70' : 'text-white/40'}`} />
                           <span className="text-xs text-white/80 font-medium block">
-                            {t('Arrastra y suelta tus fotos aqu o haz clic para explorar', 'Drag & drop your photos here or click to browse')}
+                            {t('Arrastra y suelta tus fotos aquí o haz clic para explorar', 'Drag & drop your photos here or click to browse')}
                           </span>
                           <span className="text-[9px] text-white/40 font-mono mt-1 block">
                             {t('Soporta múltiples archivos a la vez (PNG, JPG, WEBP)', 'Supports multiple files at once (PNG, JPG, WEBP)')}
@@ -3219,7 +3219,7 @@ export default function AdminCMS({
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center space-x-2">
                   <Settings className="text-white/70" size={18} />
-                  <span className="font-serif text-sm tracking-widest text-white/90 font-bold">AUREA CMS</span>
+                  <span className="font-serif text-sm tracking-widest text-white/90 font-bold">MIRIAM CAMPOS CMS</span>
                 </div>
                 <button
                   onClick={() => setMobileSidebarOpen(false)}

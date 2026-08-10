@@ -216,7 +216,9 @@ export default function ClientPortal({ lang, onOpenCheckout: _onOpenCheckout, bo
             </form>
 
             <p className="text-[10px] font-mono text-white/65">
-              Your photographer will provide you with a personalized access code.
+              {lang === 'es'
+                ? 'Tu fotógrafa te proporcionará un código de acceso personalizado.'
+                : 'Your photographer will provide you with a personalized access code.'}
             </p>
           </motion.div>
         ) : (
@@ -239,7 +241,7 @@ export default function ClientPortal({ lang, onOpenCheckout: _onOpenCheckout, bo
                 <p className="text-xs text-white/75 mt-1 font-sans">
                   {galleryData.sessionTitle
                     ? `${galleryData.sessionTitle} • ${galleryData.sessionDate}`
-                    : 'Sesión Fotográfica'}
+                    : lang === 'es' ? 'Sesión Fotográfica' : 'Photography Session'}
                 </p>
               </div>
 
@@ -332,7 +334,7 @@ export default function ClientPortal({ lang, onOpenCheckout: _onOpenCheckout, bo
                       : 'text-white/75 hover:text-white'
                   }`}
                 >
-                  Todas ({proofPhotos.length})
+                  {lang === 'es' ? 'Todas' : 'All'} ({proofPhotos.length})
                 </button>
                 <button
                   onClick={() => setActiveFilter('favorites')}
@@ -343,7 +345,7 @@ export default function ClientPortal({ lang, onOpenCheckout: _onOpenCheckout, bo
                   }`}
                 >
                   <Heart size={12} className={activeFilter === 'favorites' ? 'fill-dark' : ''} />
-                  <span>Favoritas ({proofPhotos.filter(p => p.isFav).length})</span>
+                  <span>{lang === 'es' ? 'Favoritas' : 'Favorites'} ({proofPhotos.filter(p => p.isFav).length})</span>
                 </button>
               </div>
             </div>
@@ -381,7 +383,7 @@ export default function ClientPortal({ lang, onOpenCheckout: _onOpenCheckout, bo
                                 ? 'bg-white/10 text-white shadow-md scale-105'
                                 : 'bg-black/40 hover:bg-black/60 text-white border border-stone'
                             }`}
-                            title={photo.isFav ? 'Quitar de Favoritas' : 'Marcar como Favorita'}
+                            title={lang === 'es' ? (photo.isFav ? 'Quitar de Favoritas' : 'Marcar como Favorita') : (photo.isFav ? 'Remove from Favorites' : 'Mark as Favorite')}
                           >
                             <Heart size={14} className={photo.isFav ? 'fill-dark' : ''} />
                           </button>
@@ -405,7 +407,7 @@ export default function ClientPortal({ lang, onOpenCheckout: _onOpenCheckout, bo
                               handleDownload(photo);
                             }}
                             className="p-1.5 rounded-full text-white/60 hover:text-white hover:bg-white/5 transition-all cursor-pointer shrink-0"
-                            title="Descargar Foto"
+title={lang === 'es' ? 'Descargar Foto' : 'Download Photo'}
                           >
                             <Download size={13} />
                           </button>
@@ -423,15 +425,17 @@ export default function ClientPortal({ lang, onOpenCheckout: _onOpenCheckout, bo
                 <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mx-auto text-white/30">
                   <Heart size={20} />
                 </div>
-                <h4 className="font-serif text-lg text-white/80 font-medium">No hay fotos en esta sección</h4>
+                <h4 className="font-serif text-lg text-white/80 font-medium">{lang === 'es' ? 'No hay fotos en esta sección' : 'No photos in this section'}</h4>
                 <p className="text-xs text-white/50 max-w-sm mx-auto px-4">
-                  Aún no has marcado ninguna fotografía como favorita. Explora el catálogo y pulsa el corazón en tus fotos preferidas!
+                  {lang === 'es'
+                    ? 'No has marcado ninguna fotografía como favorita. Explora el catálogo y pulsa el corazón en tus fotos preferidas.'
+                    : 'You haven\'t flagged any photograph as a favorite. Explore the catalog and tap the heart on your preferred photos.'}
                 </p>
                 <button
                   onClick={() => setActiveFilter('all')}
                   className="px-4 py-2 border border-stone hover:border-white/20 text-white/60 text-[10px] font-mono rounded-lg cursor-pointer transition-all uppercase tracking-widest"
                 >
-                  Ver Todas las Fotos
+                  {lang === 'es' ? 'Ver Todas las Fotos' : 'View All Photos'}
                 </button>
               </div>
             )}
@@ -513,7 +517,7 @@ export default function ClientPortal({ lang, onOpenCheckout: _onOpenCheckout, bo
                         });
                       }}
                       className="p-3 rounded-full bg-white/5 hover:bg-white/10 active:scale-95 border border-stone text-white transition-all cursor-pointer flex items-center justify-center"
-                      title="Anterior"
+                      title={lang === 'es' ? 'Anterior' : 'Previous'}
                     >
                       <ChevronLeft size={20} />
                     </button>
@@ -525,7 +529,7 @@ export default function ClientPortal({ lang, onOpenCheckout: _onOpenCheckout, bo
                           ? 'bg-white/10 border-white/20 text-white font-semibold scale-110'
                           : 'bg-white/5 border-stone text-white hover:bg-white/10'
                       }`}
-                      title={proofPhotos[lightboxIndex!].isFav ? 'Quitar de Favoritas' : 'Marcar como Favorita'}
+                      title={lang === 'es' ? (proofPhotos[lightboxIndex!].isFav ? 'Quitar de Favoritas' : 'Marcar como Favorita') : (proofPhotos[lightboxIndex!].isFav ? 'Remove from Favorites' : 'Mark as Favorite')}
                     >
                       <Heart size={20} className={proofPhotos[lightboxIndex!].isFav ? 'fill-dark' : ''} />
                     </button>
@@ -533,7 +537,7 @@ export default function ClientPortal({ lang, onOpenCheckout: _onOpenCheckout, bo
                     <button
                       onClick={() => handleDownload(proofPhotos[lightboxIndex!])}
                       className="p-4 bg-white text-dark hover:bg-white/80 border border-stone rounded-full transition-all flex items-center justify-center cursor-pointer active:scale-95 shadow-xl"
-                      title="Descargar Foto"
+                      title={lang === 'es' ? 'Descargar Foto' : 'Download Photo'}
                     >
                       <Download size={20} />
                     </button>
@@ -546,7 +550,7 @@ export default function ClientPortal({ lang, onOpenCheckout: _onOpenCheckout, bo
                         });
                       }}
                       className="p-3 rounded-full bg-white/5 hover:bg-white/10 active:scale-95 border border-stone text-white transition-all cursor-pointer flex items-center justify-center"
-                      title="Siguiente"
+                      title={lang === 'es' ? 'Siguiente' : 'Next'}
                     >
                       <ChevronRight size={20} />
                     </button>

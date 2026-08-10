@@ -97,7 +97,7 @@ export default function AdminPackagesTab({ sessionCategories, packages, onUpdate
     }));
     try {
       await onUpdatePackages(cleaned);
-      triggerAlert(t('✓ Paquetes guíardados.', '✓ Packages saved.'));
+      triggerAlert(t('✓ Paquetes guardados.', '✓ Packages saved.'));
     } catch (err) {
       console.error('[packages] save failed:', err);
       triggerAlert(t('Error al guardar paquetes', 'Failed to save packages'));

@@ -210,7 +210,7 @@ export interface AnalyticsStats {
 export interface PhotographerProfile {
   name: string;
   avatarUrl: string;
-  title: string; // e.g. "AUREA STUDIO HEAD PHOTOGRAPHER"
+  title: string; // e.g. "MIRIAM CAMPOS STUDIO HEAD PHOTOGRAPHER"
   preferredCamera: string;
   preferredLens: string;
   aboutTitle_es: string;

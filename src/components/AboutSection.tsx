@@ -156,7 +156,7 @@ export default function AboutSection({ profile, lang, t }: Props) {
 
         <FadeIn delay={0.15} className="mt-4 md:mt-6">
           <h2 className="font-serif text-[clamp(1.5rem,3.5vw,2.5rem)] text-white leading-tight tracking-tight">
-            {t.milestonesTitle || 'Una Década de Luz'}
+            {t.milestonesTitle || '15 Años de Luz'}
           </h2>
         </FadeIn>
 
