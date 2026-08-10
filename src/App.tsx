@@ -57,6 +57,31 @@ import {
 } from './lib/db';
 import { sanitizeString, sanitizeEmail, sanitizeUrl, unescapeHTMLEntities } from './lib/sanitize';
 import { computeAnalytics, trackPageView } from './lib/analytics';
+import { formatPrice, SOCIAL } from './config/site';
+
+// Storage-key migration: legacy aorea_*/aurea_* prefixes → miriamcampos_*.
+// Runs at module load (before the App component's useState initializers read
+// localStorage) so existing offline/demo data survives the rebrand.
+(function migrateLegacyStorageKeys() {
+  if (typeof window === 'undefined') return;
+  try {
+    const legacyPrefixes = ['aorea_', 'aurea_'];
+    const migrated = new Set<string>();
+    for (const key of Object.keys(window.localStorage)) {
+      for (const prefix of legacyPrefixes) {
+        if (key.startsWith(prefix) && !migrated.has(key)) {
+          migrated.add(key);
+          const newKey = `miriamcampos_${key.slice(prefix.length)}`;
+          if (newKey !== key && window.localStorage.getItem(newKey) === null) {
+            window.localStorage.setItem(newKey, window.localStorage.getItem(key) as string);
+          }
+        }
+      }
+    }
+  } catch {
+    // localStorage unavailable (privacy mode) — ignore.
+  }
+})();
 
 const VALID_VIEWS = new Set([
   'home', 'about', 'portfolio', 'services', 'client-portal',
@@ -160,7 +185,7 @@ export default function App() {
   const setNavigationGuard = (v: boolean) => { navigationGuardRef.current = v; };
 
   const [lang, setLang] = useState<'es' | 'en'>(() => {
-    const savedLanguíage = localStorage.getItem('aorea_lang');
+    const savedLanguíage = localStorage.getItem('miriamcampos_lang');
     return savedLanguíage === 'es' || savedLanguíage === 'en' ? savedLanguíage : 'en';
   });
 
@@ -211,59 +236,59 @@ export default function App() {
   }, []);
 
   const [photographs, setPhotographs] = useState<Photograph[]>(() => {
-    try { const saved = localStorage.getItem('aorea_photos'); return saved ? JSON.parse(saved) : INITIAL_PHOTOGRAPHS; } catch { return INITIAL_PHOTOGRAPHS; }
+    try { const saved = localStorage.getItem('miriamcampos_photos'); return saved ? JSON.parse(saved) : INITIAL_PHOTOGRAPHS; } catch { return INITIAL_PHOTOGRAPHS; }
   });
   
   const [services, setServices] = useState<Service[]>(() => {
-    try { const saved = localStorage.getItem('aorea_services'); return saved ? JSON.parse(saved) : INITIAL_SERVICES; } catch { return INITIAL_SERVICES; }
+    try { const saved = localStorage.getItem('miriamcampos_services'); return saved ? JSON.parse(saved) : INITIAL_SERVICES; } catch { return INITIAL_SERVICES; }
   });
 
   const [testimonials, setTestimonials] = useState<Testimonial[]>(() => {
-    try { const saved = localStorage.getItem('aorea_testimonials'); return saved ? JSON.parse(saved) : INITIAL_TESTIMONIALS; } catch { return INITIAL_TESTIMONIALS; }
+    try { const saved = localStorage.getItem('miriamcampos_testimonials'); return saved ? JSON.parse(saved) : INITIAL_TESTIMONIALS; } catch { return INITIAL_TESTIMONIALS; }
   });
 
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>(() => {
-    try { const saved = localStorage.getItem('aorea_blog'); return saved ? JSON.parse(saved) : INITIAL_BLOG_POSTS; } catch { return INITIAL_BLOG_POSTS; }
+    try { const saved = localStorage.getItem('miriamcampos_blog'); return saved ? JSON.parse(saved) : INITIAL_BLOG_POSTS; } catch { return INITIAL_BLOG_POSTS; }
   });
 
   const [faqs, setFaqs] = useState<FAQ[]>(() => {
-    try { const saved = localStorage.getItem('aorea_faqs'); return saved ? JSON.parse(saved) : INITIAL_FAQS; } catch { return INITIAL_FAQS; }
+    try { const saved = localStorage.getItem('miriamcampos_faqs'); return saved ? JSON.parse(saved) : INITIAL_FAQS; } catch { return INITIAL_FAQS; }
   });
 
   const [bookings, setBookings] = useState<Booking[]>(() => {
-    try { const saved = localStorage.getItem('aorea_bookings'); return saved ? JSON.parse(saved) : INITIAL_BOOKINGS; } catch { return INITIAL_BOOKINGS; }
+    try { const saved = localStorage.getItem('miriamcampos_bookings'); return saved ? JSON.parse(saved) : INITIAL_BOOKINGS; } catch { return INITIAL_BOOKINGS; }
   });
 
   const [messages, setMessages] = useState<Message[]>(() => {
-    try { const saved = localStorage.getItem('aorea_messages'); return saved ? JSON.parse(saved) : INITIAL_MESSAGES; } catch { return INITIAL_MESSAGES; }
+    try { const saved = localStorage.getItem('miriamcampos_messages'); return saved ? JSON.parse(saved) : INITIAL_MESSAGES; } catch { return INITIAL_MESSAGES; }
   });
 
   const [seo, setSeo] = useState<SEOMetadata>(() => {
-    try { const saved = localStorage.getItem('aorea_seo'); return saved ? JSON.parse(saved) : INITIAL_SEO; } catch { return INITIAL_SEO; }
+    try { const saved = localStorage.getItem('miriamcampos_seo'); return saved ? JSON.parse(saved) : INITIAL_SEO; } catch { return INITIAL_SEO; }
   });
 
   const [profile, setProfile] = useState<PhotographerProfile>(() => {
-    try { const saved = localStorage.getItem('aorea_profile'); return saved ? JSON.parse(saved) : INITIAL_PROFILE; } catch { return INITIAL_PROFILE; }
+    try { const saved = localStorage.getItem('miriamcampos_profile'); return saved ? JSON.parse(saved) : INITIAL_PROFILE; } catch { return INITIAL_PROFILE; }
   });
 
   const [bookingConfig, setBookingConfig] = useState<BookingConfig>(() => {
-    try { const saved = localStorage.getItem('aorea_booking_config'); return saved ? JSON.parse(saved) : INITIAL_BOOKING_CONFIG; } catch { return INITIAL_BOOKING_CONFIG; }
+    try { const saved = localStorage.getItem('miriamcampos_booking_config'); return saved ? JSON.parse(saved) : INITIAL_BOOKING_CONFIG; } catch { return INITIAL_BOOKING_CONFIG; }
   });
 
   const [emailConfig, setEmailConfig] = useState<EmailConfig>(() => {
-    try { const saved = localStorage.getItem('aorea_email_config'); return saved ? JSON.parse(saved) : INITIAL_EMAIL_CONFIG; } catch { return INITIAL_EMAIL_CONFIG; }
+    try { const saved = localStorage.getItem('miriamcampos_email_config'); return saved ? JSON.parse(saved) : INITIAL_EMAIL_CONFIG; } catch { return INITIAL_EMAIL_CONFIG; }
   });
 
   const [sessionCategories, setSessionCategories] = useState<SessionCategory[]>(() => {
-    try { const saved = localStorage.getItem('aorea_session_categories'); return saved ? JSON.parse(saved) : INITIAL_SESSION_CATEGORIES; } catch { return INITIAL_SESSION_CATEGORIES; }
+    try { const saved = localStorage.getItem('miriamcampos_session_categories'); return saved ? JSON.parse(saved) : INITIAL_SESSION_CATEGORIES; } catch { return INITIAL_SESSION_CATEGORIES; }
   });
 
   const [packages, setPackages] = useState<PhotographyPackage[]>(() => {
-    try { const saved = localStorage.getItem('aorea_packages'); return saved ? JSON.parse(saved) : INITIAL_PHOTOGRAPHY_PACKAGES; } catch { return INITIAL_PHOTOGRAPHY_PACKAGES; }
+    try { const saved = localStorage.getItem('miriamcampos_packages'); return saved ? JSON.parse(saved) : INITIAL_PHOTOGRAPHY_PACKAGES; } catch { return INITIAL_PHOTOGRAPHY_PACKAGES; }
   });
 
   const [invoices, setInvoices] = useState<Invoice[]>(() => {
-    try { const saved = localStorage.getItem('aorea_invoices'); return saved ? JSON.parse(saved) : INITIAL_INVOICES; } catch { return INITIAL_INVOICES; }
+    try { const saved = localStorage.getItem('miriamcampos_invoices'); return saved ? JSON.parse(saved) : INITIAL_INVOICES; } catch { return INITIAL_INVOICES; }
   });
 
   const [clientAccounts, setClientAccounts] = useState<ClientAccount[]>(INITIAL_CLIENT_ACCOUNTS);
@@ -271,7 +296,7 @@ export default function App() {
   // UI Interactive States('galeria');
   const [selectedPhotoForLightbox, setSelectedPhotoForLightbox] = useState<Photograph | null>(null);
   const [favorites, setFavorites] = useState<string[]>(() => {
-    try { const saved = localStorage.getItem('aorea_favorites'); return saved ? JSON.parse(saved) : []; } catch { return []; }
+    try { const saved = localStorage.getItem('miriamcampos_favorites'); return saved ? JSON.parse(saved) : []; } catch { return []; }
   });
 
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -404,13 +429,13 @@ export default function App() {
 
   useEffect(() => {
     // Remove client passcodes written by older versions of the application.
-    localStorage.removeItem('aorea_client_accounts');
+    localStorage.removeItem('miriamcampos_client_accounts');
     // Clear old table-missing cache that blocked Supabase reads after RLS fix.
-    localStorage.removeItem('aurea_missing_tables');
+    localStorage.removeItem('miriamcampos_missing_tables');
     // Clear stale bookings cache so initial render doesn't show stale data.
-    localStorage.removeItem('aorea_bookings');
+    localStorage.removeItem('miriamcampos_bookings');
     // Clear session-level table-missing cache so Supabase queries are retried.
-    sessionStorage.removeItem('aurea_missing_tables');
+    sessionStorage.removeItem('miriamcampos_missing_tables');
   }, []);
 
   const loadAllData = useCallback(async (shouldAbort?: () => boolean) => {
@@ -444,7 +469,7 @@ export default function App() {
     // Persists to Supabase when the admin is authenticated; otherwise the data is
     // shown unescaped locally and the persistence is retried on the next admin
     // sign-in (loadAllData re-runs from handleAdminAuthSubmit).
-    const MIGRATE_FLAG = 'aorea_html_entities_migrated_v2';
+    const MIGRATE_FLAG = 'miriamcampos_html_entities_migrated_v2';
     const needsMigration = !localStorage.getItem(MIGRATE_FLAG);
 
     if (needsMigration) {
@@ -714,69 +739,69 @@ export default function App() {
 
   const handleUpdateSessionCategories = async (newCategories: SessionCategory[]) => {
     setSessionCategories(newCategories);
-    localStorage.setItem('aorea_session_categories', JSON.stringify(newCategories));
+    localStorage.setItem('miriamcampos_session_categories', JSON.stringify(newCategories));
     await syncCollection('session_categories', sessionCategories, newCategories);
   };
 
   // Sync to LocalStorage whenever DB collections update (for offline-fallback cache layer)
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aorea_photos', JSON.stringify(photographs));
+    if (bootstrapped) localStorage.setItem('miriamcampos_photos', JSON.stringify(photographs));
   }, [photographs, bootstrapped]);
 
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aorea_services', JSON.stringify(services));
+    if (bootstrapped) localStorage.setItem('miriamcampos_services', JSON.stringify(services));
   }, [services, bootstrapped]);
 
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aorea_testimonials', JSON.stringify(testimonials));
+    if (bootstrapped) localStorage.setItem('miriamcampos_testimonials', JSON.stringify(testimonials));
   }, [testimonials, bootstrapped]);
 
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aorea_blog', JSON.stringify(blogPosts));
+    if (bootstrapped) localStorage.setItem('miriamcampos_blog', JSON.stringify(blogPosts));
   }, [blogPosts, bootstrapped]);
 
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aorea_faqs', JSON.stringify(faqs));
+    if (bootstrapped) localStorage.setItem('miriamcampos_faqs', JSON.stringify(faqs));
   }, [faqs, bootstrapped]);
 
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aorea_bookings', JSON.stringify(bookings));
+    if (bootstrapped) localStorage.setItem('miriamcampos_bookings', JSON.stringify(bookings));
   }, [bookings, bootstrapped]);
 
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aorea_invoices', JSON.stringify(invoices));
+    if (bootstrapped) localStorage.setItem('miriamcampos_invoices', JSON.stringify(invoices));
   }, [invoices, bootstrapped]);
 
   // SECURITY: messages contain client PII (name, email) — not cached in localStorage
 
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aorea_seo', JSON.stringify(seo));
+    if (bootstrapped) localStorage.setItem('miriamcampos_seo', JSON.stringify(seo));
   }, [seo, bootstrapped]);
 
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aorea_profile', JSON.stringify(profile));
+    if (bootstrapped) localStorage.setItem('miriamcampos_profile', JSON.stringify(profile));
   }, [profile, bootstrapped]);
 
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aorea_booking_config', JSON.stringify(bookingConfig));
+    if (bootstrapped) localStorage.setItem('miriamcampos_booking_config', JSON.stringify(bookingConfig));
   }, [bookingConfig, bootstrapped]);
 
   // SECURITY: email config contains receiver email — not cached in localStorage
 
   useEffect(() => {
-    localStorage.setItem('aorea_lang', lang);
+    localStorage.setItem('miriamcampos_lang', lang);
   }, [lang]);
 
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aorea_session_categories', JSON.stringify(sessionCategories));
+    if (bootstrapped) localStorage.setItem('miriamcampos_session_categories', JSON.stringify(sessionCategories));
   }, [sessionCategories, bootstrapped]);
 
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aorea_packages', JSON.stringify(packages));
+    if (bootstrapped) localStorage.setItem('miriamcampos_packages', JSON.stringify(packages));
   }, [packages, bootstrapped]);
 
   useEffect(() => {
-    localStorage.setItem('aorea_favorites', JSON.stringify(favorites));
+    localStorage.setItem('miriamcampos_favorites', JSON.stringify(favorites));
   }, [favorites]);
 
   // Update Dynamic Document Meta tags according to active SEO settings
@@ -966,7 +991,15 @@ ${photographerName}`);
     navigateTo('home');
   };
 
-  const openAdminLogin = useCallback(() => setShowAdminLogin(true), []);
+  // The CMS access dialog opens automatically when /?view=admin is reached without
+  // a session (direct URL access — there is no public Admin link anymore).
+  useEffect(() => {
+    if (currentView === 'admin' && !isAdminLoggedIn) {
+      setShowAdminLogin(true);
+    } else if (currentView !== 'admin') {
+      setShowAdminLogin(false);
+    }
+  }, [currentView, isAdminLoggedIn]);
 
   // Trigger Stripe print or service booking Checkout overlay
   const pendingPaymentRef = useRef<((result?: PaymentResult) => void) | null>(null);
@@ -1383,7 +1416,7 @@ ${photographerName}`);
                             <p className="text-[11px] font-mono tracking-[0.2em] uppercase text-white/70/70">{t[pkg.category as keyof typeof t] || pkg.category}</p>
                             <h3 className="font-serif text-xl text-white mt-1">{lang === 'es' ? pkg.name_es : pkg.name_en}</h3>
                           </div>
-                          <span className="font-mono text-sm text-white/70 whitespace-nowrap">${pkg.price.toLocaleString()}</span>
+                          <span className="font-mono text-sm text-white/70 whitespace-nowrap">{formatPrice(pkg.price, lang)}</span>
                         </div>
                         <p className="text-[11px] text-white/50 leading-relaxed line-clamp-2">{lang === 'es' ? pkg.description_es : pkg.description_en}</p>
                         <button onClick={() => { setSelectedCategory(pkg.category); setSelectedPackageId(pkg.id); navigateTo('services'); }} className="w-full py-2.5 border border-white/15 hover:border-white/30 text-white/70 hover:text-white/60 rounded-lg font-mono text-[9px] tracking-widest uppercase transition-all">
@@ -1398,9 +1431,10 @@ ${photographerName}`);
               {/* Instagram Follow */}
               <section className="text-center py-8 md:py-12">
                 <a
-                  href="https://www.instagram.com/miriamtellezphotography/"
+                  href={SOCIAL.instagram}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
+                  aria-label={lang === 'es' ? 'Instagram de Miriam Campos Photography' : 'Instagram of Miriam Campos Photography'}
                   className="group inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#FCAF45] rounded-xl text-white font-mono text-sm tracking-widest uppercase font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
                 >
                   <Instagram size={22} />
@@ -1408,7 +1442,7 @@ ${photographerName}`);
                   <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
                 </a>
                 <p className="text-[10px] text-white/40 mt-3 font-mono tracking-wider">
-                  @miriamtellezphotography
+                  {SOCIAL.instagramHandle}
                 </p>
               </section>
 
@@ -1636,7 +1670,7 @@ ${photographerName}`);
                                       <span className="text-[10px] font-mono text-white/50 tracking-wide">{pDuration}</span>
                                       <div className="text-right">
                                         <span className="text-[11px] text-white/40 block font-mono tracking-wider">{pPriceFrom}</span>
-                                        <span className="text-xl sm:text-2xl lg:text-3xl font-light text-white/70 font-mono">${pkg.price.toLocaleString()}</span>
+                                        <span className="text-xl sm:text-2xl lg:text-3xl font-light text-white/70 font-mono">{formatPrice(pkg.price, lang)}</span>
                                       </div>
                                     </div>
 
@@ -2165,8 +2199,6 @@ ${photographerName}`);
         <Footer
           onSetView={navigateTo}
           lang={lang}
-          isAdminLoggedIn={isAdminLoggedIn}
-          onOpenAdminLogin={openAdminLogin}
         />
       )}
 

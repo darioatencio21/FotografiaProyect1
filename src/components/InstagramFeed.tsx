@@ -1,8 +1,9 @@
 import { motion } from 'motion/react';
 import { Instagram } from './BrandIcons';
 import { ActiveLanguíage, InstagramPost } from '../types';
+import { SOCIAL } from '../config/site';
 
-const PROFILE_URL = 'https://www.instagram.com/miriamtellezphotography/';
+const PROFILE_URL = SOCIAL.instagram;
 const FALLBACK_LINKS = [
   'https://www.instagram.com/p/DY54qj3zRuF/',
   'https://www.instagram.com/p/DYxh6sOheSH/',
@@ -15,7 +16,7 @@ interface InstagramFeedProps {
   posts?: InstagramPost[];
 }
 
-export default function InstagramFeed({ lang: _lang, posts = [] }: InstagramFeedProps) {
+export default function InstagramFeed({ lang, posts = [] }: InstagramFeedProps) {
   const displayPosts = posts.length > 0 ? posts : [];
   const maxPosts = 12;
 
@@ -24,12 +25,13 @@ export default function InstagramFeed({ lang: _lang, posts = [] }: InstagramFeed
       <a
         href={PROFILE_URL}
         target="_blank"
-        rel="noreferrer"
+        rel="noopener noreferrer"
+        aria-label={lang === 'es' ? 'Instagram de Miriam Campos Photography' : 'Instagram of Miriam Campos Photography'}
         className="group block"
       >
         <span className="text-[10px] font-mono text-white/60 tracking-widest uppercase block group-hover:text-white transition-colors duration-300">Instagram Feed</span>
         <h2 className="font-serif text-xl sm:text-3xl text-white tracking-wide mt-1 flex items-center gap-2 sm:gap-3 flex-wrap">
-          <span className="truncate max-w-[calc(100%-2rem)] sm:max-w-none">@miriamtellezphotography</span>
+          <span className="truncate max-w-[calc(100%-2rem)] sm:max-w-none">{SOCIAL.instagramHandle}</span>
           <Instagram size={20} className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-white shrink-0" />
         </h2>
       </a>
@@ -37,7 +39,8 @@ export default function InstagramFeed({ lang: _lang, posts = [] }: InstagramFeed
       <motion.a
         href={PROFILE_URL}
         target="_blank"
-        rel="noreferrer"
+        rel="noopener noreferrer"
+        aria-label={lang === 'es' ? 'Seguir a Miriam Campos en Instagram' : 'Follow Miriam Campos on Instagram'}
         initial={{ opacity: 0, y: 12 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
@@ -45,7 +48,7 @@ export default function InstagramFeed({ lang: _lang, posts = [] }: InstagramFeed
         className="inline-flex items-center gap-2 sm:gap-2.5 px-4 sm:px-6 py-3 border border-white/20 text-white/70 font-mono text-[9px] sm:text-[10px] tracking-widest uppercase rounded-lg hover:bg-white/10 hover:text-white hover:border-white/40 transition-all duration-300 ease-out cursor-pointer"
       >
         <Instagram size={15} />
-        <span>Follow @miriamtellezphotography</span>
+        <span>Follow {SOCIAL.instagramHandle}</span>
       </motion.a>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -63,7 +66,7 @@ export default function InstagramFeed({ lang: _lang, posts = [] }: InstagramFeed
           >
             <img
               src={post.imageUrl}
-              alt="Instagram @miriamtellezphotography"
+              alt={`Instagram ${SOCIAL.instagramHandle}`}
               loading="lazy"
               className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
             />
@@ -71,7 +74,7 @@ export default function InstagramFeed({ lang: _lang, posts = [] }: InstagramFeed
             <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-1 group-hover:translate-y-0">
               <div className="flex items-center gap-2 text-white">
                 <Instagram size={13} className="text-white/70" />
-                <span className="text-[9px] font-mono tracking-widest uppercase">@miriamtellezphotography</span>
+                <span className="text-[9px] font-mono tracking-widest uppercase">{SOCIAL.instagramHandle}</span>
               </div>
             </div>
           </motion.a>

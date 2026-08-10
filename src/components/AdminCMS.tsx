@@ -214,7 +214,7 @@ export default function AdminCMS({
               const cName = newBooking.clientname || 'Alguien';
               triggerAlert(`📍 Nueva reserva de ${cName}!`);
               if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-                new Notification('Nueva Reserva - Aorea Studio', {
+                new Notification('Nueva Reserva - Miriam Campos Photography', {
                   body: `${cName} ha solicitado una sesión. Revisa la cola de reservas.`,
                   icon: '/favicon-32x32.png',
                 });
@@ -253,7 +253,7 @@ export default function AdminCMS({
               const cName = newMsg.name || 'Alguien';
               triggerAlert(`✉️ Nuevo mensaje de ${cName}!`);
               if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-                new Notification('Nuevo Mensaje - Aorea Studio', {
+                new Notification('Nuevo Mensaje - Miriam Campos Photography', {
                   body: `${cName} te ha escrito. Revisa la bandeja de entrada.`,
                   icon: '/favicon-32x32.png',
                 });
@@ -1674,7 +1674,7 @@ export default function AdminCMS({
                                                     </button>
                                                   )}
                                                  {b.contractSignature && !b.contractPhotographerSignature && (
-                                                   <button onClick={() => onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, contractPhotographerSignature: 'Miriam Tellez', contractPhotographerSignedAt: new Date().toISOString() } : book))} className="flex-1 px-3 py-2 bg-white/10 border border-white/10 text-white/70 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-white/15 transition-all">
+                                                   <button onClick={() => onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, contractPhotographerSignature: 'Miriam Campos', contractPhotographerSignedAt: new Date().toISOString() } : book))} className="flex-1 px-3 py-2 bg-white/10 border border-white/10 text-white/70 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-white/15 transition-all">
                                                      {t('Firmar como Fotógrafa', 'Sign as Photographer', 'Assinar como Fotógrafa')}
                                                    </button>
                                                  )}
@@ -1914,7 +1914,7 @@ export default function AdminCMS({
                                 </button>
                               )}
                               {b.contractSignature && !b.contractPhotographerSignature && (
-                                <button onClick={() => onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, contractPhotographerSignature: 'Miriam Tellez', contractPhotographerSignedAt: new Date().toISOString() } : book))} className="flex-1 px-3 py-2 bg-white/10 border border-white/10 text-white/70 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-white/15 transition-all">
+                                <button onClick={() => onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, contractPhotographerSignature: 'Miriam Campos', contractPhotographerSignedAt: new Date().toISOString() } : book))} className="flex-1 px-3 py-2 bg-white/10 border border-white/10 text-white/70 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-white/15 transition-all">
                                   {t('Firmar como Fotógrafa', 'Sign as Photographer', 'Assinar como Fotógrafa')}
                                 </button>
                               )}
@@ -2320,7 +2320,7 @@ export default function AdminCMS({
                         <label className="text-[10px] font-mono text-white/45 uppercase tracking-wider">Asunto del Correo de Respuesta</label>
                         <input
                           type="text"
-                          placeholder="Ej: Tu reserva ha sido recibida con éxito! - Aorea Studio"
+                          placeholder="Ej: Tu reserva ha sido recibida con éxito! - Miriam Campos Photography"
                           value={emailForm.autoReplySubject || ''}
                           onChange={(e) => setEmailForm({ ...emailForm, autoReplySubject: e.target.value })}
                           className="w-full bg-charcoal border border-stone rounded p-2.5 text-xs text-white placeholder-white/20 focus:outline-none focus:border-white/30"

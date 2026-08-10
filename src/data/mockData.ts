@@ -582,8 +582,8 @@ export const INITIAL_BOOKING_CONFIG: BookingConfig = {
 export const INITIAL_EMAIL_CONFIG: EmailConfig = {
   receiverEmail: '',
   enableAutoResponse: false,
-  autoReplySubject: 'Tu reserva ha sido recibida con éxito! - Aorea Studio',
-  autoReplyMessage: 'Hola,\n\nMuchas gracias por reservar tu sesión fotográfica con nosotros. Hemos recibido tus datos correctamente y tu espacio ha sido bloqueado en nuestro calendario.\n\nEn las próximas horas nos pondremos en contacto contigo para coordinar los detalles finales, locación y responder cualquier consulta adicional.\n\nEstamos muy emocionados de crear arte juntos!\n\nAtentamente,\nEl equipo de Aorea Studio.'
+  autoReplySubject: 'Tu reserva ha sido recibida con éxito! - Miriam Campos Photography',
+  autoReplyMessage: 'Hola,\n\nMuchas gracias por reservar tu sesión fotográfica con nosotros. Hemos recibido tus datos correctamente y tu espacio ha sido bloqueado en nuestro calendario.\n\nEn las próximas horas nos pondremos en contacto contigo para coordinar los detalles finales, locación y responder cualquier consulta adicional.\n\nEstamos muy emocionados de crear arte juntos!\n\nCon cariño,\nEl equipo de Miriam Campos Photography.'
 };
 
 export const INITIAL_PROFILE: PhotographerProfile = {
@@ -918,7 +918,7 @@ export const TRANSLATIONS = {
     pixiesetSearchBtn: 'Ir a mi galería →',
 
     contractTitle: 'CONTRATO DE SERVICIOS FOTOGRFICOS',
-    contractSubtitle: 'Acuerdo entre Miriam Tellez Photography y el Cliente',
+    contractSubtitle: 'Acuerdo entre Miriam Campos Photography y el Cliente',
     contractBride: 'Novia',
     contractGroom: 'Novio',
     contractBrideEmail: 'Correo de la Novia',
@@ -968,7 +968,7 @@ export const TRANSLATIONS = {
     contractAdminSetAmounts: 'Definir Montos',
     contractSaveAmounts: 'Guardar Montos',
     contractSessionTitle: 'CONTRATO DE SERVICIOS FOTOGRFICOS',
-    contractSessionSubtitle: 'Acuerdo entre Miriam Tellez Photography y el Cliente',
+    contractSessionSubtitle: 'Acuerdo entre Miriam Campos Photography y el Cliente',
     contractClient: 'Cliente',
     contractClientEmail: 'Correo Electrónico',
     contractClientPhone: 'Teléfono',
@@ -1123,7 +1123,7 @@ export const TRANSLATIONS = {
     pixiesetSearchBtn: 'Go to my gallery →',
 
     contractTitle: 'PHOTOGRAPHY SERVICES CONTRACT',
-    contractSubtitle: 'Agreement between Miriam Tellez Photography and the Client',
+    contractSubtitle: 'Agreement between Miriam Campos Photography and the Client',
     contractBride: 'Bride',
     contractGroom: 'Groom',
     contractBrideEmail: 'Bride Email',
@@ -1173,7 +1173,7 @@ export const TRANSLATIONS = {
     contractAdminSetAmounts: 'Set Amounts',
     contractSaveAmounts: 'Save Amounts',
     contractSessionTitle: 'PHOTOGRAPHY SERVICES CONTRACT',
-    contractSessionSubtitle: 'Agreement between Miriam Tellez Photography and the Client',
+    contractSessionSubtitle: 'Agreement between Miriam Campos Photography and the Client',
     contractClient: 'Client',
     contractClientEmail: 'Email',
     contractClientPhone: 'Phone',
