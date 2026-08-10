@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CreditCard, Lock, CheckCircle2, X, AlertCircle, Wallet, Shield } from 'lucide-react';
+import { ActiveLanguíage } from '../types';
+import { formatPrice } from '../config/site';
 
 export interface PaymentResult {
   txHash: string;
@@ -13,6 +15,7 @@ interface StripeCheckoutProps {
   isOpen: boolean;
   amount: number;
   description: string;
+  lang: ActiveLanguíage;
   onClose: () => void;
   onSuccess: (result?: PaymentResult) => void;
   onProcessPayment: () => Promise<string>;
@@ -20,7 +23,7 @@ interface StripeCheckoutProps {
 
 type PaymentMethod = 'stripe' | 'paypal';
 
-export default function StripeCheckout({ isOpen, amount, description, onClose, onSuccess, onProcessPayment }: StripeCheckoutProps) {
+export default function StripeCheckout({ isOpen, amount, description, lang, onClose, onSuccess, onProcessPayment }: StripeCheckoutProps) {
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
@@ -137,7 +140,7 @@ export default function StripeCheckout({ isOpen, amount, description, onClose, o
                     </div>
                     <div className="flex flex-col items-end shrink-0 ml-4">
                       <span className="text-[9px] font-mono text-white/40 uppercase">AMOUNT</span>
-                      <span className="text-sm font-mono font-semibold text-white/70">${amount.toLocaleString()}</span>
+                      <span className="text-sm font-mono font-semibold text-white/70">{formatPrice(amount, lang)}</span>
                     </div>
                   </div>
 
@@ -250,7 +253,7 @@ export default function StripeCheckout({ isOpen, amount, description, onClose, o
                           className="w-full py-3 bg-[#B58A4A]/20 hover:bg-[#B58A4A]/30 text-[#B58A4A] border border-[#B58A4A]/20 font-mono text-xs tracking-widest uppercase font-semibold rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
                         >
                           <Lock size={12} />
-                          Pay ${amount.toLocaleString()}
+                          Pay {formatPrice(amount, lang)}
                         </button>
                       </div>
                     </form>

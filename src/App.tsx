@@ -2313,6 +2313,7 @@ ${photographerName}`);
           isOpen={checkoutOpen}
           amount={checkoutAmount}
           description={checkoutDesc}
+          lang={lang}
           onProcessPayment={handleProcessPayment}
           onClose={() => {
             setCheckoutOpen(false);

@@ -17,8 +17,9 @@ function formatDate(value: string, lang: ActiveLanguíage) {
   });
 }
 
-function formatCurrency(amount: number) {
-  return `$${Math.abs(amount).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+function formatCurrency(amount: number, lang: ActiveLanguíage) {
+  const locale = lang === 'es' ? 'es-ES' : 'en-US';
+  return `$${Math.abs(amount).toLocaleString(locale, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 }
 
 const InvoiceReceipt: React.FC<InvoiceReceiptProps> = ({ invoice, lang, compact = false }) => {
@@ -118,14 +119,14 @@ const InvoiceReceipt: React.FC<InvoiceReceiptProps> = ({ invoice, lang, compact 
 </div>
 <div class="items">
 <div class="items-header"><span>${t.invoiceItemás}</span><span>${t.invoiceSubtotal}</span></div>
-${invoice.items.map((item) => `<div class="item-row"><span class="item-desc">${sanitizeHTML(item.description)}</span><span class="item-amount">${formatCurrency(item.amount)}</span></div>`).join('')}
+${invoice.items.map((item) => `<div class="item-row"><span class="item-desc">${sanitizeHTML(item.description)}</span><span class="item-amount">${formatCurrency(item.amount, lang)}</span></div>`).join('')}
 </div>
 <div class="totals">
 <div class="totals-inner">
-<div class="total-row"><span>${t.invoiceSubtotal}</span><span class="amount">${formatCurrency(invoice.subtotal)}</span></div>
-${invoice.depositPaid > 0 ? `<div class="total-row green"><span>${t.invoiceDeposit}</span><span class="amount">-${formatCurrency(invoice.depositPaid)}</span></div>` : ''}
-<div class="total-row balance"><span>${t.invoiceBalance}</span><span class="amount">${formatCurrency(invoice.balanceDue)}</span></div>
-<div class="total-row gold"><span>${t.invoiceTotal}</span><span class="amount">${formatCurrency(invoice.total)}</span></div>
+<div class="total-row"><span>${t.invoiceSubtotal}</span><span class="amount">${formatCurrency(invoice.subtotal, lang)}</span></div>
+${invoice.depositPaid > 0 ? `<div class="total-row green"><span>${t.invoiceDeposit}</span><span class="amount">-${formatCurrency(invoice.depositPaid, lang)}</span></div>` : ''}
+<div class="total-row balance"><span>${t.invoiceBalance}</span><span class="amount">${formatCurrency(invoice.balanceDue, lang)}</span></div>
+<div class="total-row gold"><span>${t.invoiceTotal}</span><span class="amount">${formatCurrency(invoice.total, lang)}</span></div>
 </div>
 </div>
 <div class="footer">
@@ -206,7 +207,7 @@ ${invoice.stripeTxHash ? `<p style="font-family:monospace;font-size:8px;word-bre
               {invoice.items.map((item, index) => (
                 <div key={`${item.description}-${index}`} className="flex justify-between py-3 text-[12px]">
                   <span className="text-[#2D2A28]/80 leading-snug pr-4">{item.description}</span>
-                  <span className="font-mono text-[13px] tabular-nums whitespace-nowrap">{formatCurrency(item.amount)}</span>
+                  <span className="font-mono text-[13px] tabular-nums whitespace-nowrap">{formatCurrency(item.amount, lang)}</span>
                 </div>
               ))}
             </div>
@@ -216,21 +217,21 @@ ${invoice.stripeTxHash ? `<p style="font-family:monospace;font-size:8px;word-bre
             <div className="w-[220px] space-y-1.5 text-[12px]">
               <div className="flex justify-between text-[#8C8076]">
                 <span>{t.invoiceSubtotal}</span>
-                <span className="font-mono tabular-nums">{formatCurrency(invoice.subtotal)}</span>
+                <span className="font-mono tabular-nums">{formatCurrency(invoice.subtotal, lang)}</span>
               </div>
               {invoice.depositPaid > 0 && (
                 <div className="flex justify-between text-emerald-700">
                   <span>{t.invoiceDeposit}</span>
-                  <span className="font-mono tabular-nums">-{formatCurrency(invoice.depositPaid)}</span>
+                  <span className="font-mono tabular-nums">-{formatCurrency(invoice.depositPaid, lang)}</span>
                 </div>
               )}
               <div className="flex justify-between border-t border-[#2D2A28]/10 pt-1.5 font-semibold text-[15px] text-[#2D2A28]">
                 <span>{t.invoiceBalance}</span>
-                <span className="font-mono tabular-nums">{formatCurrency(invoice.balanceDue)}</span>
+                <span className="font-mono tabular-nums">{formatCurrency(invoice.balanceDue, lang)}</span>
               </div>
               <div className="flex justify-between text-[10px] text-[#B58A4A] font-sans font-semibold tracking-[0.1em]">
                 <span>{t.invoiceTotal}</span>
-                <span className="font-mono tabular-nums">{formatCurrency(invoice.total)}</span>
+                <span className="font-mono tabular-nums">{formatCurrency(invoice.total, lang)}</span>
               </div>
             </div>
           </div>
