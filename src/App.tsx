@@ -58,6 +58,7 @@ import {
 import { sanitizeString, sanitizeEmail, sanitizeUrl, unescapeHTMLEntities } from './lib/sanitize';
 import { computeAnalytics, trackPageView } from './lib/analytics';
 import { formatPrice, SOCIAL, METRICS, CONTACT } from './config/site';
+import { isSupabaseConfigured } from './lib/supabase';
 
 // Storage-key migration: legacy aorea_*/aurea_* prefixes → miriamcampos_*.
 // Runs at module load (before the App component's useState initializers read
@@ -310,6 +311,7 @@ export default function App() {
   const [adminPassword, setAdminPassword] = useState('');
   const [showAdminPassword, setShowAdminPassword] = useState(false);
   const [adminLoginError, setAdminLoginError] = useState('');
+  const [authInitializing, setAuthInitializing] = useState(isSupabaseConfigured);
 
   // Stripe Checkout Integrations
   const [checkoutOpen, setCheckoutOpen] = useState(false);
@@ -415,17 +417,17 @@ export default function App() {
     // produces 401s on every save.
     const unsub = onAuthChange((user) => {
       setIsAdminLoggedIn(!!user);
-      // Recompute the dashboard analytics once the admin session becomes active.
-      // The mount-time loadAllData() can run before Supabase restores a persisted
-      // session, so bookings (authenticated-only read) is read as anonymous and
-      // the Revenue/Traffic charts are left empty until this re-runs as admin.
+      setAuthInitializing(false);
       if (user) {
         computeAnalytics()
           .then(setSeoAnalytics)
           .catch((err) => console.warn('[analytics] recompute after auth failed:', err));
       }
     });
-    return () => unsub();
+    // Fallback: if onAuthChange doesn't fire within 3s (slow network), unblock the UI
+    // so the admin login dialog can appear instead of hanging on the spinner forever.
+    const timeout = setTimeout(() => setAuthInitializing(false), 3000);
+    return () => { unsub(); clearTimeout(timeout); };
   }, []);
 
   useEffect(() => {
@@ -999,12 +1001,12 @@ ${photographerName}`);
   // The CMS access dialog opens automatically when /?view=admin is reached without
   // a session (direct URL access — there is no public Admin link anymore).
   useEffect(() => {
-    if (currentView === 'admin' && !isAdminLoggedIn) {
+    if (currentView === 'admin' && !isAdminLoggedIn && !authInitializing) {
       setShowAdminLogin(true);
     } else if (currentView !== 'admin') {
       setShowAdminLogin(false);
     }
-  }, [currentView, isAdminLoggedIn]);
+  }, [currentView, isAdminLoggedIn, authInitializing]);
 
   // Trigger Stripe print or service booking Checkout overlay
   const pendingPaymentRef = useRef<((result?: PaymentResult) => void) | null>(null);
@@ -2221,6 +2223,14 @@ ${photographerName}`);
           {/* ======================================================= */}
           {/* ADMINISTRATIVE SUITE (CMS BACKOFFICE) */}
           {/* ======================================================= */}
+          {currentView === 'admin' && authInitializing && !isAdminLoggedIn && (
+            <div className="flex flex-col items-center justify-center gap-4 py-32 text-center">
+              <div className="w-8 h-8 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
+              <p className="text-[10px] font-mono text-white/40 uppercase tracking-widest">
+                {lang === 'es' ? 'Verificando acceso…' : 'Verifying access…'}
+              </p>
+            </div>
+          )}
           {currentView === 'admin' && isAdminLoggedIn && (
             <AdminCMS
               photographs={photographs}
@@ -2321,8 +2331,11 @@ ${photographerName}`);
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
             >
-              <button 
-                onClick={() => setShowAdminLogin(false)}
+              <button
+                onClick={() => {
+                  setShowAdminLogin(false);
+                  navigateTo('home');
+                }}
                 className="absolute top-4 right-4 text-white/50 hover:text-white"
               >
                 <X size={16} />
