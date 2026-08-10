@@ -56,11 +56,3 @@ export const METRICS = {
   sessions: 500,
   satisfaction: 98,
 };
-
-export const BRAND_CONTACTS = {
-  photographerName: 'Miriam Campos',
-  photographerSignature: 'Miriam Campos',
-  photographerEmail: CONTACT.email,
-  /** Legacy: the previous brand leaked into some email defaults and contracts. */
-  photographerEmailLegacy: 'miriamtellezphotography@gmail.com',
-};

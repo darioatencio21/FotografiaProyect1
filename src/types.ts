@@ -321,12 +321,3 @@ export interface ClientAccount {
   photos: ProofPhoto[];
   createdAt: string;
 }
-
-export interface InstagramPost {
-  id: string;
-  imageUrl: string;
-  postUrl: string;
-  caption?: string;
-  timestamp: string;
-  sortOrder: number;
-}

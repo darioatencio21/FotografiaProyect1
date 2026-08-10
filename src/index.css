@@ -98,17 +98,3 @@ html {
 .zoom-in-out:hover {
   transform: scale(1.03);
 }
-
-@media (min-width: 1024px) {
-  .custom-cursor-active {
-    cursor: default;
-  }
-  .custom-cursor-active a,
-  .custom-cursor-active button,
-  .custom-cursor-active select,
-  .custom-cursor-active input,
-  .custom-cursor-active textarea,
-  .custom-cursor-active [role="button"] {
-    cursor: pointer;
-  }
-}
