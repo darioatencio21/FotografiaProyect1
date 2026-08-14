@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { maskName, maskEmail, maskPhone, maskPasscode, maskToken, maskText } from '../utils/maskData';
 

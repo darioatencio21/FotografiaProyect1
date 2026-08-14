@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { ActiveLanguíage, Testimonial } from '../types';
+import { ActiveLanguage, Testimonial } from '../types';
 
 interface TestimonialsViewProps {
   testimonials: Testimonial[];
-  lang: ActiveLanguíage;
+  lang: ActiveLanguage;
   onSubmitTestimonial: (testimonial: Testimonial) => void;
 }
 

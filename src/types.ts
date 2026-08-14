@@ -288,7 +288,7 @@ export interface Milestone {
   description_en: string;
 }
 
-export type ActiveLanguíage = 'es' | 'en';
+export type ActiveLanguage = 'es' | 'en';
 
 export interface ProofPhoto {
   id: string;

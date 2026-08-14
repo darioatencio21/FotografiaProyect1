@@ -1,23 +1,23 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { CheckCircle2, Clock3, FileText, Printer, Download, Loader2 } from 'lucide-react';
-import { ActiveLanguíage, Invoice } from '../types';
+import { ActiveLanguage, Invoice } from '../types';
 import { TRANSLATIONS } from '../data/mockData';
 import { sanitizeHTML } from '../lib/sanitize';
 
 interface InvoiceReceiptProps {
   invoice: Invoice;
-  lang: ActiveLanguíage;
+  lang: ActiveLanguage;
   compact?: boolean;
 }
 
-function formatDate(value: string, lang: ActiveLanguíage) {
+function formatDate(value: string, lang: ActiveLanguage) {
   if (!value) return '-';
   return new Date(value).toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', {
     year: 'numeric', month: 'short', day: 'numeric'
   });
 }
 
-function formatCurrency(amount: number, lang: ActiveLanguíage) {
+function formatCurrency(amount: number, lang: ActiveLanguage) {
   const locale = lang === 'es' ? 'es-ES' : 'en-US';
   return `$${Math.abs(amount).toLocaleString(locale, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 }
@@ -118,7 +118,7 @@ const InvoiceReceipt: React.FC<InvoiceReceiptProps> = ({ invoice, lang, compact 
 </div>
 </div>
 <div class="items">
-<div class="items-header"><span>${t.invoiceItemás}</span><span>${t.invoiceSubtotal}</span></div>
+<div class="items-header"><span>${t.invoiceItems}</span><span>${t.invoiceSubtotal}</span></div>
 ${invoice.items.map((item) => `<div class="item-row"><span class="item-desc">${sanitizeHTML(item.description)}</span><span class="item-amount">${formatCurrency(item.amount, lang)}</span></div>`).join('')}
 </div>
 <div class="totals">
@@ -200,7 +200,7 @@ ${invoice.stripeTxHash ? `<p style="font-family:monospace;font-size:8px;word-bre
 
           <div>
             <div className="flex justify-between pb-2 border-b border-[#2D2A28]/10 text-[8px] font-sans font-semibold tracking-[0.3em] uppercase text-[#8C8076]">
-              <span>{t.invoiceItemás}</span>
+              <span>{t.invoiceItems}</span>
               <span>{t.invoiceSubtotal}</span>
             </div>
             <div className="divide-y divide-[#2D2A28]/6">

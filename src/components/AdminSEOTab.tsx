@@ -1,6 +1,6 @@
 ﻿import React, { useState, useCallback, useEffect } from 'react';
 import { RefreshCw, UploadCloud } from 'lucide-react';
-import { SEOMetadata, ActiveLanguíage } from '../types';
+import { SEOMetadata, ActiveLanguage } from '../types';
 import { sanitizeObject } from '../lib/sanitize';
 import { uploadImageBlob } from '../lib/db';
 import StorageImage from './StorageImage';
@@ -9,7 +9,7 @@ interface AdminSEOTabProps {
   seo: SEOMetadata;
   onUpdateSeo: (seo: SEOMetadata) => void;
   triggerAlert: (msg: string) => void;
-  lang: ActiveLanguíage;
+  lang: ActiveLanguage;
 }
 
 function AdminSEOTab({ seo, onUpdateSeo, triggerAlert, lang }: AdminSEOTabProps) {
@@ -21,7 +21,7 @@ function AdminSEOTab({ seo, onUpdateSeo, triggerAlert, lang }: AdminSEOTabProps)
 
   const handleSaveSEO = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    const safeSeo = sanitizeObject(seoForm as Record<string, unknown>) as unknown as SEOMetadata;
+    const safeSeo = sanitizeObject(seoForm as unknown as Record<string, unknown>) as unknown as SEOMetadata;
     try {
       await onUpdateSeo(safeSeo);
       triggerAlert('SEO Schema, Meta tags and Robots.txt deployed to production');

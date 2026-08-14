@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CreditCard, Lock, CheckCircle2, X, AlertCircle, Wallet, Shield } from 'lucide-react';
-import { ActiveLanguíage } from '../types';
+import { ActiveLanguage } from '../types';
 import { formatPrice } from '../config/site';
 
 export interface PaymentResult {
@@ -15,7 +15,7 @@ interface StripeCheckoutProps {
   isOpen: boolean;
   amount: number;
   description: string;
-  lang: ActiveLanguíage;
+  lang: ActiveLanguage;
   onClose: () => void;
   onSuccess: (result?: PaymentResult) => void;
   onProcessPayment: () => Promise<string>;

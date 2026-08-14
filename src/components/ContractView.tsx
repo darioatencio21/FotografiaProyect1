@@ -1,12 +1,12 @@
 import React from 'react';
 import { Printer, CheckCircle } from 'lucide-react';
-import { Booking, ActiveLanguíage } from '../types';
+import { Booking, ActiveLanguage } from '../types';
 import { sanitizeHTML } from '../lib/sanitize';
 import { CONTACT, formatPrice } from '../config/site';
 
 interface Props {
   booking: Booking;
-  lang: ActiveLanguíage;
+  lang: ActiveLanguage;
   t: Record<string, string>;
   mode?: 'client-sign' | 'view' | 'admin-sign';
   onClientSign?: (signature: string) => void;

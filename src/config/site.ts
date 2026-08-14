@@ -6,7 +6,7 @@
  * with the AGENTS.md brand rules (never introduce a different studio name).
  */
 
-import type { ActiveLanguíage } from '../types';
+import type { ActiveLanguage } from '../types';
 
 export const BRAND_NAME = 'Miriam Campos Photography';
 /** Short mark used in the logo / navbar wordmark (kept consistent with existing UI). */
@@ -16,7 +16,7 @@ export const LOGO_MARK = 'Miriam Campos';
 export const CURRENCY = 'USD';
 
 /** Formatting for prices across the whole site: en uses comma thousands, es uses dot. */
-export function formatPrice(amount: number, lang: ActiveLanguíage): string {
+export function formatPrice(amount: number, lang: ActiveLanguage): string {
   const locale = lang === 'es' ? 'es-ES' : 'en-US';
   const formatted = Number(amount || 0).toLocaleString(locale, {
     minimumFractionDigits: 0,

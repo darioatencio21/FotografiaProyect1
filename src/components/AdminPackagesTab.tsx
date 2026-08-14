@@ -1,6 +1,6 @@
 ﻿import { useState, useCallback, useEffect } from 'react';
 import { Save, Plus, Trash2, Edit3, X, Upload, Star } from 'lucide-react';
-import { PhotographyPackage, ActiveLanguíage, SessionCategory } from '../types';
+import { PhotographyPackage, ActiveLanguage, SessionCategory } from '../types';
 import { uploadImageBlob } from '../lib/db';
 import StorageImage from './StorageImage';
 import { formatPrice } from '../config/site';
@@ -44,7 +44,7 @@ interface AdminPackagesTabProps {
   packages: PhotographyPackage[];
   onUpdatePackages: (packages: PhotographyPackage[]) => void;
   triggerAlert: (msg: string) => void;
-  lang: ActiveLanguíage;
+  lang: ActiveLanguage;
 }
 
 function emptyPackage(categories: SessionCategory[]): PhotographyPackage {

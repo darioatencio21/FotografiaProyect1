@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { 
   Photograph, Service, Testimonial, BlogPost, FAQ, Booking, 
-  Message, SEOMetadata, AnalyticsStats, ActiveLanguíage, PhotographerProfile, BookingConfig, EmailConfig,
+  Message, SEOMetadata, AnalyticsStats, ActiveLanguage, PhotographerProfile, BookingConfig, EmailConfig,
   ClientAccount, ProofPhoto, SessionCategory, PhotographyPackage, Invoice
 } from '../types';
 import { TRANSLATIONS } from '../data/mockData';
@@ -80,7 +80,7 @@ interface AdminCMSProps {
   bookingConfig: BookingConfig;
   emailConfig: EmailConfig;
   stats: AnalyticsStats;
-  lang: ActiveLanguíage;
+  lang: ActiveLanguage;
   onUpdatePhotographs: (photos: Photograph[]) => void;
   onUpdateTestimonials: (testimonials: Testimonial[]) => void;
   onUpdateBlogPosts: (posts: BlogPost[]) => void;
@@ -163,10 +163,10 @@ export default function AdminCMS({
   const [replyText, setReplyText] = useState<string>('');
 
   // Simulated notification system
-  const [cmásAlert, setCmásAlert] = useState<string | null>(null);
+  const [cmsAlert, setCmsAlert] = useState<string | null>(null);
   const triggerAlert = (msg: string) => {
-    setCmásAlert(msg);
-    setTimeout(() => setCmásAlert(null), 3000);
+    setCmsAlert(msg);
+    setTimeout(() => setCmsAlert(null), 3000);
   };
 
   const resetTestimonialForm = () => {
@@ -791,7 +791,7 @@ export default function AdminCMS({
       
       {/* Toast Alert */}
       <AnimatePresence>
-        {cmásAlert && (
+        {cmsAlert && (
           <motion.div
             className="absolute top-6 right-6 glass-premium px-4 py-2.5 rounded-lg border border-white/10 text-white/50 text-xs font-mono tracking-wider flex items-center space-x-2 shadow-2xl z-55"
             initial={{ opacity: 0, y: -20 }}
@@ -799,7 +799,7 @@ export default function AdminCMS({
             exit={{ opacity: 0, y: -20 }}
           >
             <div className="w-2 h-2 rounded-full bg-white/10 animate-ping" />
-            <span>{cmásAlert}</span>
+            <span>{cmsAlert}</span>
           </motion.div>
         )}
       </AnimatePresence>
@@ -3326,7 +3326,7 @@ interface SessionCatEditorProps {
   categories: SessionCategory[];
   onUpdate: (cats: SessionCategory[]) => void;
   triggerAlert: (msg: string) => void;
-  lang: ActiveLanguíage;
+  lang: ActiveLanguage;
 }
 
 const CATEGORY_ICONS = ['Heart', 'Gem', 'Camera', 'Users', 'Baby', 'Sparkles', 'PartyPopper', 'GraduationCap', 'Briefcase', 'Utensils', 'Package', 'Calendar'];

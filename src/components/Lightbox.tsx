@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Heart, Download, Share2, X, ChevronLeft, ChevronRight, Sliders } from 'lucide-react';
-import { Photograph, ActiveLanguíage } from '../types';
+import { Photograph, ActiveLanguage } from '../types';
 import { TRANSLATIONS } from '../data/mockData';
 import { sanitizeUrl } from '../lib/sanitize';
 import StorageImage from './StorageImage';
@@ -18,7 +18,7 @@ interface LightboxProps {
   onPrev: () => void;
   isFavorite: boolean;
   onToggleFavorite: () => void;
-  lang: ActiveLanguíage;
+  lang: ActiveLanguage;
 }
 
 export default function Lightbox({
@@ -37,7 +37,7 @@ export default function Lightbox({
 
   const t = TRANSLATIONS[lang];
 
-  function getPhotoDescription(photo: Photograph, l: ActiveLanguíage) {
+  function getPhotoDescription(photo: Photograph, l: ActiveLanguage) {
     if (l === 'es') return photo.description_es || photo.description;
 
     return photo.description;

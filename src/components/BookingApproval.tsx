@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { CheckCircle2, Clock, DollarSign, FileText, AlertCircle, Calendar, Shield } from 'lucide-react';
-import { ActiveLanguíage, Booking } from '../types';
+import { ActiveLanguage, Booking } from '../types';
 import ContractView from './ContractView';
 import { PaymentResult } from './StripeCheckout';
 import { TRANSLATIONS } from '../data/mockData';
@@ -9,7 +9,7 @@ import { formatPrice } from '../config/site';
 
 interface BookingApprovalProps {
   booking: Booking;
-  lang: ActiveLanguíage;
+  lang: ActiveLanguage;
   onConfirm: (bookingId: string, signature?: string) => void;
   onCheckout: (amount: number, description: string, onDone: (result?: PaymentResult) => void, onCancel?: () => void) => void;
 }

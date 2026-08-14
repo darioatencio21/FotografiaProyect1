@@ -7,14 +7,14 @@ import React, { useState, memo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowUp, Send } from 'lucide-react';
 import { Instagram, Facebook } from './BrandIcons';
-import { ActiveLanguíage } from '../types';
+import { ActiveLanguage } from '../types';
 import { TRANSLATIONS } from '../data/mockData';
 import { Logo } from './Logo';
 import { BRAND_NAME, SOCIAL } from '../config/site';
 
 interface FooterProps {
   onSetView: (view: string) => void;
-  lang: ActiveLanguíage;
+  lang: ActiveLanguage;
 }
 
 function Footer({ onSetView, lang }: FooterProps) {

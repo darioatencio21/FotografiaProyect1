@@ -18,12 +18,12 @@ import {
   ChevronRight,
   MapPin
 } from 'lucide-react';
-import { Service, ActiveLanguíage, Booking, BookingConfig, EmailConfig, PhotographyPackage, ContractData } from '../types';
+import { Service, ActiveLanguage, Booking, BookingConfig, EmailConfig, PhotographyPackage, ContractData } from '../types';
 import { sanitizeString, sanitizeEmail, sanitizePhone } from '../lib/sanitize';
 import { formatPrice } from '../config/site';
 interface BookingCalendarProps {
   services: Service[];
-  lang: ActiveLanguíage;
+  lang: ActiveLanguage;
   config?: BookingConfig;
   emailConfig?: EmailConfig;
   preSelectedPackage?: PhotographyPackage | null;
@@ -159,7 +159,7 @@ export default function BookingCalendar({ services, lang, config: _config, email
 
   // Warn before leaving if form has data
   const formHasData = clientName || clientEmail || clientPhone || dateValue || creativeNotes || customServiceText || customTimeframeText;
-  const shouldWarn = formHasData;
+  const shouldWarn = Boolean(formHasData);
   useEffect(() => {
     setNavigationGuard?.(shouldWarn);
     if (!shouldWarn) return;

@@ -1,16 +1,16 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { PhotographerProfile, ActiveLanguíage } from '../types';
+import { PhotographerProfile, ActiveLanguage } from '../types';
 import { MILESTONES } from '../data/mockData';
 import StorageImage from './StorageImage';
 
 interface Props {
   profile: PhotographerProfile;
-  lang: ActiveLanguíage;
+  lang: ActiveLanguage;
   t: Record<string, string>;
 }
 
-function getMilestone(m: (typeof MILESTONES)[number], lang: ActiveLanguíage) {
+function getMilestone(m: (typeof MILESTONES)[number], lang: ActiveLanguage) {
   const key = lang === 'es' ? 'es' : 'en';
   return {
     title: m[`title_${key}` as keyof typeof m] as string,
@@ -20,7 +20,7 @@ function getMilestone(m: (typeof MILESTONES)[number], lang: ActiveLanguíage) {
 
 function getText(
   profile: PhotographerProfile,
-  lang: ActiveLanguíage,
+  lang: ActiveLanguage,
   t: Record<string, string>,
   field: 'aboutTitle' | 'aboutText1' | 'aboutText2'
 ) {

@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ExternalLink, Search } from 'lucide-react';
-import { ActiveLanguíage } from '../types';
+import { ActiveLanguage } from '../types';
 
 interface Props {
-  lang: ActiveLanguíage;
+  lang: ActiveLanguage;
   t: Record<string, string>;
 }
 

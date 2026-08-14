@@ -1,7 +1,7 @@
 ﻿import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ShieldCheck, Heart, ArrowRight, Download, Eye, EyeOff, ChevronLeft, ChevronRight, X } from 'lucide-react';
-import { ActiveLanguíage, Booking, ProofPhoto, Invoice, GalleryData } from '../types';
+import { ActiveLanguage, Booking, ProofPhoto, Invoice, GalleryData } from '../types';
 import ContractView from './ContractView';
 import InvoiceReceipt from './InvoiceReceipt';
 import { TRANSLATIONS } from '../data/mockData';
@@ -9,7 +9,7 @@ import { sanitizeUrl } from '../lib/sanitize';
 import StorageImage from './StorageImage';
 
 interface ClientPortalProps {
-  lang: ActiveLanguíage;
+  lang: ActiveLanguage;
   onOpenCheckout: (amount: number, description: string) => void;
   bookings?: Booking[];
   onUpdateBookings?: (bookings: Booking[]) => void;

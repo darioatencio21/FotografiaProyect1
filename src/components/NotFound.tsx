@@ -4,11 +4,11 @@
  */
 
 import { motion } from 'motion/react';
-import { ActiveLanguíage } from '../types';
+import { ActiveLanguage } from '../types';
 import { Logo } from './Logo';
 
 interface NotFoundProps {
-  lang: ActiveLanguíage;
+  lang: ActiveLanguage;
   onNavigateHome: () => void;
   onNavigatePortfolio: () => void;
 }

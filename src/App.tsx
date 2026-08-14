@@ -186,17 +186,15 @@ export default function App() {
   const setNavigationGuard = (v: boolean) => { navigationGuardRef.current = v; };
 
   const [lang, setLang] = useState<'es' | 'en'>(() => {
-    const savedLanguíage = localStorage.getItem('miriamcampos_lang');
-    return savedLanguíage === 'es' || savedLanguíage === 'en' ? savedLanguíage : 'en';
+    const savedLanguage = localStorage.getItem('miriamcampos_lang');
+    return savedLanguage === 'es' || savedLanguage === 'en' ? savedLanguage : 'en';
   });
 
   const navigateTo = useCallback((view: string) => {
     if (navigationGuardRef.current) {
       const msg = lang === 'es'
         ? 'Tienes información sin guardar. ¿Seguro que quieres salir?'
-        : lang === 'pt'
-          ? 'Você tem informações não salvas. Tem certeza que deseja sair?'
-          : 'You have unsaved information. Are you sure you want to leave?';
+        : 'You have unsaved information. Are you sure you want to leave?';
       if (!window.confirm(msg)) return;
       navigationGuardRef.current = false;
     }
@@ -307,7 +305,7 @@ export default function App() {
   // Administrative Workspace credentials
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
-  const [adminUseráname, setAdminUseráname] = useState('');
+  const [adminUsername, setAdminUsername] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
   const [showAdminPassword, setShowAdminPassword] = useState(false);
   const [adminLoginError, setAdminLoginError] = useState('');
@@ -476,17 +474,20 @@ export default function App() {
     const needsMigration = !localStorage.getItem(MIGRATE_FLAG);
 
     if (needsMigration) {
-      function migrateStrings(obj: unknown): unknown {
-        if (typeof obj === 'string') return unescapeHTMLEntities(obj);
-        if (Array.isArray(obj)) return obj.map(migrateStrings);
-        if (obj && typeof obj === 'object') {
-          const result: Record<string, unknown> = {};
-          for (const [k, v] of Object.entries(obj as Record<string, unknown>)) {
-            result[k] = migrateStrings(v);
+      function migrateStrings<T>(obj: T): T {
+        const migrate = (value: unknown): unknown => {
+          if (typeof value === 'string') return unescapeHTMLEntities(value);
+          if (Array.isArray(value)) return value.map(migrate);
+          if (value && typeof value === 'object') {
+            const result: Record<string, unknown> = {};
+            for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+              result[k] = migrate(v);
+            }
+            return result;
           }
-          return result;
-        }
-        return obj;
+          return value;
+        };
+        return migrate(obj) as T;
       }
       const migratedPhotos = photosRes.map(p => migrateStrings(p));
       const migratedServices = servicesRes.map(s => migrateStrings(s));
@@ -953,7 +954,7 @@ ${photographerName}`);
     e.preventDefault();
     setAdminLoginError('');
 
-    const email = sanitizeEmail(adminUseráname);
+    const email = sanitizeEmail(adminUsername);
     const password = adminPassword;
 
     if (!email || !email.includes('@')) {
@@ -1012,7 +1013,7 @@ ${photographerName}`);
   const pendingPaymentRef = useRef<((result?: PaymentResult) => void) | null>(null);
   const pendingCancelRef = useRef<(() => void) | null>(null);
   const pendingPaymentBookingRef = useRef<{ clientName: string; clientEmail: string; photographerEmail: string; amount: number; packageName: string } | null>(null);
-  const paymentBookingRef = useRef<{ id: string; approvalToken?: string } | null>(null);
+  const paymentBookingRef = useRef<Booking | null>(null);
 
   const handleOpenStripeCheckout = (amount: number, description: string) => {
     setCheckoutAmount(amount);
@@ -1044,7 +1045,7 @@ ${photographerName}`);
       },
       body: JSON.stringify({ bookingId: paymentBooking.id, token: paymentBooking.approvalToken }),
     });
-    const data = await res.json().catch(() => null);
+    const data = await res.json().catch((): null => null);
     if (!res.ok) {
       throw new Error(data?.error || 'Payment could not be processed. Please try again.');
     }
@@ -1630,19 +1631,15 @@ ${photographerName}`);
                           <span className="text-[10px] font-mono text-white/50 tracking-[0.25em] uppercase block">
                             {lang === 'es'
                               ? '¿Tienes una visión diferente en mente?'
-                              : lang === 'pt'
-                                ? 'Tem uma visão diferente em mente?'
-                                : 'Have a different vision in mind?'}
+                              : 'Have a different vision in mind?'}
                           </span>
                           <h3 className="font-serif text-2xl sm:text-3xl text-white tracking-wide">
-                            {lang === 'es' ? 'Propuesta a medida' : lang === 'pt' ? 'Proposta personalizada' : 'Custom proposal'}
+                            {lang === 'es' ? 'Propuesta a medida' : 'Custom proposal'}
                           </h3>
                           <p className="text-xs sm:text-sm text-white/50 leading-relaxed">
                             {lang === 'es'
                               ? 'Crea una sesión totalmente personalizada — locación, estilo, producción. Cuéntame tu idea y preparo un concepto editorial único para ti.'
-                              : lang === 'pt'
-                                ? 'Crie uma sessão totalmente personalizada — local, estilo, produção. Conte-me a sua ideia e preparo um conceito editorial único para você.'
-                                : 'Create a fully tailored session — location, styling, production. Share your idea and I\'ll craft a one-of-a-kind editorial concept for you.'}
+                              : 'Create a fully tailored session — location, styling, production. Share your idea and I\'ll craft a one-of-a-kind editorial concept for you.'}
                           </p>
                         </div>
                         <button
@@ -1651,9 +1648,7 @@ ${photographerName}`);
                         >
                           {lang === 'es'
                             ? 'Solicitar propuesta a medida'
-                            : lang === 'pt'
-                              ? 'Solicitar proposta personalizada'
-                              : 'Request a custom proposal'}
+                            : 'Request a custom proposal'}
                           <ArrowRight size={12} className="transition-transform duration-300 group-hover:translate-x-0.5" />
                         </button>
                       </div>
@@ -1943,7 +1938,7 @@ ${photographerName}`);
                     lang={lang}
                     onConfirm={handleConfirmBooking}
                     onCheckout={(amount, desc, onDone, onCancel) => {
-                      paymentBookingRef.current = { id: booking.id, approvalToken: booking.approvalToken };
+                      paymentBookingRef.current = booking;
                       pendingPaymentBookingRef.current = {
                         clientName: booking.clientName,
                         clientEmail: booking.clientEmail,
@@ -2355,8 +2350,8 @@ ${photographerName}`);
                   <input
                     type="text"
                     required
-                    value={adminUseráname}
-                    onChange={(e) => setAdminUseráname(e.target.value)}
+                    value={adminUsername}
+                    onChange={(e) => setAdminUsername(e.target.value)}
                     className="w-full bg-charcoal border-stone rounded p-2.5 text-xs text-white focus:outline-none focus:border-white/30"
                     placeholder="admin@tudominio.com"
                   />

@@ -1,13 +1,13 @@
 import { useState, useMemo } from 'react';
 import { Bell, BellOff, Send, Check, X, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
-import { Booking, PhotographerProfile, ActiveLanguíage } from '../types';
+import { Booking, PhotographerProfile, ActiveLanguage } from '../types';
 
 interface AdminRemindersTabProps {
   bookings: Booking[];
   profile: PhotographerProfile;
   onUpdateBookings: (bookings: Booking[]) => void;
   triggerAlert: (msg: string) => void;
-  lang: ActiveLanguíage;
+  lang: ActiveLanguage;
 }
 
 export default function AdminRemindersTab({
