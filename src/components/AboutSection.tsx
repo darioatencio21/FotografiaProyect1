@@ -1,16 +1,16 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { PhotographerProfile, ActiveLanguíage } from '../types';
+import { PhotographerProfile, ActiveLanguage } from '../types';
 import { MILESTONES } from '../data/mockData';
 import StorageImage from './StorageImage';
 
 interface Props {
   profile: PhotographerProfile;
-  lang: ActiveLanguíage;
+  lang: ActiveLanguage;
   t: Record<string, string>;
 }
 
-function getMilestone(m: (typeof MILESTONES)[number], lang: ActiveLanguíage) {
+function getMilestone(m: (typeof MILESTONES)[number], lang: ActiveLanguage) {
   const key = lang === 'es' ? 'es' : 'en';
   return {
     title: m[`title_${key}` as keyof typeof m] as string,
@@ -20,7 +20,7 @@ function getMilestone(m: (typeof MILESTONES)[number], lang: ActiveLanguíage) {
 
 function getText(
   profile: PhotographerProfile,
-  lang: ActiveLanguíage,
+  lang: ActiveLanguage,
   t: Record<string, string>,
   field: 'aboutTitle' | 'aboutText1' | 'aboutText2'
 ) {
@@ -156,7 +156,7 @@ export default function AboutSection({ profile, lang, t }: Props) {
 
         <FadeIn delay={0.15} className="mt-4 md:mt-6">
           <h2 className="font-serif text-[clamp(1.5rem,3.5vw,2.5rem)] text-white leading-tight tracking-tight">
-            {t.milestonesTitle || 'Una Década de Luz'}
+            {t.milestonesTitle || '15 Años de Luz'}
           </h2>
         </FadeIn>
 

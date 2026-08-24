@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Photograph, Service, Testimonial, BlogPost, FAQ, Booking, Message, SEOMetadata, AnalyticsStats, PhotographerProfile, BookingConfig, EmailConfig, ClientAccount, SessionCategory, PhotographyPackage, Invoice, InstagramPost } from '../types';
+import { Photograph, Service, Testimonial, BlogPost, FAQ, Booking, Message, SEOMetadata, AnalyticsStats, PhotographerProfile, BookingConfig, EmailConfig, ClientAccount, SessionCategory, PhotographyPackage, Invoice } from '../types';
 
 // Curated selection of ultra-high-resolution Unsplash photography matching Leica, Hasselblad tones
 export const INITIAL_PHOTOGRAPHS: Photograph[] = [
@@ -37,7 +37,7 @@ export const INITIAL_PHOTOGRAPHS: Photograph[] = [
     title: 'Golden Hour Vows',
     title_es: 'Votos a la Hora Dorada',
     category: 'boda',
-    description: 'An iíntimate sunset frame on the cliffs of Amalfi, reflecting the raw tenderness and premium atmosphere of high-fashion weddings.',
+    description: 'An intimate sunset frame on the cliffs of Amalfi, reflecting the raw tenderness and premium atmosphere of high-fashion weddings.',
     description_es: 'Una íntima toma al atardecer en los acantilados de Amalfi, reflejando la ternura y la atmósfera premium de las bodas de alta costura.',
     exif: {
       camera: 'Leica SL3',
@@ -62,7 +62,7 @@ export const INITIAL_PHOTOGRAPHS: Photograph[] = [
     title_es: 'Editorial Vogue No. IV',
     category: 'moda',
     description: 'High-contrast avant-garde editorial in Madrid\u2019s brutalist structures, focusing on dynamic drape mechanics and stark shadows.',
-    description_es: 'Editorial vanguíardista de alto contraste en las estructuras brutalistas de Madrid, centrado en la mecnica dinmica del drapeado y sombras marcadas.',
+    description_es: 'Editorial vanguardista de alto contraste en las estructuras brutalistas de Madrid, centrado en la mecánica dinámica del drapeado y sombras marcadas.',
     exif: {
       camera: 'Leica M11',
       lens: 'Noctilux-M 50mm f/0.95 ASPH.',
@@ -83,10 +83,10 @@ export const INITIAL_PHOTOGRAPHS: Photograph[] = [
     id: 'photo-4',
     url: 'https://images.unsplash.com/photo-1508873696983-2df519f0397e?auto=format&fit=crop&q=90&w=1200',
     title: 'Azure Symmetry',
-    title_es: 'Simetra Azul',
+    title_es: 'Simetría Azul',
     category: 'drone',
     description: 'Orthogonal aerial capture of coastal formations in Portugal, capturing the abstract balance between ocean textures and golden shore cliffs.',
-    description_es: 'Captura orea ortogonal de formaciones costeras en Portugal, mostrando el equilibrio abstracto entre texturas oceúnicas y acantilados dorados.',
+    description_es: 'Captura aérea ortogonal de formaciones costeras en Portugal, mostrando el equilibrio abstracto entre texturas oceánicas y acantilados dorados.',
     exif: {
       camera: 'DJI Inspire 3',
       lens: 'DL 18mm f/2.8 LS ASPH',
@@ -134,7 +134,7 @@ export const INITIAL_PHOTOGRAPHS: Photograph[] = [
     title_es: 'Amanecer en Positano',
     category: 'viajes',
     description: 'A quiet dawn overlooking the iconic tiered pastel architectures of Positano, cloaked in mist and golden reflection.',
-    description_es: 'Un amanecer tranquilo sobre las icúnicas arquitecturas pastel escalonadas de Positano, envuelto en niebla y reflejos dorados.',
+    description_es: 'Un amanecer tranquilo sobre las icónicas arquitecturas pastel escalonadas de Positano, envuelto en niebla y reflejos dorados.',
     exif: {
       camera: 'Leica Q3',
       lens: 'Summilux 28mm f/1.7 ASPH.',
@@ -155,10 +155,10 @@ export const INITIAL_PHOTOGRAPHS: Photograph[] = [
     id: 'photo-7',
     url: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&q=90&w=1200',
     title: 'The Grand Ballroom Entrance',
-    title_es: 'La Gran Entrada al Saln de Baile',
+    title_es: 'La Gran Entrada al Salón de Baile',
     category: 'evento',
     description: 'Candid photo of a prestigious gala at Palais Garnier. Masterclass in low-light ambience, high dynamic range preservation, and architectural framing.',
-    description_es: 'Foto espontnea de una prestigiosa gala en el Palais Garnier. Maestra en iluminación ambiental escasa, preservacin de alto rango dinmico y encuadre arquitectnico.',
+    description_es: 'Foto espontánea de una prestigiosa gala en el Palais Garnier. Maestra en iluminación ambiental escasa, preservación de alto rango dinámico y encuadre arquitectónico.',
     exif: {
       camera: 'Sony Alpha 1',
       lens: 'FE 24-70mm f/2.8 GM II',
@@ -182,7 +182,7 @@ export const INITIAL_PHOTOGRAPHS: Photograph[] = [
     title_es: 'Dosel Forestal Etreo',
     category: 'naturaleza',
     description: 'First rays of morning light breaking through a dense cedar canopy in Yakushima, casting dramatic light shafts into primeval moss meadows.',
-    description_es: 'Los primeros rayos de luz matinal atraviesan un denso dosel de cedro en Yakushima, creando dramticos haces de luz en prados de musgo primigenios.',
+    description_es: 'Los primeros rayos de luz matinal atraviesan un denso dosel de cedro en Yakushima, creando dramáticos haces de luz en prados de musgo primigenios.',
     exif: {
       camera: 'Hasselblad X2D 100C',
       lens: 'XCD 38mm f/2.5 V',
@@ -219,15 +219,15 @@ export const INITIAL_SERVICES: Service[] = [
     slug: 'wedding-luxury',
     image: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=800',
     title_es: 'Bodas Editoriales de Lujo',
-    description_es: 'Cobertura cinematogrfica, atemporal y estilo documental del día de su boda. Diseado para parejas que buscan composiciones de alta costura y la preservacin artstica de sus momentos sagrados.',
+    description_es: 'Cobertura cinematográfica, atemporal y estilo documental del día de su boda. Diseñado para parejas que buscan composiciones de alta costura y la preservación artística de sus momentos sagrados.',
     duration_es: '10 Horas de Cobertura',
     includes_es: [
-      'Consulta previa a la boda y exploracin de locaciones',
-      'Configuracin de cámara dual Leica/Hasselblad',
-      'Archivo web premium de revisin para clientes',
+      'Consulta previa a la boda y exploración de locaciones',
+      'Configuración de cámara dual Leica/Hasselblad',
+      'Archivo web premium de revisión para clientes',
       'Más de 750 imágenes WebP de alta resolución totalmente procesadas',
-      'Fotolibro artstico encuadernado a mano en cuero premium (40 pginas)',
-      'Licencia digital para distribucin personal y de prensa'
+      'Fotolibro artístico encuadernado a mano en cuero premium (40 páginas)',
+      'Licencia digital para distribución personal y de prensa'
     ],
   },
   {
@@ -247,15 +247,15 @@ export const INITIAL_SERVICES: Service[] = [
     slug: 'fashion-editorial',
     image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&q=80&w=800',
     title_es: 'Moda y Retrato de Alta Gama',
-    description_es: 'Imágenes editoriales impactúantes diseadas para agencias de modelos, firmas de moda de lujo e individuos que buscan impresiones artsticas personales de calidad de museo.',
+    description_es: 'Imágenes editoriales impactantes diseñadas para agencias de modelos, firmas de moda de lujo e individuos que buscan impresiones artísticas personales de calidad de museo.',
     duration_es: 'Sesión de 4 Horas',
     includes_es: [
       'Sesión en estudio o locación conceptualizada',
-      'Direccin creativa y asesora de estilismo de moda personalizada',
+      'Dirección creativa y asesora de estilismo de moda personalizada',
       '25 archivos maestros digitales completamente optimizados con retoque de piel premium',
       'Acceso completo a la biblioteca de fotos RAW mediante el panel de clientes',
-      'Una impresin de calidad de museo en algodn de formato 24x36"',
-      'Opcin de licencia de uso comercial disponible'
+      'Una impresión de calidad de museo en algodón de formato 24x36"',
+      'Opción de licencia de uso comercial disponible'
     ],
   },
   {
@@ -274,11 +274,11 @@ export const INITIAL_SERVICES: Service[] = [
     slug: 'architectural-real-estate',
     image: 'https://images.unsplash.com/photo-1508873696983-2df519f0397e?auto=format&fit=crop&q=80&w=800',
     title_es: 'Arquitectura y Propiedades de Lujo',
-    description_es: 'Simetra perfecta, iluminación ambiental y artificial equilibrada, y perspectivas áureas que destacan espacios residenciales o comerciales de alta gama.',
+    description_es: 'Simetría perfecta, iluminación ambiental y artificial equilibrada, y perspectivas áureas que destacan espacios residenciales o comerciales de alta gama.',
     duration_es: 'Sesión de 6 Horas',
     includes_es: [
       'Encuadre exhaustivo de interiores y exteriores',
-      'Configuracin de doble perspectiva: interior ultra gran angular y dron de gran altitud',
+      'Configuración de doble perspectiva: interior ultra gran angular y dron de gran altitud',
       'Revelado de color profesional y reemplazos de cielo HDR',
       '35 activos fotográficos editoriales de alta resolución para interiores',
       'Licencia comercial completa para publicidad digital, impresa y vallas publicitarias'
@@ -300,14 +300,14 @@ export const INITIAL_SERVICES: Service[] = [
     slug: 'commercial-product',
     image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=800',
     title_es: 'Campaas Comerciales de Producto',
-    description_es: 'Sesiones de estudio macro enfocadas en materiales exquisitos, diseo de precisin e iluminación de autor. Hecho a medida para relojeros premium, firmas de alta joyera y destilados finos.',
+    description_es: 'Sesiones de estudio macro enfocadas en materiales exquisitos, diseño de precisión e iluminación de autor. Hecho a medida para relojeros premium, firmas de alta joyería y destilados finos.',
     duration_es: 'Tarifa Diaria (8 Horas)',
     includes_es: [
-      'Configuracin de matriz de iluminación de estudio macro dedicada',
+      'Configuración de matriz de iluminación de estudio macro dedicada',
       'Estilismo de producto y preparación libre de polvo',
       'Captura de resolución ultra-alta de 100MP con Hasselblad',
       'Postprocesamiento profesional con apilamiento de enfoque (focus-stacking)',
-      'Derechos de uso publicitario completo y distribucin de prensa mundial'
+      'Derechos de uso publicitario completo y distribución de prensa mundial'
     ],
   }
 ];
@@ -396,8 +396,8 @@ export const INITIAL_FAQS: FAQ[] = [
     question: 'What cameras and lenses do you use for your shoots?',
     answer: 'I shoot predominantly on the Hasselblad X2D 100C system for ultimate medium-format detail and unmatched skin-tone color rendition. For spontaneous or street-editorial projects, I rely on the iconic Leica SL3 and Leica M11 Rangefinder, paired with legendary Summilux-M prime lenses.',
     category: 'Gear & Production',
-    question_es: 'Qu cámaras y objetivos utilizas en tu trabajo?',
-    answer_es: 'Trabajo principalmente con el sistema de formato medio Hasselblad X2D 100C para obtener el mximo detalle y una reproducción de color de piel iniguíalable. Para proyectos de calle o editoriales espontneos, confo en las icúnicas Leica SL3 y Leica M11, combinadas con los legendarios objetivos fijos Summilux-M.',
+    question_es: '¿Qué cámaras y objetivos utilizas en tu trabajo?',
+    answer_es: 'Trabajo principalmente con el sistema de formato medio Hasselblad X2D 100C para obtener el máximo detalle y una reproducción de color de piel inigualable. Para proyectos de calle o editoriales espontáneos, confío en las icónicas Leica SL3 y Leica M11, combinadas con los legendarios objetivos fijos Summilux-M.',
     question_en: 'What cameras and lenses do you use for your shoots?',
     answer_en: 'I shoot predominantly on the Hasselblad X2D 100C system for ultimate medium-format detail and unmatched skin-tone color rendition. For spontaneous or street-editorial projects, I rely on the iconic Leica SL3 and Leica M11 Rangefinder, paired with legendary Summilux-M prime lenses.'
   },
@@ -406,8 +406,8 @@ export const INITIAL_FAQS: FAQ[] = [
     question: 'Do you travel internationally for destination weddings and shoots?',
     answer: 'Absolutely. I am based in Europe, but shoot destination weddings and fashion campaigns worldwide. Travel, lodging, and visa coordination are handled directly by my studio manager, and a flat-rate custom travel expense package will be appended to your quotation.',
     category: 'Travel & Booking',
-    question_es: 'Viajas internacionalmente para bodas de destino y sesiones?',
-    answer_es: 'Absolutamente. Tengo mi base en Europa, pero realizo reportajes de bodas de destino y campañas de moda en todo el mundo. Los vuelos, el alojamiento y la logística de visados son gestionados directamente por mi jefa de estudio, y se añadir un paquete de gastos de viaje de tarifa plana personalizado a su cotización.',
+    question_es: '¿Viajas internacionalmente para bodas de destino y sesiones?',
+    answer_es: 'Absolutamente. Tengo mi base en Europa, pero realizo reportajes de bodas de destino y campañas de moda en todo el mundo. Los vuelos, el alojamiento y la logística de visados son gestionados directamente por mi jefa de estudio, y se añadirá un paquete de gastos de viaje de tarifa plana personalizado a su cotización.',
     question_en: 'Do you travel internationally for destination weddings and shoots?',
     answer_en: 'Absolutely. I am based in Europe, but shoot destination weddings and fashion campaigns worldwide. Travel, lodging, and visa coordination are handled directly by my studio manager, and a flat-rate custom travel expense package will be appended to your quotation.'
   },
@@ -416,7 +416,7 @@ export const INITIAL_FAQS: FAQ[] = [
     question: 'How long does it take to receive the fully finished gallery?',
     answer: 'A high-fidelity teaser selection of 15-20 hand-edited images is uploaded to your Private Client Portal within 72 hours of your session. The full, color-graded, high-resolution master catalog is completed and published for download within 4 to 6 weeks.',
     category: 'Deliverables & Retouching',
-    question_es: 'Cunto tiempo se tarda en recibir la galería finalizada?',
+    question_es: '¿Cuánto tiempo se tarda en recibir la galería finalizada?',
     answer_es: 'Una selección exclusiva de adelanto de 15 a 20 imágenes editadas a mano se subirá a su Portal Privado de Clientes dentro de las primeras 72 horas posteriores a la sesión. El catálogo maestro completo, procesado en alta resolución y con nuestra firma cromática, se entregará en un plazo garantizado de 4 a 6 semanas.',
     question_en: 'How long does it take to receive the fully finished gallery?',
     answer_en: 'A high-fidelity teaser selection of 15-20 hand-edited images is uploaded to your Private Client Portal within 72 hours of your session. The full, color-graded, high-resolution master catalog is completed and published for download within 4 to 6 weeks.'
@@ -426,7 +426,7 @@ export const INITIAL_FAQS: FAQ[] = [
     question: 'Are raw files included in your packages?',
     answer: 'I pride myself on delivering polished, finalized masterpieces. Therefore, unedited raw files are generally not released. However, full access to view and proof the complete raw catalog is provided inside the secure Client proofing portal to select your final favorites for retouching.',
     category: 'Deliverables & Retouching',
-    question_es: 'Estn incluidos los archivos RAW sin editar en sus paquetes?',
+    question_es: '¿Están incluidos los archivos RAW sin editar en sus paquetes?',
     answer_es: 'Me enorgullezco de entregar obras de arte pulidas y finalizadas con nuestra firma visual. Por lo tanto, los archivos RAW sin editar nunca se entregan al cliente final. Sin embargo, se proporciona acceso completo para visualizar y revisar todo el catálogo de pruebas dentro del Portal Privado para que pueda seleccionar sus capturas favoritas para el retoque final.',
     question_en: 'Are raw files included in your packages?',
     answer_en: 'I pride myself on delivering polished, finalized masterpieces. Therefore, unedited raw files are generally not released. However, full access to view and proof the complete raw catalog is provided inside the secure Client proofing portal to select your final favorites for retouching.'
@@ -436,8 +436,8 @@ export const INITIAL_FAQS: FAQ[] = [
     question: 'How does the booking and secure payment process work?',
     answer: 'To book an exclusive date, we require a 30% booking deposit paid securely through Stripe using credit/debit cards or digital wallets. The remaining 70% balance is payable one week prior to the session date or on the day of the shoot before we begin.',
     category: 'Travel & Booking',
-    question_es: 'Cmo funciona el proceso de reserva y pago seguro?',
-    answer_es: 'Para reservar una fecha exclusiva, requerimos un depósito de reserva del 30% que se abona cómodamente a través de Stripe utilizando tarjeta de crédito/débito o billeteras digitales. El 70% restante se abona una semana antes del día de la sesión o el mismo da del reportaje antes de comenzar.',
+    question_es: '¿Cómo funciona el proceso de reserva y pago seguro?',
+    answer_es: 'Para reservar una fecha exclusiva, requerimos un depósito de reserva del 30% que se abona cómodamente a través de Stripe utilizando tarjeta de crédito/débito o billeteras digitales. El 70% restante se abona una semana antes del día de la sesión o el mismo día del reportaje antes de comenzar.',
     question_en: 'How does the booking and secure payment process work?',
     answer_en: 'To book an exclusive date, we require a 30% booking deposit paid securely through Stripe using credit/debit cards or digital wallets. The remaining 70% balance is payable one week prior to the session date or on the day of the shoot before we begin.'
   },
@@ -446,8 +446,8 @@ export const INITIAL_FAQS: FAQ[] = [
     question: 'Do you offer fine art prints and handmade albums?',
     answer: 'Yes, we collaborate with the finest fine-art print labs in Italy and Germany to produce museum-grade archival cotton prints (100% acid-free). Our luxury photo albums are hand-bound with fine-grain leather or premium linen, designed to endure for generations.',
     category: 'Deliverables & Retouching',
-    question_es: 'Ofrecen impresiones artsticas y álbumes hechos a mano?',
-    answer_es: 'S, trabajamos con los mejores laboratorios de bellas artes de Italia y Alemania para producir impresiones de calidad de museo en papel de algodn de archivo 100% libre de cido. Nuestros álbumes de fotos de lujo estn encuadernados a mano con cuero de grano fino o lino premium, diseados para durar generaciones.',
+    question_es: '¿Ofrecen impresiones artísticas y álbumes hechos a mano?',
+    answer_es: 'Sí, trabajamos con los mejores laboratorios de bellas artes de Italia y Alemania para producir impresiones de calidad de museo en papel de algodón de archivo 100% libre de ácido. Nuestros álbumes de fotos de lujo están encuadernados a mano con cuero de grano fino o lino premium, diseñados para durar generaciones.',
     question_en: 'Do you offer fine art prints and handmade albums?',
     answer_en: 'Yes, we collaborate with the finest fine-art print labs in Italy and Germany to produce museum-grade archival cotton prints (100% acid-free). Our luxury photo albums are hand-bound with fine-grain leather or premium linen, designed to endure for generations.'
   },
@@ -456,8 +456,8 @@ export const INITIAL_FAQS: FAQ[] = [
     question: 'What happens if the weather is unfavorable for an outdoor session?',
     answer: 'We understand that weather is unpredictable. If heavy rain or storms are forecast that make the shoot impossible, we will reschedule the session at no additional cost to the next mutually available date. For light overcast, we often continue as clouds act as a beautiful natural light diffuser.',
     category: 'Travel & Booking',
-    question_es: 'Qu sucede si el clima no es favorable para una sesión en exteriores?',
-    answer_es: 'Entendemos que las condiciones climáticas son impredecibles. Si se pronostican lluvias intensas o tormentas que imposibiéliten la sesión, reprogramaremos el reportaje sin costo adicional para la primera fecha disponible que sea de mutuo acuerdo. Para nublado ligero, a menudo continuamos ya que las nubes actúan como un difusor de luz natural impecable.',
+    question_es: '¿Qué sucede si el clima no es favorable para una sesión en exteriores?',
+    answer_es: 'Entendemos que las condiciones climáticas son impredecibles. Si se pronostican lluvias intensas o tormentas que imposibiliten la sesión, reprogramaremos el reportaje sin costo adicional para la primera fecha disponible que sea de mutuo acuerdo. Para nublado ligero, a menudo continuamos ya que las nubes actúan como un difusor de luz natural impecable.',
     question_en: 'What happens if the weather is unfavorable for an outdoor session?',
     answer_en: 'We understand that weather is unpredictable. If heavy rain or storms are forecast that make the shoot impossible, we will reschedule the session at no additional cost to the next mutually available date. For light overcast, we often continue as clouds act as a beautiful natural light diffuser.'
   },
@@ -466,8 +466,8 @@ export const INITIAL_FAQS: FAQ[] = [
     question: 'Can we request creative direction and styling assistance?',
     answer: 'Absolutely. All artistic and fashion commissions include a dedicated 1-hour pre-shoot creative direction consultation. We curate a bespoke style guide and collaborative visual moodboard to align your wardrobe color palette, location aesthetics, and lighting atmosphere with medium-format standards.',
     category: 'Gear & Production',
-    question_es: 'Podemos solicitar directrices creativas y ayuda para el estilismo?',
-    answer_es: 'Absolutamente. Todas las comisiones artsticas y de moda incluyen una sesión de consulta de dirección de arte previa de 1 hora. Creamos una guía de estilo a medida y un panel de inspiración (moodboard) visual conjunto para coordinar las paletas de color de su vestuario, localizaciones y ambiente de iluminación para que se alineen perfectamente con los estándares de formato medio.',
+    question_es: '¿Podemos solicitar directrices creativas y ayuda para el estilismo?',
+    answer_es: 'Absolutamente. Todas las comisiones artísticas y de moda incluyen una sesión de consulta de dirección de arte previa de 1 hora. Creamos una guía de estilo a medida y un panel de inspiración (moodboard) visual conjunto para coordinar las paletas de color de su vestuario, localizaciones y ambiente de iluminación para que se alineen perfectamente con los estándares de formato medio.',
     question_en: 'Can we request creative direction and styling assistance?',
     answer_en: 'Absolutely. All artistic and fashion commissions include a dedicated 1-hour pre-shoot creative direction consultation. We curate a bespoke style guide and collaborative visual moodboard to align your wardrobe color palette, location aesthetics, and lighting atmosphere with medium-format standards.'
   }
@@ -582,8 +582,8 @@ export const INITIAL_BOOKING_CONFIG: BookingConfig = {
 export const INITIAL_EMAIL_CONFIG: EmailConfig = {
   receiverEmail: '',
   enableAutoResponse: false,
-  autoReplySubject: 'Tu reserva ha sido recibida con éxito! - Aorea Studio',
-  autoReplyMessage: 'Hola,\n\nMuchas gracias por reservar tu sesión fotográfica con nosotros. Hemos recibido tus datos correctamente y tu espacio ha sido bloqueado en nuestro calendario.\n\nEn las próximas horas nos pondremos en contacto contigo para coordinar los detalles finales, locación y responder cualquier consulta adicional.\n\nEstamos muy emocionados de crear arte juntos!\n\nAtentamente,\nEl equipo de Aorea Studio.'
+  autoReplySubject: 'Tu reserva ha sido recibida con éxito! - Miriam Campos Photography',
+  autoReplyMessage: 'Hola,\n\nMuchas gracias por reservar tu sesión fotográfica con nosotros. Hemos recibido tus datos correctamente y tu espacio ha sido bloqueado en nuestro calendario.\n\nEn las próximas horas nos pondremos en contacto contigo para coordinar los detalles finales, locación y responder cualquier consulta adicional.\n\nEstamos muy emocionados de crear arte juntos!\n\nCon cariño,\nEl equipo de Miriam Campos Photography.'
 };
 
 export const INITIAL_PROFILE: PhotographerProfile = {
@@ -597,7 +597,7 @@ export const INITIAL_PROFILE: PhotographerProfile = {
   aboutText1_es: 'Soy Miriam Campos, fotógrafa y directora de arte de bellas artes, dedicada a congelar el tiempo bajo el estándar de Leica y Hasselblad. Entiendo la luz no solo como iluminación, sino como el medio supremo para esculpir emociones y narrar historias silenciosas con proporciones áureas.',
   aboutText2_es: 'Con más de 15 años documentando bodas editoriales de alta costura, campañas comerciales internacionales y retratos íntimos para agencias de modelos de élite, mi trabajo busca un minimalismo elegante, abundante espacio en blanco y simetría geométrica.',
   aboutText1_en: 'I am Miriam Campos, a fine art photographer and creative director dedicated to freezing time through the pristine optics of Leica and Hasselblad. I understand light not as simple exposure, but as the supreme medium to sculpt emotion and weave silent stories of golden ratio symmetry.',
-  aboutText2_en: 'With over 15 years documenting haute-couture destination weddings, international commercial campaigns, and iíntimate editorial model books, my work strives for elegant minimalism, generous negative space, and absolute geometric structure.'
+  aboutText2_en: 'With over 15 years documenting haute-couture destination weddings, international commercial campaigns, and intimate editorial model books, my work strives for elegant minimalism, generous negative space, and absolute geometric structure.'
 };
 
 export const MILESTONES = [
@@ -640,8 +640,8 @@ export const MILESTONES = [
     year: '2025',
     title_es: '15 Años de Luz',
     title_en: '15 Years of Light',
-    description_es: 'Más de 15 años de trayectoria, 200+ clientes felices en 12 países y una evolución constante. La fotografía sigue siendo mi lenguíaje: congelar instantes, esculpir emociones y contar historias que trascienden el tiempo.',
-    description_en: 'Over 15 years of career, 200+ happy clients across 12 countries, and constant evolution. Photography remains my languíage: freezing moments, sculpting emotions, and telling stories that transcend time.',
+    description_es: 'Más de 15 años de trayectoria, 200+ clientes felices en 12 países y una evolución constante. La fotografía sigue siendo mi lenguaje: congelar instantes, esculpir emociones y contar historias que trascienden el tiempo.',
+    description_en: 'Over 15 years of career, 200+ happy clients across 12 countries, and constant evolution. Photography remains my language: freezing moments, sculpting emotions, and telling stories that transcend time.',
   },
 ];
 
@@ -649,7 +649,7 @@ export const INITIAL_SESSION_CATEGORIES: SessionCategory[] = [
   {
     id: 'boda', icon: 'Heart',
     name_es: 'Bodas', name_en: 'Weddings',
-    description_es: 'El da más importante merece ser eterno.', description_en: 'The most important day deserves to be eternal.',
+    description_es: 'El día más importante merece ser eterno.', description_en: 'The most important day deserves to be eternal.',
     image: 'https://pkdzxqsplfeobhflgmyu.supabase.co/storage/v1/object/public/session_categories/cat-boda.jpg',
     sortOrder: 1, active: true,
   },
@@ -670,7 +670,7 @@ export const INITIAL_SESSION_CATEGORIES: SessionCategory[] = [
   {
     id: 'familia', icon: 'Users',
     name_es: 'Familia', name_en: 'Family',
-    description_es: 'El vnculo más hermoso.', description_en: 'The most beautiful bond.',
+    description_es: 'El vínculo más hermoso.', description_en: 'The most beautiful bond.',
     image: 'https://pkdzxqsplfeobhflgmyu.supabase.co/storage/v1/object/public/session_categories/cat-familia-1785217479447.jpg',
     sortOrder: 4, active: true,
   },
@@ -886,12 +886,12 @@ export const TRANSLATIONS = {
     heroSubtitle: 'Cada fotografía nace de una emoción real. Cada imagen está pensada para perdurar más allá del tiempo.',
     ctaPortfolio: 'Explorar Galería',
     ctaBook: 'Reservar Sesión',
-    aboutTitle: 'LA FILOSOFA DETRS DE LA LENTE',
+    aboutTitle: 'LA FILOSOFÍA DETRÁS DE LA LENTE',
     aboutText1: 'Soy un fotógrafo y director de arte de bellas artes, dedicado a congelar el tiempo bajo el estándar de Leica y Hasselblad. Entiendo la luz no solo como iluminación, sino como el medio supremo para esculpir emociones y narrar historias silenciosas con proporciones áureas.',
-    aboutText2: 'Con más de 15 aos documentando bodas editoriales de alta costura, campañas comerciales internacionales y retratos íntimos para agencias de modelos de élite, mi trabajo busca un minimalismo elegante, abundante espacio en blanco y simetría geomtrica.',
+    aboutText2: 'Con más de 15 años documentando bodas editoriales de alta costura, campañas comerciales internacionales y retratos íntimos para agencias de modelos de élite, mi trabajo busca un minimalismo elegante, abundante espacio en blanco y simetría geométrica.',
     awards: 'Premios & Reconocimientos',
     gear: 'El Equipo Utilizado',
-    experience: 'Lnea de Tiempo Artstica',
+    experience: 'Línea de Tiempo Artística',
     all: 'Todos',
     retrato: 'Retrato',
     boda: 'Boda',
@@ -918,21 +918,21 @@ export const TRANSLATIONS = {
     pixiesetSearchBtn: 'Ir a mi galería →',
 
     contractTitle: 'CONTRATO DE SERVICIOS FOTOGRFICOS',
-    contractSubtitle: 'Acuerdo entre Miriam Tellez Photography y el Cliente',
+    contractSubtitle: 'Acuerdo entre Miriam Campos Photography y el Cliente',
     contractBride: 'Novia',
     contractGroom: 'Novio',
     contractBrideEmail: 'Correo de la Novia',
     contractGroomPhone: 'Teléfono del Novio',
-    contractBrideAddress: 'Direccin de la Novia',
+    contractBrideAddress: 'Dirección de la Novia',
     contractWeddingDate: 'Fecha de la Boda',
     contractCeremony: 'Ceremonia',
     contractCeremonyLocation: 'Lugar de la Ceremonia',
-    contractCeremonyAddress: 'Direccin de la Ceremonia',
+    contractCeremonyAddress: 'Dirección de la Ceremonia',
     contractCeremonyStart: 'Hora de Inicio',
     contractCeremonyEnd: 'Hora de Fin',
-    contractReception: 'Recepcin',
-    contractReceptionLocation: 'Lugar de la Recepcin',
-    contractReceptionAddress: 'Direccin de la Recepcin',
+    contractReception: 'Recepción',
+    contractReceptionLocation: 'Lugar de la Recepción',
+    contractReceptionAddress: 'Dirección de la Recepción',
     contractReceptionStart: 'Hora de Inicio',
     contractReceptionEnd: 'Hora de Fin',
     contractPackage: 'Paquete',
@@ -940,11 +940,11 @@ export const TRANSLATIONS = {
     contractDeposit: 'Depósito / Booking Fee',
     contractAmountDue: 'Monto Restante',
     contractTravelExpenses: 'Gastos de Viaje',
-    contractClauseCooperation: 'COOPERACIN',
-    contractClauseCooperationText: 'Los Clientes aceptan cooperar con el Fotógrafo y comunicarse entre s para lograr el mejor resultado posible dentro del entendimiento de este contrato. Se recomienda que el Fotógrafo cuente con alguien que conozca a la mayoría de los invitados para señalar a las personas clave a fotografiar. Los Clientes también aceptan avisar al Fotógrafo con suficiente antelación sobre los eventos importantes para darle tiempo de preparación.',
+    contractClauseCooperation: 'COOPERACIÓN',
+    contractClauseCooperationText: 'Los Clientes aceptan cooperar con el Fotógrafo y comunicarse entre sí para lograr el mejor resultado posible dentro del entendimiento de este contrato. Se recomienda que el Fotógrafo cuente con alguien que conozca a la mayoría de los invitados para señalar a las personas clave a fotografiar. Los Clientes también aceptan avisar al Fotógrafo con suficiente antelación sobre los eventos importantes para darle tiempo de preparación.',
     contractClauseSchedule: 'HORARIO',
-    contractClauseScheduleText: 'Nuestro horario de trabajo, estilo y experiencia estn diseados para lograr un gran conjunto de fotos del Evento. Los Clientes aceptan que la puntualidad y la cooperacin son esenciales para obtener resultados fotográficos sobresalientes. En caso de que el Evento no se desarrolle a tiempo, no podemos garantizar tomar nuestro conjunto normal de fotos, aunque haremos nuestro mejor esfuerzo para compensar.',
-    contractClauseGuests: 'INVITADOS FOTGRAFOS',
+    contractClauseScheduleText: 'Nuestro horario de trabajo, estilo y experiencia están diseñados para lograr un gran conjunto de fotos del Evento. Los Clientes aceptan que la puntualidad y la cooperación son esenciales para obtener resultados fotográficos sobresalientes. En caso de que el Evento no se desarrolle a tiempo, no podemos garantizar tomar nuestro conjunto normal de fotos, aunque haremos nuestro mejor esfuerzo para compensar.',
+    contractClauseGuests: 'INVITADOS FOTÓGRAFOS',
     contractClauseGuestsText: 'Los Clientes aceptan darle prioridad al Fotógrafo sobre los invitados para tomar las fotografías requeridas. El Fotógrafo no se hace responsable por la falta de fotos del Evento si los invitados que toman sus propias fotos interrumpen continuamente el trabajo del Fotógrafo.',
     contractClauseCopyright: 'DERECHOS DE AUTOR',
     contractClauseCopyrightText: 'Los derechos de autor de las fotografías pertenecen al Fotógrafo. Las imágenes tomadas por el Fotógrafo son para uso personal de los Clientes, sus amigos y familiares. No se permite la venta, publicación o uso comercial de las fotografías sin permiso previo por escrito del Fotógrafo.',
@@ -952,13 +952,13 @@ export const TRANSLATIONS = {
     contractClauseModelReleaseText: 'Los Clientes otorgan al Fotógrafo y sus representantes legales el consentimiento irrevocable e ilimitado para usar las fotografías de los Clientes con fines editoriales, comerciales, publicitarios y cualquier otro propósito, y para modificar las fotografías sin restricción.',
     contractClauseLiability: 'LIMITACIN DE RESPONSABILIDAD',
     contractClauseLiabilityText: 'Si el Fotógrafo no puede prestar los servicios por enfermedad o lesión, intentar contratar un fotógrafo de reemplazo. Si no se encuentra un reemplazo, la responsabilidad se limita al reembolso de los pagos recibidos. En caso de pérdida o destrucción de las imágenes por causas fuera de nuestro control, la responsabilidad se limita a la devolución de las tarifas pagadas.',
-    contractClauseCancellation: 'CANCELACIN',
-    contractClauseCancellationText: 'En caso de cancelacin del Evento por cualquier motivo, el depósito no es reembolsable y se convierte en un "crédito de estudio" que puede utilizarse para una sesión o evento futuro.',
+    contractClauseCancellation: 'CANCELACIÓN',
+    contractClauseCancellationText: 'En caso de cancelación del Evento por cualquier motivo, el depósito no es reembolsable y se convierte en un "crédito de estudio" que puede utilizarse para una sesión o evento futuro.',
     contractSignatureClient: 'FIRMA DEL CLIENTE',
-    contractSignaturePhotographer: 'FIRMA DEL FOTGRAFO',
+    contractSignaturePhotographer: 'FIRMA DEL FOTÓGRAFO',
     contractSignatureDate: 'FECHA',
     contractSignHere: 'Escriba su nombre completo como firma',
-    contractIAccept: 'He ledo y entiendo el contenido de este contrato y acepto los trminos aqu establecidos.',
+    contractIAccept: 'He leído y entiendo el contenido de este contrato y acepto los términos aquí establecidos.',
     contractSignBtn: 'Firmar Contrato',
     contractSignSuccess: 'Contrato firmado exitosamente',
     contractViewBtn: 'Ver Contrato Firmado',
@@ -968,7 +968,7 @@ export const TRANSLATIONS = {
     contractAdminSetAmounts: 'Definir Montos',
     contractSaveAmounts: 'Guardar Montos',
     contractSessionTitle: 'CONTRATO DE SERVICIOS FOTOGRFICOS',
-    contractSessionSubtitle: 'Acuerdo entre Miriam Tellez Photography y el Cliente',
+    contractSessionSubtitle: 'Acuerdo entre Miriam Campos Photography y el Cliente',
     contractClient: 'Cliente',
     contractClientEmail: 'Correo Electrónico',
     contractClientPhone: 'Teléfono',
@@ -977,10 +977,10 @@ export const TRANSLATIONS = {
     contractSessionPackage: 'Servicio Contratado',
     contractSessionInfo: 'Información de la Sesión',
     contractSessionClauseCopyright: 'DERECHOS DE AUTOR',
-    contractSessionClauseCopyrightText: 'El Fotógrafo es el nico autor de las fotografías y se reserva todos los derechos de autor. El Cliente acepta que las fotografías serán utilizadas para el portafolio, sitio web y fines promocionales del Fotógrafo, salvo acuerdo escrito en contrario.',
-    contractSessionClausePayment: 'TRMINOS DE PAGO',
+    contractSessionClauseCopyrightText: 'El Fotógrafo es el único autor de las fotografías y se reserva todos los derechos de autor. El Cliente acepta que las fotografías serán utilizadas para el portafolio, sitio web y fines promocionales del Fotógrafo, salvo acuerdo escrito en contrario.',
+    contractSessionClausePayment: 'TÉRMINOS DE PAGO',
     contractSessionClausePaymentText: 'Para reservar la fecha de la sesión, se requiere un depósito no reembolsable. El saldo restante debe pagarse antes de la entrega final de las fotografías. El pago puede realizarse mediante transferencia bancaria o tarjeta de crédito a través de nuestra plataforma segura.',
-    contractSessionClauseSchedule: 'PROGRAMA Y CANCELACIN',
+    contractSessionClauseSchedule: 'PROGRAMA Y CANCELACIÓN',
     contractSessionClauseScheduleText: 'El horario de la sesión ser acordado previamente entre ambas partes. En caso de cancelacin por parte del Cliente con menos de 48 horas de anticipación, el depósito no ser reembolsado. El Fotógrafo se reserva el derecho de reprogramar en caso de condiciones climáticas adversas o fuerza mayor.',
     contractSessionClauseLiability: 'LIMITACIN DE RESPONSABILIDAD',
     contractSessionClauseLiabilityText: 'El Fotógrafo har todo lo posible por entregar las fotografías acordadas. Sin embargo, si el Fotógrafo no puede prestar los servicios por enfermedad, lesión o caso fortuito, se reembolsar el monto total pagado y el Fotógrafo no tendrá ninguna obligación adicional con el Cliente.',
@@ -1010,7 +1010,7 @@ export const TRANSLATIONS = {
     satisfiedSub: 'Verificado 5 estrellas',
     faqTitle: 'PREGUNTAS FRECUENTES',
     faqSubtitle: 'Respuestas detalladas sobre nuestro flujo de trabajo, gear y entregables.',
-    bookingTitle: 'AGENDA TU SESIN DE LUJO',
+    bookingTitle: 'AGENDA TU SESIÓN DE LUJO',
     bookingSubtitle: 'Selecciona una fecha libre y personaliza tu cotización premium en tiempo real.',
     clientName: 'Nombre Completo',
     clientEmail: 'Correo Electrónico',
@@ -1025,18 +1025,16 @@ export const TRANSLATIONS = {
     privacy: 'Política de Privacidad',
     terms: 'Términos de Servicio',
     legal: 'Aviso Legal',
-    customCursorScroll: 'SCROLL',
-    customCursorView: 'VER',
     customCursorClose: 'CERRAR',
-    favoriteAdded: 'Aadido a tus favoritos!',
+    favoriteAdded: 'Añadido a tus favoritos!',
     favoriteRemoved: 'Eliminado de tus favoritos!',
     proofTitle: 'PORTAL PRIVADO DE CLIENTE',
     proofSubtitle: 'Acceso seguro a tu galería privada de pruebas',
-    proofPassPlaceholder: 'Introduce tu cdigo de acceso seguro (ej: SELECCION2026)',
+    proofPassPlaceholder: 'Introduce tu código de acceso seguro (ej: SELECCIÓN2026)',
     proofEnter: 'Acceder a mi Galería',
-    proofError: 'Cdigo de acceso incorrecto. Intntalo de nuevo.',
-    aiTitle: 'ASISTENTE DE SELECCIN IA',
-    aiDesc: 'Nuestra red neuronal evala automticamente tus fotos segn nitidez, composicin de regla de tercios y emoción.',
+    proofError: 'Código de acceso incorrecto. Inténtalo de nuevo.',
+    aiTitle: 'ASISTENTE DE SELECCIÓN IA',
+    aiDesc: 'Nuestra red neuronal evalúa automáticamente tus fotos según nitidez, composición de regla de tercios y emoción.',
     stripePay: 'Pasarela Stripe Segura',
     invoiceTitle: 'Factura / Recibo',
     invoiceNumber: 'Factura N°',
@@ -1055,24 +1053,24 @@ export const TRANSLATIONS = {
     invoicePrint: 'Imprimir',
     invoiceView: 'Ver Factura',
     invoiceNoInvoices: 'No hay facturas disponibles',
-    invoicePaymentMethod: 'Mtodo de Pago',
+    invoicePaymentMethod: 'Método de Pago',
     invoicePaymentDate: 'Fecha de Pago',
     invoiceReceipt: 'Recibo de Pago',
     invoicePaymentComplete: 'Pago Completado',
-    invoiceItemás: 'Conceptos',
+    invoiceItems: 'Conceptos',
     invoiceSubtotal: 'Subtotal',
     invoiceBookingId: 'Reserva N°',
     invoicePaidOn: 'Pagado el',
     compareTitle: 'Comparar Imágenes',
     compareDesc: 'Desliza para contrastar los sutiles retoques de color y corrección cromática Leica.',
-    milestonesTitle: 'Una Década de Luz',
+    milestonesTitle: '15 Años de Luz',
     philosophyTitle: 'Mi Enfoque',
     philosophyPillar1: 'Luz Natural',
     philosophyPillar1Desc: 'Cada sesión comienza con el estudio de la luz. Trabajo exclusivamente con luz natural y direccional para esculpir volúmenes y revelar la textura genuina de cada instante.',
     philosophyPillar2: 'Composición',
     philosophyPillar2Desc: 'La geometría y el equilibrio visual son el alma de cada imagen. Componer con intención, respetando los espacios y las proporciones, es mi forma de narrar sin palabras.',
     philosophyPillar3: 'Emoción',
-    philosophyPillar3Desc: 'Ms all de la técnica, busco congelar lo que late: una mirada, un silencio, un gesto. La fotografía es emoción convertida en luz y sombra.',
+    philosophyPillar3Desc: 'Más allá de la técnica, busco congelar lo que late: una mirada, un silencio, un gesto. La fotografía es emoción convertida en luz y sombra.',
     searchPlaceholder: 'Buscar fotos por etiqueta, cámara, color...'
   },
   en: {
@@ -1093,7 +1091,7 @@ export const TRANSLATIONS = {
     ctaBook: 'Book Session',
     aboutTitle: 'THE PHILOSOPHY BEHIND THE GLASS',
     aboutText1: 'I am a fine art photographer and creative director dedicated to freezing time through the pristine optics of Leica and Hasselblad. I understand light not as simple exposure, but as the supreme medium to sculpt emotion and weave silent stories of golden ratio symmetry.',
-    aboutText2: 'With over 15 years documenting haute-couture destination weddings, international commercial campaigns, and iíntimate editorial model books, my work strives for elegant minimalism, generous negative space, and absolute geometric structure.',
+    aboutText2: 'With over 15 years documenting haute-couture destination weddings, international commercial campaigns, and intimate editorial model books, my work strives for elegant minimalism, generous negative space, and absolute geometric structure.',
     awards: 'Awards & Distinctions',
     gear: 'Our Gear & Optics',
     experience: 'Artistic Timeline',
@@ -1123,7 +1121,7 @@ export const TRANSLATIONS = {
     pixiesetSearchBtn: 'Go to my gallery →',
 
     contractTitle: 'PHOTOGRAPHY SERVICES CONTRACT',
-    contractSubtitle: 'Agreement between Miriam Tellez Photography and the Client',
+    contractSubtitle: 'Agreement between Miriam Campos Photography and the Client',
     contractBride: 'Bride',
     contractGroom: 'Groom',
     contractBrideEmail: 'Bride Email',
@@ -1148,7 +1146,7 @@ export const TRANSLATIONS = {
     contractClauseCooperation: 'COOPERATION',
     contractClauseCooperationText: 'The Clients consent to cooperate with the Photographer and communicate in order to achieve the best possible result within the understanding of this contract. It is recommended that the Photographer be provided with someone who knows most of the guests to point out key individuals to be photographed.',
     contractClauseSchedule: 'SCHEDULE',
-    contractClauseScheduleText: 'The shooting schedule, style of working and experience are designed to achieve a great set of Event photos. Clients agree that punctuality and cooperation are essential to producing outstanding photographic results. In cases where the Event does not run on time, we cannot guíarantee our normal set of photos.',
+    contractClauseScheduleText: 'The shooting schedule, style of working and experience are designed to achieve a great set of Event photos. Clients agree that punctuality and cooperation are essential to producing outstanding photographic results. In cases where the Event does not run on time, we cannot guarantee our normal set of photos.',
     contractClauseGuests: 'FREELANCE PHOTOGRAPHER GUESTS',
     contractClauseGuestsText: 'The Clients agree to give the Photographer precedence over guests to take the photographs required. The Photographer cannot be held liable for a lack of Event photos if guests taking their own photos interrupt the Photographer\'s work.',
     contractClauseCopyright: 'COPYRIGHT',
@@ -1173,7 +1171,7 @@ export const TRANSLATIONS = {
     contractAdminSetAmounts: 'Set Amounts',
     contractSaveAmounts: 'Save Amounts',
     contractSessionTitle: 'PHOTOGRAPHY SERVICES CONTRACT',
-    contractSessionSubtitle: 'Agreement between Miriam Tellez Photography and the Client',
+    contractSessionSubtitle: 'Agreement between Miriam Campos Photography and the Client',
     contractClient: 'Client',
     contractClientEmail: 'Email',
     contractClientPhone: 'Phone',
@@ -1230,8 +1228,6 @@ export const TRANSLATIONS = {
     privacy: 'Privacy Policy',
      terms: 'Terms of Service',
     legal: 'Legal Notice',
-    customCursorScroll: 'SCROLL',
-    customCursorView: 'VIEW',
     customCursorClose: 'CLOSE',
     favoriteAdded: 'Added to your favorites!',
     favoriteRemoved: 'Removed from your favorites!',
@@ -1264,13 +1260,13 @@ export const TRANSLATIONS = {
     invoicePaymentDate: 'Payment Date',
     invoiceReceipt: 'Payment Receipt',
     invoicePaymentComplete: 'Payment Completed',
-    invoiceItemás: 'Itemás',
+    invoiceItems: 'Items',
     invoiceSubtotal: 'Subtotal',
     invoiceBookingId: 'Booking N°',
     invoicePaidOn: 'Paid on',
     compareTitle: 'Compare Masterclasses',
     compareDesc: 'Slide to compare the masterly raw file and final signature Leica color-grade edits.',
-    milestonesTitle: 'A Decade of Light',
+    milestonesTitle: '15 Years of Light',
     philosophyTitle: 'My Approach',
     philosophyPillar1: 'Natural Light',
     philosophyPillar1Desc: 'Every session begins with the study of light. I work exclusively with natural and directional light to sculpt volumes and reveal the genuine texture of each moment.',
@@ -1281,40 +1277,5 @@ export const TRANSLATIONS = {
     searchPlaceholder: 'Search photos by tag, camera, color...'
   },
 };
-
-export const INITIAL_INSTAGRAM_POSTS: InstagramPost[] = [
-  {
-    id: 'ig-1',
-    imageUrl: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80',
-    postUrl: 'https://www.instagram.com/p/DY54qj3zRuF/',
-    caption: 'Golden hour magic ✨',
-    timestamp: '2026-07-20T10:00:00Z',
-    sortOrder: 0,
-  },
-  {
-    id: 'ig-2',
-    imageUrl: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=800&q=80',
-    postUrl: 'https://www.instagram.com/p/DYxh6sOheSH/',
-    caption: 'Timeless elegance 🖤',
-    timestamp: '2026-07-18T14:00:00Z',
-    sortOrder: 1,
-  },
-  {
-    id: 'ig-3',
-    imageUrl: 'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?auto=format&fit=crop&w=800&q=80',
-    postUrl: 'https://www.instagram.com/p/DYoJvTKTeqv/',
-    caption: 'Soft light, strong soul 🌿',
-    timestamp: '2026-07-15T09:00:00Z',
-    sortOrder: 2,
-  },
-  {
-    id: 'ig-4',
-    imageUrl: 'https://images.unsplash.com/photo-1554048612-b6a482bf67e5?auto=format&fit=crop&w=800&q=80',
-    postUrl: 'https://www.instagram.com/p/DUyd8j9khcL/?img_index=1',
-    caption: 'Captured in Milan 🇮🇹',
-    timestamp: '2026-07-12T16:00:00Z',
-    sortOrder: 3,
-  },
-];
 
 export const INITIAL_CLIENT_ACCOUNTS: ClientAccount[] = [];

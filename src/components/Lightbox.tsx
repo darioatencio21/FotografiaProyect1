@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Heart, Download, Share2, X, ChevronLeft, ChevronRight, Sliders } from 'lucide-react';
-import { Photograph, ActiveLanguíage } from '../types';
+import { Photograph, ActiveLanguage } from '../types';
 import { TRANSLATIONS } from '../data/mockData';
 import { sanitizeUrl } from '../lib/sanitize';
 import StorageImage from './StorageImage';
@@ -18,7 +18,7 @@ interface LightboxProps {
   onPrev: () => void;
   isFavorite: boolean;
   onToggleFavorite: () => void;
-  lang: ActiveLanguíage;
+  lang: ActiveLanguage;
 }
 
 export default function Lightbox({
@@ -37,7 +37,7 @@ export default function Lightbox({
 
   const t = TRANSLATIONS[lang];
 
-  function getPhotoDescription(photo: Photograph, l: ActiveLanguíage) {
+  function getPhotoDescription(photo: Photograph, l: ActiveLanguage) {
     if (l === 'es') return photo.description_es || photo.description;
 
     return photo.description;
@@ -219,7 +219,7 @@ export default function Lightbox({
                     style={{ width: '100%', maxWidth: 'none' }}
                   />
                   <div className="absolute top-3 right-3 bg-white/10 border border-white/10 px-2 py-1 text-[9px] font-mono tracking-widest text-white font-semibold rounded">
-                    AUREA MASTER WEB_RGB
+                    MIRIAM CAMPOS MASTER WEB_RGB
                   </div>
                 </div>
 

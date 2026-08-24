@@ -5,20 +5,19 @@
 
 import React, { useState, memo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowUp, Send, Check } from 'lucide-react';
+import { ArrowUp, Send } from 'lucide-react';
 import { Instagram, Facebook } from './BrandIcons';
-import { ActiveLanguíage } from '../types';
+import { ActiveLanguage } from '../types';
 import { TRANSLATIONS } from '../data/mockData';
 import { Logo } from './Logo';
+import { BRAND_NAME, SOCIAL } from '../config/site';
 
 interface FooterProps {
   onSetView: (view: string) => void;
-  lang: ActiveLanguíage;
-  isAdminLoggedIn: boolean;
-  onOpenAdminLogin: () => void;
+  lang: ActiveLanguage;
 }
 
-function Footer({ onSetView, lang, isAdminLoggedIn, onOpenAdminLogin }: FooterProps) {
+function Footer({ onSetView, lang }: FooterProps) {
   const [email, setEmail] = useState('');
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -64,10 +63,10 @@ function Footer({ onSetView, lang, isAdminLoggedIn, onOpenAdminLogin }: FooterPr
             Fine-Art and high-end editorial photography commissions. Captured under golden proportions, rendering raw emotion with absolute Leica and Hasselblad precision.
           </p>
           <div className="flex space-x-4 pt-2">
-            <a href="https://www.instagram.com/miriamtellezphotography/" target="_blank" rel="noreferrer" className="text-white/65 hover:text-white transition-colors">
+            <a href={SOCIAL.instagram} target="_blank" rel="noopener noreferrer" aria-label={`${lang === 'es' ? 'Instagram de Miriam Campos Photography' : 'Instagram of Miriam Campos Photography'}`} className="text-white/65 hover:text-white transition-colors">
               <Instagram size={16} />
             </a>
-            <a href="https://www.facebook.com/mifephotography/?_rdr" target="_blank" rel="noreferrer" className="text-white/65 hover:text-white transition-colors">
+            <a href={SOCIAL.facebook} target="_blank" rel="noopener noreferrer" aria-label={`${lang === 'es' ? 'Facebook de Miriam Campos Photography' : 'Facebook of Miriam Campos Photography'}`} className="text-white/65 hover:text-white transition-colors">
               <Facebook size={16} />
             </a>
           </div>
@@ -129,32 +128,37 @@ function Footer({ onSetView, lang, isAdminLoggedIn, onOpenAdminLogin }: FooterPr
 
         {/* Newsletter Column (Cols 3) */}
         <div className="md:col-span-3 space-y-3.5 text-left">
-          <h5 className="text-xs font-mono tracking-widest text-white/60 uppercase">NEWSLETTER</h5>
+          <h5 className="text-xs font-mono tracking-widest text-white/60 uppercase">{lang === 'es' ? 'BOLETIN' : 'NEWSLETTER'}</h5>
           <p className="text-[11px] text-white/70 leading-relaxed">
-            Subscribe to our journal for seasonal destination booking alerts & lighting masterclasses.
+            {lang === 'es'
+              ? 'Suscribite a nuestro journal para alertas de reservas en destinos y clases magistrales de luz.'
+              : 'Subscribe to our journal for seasonal destination booking alerts & lighting masterclasses.'}
           </p>
 
-          <form onSubmit={handleSubscribe} className="relative mt-2">
+          <form onSubmit={handleSubscribe} className="relative mt-2 flex gap-2" aria-label={lang === 'es' ? 'Suscripción al boletín' : 'Newsletter subscription'}>
             <input
               type="email"
               required
+              aria-label={lang === 'es' ? 'Tu dirección de email' : 'Your email address'}
               disabled={isSubmitting || isSubscribed}
-              placeholder="studio@client.com"
+              placeholder={lang === 'es' ? 'tu@email.com' : 'your@email.com'}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-charcoal border border-white/10 rounded px-3.5 py-2.5 pr-10 text-xs text-white placeholder-white/20 focus:outline-none focus:border-white/30"
+              className="flex-1 min-w-0 bg-charcoal border border-white/10 rounded px-3.5 py-2.5 text-xs text-white placeholder-white/20 focus:outline-none focus:border-white/30"
             />
             <button
               type="submit"
               disabled={isSubmitting || isSubscribed}
-              className="absolute right-1 top-1 bottom-1 px-2.5 bg-white/10 hover:bg-white/15 text-white rounded transition-all flex items-center justify-center cursor-pointer disabled:opacity-50"
+              aria-label={lang === 'es' ? 'Suscribirse' : 'Subscribe'}
+              className="px-3.5 bg-white text-dark hover:bg-white/80 font-mono text-[9px] tracking-widest uppercase font-bold rounded transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (
-                <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
-              ) : isSubscribed ? (
-                <Check size={12} />
+                <div className="w-3 h-3 border border-dark border-t-transparent rounded-full animate-spin" />
               ) : (
-                <Send size={11} />
+                <>
+                  <Send size={11} />
+                  <span className="hidden sm:inline">{lang === 'es' ? 'Suscribirse' : 'Subscribe'}</span>
+                </>
               )}
             </button>
           </form>
@@ -167,7 +171,7 @@ function Footer({ onSetView, lang, isAdminLoggedIn, onOpenAdminLogin }: FooterPr
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
               >
-                WELCOMED TO THE JOURNAL CIRCLE
+                {lang === 'es' ? 'BIENVENIDO AL CÍRCULO DEL JOURNAL' : 'WELCOMED TO THE JOURNAL CIRCLE'}
               </motion.p>
             )}
           </AnimatePresence>
@@ -178,22 +182,9 @@ function Footer({ onSetView, lang, isAdminLoggedIn, onOpenAdminLogin }: FooterPr
       {/* Footer copyright block */}
       <div className="max-w-7xl mx-auto pt-8 flex flex-col md:flex-row items-center justify-between text-xs text-white/65 space-y-4 md:space-y-0">
         <div className="flex flex-wrap justify-center md:justify-start gap-4">
-          <span>&copy; {new Date().getFullYear()} Chameleon Studio. {t.footerRights}</span>
+          <span>&copy; {new Date().getFullYear()} {BRAND_NAME}. {t.footerRights}</span>
           <button onClick={() => handleNav('privacy')} className="hover:text-white transition-colors cursor-pointer">{t.privacy}</button>
           <button onClick={() => handleNav('terms')} className="hover:text-white transition-colors cursor-pointer">{t.terms}</button>
-          <button
-            onClick={() => {
-              if (isAdminLoggedIn) {
-                onSetView('admin');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              } else {
-                onOpenAdminLogin();
-              }
-            }}
-            className="text-white/40 hover:text-white/70 transition-colors cursor-pointer text-[10px]"
-          >
-            Admin
-          </button>
         </div>
 
         <button

@@ -10,7 +10,6 @@ import {
   Clock, 
   Users, 
   CheckCircle2, 
-  DollarSign, 
   Sparkles,
   Phone,
   Mail,
@@ -19,11 +18,12 @@ import {
   ChevronRight,
   MapPin
 } from 'lucide-react';
-import { Service, ActiveLanguíage, Booking, BookingConfig, EmailConfig, PhotographyPackage, ContractData } from '../types';
+import { Service, ActiveLanguage, Booking, BookingConfig, EmailConfig, PhotographyPackage, ContractData } from '../types';
 import { sanitizeString, sanitizeEmail, sanitizePhone } from '../lib/sanitize';
+import { formatPrice } from '../config/site';
 interface BookingCalendarProps {
   services: Service[];
-  lang: ActiveLanguíage;
+  lang: ActiveLanguage;
   config?: BookingConfig;
   emailConfig?: EmailConfig;
   preSelectedPackage?: PhotographyPackage | null;
@@ -64,7 +64,15 @@ const LOCAL_TRANSLATIONS = {
     expressLabel: 'Entrega Express (48 Horas)',
     expressSub: 'Curaduría digital y retoque editorial de prioridad',
     makeupLabel: 'Maquillaje & Estilismo Profesional',
-    makeupSub: 'Asistente de estilismo de moda y cosméticos editoriales'
+    makeupSub: 'Asistente de estilismo de moda y cosméticos editoriales',
+    estimationTitle: 'Estudio de Presupuesto',
+    packagePrefix: 'Paquete:',
+    includesPackage: (duration: string) => `Incluye el paquete seleccionado (${duration})`,
+    customEstimateText: 'Se definirá un presupuesto a medida basado en tus requerimientos.',
+    toBeDefined: 'Por Definir',
+    durationFallback: '1-2 Horas',
+    sessionTypeFallback: 'Sesión Fotográfica',
+    customLabel: 'Personalizado:'
   },
   en: {
     title: 'DESIGN YOUR PHOTOGRAPHIC SESSION',
@@ -96,7 +104,15 @@ const LOCAL_TRANSLATIONS = {
     expressLabel: 'Priority Delivery (48 Hours)',
     expressSub: 'Priority editorial curation and fast high-end digital delivery',
     makeupLabel: 'Professional Makeup & Styling',
-    makeupSub: 'On-set luxury stylist and professional editorial cosmetics'
+    makeupSub: 'On-set luxury stylist and professional editorial cosmetics',
+    estimationTitle: 'Budget Estimate',
+    packagePrefix: 'Package:',
+    includesPackage: (duration: string) => `Includes the selected package (${duration})`,
+    customEstimateText: 'A custom budget will be defined based on your requirements.',
+    toBeDefined: 'To Be Defined',
+    durationFallback: '1-2 Hours',
+    sessionTypeFallback: 'Photography Session',
+    customLabel: 'Custom:'
   },
 };
 
@@ -143,7 +159,7 @@ export default function BookingCalendar({ services, lang, config: _config, email
 
   // Warn before leaving if form has data
   const formHasData = clientName || clientEmail || clientPhone || dateValue || creativeNotes || customServiceText || customTimeframeText;
-  const shouldWarn = formHasData;
+  const shouldWarn = Boolean(formHasData);
   useEffect(() => {
     setNavigationGuard?.(shouldWarn);
     if (!shouldWarn) return;
@@ -217,13 +233,13 @@ export default function BookingCalendar({ services, lang, config: _config, email
     if (selectedTimeframe === 'morning') finalSchedule = t.morning;
     else if (selectedTimeframe === 'afternoon') finalSchedule = t.afternoon;
     else if (selectedTimeframe === 'goldenHour') finalSchedule = t.goldenHour;
-    else finalSchedule = safeCustomTime ? `Personalizado: ${safeCustomTime}` : t.otherSchedule;
+    else finalSchedule = safeCustomTime ? `${t.customLabel} ${safeCustomTime}` : t.otherSchedule;
 
     const serviceName = preSelectedPackage
       ? (lang === 'es' ? preSelectedPackage.name_es : preSelectedPackage.name_en)
       : selectedServiceId === 'custom' 
-        ? `Personalizado (${safeCustomService || 'General'})` 
-        : (selectedService?.title || 'Sesión Fotográfica');
+        ? `${t.customLabel} ${safeCustomService || 'General'}` 
+        : (selectedService?.title || t.sessionTypeFallback);
 
     const formattedDate = dateValue;
     const notesText = safeNotes + 
@@ -264,7 +280,7 @@ Package: ${serviceName}
 Date: ${formattedDate}
 Time: ${finalSchedule}
 Guests: ${peopleCount}
-Estimated Total: $${totalPrice > 0 ? totalPrice : 'TBD'}
+Estimated Total: ${totalPrice > 0 ? formatPrice(totalPrice, lang) : 'TBD'}
 
 Client notes:
 ${safeNotes || 'No notes'}`
@@ -277,7 +293,7 @@ Paquete: ${serviceName}
 Fecha: ${formattedDate}
 Horario: ${finalSchedule}
 Personas: ${peopleCount}
-Total Estimado: $${totalPrice > 0 ? totalPrice : 'A Definir'}
+Total Estimado: ${totalPrice > 0 ? formatPrice(totalPrice, lang) : 'A Definir'}
 
 Notas del cliente:
 ${safeNotes || 'Sin notas'}`;
@@ -299,7 +315,7 @@ ${safeNotes || 'Sin notas'}`;
           const timeLabel = isEn ? 'Preferred time' : 'Horario preferido';
           const guestsLabel = isEn ? 'Guests' : 'Personas';
           const totalLabel = isEn ? 'Estimated total' : 'Total estimado';
-          const totalVal = totalPrice > 0 ? `$${totalPrice}` : (isEn ? 'To be defined' : 'A Definir');
+          const totalVal = totalPrice > 0 ? formatPrice(totalPrice, lang) : (isEn ? 'To be defined' : 'A Definir');
           const closing = isEn ? 'Best regards,\nMiriam Campos' : 'Saludos,\nMiriam Campos';
 
           await sendFn(safeEmail, autoSubject, `${greeting} ${safeName},
@@ -657,30 +673,22 @@ ${closing}`);
               <div className="bg-dark-gray/60 border border-white/10 rounded-lg p-4 space-y-2 mt-2">
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div className="text-center sm:text-left">
-                    <span className="text-[9px] font-mono text-white/40 uppercase tracking-wider block">Estudio de Presupuesto</span>
+                    <span className="text-[9px] font-mono text-white/40 uppercase tracking-wider block">{t.estimationTitle}</span>
                     <span className="text-xs text-white/80 font-sans font-medium mt-0.5 block">
                       {preSelectedPackage
-                        ? `Paquete: ${lang === 'es' ? preSelectedPackage.name_es : preSelectedPackage.name_en}`
+                        ? `${t.packagePrefix} ${lang === 'es' ? preSelectedPackage.name_es : preSelectedPackage.name_en}`
                         : selectedServiceId === 'custom' 
-                          ? 'Se definirá un presupuesto a medida basado en tus requerimientos.' 
-                          : `Incluye el paquete seleccionado (${selectedService?.duration || '1-2 Horas'})`
+                          ? t.customEstimateText
+                          : t.includesPackage((lang === 'es' ? selectedService?.duration_es : selectedService?.duration_en) || t.durationFallback)
                       }
                     </span>
                   </div>
                   
-                  <div className="flex items-center space-x-1 font-mono text-xl font-semibold text-white/70">
-                    {preSelectedPackage ? (
-                      <>
-                        <DollarSign size={18} className="-mr-1 text-white/70" />
-                        <span>{totalPrice.toLocaleString()}</span>
-                      </>
-                    ) : selectedServiceId === 'custom' ? (
-                      <span className="text-sm tracking-wider uppercase bg-white/10 px-3 py-1 rounded border border-white/10">Por Definir</span>
+                  <div className="flex items-center font-mono text-xl font-semibold text-white/70">
+                    {selectedServiceId === 'custom' && !preSelectedPackage ? (
+                      <span className="text-sm tracking-wider uppercase bg-white/10 px-3 py-1 rounded border border-white/10">{t.toBeDefined}</span>
                     ) : (
-                      <>
-                        <DollarSign size={18} className="-mr-1 text-white/70" />
-                        <span>{totalPrice.toLocaleString()}</span>
-                      </>
+                      <span>{formatPrice(totalPrice, lang)}</span>
                     )}
                   </div>
                 </div>

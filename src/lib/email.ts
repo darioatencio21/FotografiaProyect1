@@ -1,4 +1,4 @@
-import type { ActiveLanguíage, EmailConfig } from '../types';
+import type { ActiveLanguage, EmailConfig } from '../types';
 import { getSessionToken } from './db';
 
 function getFunctionUrl(): string {
@@ -46,7 +46,7 @@ export async function sendApprovalEmail(
   sessionDate: string,
   depositAmount: number,
   packageName: string,
-  lang: ActiveLanguíage = 'en',
+  lang: ActiveLanguage = 'en',
 ): Promise<boolean> {
   const isEn = lang === 'en';
   const subject = isEn
@@ -88,7 +88,7 @@ export async function sendRejectionEmail(
   clientEmail: string,
   sessionDate: string,
   reason?: string,
-  lang: ActiveLanguíage = 'en',
+  lang: ActiveLanguage = 'en',
 ): Promise<boolean> {
   const isEn = lang === 'en';
   const subject = isEn ? 'Booking Not Available' : 'Reserva no disponible';
@@ -119,7 +119,7 @@ export async function sendConfirmationEmail(
   sessionTime: string,
   amountPaid: number,
   packageName: string,
-  lang: ActiveLanguíage = 'en',
+  lang: ActiveLanguage = 'en',
 ): Promise<boolean> {
   const isEn = lang === 'en';
   const subject = isEn ? 'Booking Confirmed — Miriam Campos Photography' : 'Reserva confirmada — Miriam Campos Photography';
@@ -174,7 +174,7 @@ export async function sendExpirationEmail(
   clientName: string,
   clientEmail: string,
   sessionDate: string,
-  lang: ActiveLanguíage = 'en',
+  lang: ActiveLanguage = 'en',
 ): Promise<boolean> {
   const isEn = lang === 'en';
   const subject = isEn ? 'Your booking link has expired' : 'El enlace para pagar tu reserva expiró';
@@ -207,7 +207,7 @@ export async function sendDepositReceivedEmail(
   photographerEmail: string,
   amount: number,
   packageName: string,
-  lang: ActiveLanguíage = 'en',
+  lang: ActiveLanguage = 'en',
 ): Promise<boolean> {
   const isEn = lang === 'en';
   const subject = isEn ? 'Deposit Received — Miriam Campos Photography' : 'Depósito recibido — Miriam Campos Photography';
@@ -237,7 +237,7 @@ export async function sendPendingPaymentReminder(
   clientEmail: string,
   approvalLink: string,
   sessionDate: string,
-  lang: ActiveLanguíage = 'en',
+  lang: ActiveLanguage = 'en',
 ): Promise<boolean> {
   const isEn = lang === 'en';
   const subject = isEn ? 'Payment pending to confirm your booking' : 'Solo falta el pago para confirmar tu reserva';

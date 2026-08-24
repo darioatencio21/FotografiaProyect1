@@ -210,7 +210,7 @@ export interface AnalyticsStats {
 export interface PhotographerProfile {
   name: string;
   avatarUrl: string;
-  title: string; // e.g. "AUREA STUDIO HEAD PHOTOGRAPHER"
+  title: string; // e.g. "MIRIAM CAMPOS STUDIO HEAD PHOTOGRAPHER"
   preferredCamera: string;
   preferredLens: string;
   aboutTitle_es: string;
@@ -288,7 +288,7 @@ export interface Milestone {
   description_en: string;
 }
 
-export type ActiveLanguíage = 'es' | 'en';
+export type ActiveLanguage = 'es' | 'en';
 
 export interface ProofPhoto {
   id: string;
@@ -320,13 +320,4 @@ export interface ClientAccount {
   sessionTitle: string;
   photos: ProofPhoto[];
   createdAt: string;
-}
-
-export interface InstagramPost {
-  id: string;
-  imageUrl: string;
-  postUrl: string;
-  caption?: string;
-  timestamp: string;
-  sortOrder: number;
 }

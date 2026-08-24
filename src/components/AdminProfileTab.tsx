@@ -1,6 +1,6 @@
 ﻿import React, { useState, useCallback, useEffect } from 'react';
 import { Check, UploadCloud } from 'lucide-react';
-import { PhotographerProfile, ActiveLanguíage } from '../types';
+import { PhotographerProfile, ActiveLanguage } from '../types';
 import { sanitizeObject } from '../lib/sanitize';
 import { uploadImageBlob } from '../lib/db';
 import StorageImage from './StorageImage';
@@ -9,7 +9,7 @@ interface AdminProfileTabProps {
   profile: PhotographerProfile;
   onUpdateProfile: (profile: PhotographerProfile) => void;
   triggerAlert: (msg: string) => void;
-  lang: ActiveLanguíage;
+  lang: ActiveLanguage;
 }
 
 function AdminProfileTab({ profile, onUpdateProfile, triggerAlert, lang }: AdminProfileTabProps) {

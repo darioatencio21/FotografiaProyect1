@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { 
   Photograph, Service, Testimonial, BlogPost, FAQ, Booking, 
-  Message, SEOMetadata, AnalyticsStats, ActiveLanguíage, PhotographerProfile, BookingConfig, EmailConfig,
+  Message, SEOMetadata, AnalyticsStats, ActiveLanguage, PhotographerProfile, BookingConfig, EmailConfig,
   ClientAccount, ProofPhoto, SessionCategory, PhotographyPackage, Invoice
 } from '../types';
 import { TRANSLATIONS } from '../data/mockData';
@@ -30,6 +30,7 @@ import AdminRemindersTab from './AdminRemindersTab';
 import ContractView from './ContractView';
 import RevealableField from './RevealableField';
 import { maskToken } from '../utils/maskData';
+import { formatPrice } from '../config/site';
 
 function compressImage(file: File, maxSize = 1600, quality = 0.85): Promise<{ blob: Blob; width: number; height: number }> {
   return new Promise((resolve, reject) => {
@@ -79,7 +80,7 @@ interface AdminCMSProps {
   bookingConfig: BookingConfig;
   emailConfig: EmailConfig;
   stats: AnalyticsStats;
-  lang: ActiveLanguíage;
+  lang: ActiveLanguage;
   onUpdatePhotographs: (photos: Photograph[]) => void;
   onUpdateTestimonials: (testimonials: Testimonial[]) => void;
   onUpdateBlogPosts: (posts: BlogPost[]) => void;
@@ -162,10 +163,10 @@ export default function AdminCMS({
   const [replyText, setReplyText] = useState<string>('');
 
   // Simulated notification system
-  const [cmásAlert, setCmásAlert] = useState<string | null>(null);
+  const [cmsAlert, setCmsAlert] = useState<string | null>(null);
   const triggerAlert = (msg: string) => {
-    setCmásAlert(msg);
-    setTimeout(() => setCmásAlert(null), 3000);
+    setCmsAlert(msg);
+    setTimeout(() => setCmsAlert(null), 3000);
   };
 
   const resetTestimonialForm = () => {
@@ -214,7 +215,7 @@ export default function AdminCMS({
               const cName = newBooking.clientname || 'Alguien';
               triggerAlert(`📍 Nueva reserva de ${cName}!`);
               if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-                new Notification('Nueva Reserva - Aorea Studio', {
+                new Notification('Nueva Reserva - Miriam Campos Photography', {
                   body: `${cName} ha solicitado una sesión. Revisa la cola de reservas.`,
                   icon: '/favicon-32x32.png',
                 });
@@ -253,7 +254,7 @@ export default function AdminCMS({
               const cName = newMsg.name || 'Alguien';
               triggerAlert(`✉️ Nuevo mensaje de ${cName}!`);
               if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-                new Notification('Nuevo Mensaje - Aorea Studio', {
+                new Notification('Nuevo Mensaje - Miriam Campos Photography', {
                   body: `${cName} te ha escrito. Revisa la bandeja de entrada.`,
                   icon: '/favicon-32x32.png',
                 });
@@ -790,7 +791,7 @@ export default function AdminCMS({
       
       {/* Toast Alert */}
       <AnimatePresence>
-        {cmásAlert && (
+        {cmsAlert && (
           <motion.div
             className="absolute top-6 right-6 glass-premium px-4 py-2.5 rounded-lg border border-white/10 text-white/50 text-xs font-mono tracking-wider flex items-center space-x-2 shadow-2xl z-55"
             initial={{ opacity: 0, y: -20 }}
@@ -798,7 +799,7 @@ export default function AdminCMS({
             exit={{ opacity: 0, y: -20 }}
           >
             <div className="w-2 h-2 rounded-full bg-white/10 animate-ping" />
-            <span>{cmásAlert}</span>
+            <span>{cmsAlert}</span>
           </motion.div>
         )}
       </AnimatePresence>
@@ -808,7 +809,7 @@ export default function AdminCMS({
         <div className="space-y-6">
           <div className="flex items-center space-x-2 px-2">
             <Settings className="text-white/70" size={18} />
-            <span className="font-serif text-sm tracking-widest text-white/90 font-bold">AUREA BACKOFFICE</span>
+            <span className="font-serif text-sm tracking-widest text-white/90 font-bold">MIRIAM CAMPOS BACKOFFICE</span>
           </div>
 
           <div className="space-y-1.5">
@@ -1011,7 +1012,7 @@ export default function AdminCMS({
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-charcoal border border-white/10 rounded-lg p-4 flex flex-col text-left">
                 <span className="text-[9px] font-mono text-white/40 uppercase">{t('Ingresos Estimados', 'Estimated Revenue', 'Receita Estimada')}</span>
-                <span className="text-2xl font-mono font-bold text-white/70 mt-1">${stats.totalRevenue.toLocaleString()}</span>
+                <span className="text-2xl font-mono font-bold text-white/70 mt-1">{formatPrice(stats.totalRevenue, lang)}</span>
                 <span className="text-[10px] font-mono text-emerald-400 mt-2 flex items-center space-x-1">
                   <ArrowUpRight size={10} />
                   <span>{t('+12.4% vs mes anterior', '+12.4% vs Last month', '+12.4% vs mês anterior')}</span>
@@ -1437,7 +1438,7 @@ export default function AdminCMS({
                                 {services.find(s=>s.id === b.serviceId)?.title || 'Custom Session'}
                               </span>
                             </td>
-                            <td className="p-4 font-semibold text-white/60 font-mono">${b.amount || 1800}</td>
+                            <td className="p-4 font-semibold text-white/60 font-mono">{formatPrice(b.amount || 1800, lang)}</td>
                             <td className="p-4">
                               <span className={`px-2 py-0.5 rounded text-[9px] font-mono font-semibold uppercase ${
                                 b.status === 'confirmed' || b.status === 'completed'
@@ -1585,7 +1586,7 @@ export default function AdminCMS({
                                       <div className="pt-2 border-t border-white/10 flex items-center justify-between">
                                         <div>
                                           <span className="text-white/40 block text-[9px] uppercase font-mono tracking-wider">{t('Monto Presupuestado:', 'Estimated Amount:', 'Valor Orçado:')}</span>
-                                          <span className="text-lg font-serif text-white/60 font-semibold">${b.amount || 1800}</span>
+                                          <span className="text-lg font-serif text-white/60 font-semibold">{formatPrice(b.amount || 1800, lang)}</span>
                                         </div>
                                         <div>
                                           <span className="text-white/40 block text-[9px] uppercase font-mono tracking-wider text-right">{t('Estado Solicitud:', 'Request Status:', 'Estado da Solicitação:')}</span>
@@ -1674,7 +1675,7 @@ export default function AdminCMS({
                                                     </button>
                                                   )}
                                                  {b.contractSignature && !b.contractPhotographerSignature && (
-                                                   <button onClick={() => onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, contractPhotographerSignature: 'Miriam Tellez', contractPhotographerSignedAt: new Date().toISOString() } : book))} className="flex-1 px-3 py-2 bg-white/10 border border-white/10 text-white/70 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-white/15 transition-all">
+                                                   <button onClick={() => onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, contractPhotographerSignature: 'Miriam Campos', contractPhotographerSignedAt: new Date().toISOString() } : book))} className="flex-1 px-3 py-2 bg-white/10 border border-white/10 text-white/70 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-white/15 transition-all">
                                                      {t('Firmar como Fotógrafa', 'Sign as Photographer', 'Assinar como Fotógrafa')}
                                                    </button>
                                                  )}
@@ -1781,7 +1782,7 @@ export default function AdminCMS({
                         </div>
                       </div>
                       <div className="flex items-center justify-between mt-2">
-                        <span className="font-semibold text-white/60 font-mono text-sm">${b.amount || 1800}</span>
+                        <span className="font-semibold text-white/60 font-mono text-sm">{formatPrice(b.amount || 1800, lang)}</span>
                       </div>
                     </div>
 
@@ -1914,7 +1915,7 @@ export default function AdminCMS({
                                 </button>
                               )}
                               {b.contractSignature && !b.contractPhotographerSignature && (
-                                <button onClick={() => onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, contractPhotographerSignature: 'Miriam Tellez', contractPhotographerSignedAt: new Date().toISOString() } : book))} className="flex-1 px-3 py-2 bg-white/10 border border-white/10 text-white/70 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-white/15 transition-all">
+                                <button onClick={() => onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, contractPhotographerSignature: 'Miriam Campos', contractPhotographerSignedAt: new Date().toISOString() } : book))} className="flex-1 px-3 py-2 bg-white/10 border border-white/10 text-white/70 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-white/15 transition-all">
                                   {t('Firmar como Fotógrafa', 'Sign as Photographer', 'Assinar como Fotógrafa')}
                                 </button>
                               )}
@@ -1999,7 +2000,7 @@ export default function AdminCMS({
                   <div><p className="text-[9px] text-white/40 uppercase">{t('Factura', 'Invoice', 'Fatura')}</p><p className="font-mono text-white/60">{invoice.invoiceNumber}</p></div>
                    <div><p className="text-[9px] text-white/40 uppercase">{t('Cliente', 'Client', 'Cliente')}</p><p className="text-white/80"><RevealableField value={invoice.clientName} type="name" /></p></div>
                   <div className="md:col-span-2"><p className="text-[9px] text-white/40 uppercase">{t('Paquete', 'Package', 'Pacote')}</p><p className="text-white/70 truncate">{invoice.packageName}</p></div>
-                  <div><p className="text-[9px] text-white/40 uppercase">{t('Total', 'Total', 'Total')}</p><p className="text-white/60 font-mono">${invoice.total.toLocaleString()}</p></div>
+                  <div><p className="text-[9px] text-white/40 uppercase">{t('Total', 'Total', 'Total')}</p><p className="text-white/60 font-mono">{formatPrice(invoice.total, lang)}</p></div>
                   <div className="flex items-center justify-between gap-2"><span className={invoice.status === 'paid' ? 'text-emerald-400' : 'text-white/60'}>{invoice.status === 'paid' ? t('Pagada', 'Paid', 'Paga') : invoice.status === 'partial' ? t('Parcial', 'Partial', 'Parcial') : t('Pendiente', 'Pending', 'Pendente')}</span><button onClick={() => window.print()} className="text-white/70 hover:text-white"><FileText size={14} /></button></div>
                 </div>
               ))}
@@ -2091,7 +2092,7 @@ export default function AdminCMS({
                         rows={5}
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
-                        placeholder="Escribe tu respuesta profesional aqu o usa la plantilla de arriba..."
+                        placeholder="Escribe tu respuesta profesional aquí o usa la plantilla de arriba..."
                         className="w-full bg-dark-gray border-stone rounded-lg p-3 text-xs text-white placeholder-white/20 focus:outline-none focus:border-white/30 font-sans resize-none leading-relaxed"
                       />
                       <p className="text-[10px] font-mono text-white/40 leading-relaxed">
@@ -2320,7 +2321,7 @@ export default function AdminCMS({
                         <label className="text-[10px] font-mono text-white/45 uppercase tracking-wider">Asunto del Correo de Respuesta</label>
                         <input
                           type="text"
-                          placeholder="Ej: Tu reserva ha sido recibida con éxito! - Aorea Studio"
+                          placeholder="Ej: Tu reserva ha sido recibida con éxito! - Miriam Campos Photography"
                           value={emailForm.autoReplySubject || ''}
                           onChange={(e) => setEmailForm({ ...emailForm, autoReplySubject: e.target.value })}
                           className="w-full bg-charcoal border border-stone rounded p-2.5 text-xs text-white placeholder-white/20 focus:outline-none focus:border-white/30"
@@ -2652,7 +2653,7 @@ export default function AdminCMS({
                           />
                           <Upload size={32} className={`mb-3 transition-colors ${isDragOver ? 'text-white/70' : 'text-white/40'}`} />
                           <span className="text-xs text-white/80 font-medium block">
-                            {t('Arrastra y suelta tus fotos aqu o haz clic para explorar', 'Drag & drop your photos here or click to browse')}
+                            {t('Arrastra y suelta tus fotos aquí o haz clic para explorar', 'Drag & drop your photos here or click to browse')}
                           </span>
                           <span className="text-[9px] text-white/40 font-mono mt-1 block">
                             {t('Soporta múltiples archivos a la vez (PNG, JPG, WEBP)', 'Supports multiple files at once (PNG, JPG, WEBP)')}
@@ -3218,7 +3219,7 @@ export default function AdminCMS({
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center space-x-2">
                   <Settings className="text-white/70" size={18} />
-                  <span className="font-serif text-sm tracking-widest text-white/90 font-bold">AUREA CMS</span>
+                  <span className="font-serif text-sm tracking-widest text-white/90 font-bold">MIRIAM CAMPOS CMS</span>
                 </div>
                 <button
                   onClick={() => setMobileSidebarOpen(false)}
@@ -3325,7 +3326,7 @@ interface SessionCatEditorProps {
   categories: SessionCategory[];
   onUpdate: (cats: SessionCategory[]) => void;
   triggerAlert: (msg: string) => void;
-  lang: ActiveLanguíage;
+  lang: ActiveLanguage;
 }
 
 const CATEGORY_ICONS = ['Heart', 'Gem', 'Camera', 'Users', 'Baby', 'Sparkles', 'PartyPopper', 'GraduationCap', 'Briefcase', 'Utensils', 'Package', 'Calendar'];

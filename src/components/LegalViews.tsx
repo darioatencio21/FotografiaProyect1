@@ -1,9 +1,9 @@
 import { Shield, FileText, ArrowLeft, CheckCircle } from 'lucide-react';
-import { ActiveLanguíage } from '../types';
+import { ActiveLanguage } from '../types';
 
 interface LegalViewProps {
   type: 'privacy' | 'terms';
-  lang: ActiveLanguíage;
+  lang: ActiveLanguage;
   onBack: () => void;
 }
 

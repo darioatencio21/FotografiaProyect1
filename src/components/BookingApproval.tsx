@@ -1,14 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { CheckCircle2, Clock, DollarSign, FileText, AlertCircle, Calendar, Shield } from 'lucide-react';
-import { ActiveLanguíage, Booking } from '../types';
+import { ActiveLanguage, Booking } from '../types';
 import ContractView from './ContractView';
 import { PaymentResult } from './StripeCheckout';
 import { TRANSLATIONS } from '../data/mockData';
+import { formatPrice } from '../config/site';
 
 interface BookingApprovalProps {
   booking: Booking;
-  lang: ActiveLanguíage;
+  lang: ActiveLanguage;
   onConfirm: (bookingId: string, signature?: string) => void;
   onCheckout: (amount: number, description: string, onDone: (result?: PaymentResult) => void, onCancel?: () => void) => void;
 }
@@ -136,7 +137,7 @@ export default function BookingApproval({ booking, lang, onConfirm, onCheckout }
               {lang === 'en' ? 'Package Price' : 'Precio del Paquete'}
             </span>
             <span className="text-white/80 font-mono text-sm">
-              ${(booking.amount || 0).toLocaleString()}
+              {formatPrice(booking.amount || 0, lang)}
             </span>
           </div>
           {travelAmount > 0 && (
@@ -145,7 +146,7 @@ export default function BookingApproval({ booking, lang, onConfirm, onCheckout }
                 {lang === 'en' ? 'Travel Expenses' : 'Gastos de Viaje'}
               </span>
               <span className="text-white/80 font-mono text-sm">
-                + ${travelAmount.toLocaleString()}
+                + {formatPrice(travelAmount, lang)}
               </span>
             </div>
           )}
@@ -154,7 +155,7 @@ export default function BookingApproval({ booking, lang, onConfirm, onCheckout }
               {lang === 'en' ? 'Total' : 'Total'}
             </span>
             <span className="text-white/90 font-serif text-lg font-semibold">
-              ${totalWithTravel.toLocaleString()}
+              {formatPrice(totalWithTravel, lang)}
             </span>
           </div>
           <div className="flex justify-between items-center">
@@ -162,7 +163,7 @@ export default function BookingApproval({ booking, lang, onConfirm, onCheckout }
               {lang === 'en' ? 'Deposit (30%)' : 'Depósito (30%)'}
             </span>
             <span className="text-[#C7A962] font-serif text-lg font-semibold">
-              ${depositAmount.toLocaleString()}
+              {formatPrice(depositAmount, lang)}
             </span>
           </div>
           <div className="flex justify-between items-center">
@@ -170,7 +171,7 @@ export default function BookingApproval({ booking, lang, onConfirm, onCheckout }
               {lang === 'en' ? 'Balance Due' : 'Saldo Restante'}
             </span>
             <span className="text-white/80 font-mono text-sm">
-              ${dueAmount.toLocaleString()}
+              {formatPrice(dueAmount, lang)}
             </span>
           </div>
         </div>

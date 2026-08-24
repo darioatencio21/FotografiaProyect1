@@ -6,15 +6,15 @@
 import { useState, useEffect, memo } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'motion/react';
 import { X, Globe, ChevronLeft } from 'lucide-react';
-import { ActiveLanguíage } from '../types';
+import { ActiveLanguage } from '../types';
 import { TRANSLATIONS } from '../data/mockData';
 import { Logo } from './Logo';
 
 interface HeaderProps {
   currentView: string;
   onSetView: (view: string) => void;
-  lang: ActiveLanguíage;
-  onSetLang: (lang: ActiveLanguíage) => void;
+  lang: ActiveLanguage;
+  onSetLang: (lang: ActiveLanguage) => void;
 }
 
 const DRAWER_WIDTH_VW = 85;
@@ -28,11 +28,11 @@ function Header({
   onSetLang,
 }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showLanguíageDropdown, setShowLanguíageDropdown] = useState(false);
+  const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
 
   const t = TRANSLATIONS[lang];
 
-  const menuItemás = [
+  const menuItems = [
     { id: 'home', label: t.navHome },
     { id: 'about', label: t.navAbout },
     { id: 'portfolio', label: t.navPortfolio },
@@ -47,7 +47,15 @@ function Header({
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const languíages: { code: ActiveLanguíage; name: string }[] = [
+  const handleBookNow = () => {
+    onSetView('services');
+    setIsMobileMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const bookNowLabel = lang === 'es' ? 'Reservar' : 'Book Now';
+
+  const languages: { code: ActiveLanguage; name: string }[] = [
     { code: 'es', name: 'ESP' },
     { code: 'en', name: 'ENG' },
 
@@ -92,7 +100,7 @@ function Header({
     <header className="fixed top-0 left-0 right-0 w-full max-h-[70px] lg:max-h-none bg-dark border-b border-white/10 py-2 lg:py-4 px-4 lg:px-12 flex items-center justify-between lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-x-24 z-50">
       {/* Desktop navigation link array - Left split (Home, About, Portfolio) */}
       <nav className="hidden lg:flex items-center space-x-8 z-10 justify-start">
-        {menuItemás.slice(0, 3).map(item => {
+        {menuItems.slice(0, 3).map(item => {
           const isActive = currentView === item.id;
           return (
             <button
@@ -128,7 +136,7 @@ function Header({
       {/* Desktop Actions bar & Right split (Services, Client Portal, Contact) */}
       <div className="hidden lg:flex items-center justify-end space-x-8 z-10">
         <nav className="flex items-center space-x-8">
-          {menuItemás.slice(3).map(item => {
+          {menuItems.slice(3).map(item => {
             const isActive = currentView === item.id;
             return (
               <button
@@ -156,7 +164,10 @@ function Header({
           {/* Languíage selector */}
           <div className="relative">
             <button
-              onClick={() => setShowLanguíageDropdown(!showLanguíageDropdown)}
+              onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}
+              aria-haspopup="true"
+              aria-expanded={showLanguageDropdown}
+              aria-label={lang === 'es' ? 'Cambiar idioma' : 'Change language'}
               className="flex items-center space-x-1.5 bg-white/10 hover:bg-white/15 border border-white/15 px-2.5 py-1.5 rounded-md text-white/90 hover:text-white text-xs font-mono tracking-widest uppercase cursor-pointer transition-all"
             >
               <Globe size={12} className="text-white" />
@@ -164,21 +175,22 @@ function Header({
             </button>
 
             <AnimatePresence>
-              {showLanguíageDropdown && (
+              {showLanguageDropdown && (
                 <>
-                  <div className="fixed inset-0 z-10" onClick={() => setShowLanguíageDropdown(false)} />
+                  <div className="fixed inset-0 z-10" onClick={() => setShowLanguageDropdown(false)} />
                   <motion.div
                     className="absolute right-0 mt-2.5 w-24 bg-[#2D2A28] border border-white/10 rounded-lg shadow-2xl overflow-hidden z-20 text-left"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
                   >
-                    {languíages.map(item => (
+                    {languages.map(item => (
                       <button
                         key={item.code}
+                        aria-current={lang === item.code}
                         onClick={() => {
                           onSetLang(item.code);
-                          setShowLanguíageDropdown(false);
+                          setShowLanguageDropdown(false);
                         }}
                         className={`w-full text-left px-3.5 py-2 text-xs font-mono transition-all ${
                           lang === item.code
@@ -194,6 +206,15 @@ function Header({
               )}
             </AnimatePresence>
           </div>
+
+          {/* Book Now CTA */}
+          <button
+            onClick={handleBookNow}
+            aria-label={bookNowLabel}
+            className="flex items-center space-x-1.5 bg-white hover:bg-white/85 border border-white px-4 py-1.5 rounded-md text-dark text-xs font-mono tracking-widest uppercase font-bold cursor-pointer transition-all shadow-[0_0_16px_rgba(255,255,255,0.15)]"
+          >
+            {bookNowLabel}
+          </button>
 
         </div>
       </div>
@@ -293,7 +314,7 @@ function Header({
             </div>
 
             <div className="space-y-6 pt-2">
-              {menuItemás.map(item => {
+              {menuItems.map(item => {
                 const isActive = currentView === item.id;
                 return (
                   <button
@@ -310,8 +331,14 @@ function Header({
             </div>
 
             <div className="space-y-4 pb-8">
+              <button
+                onClick={handleBookNow}
+                className="w-full py-3 bg-white hover:bg-white/85 text-dark rounded-md font-mono text-xs tracking-widest uppercase font-bold cursor-pointer transition-all"
+              >
+                {bookNowLabel}
+              </button>
               <div className="flex items-center justify-center space-x-3 pb-4">
-                {languíages.map(item => (
+                {languages.map(item => (
                   <button
                     key={item.code}
                     onClick={() => onSetLang(item.code)}

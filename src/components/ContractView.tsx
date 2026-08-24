@@ -1,11 +1,12 @@
 import React from 'react';
 import { Printer, CheckCircle } from 'lucide-react';
-import { Booking, ActiveLanguíage } from '../types';
+import { Booking, ActiveLanguage } from '../types';
 import { sanitizeHTML } from '../lib/sanitize';
+import { CONTACT, formatPrice } from '../config/site';
 
 interface Props {
   booking: Booking;
-  lang: ActiveLanguíage;
+  lang: ActiveLanguage;
   t: Record<string, string>;
   mode?: 'client-sign' | 'view' | 'admin-sign';
   onClientSign?: (signature: string) => void;
@@ -67,8 +68,8 @@ export default function ContractView({ booking, lang, t, mode = 'view', onClient
 '<div class="grid2">' +
 '<div>' +
 `<p style="font-size:9px;text-transform:uppercase;letter-spacing:0.15em;color:#B58A4A;margin:0 0 4px;font-weight:600">${pl}</p>` +
-'<p style="margin:0;font-size:13px;color:#2D2A28">Miriam Tellez</p>' +
-'<p style="margin:0;font-size:11px;color:#8C8076">miriamtellezphotography@gmail.com</p>' +
+'<p style="margin:0;font-size:13px;color:#2D2A28">Miriam Campos</p>' +
+`<p style="margin:0;font-size:11px;color:#8C8076">${CONTACT.email}</p>` +
 '</div>' +
 '<div style="text-align:right">' +
 `<p style="font-size:9px;text-transform:uppercase;letter-spacing:0.15em;color:#B58A4A;margin:0 0 4px;font-weight:600">${isSession ? t.contractSessionDate : t.contractWeddingDate}</p>` +
@@ -123,10 +124,10 @@ export default function ContractView({ booking, lang, t, mode = 'view', onClient
 (booking.packageDetails ? `<p style="margin:4px 0 0;font-size:11px;color:#8C8076">${sanitizeHTML(booking.packageDetails)}</p>` : '') +
 '<hr style="border:0;border-top:1px solid #ddd;margin:12px 0"/>' +
 '<div class="price-grid">' +
-`${priceRow(t.contractAmountAgreed, '$' + (Number(booking.amount) || 0).toLocaleString())}` +
-(Number(booking.travelExpenses) ? `${priceRow(t.contractTravelExpenses, '$' + (Number(booking.travelExpenses) || 0).toLocaleString())}` : '') +
-`${priceRow(t.contractDeposit, '$' + (Number(booking.depositAmount) || 0).toLocaleString())}` +
-`${priceRow(t.contractAmountDue, '$' + Math.max(0, (Number(booking.amount) || 0) + (Number(booking.travelExpenses) || 0) - (Number(booking.depositAmount) || 0)).toLocaleString())}` +
+`${priceRow(t.contractAmountAgreed, formatPrice(Number(booking.amount) || 0, lang))}` +
+(Number(booking.travelExpenses) ? `${priceRow(t.contractTravelExpenses, formatPrice(Number(booking.travelExpenses) || 0, lang))}` : '') +
+`${priceRow(t.contractDeposit, formatPrice(Number(booking.depositAmount) || 0, lang))}` +
+`${priceRow(t.contractAmountDue, formatPrice(Math.max(0, (Number(booking.amount) || 0) + (Number(booking.travelExpenses) || 0) - (Number(booking.depositAmount) || 0)), lang))}` +
 '</div>' +
 '</div>' +
 '<hr class="hr"/>' +
@@ -187,8 +188,8 @@ clauses.map(c => `<div class="clause"><h4>${c.title}</h4><p>${c.text}</p></div>`
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs font-mono text-white/70">
         <div className="space-y-1">
           <p className="text-white/70 font-semibold uppercase tracking-widest text-[10px]">{lang === 'es' ? 'Fotógrafa' : 'Photographer'}</p>
-          <p>Miriam Tellez</p>
-          <p>miriamtellezphotography@gmail.com</p>
+          <p>Miriam Campos</p>
+          <p>{CONTACT.email}</p>
           <p>(559) 756-1144</p>
         </div>
         <div className="space-y-1">
@@ -257,21 +258,21 @@ clauses.map(c => `<div class="clause"><h4>${c.title}</h4><p>${c.text}</p></div>`
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 pt-3 border-t border-white/10 mt-3">
           <div>
             <p className="text-[9px] uppercase tracking-widest text-white/30">{t.contractAmountAgreed}</p>
-            <p className="font-serif text-lg text-white/90">${(Number(booking.amount) || 0).toLocaleString()}</p>
+            <p className="font-serif text-lg text-white/90">{formatPrice(Number(booking.amount) || 0, lang)}</p>
           </div>
           {Number(booking.travelExpenses) ? (
             <div>
               <p className="text-[9px] uppercase tracking-widest text-white/30">{t.contractTravelExpenses}</p>
-              <p className="font-serif text-lg text-white/90">+ ${(Number(booking.travelExpenses) || 0).toLocaleString()}</p>
+              <p className="font-serif text-lg text-white/90">+ {formatPrice(Number(booking.travelExpenses) || 0, lang)}</p>
             </div>
           ) : <div />}
           <div>
             <p className="text-[9px] uppercase tracking-widest text-white/30">{t.contractDeposit}</p>
-            <p className="font-serif text-lg text-white/90">${(Number(booking.depositAmount) || 0).toLocaleString()}</p>
+            <p className="font-serif text-lg text-white/90">{formatPrice(Number(booking.depositAmount) || 0, lang)}</p>
           </div>
           <div>
             <p className="text-[9px] uppercase tracking-widest text-white/30">{t.contractAmountDue}</p>
-            <p className="font-serif text-lg text-white/90">${Math.max(0, (Number(booking.amount) || 0) + (Number(booking.travelExpenses) || 0) - (Number(booking.depositAmount) || 0)).toLocaleString()}</p>
+            <p className="font-serif text-lg text-white/90">{formatPrice(Math.max(0, (Number(booking.amount) || 0) + (Number(booking.travelExpenses) || 0) - (Number(booking.depositAmount) || 0)), lang)}</p>
           </div>
         </div>
         {booking.invoiceId && (

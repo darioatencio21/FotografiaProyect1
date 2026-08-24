@@ -1,6 +1,6 @@
 ﻿import React, { useState, useCallback, useEffect } from 'react';
 import { RefreshCw, UploadCloud } from 'lucide-react';
-import { SEOMetadata, ActiveLanguíage } from '../types';
+import { SEOMetadata, ActiveLanguage } from '../types';
 import { sanitizeObject } from '../lib/sanitize';
 import { uploadImageBlob } from '../lib/db';
 import StorageImage from './StorageImage';
@@ -9,7 +9,7 @@ interface AdminSEOTabProps {
   seo: SEOMetadata;
   onUpdateSeo: (seo: SEOMetadata) => void;
   triggerAlert: (msg: string) => void;
-  lang: ActiveLanguíage;
+  lang: ActiveLanguage;
 }
 
 function AdminSEOTab({ seo, onUpdateSeo, triggerAlert, lang }: AdminSEOTabProps) {

@@ -57,6 +57,32 @@ import {
 } from './lib/db';
 import { sanitizeString, sanitizeEmail, sanitizeUrl, unescapeHTMLEntities } from './lib/sanitize';
 import { computeAnalytics, trackPageView } from './lib/analytics';
+import { formatPrice, SOCIAL, METRICS, CONTACT } from './config/site';
+import { isSupabaseConfigured } from './lib/supabase';
+
+// Storage-key migration: legacy aorea_*/aurea_* prefixes → miriamcampos_*.
+// Runs at module load (before the App component's useState initializers read
+// localStorage) so existing offline/demo data survives the rebrand.
+(function migrateLegacyStorageKeys() {
+  if (typeof window === 'undefined') return;
+  try {
+    const legacyPrefixes = ['aorea_', 'aurea_'];
+    const migrated = new Set<string>();
+    for (const key of Object.keys(window.localStorage)) {
+      for (const prefix of legacyPrefixes) {
+        if (key.startsWith(prefix) && !migrated.has(key)) {
+          migrated.add(key);
+          const newKey = `miriamcampos_${key.slice(prefix.length)}`;
+          if (newKey !== key && window.localStorage.getItem(newKey) === null) {
+            window.localStorage.setItem(newKey, window.localStorage.getItem(key) as string);
+          }
+        }
+      }
+    }
+  } catch {
+    // localStorage unavailable (privacy mode) — ignore.
+  }
+})();
 
 const VALID_VIEWS = new Set([
   'home', 'about', 'portfolio', 'services', 'client-portal',
@@ -160,17 +186,15 @@ export default function App() {
   const setNavigationGuard = (v: boolean) => { navigationGuardRef.current = v; };
 
   const [lang, setLang] = useState<'es' | 'en'>(() => {
-    const savedLanguíage = localStorage.getItem('aorea_lang');
-    return savedLanguíage === 'es' || savedLanguíage === 'en' ? savedLanguíage : 'en';
+    const savedLanguage = localStorage.getItem('miriamcampos_lang');
+    return savedLanguage === 'es' || savedLanguage === 'en' ? savedLanguage : 'en';
   });
 
   const navigateTo = useCallback((view: string) => {
     if (navigationGuardRef.current) {
       const msg = lang === 'es'
         ? 'Tienes información sin guardar. ¿Seguro que quieres salir?'
-        : lang === 'pt'
-          ? 'Você tem informações não salvas. Tem certeza que deseja sair?'
-          : 'You have unsaved information. Are you sure you want to leave?';
+        : 'You have unsaved information. Are you sure you want to leave?';
       if (!window.confirm(msg)) return;
       navigationGuardRef.current = false;
     }
@@ -211,59 +235,59 @@ export default function App() {
   }, []);
 
   const [photographs, setPhotographs] = useState<Photograph[]>(() => {
-    try { const saved = localStorage.getItem('aorea_photos'); return saved ? JSON.parse(saved) : INITIAL_PHOTOGRAPHS; } catch { return INITIAL_PHOTOGRAPHS; }
+    try { const saved = localStorage.getItem('miriamcampos_photos'); return saved ? JSON.parse(saved) : INITIAL_PHOTOGRAPHS; } catch { return INITIAL_PHOTOGRAPHS; }
   });
   
   const [services, setServices] = useState<Service[]>(() => {
-    try { const saved = localStorage.getItem('aorea_services'); return saved ? JSON.parse(saved) : INITIAL_SERVICES; } catch { return INITIAL_SERVICES; }
+    try { const saved = localStorage.getItem('miriamcampos_services'); return saved ? JSON.parse(saved) : INITIAL_SERVICES; } catch { return INITIAL_SERVICES; }
   });
 
   const [testimonials, setTestimonials] = useState<Testimonial[]>(() => {
-    try { const saved = localStorage.getItem('aorea_testimonials'); return saved ? JSON.parse(saved) : INITIAL_TESTIMONIALS; } catch { return INITIAL_TESTIMONIALS; }
+    try { const saved = localStorage.getItem('miriamcampos_testimonials'); return saved ? JSON.parse(saved) : INITIAL_TESTIMONIALS; } catch { return INITIAL_TESTIMONIALS; }
   });
 
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>(() => {
-    try { const saved = localStorage.getItem('aorea_blog'); return saved ? JSON.parse(saved) : INITIAL_BLOG_POSTS; } catch { return INITIAL_BLOG_POSTS; }
+    try { const saved = localStorage.getItem('miriamcampos_blog'); return saved ? JSON.parse(saved) : INITIAL_BLOG_POSTS; } catch { return INITIAL_BLOG_POSTS; }
   });
 
   const [faqs, setFaqs] = useState<FAQ[]>(() => {
-    try { const saved = localStorage.getItem('aorea_faqs'); return saved ? JSON.parse(saved) : INITIAL_FAQS; } catch { return INITIAL_FAQS; }
+    try { const saved = localStorage.getItem('miriamcampos_faqs'); return saved ? JSON.parse(saved) : INITIAL_FAQS; } catch { return INITIAL_FAQS; }
   });
 
   const [bookings, setBookings] = useState<Booking[]>(() => {
-    try { const saved = localStorage.getItem('aorea_bookings'); return saved ? JSON.parse(saved) : INITIAL_BOOKINGS; } catch { return INITIAL_BOOKINGS; }
+    try { const saved = localStorage.getItem('miriamcampos_bookings'); return saved ? JSON.parse(saved) : INITIAL_BOOKINGS; } catch { return INITIAL_BOOKINGS; }
   });
 
   const [messages, setMessages] = useState<Message[]>(() => {
-    try { const saved = localStorage.getItem('aorea_messages'); return saved ? JSON.parse(saved) : INITIAL_MESSAGES; } catch { return INITIAL_MESSAGES; }
+    try { const saved = localStorage.getItem('miriamcampos_messages'); return saved ? JSON.parse(saved) : INITIAL_MESSAGES; } catch { return INITIAL_MESSAGES; }
   });
 
   const [seo, setSeo] = useState<SEOMetadata>(() => {
-    try { const saved = localStorage.getItem('aorea_seo'); return saved ? JSON.parse(saved) : INITIAL_SEO; } catch { return INITIAL_SEO; }
+    try { const saved = localStorage.getItem('miriamcampos_seo'); return saved ? JSON.parse(saved) : INITIAL_SEO; } catch { return INITIAL_SEO; }
   });
 
   const [profile, setProfile] = useState<PhotographerProfile>(() => {
-    try { const saved = localStorage.getItem('aorea_profile'); return saved ? JSON.parse(saved) : INITIAL_PROFILE; } catch { return INITIAL_PROFILE; }
+    try { const saved = localStorage.getItem('miriamcampos_profile'); return saved ? JSON.parse(saved) : INITIAL_PROFILE; } catch { return INITIAL_PROFILE; }
   });
 
   const [bookingConfig, setBookingConfig] = useState<BookingConfig>(() => {
-    try { const saved = localStorage.getItem('aorea_booking_config'); return saved ? JSON.parse(saved) : INITIAL_BOOKING_CONFIG; } catch { return INITIAL_BOOKING_CONFIG; }
+    try { const saved = localStorage.getItem('miriamcampos_booking_config'); return saved ? JSON.parse(saved) : INITIAL_BOOKING_CONFIG; } catch { return INITIAL_BOOKING_CONFIG; }
   });
 
   const [emailConfig, setEmailConfig] = useState<EmailConfig>(() => {
-    try { const saved = localStorage.getItem('aorea_email_config'); return saved ? JSON.parse(saved) : INITIAL_EMAIL_CONFIG; } catch { return INITIAL_EMAIL_CONFIG; }
+    try { const saved = localStorage.getItem('miriamcampos_email_config'); return saved ? JSON.parse(saved) : INITIAL_EMAIL_CONFIG; } catch { return INITIAL_EMAIL_CONFIG; }
   });
 
   const [sessionCategories, setSessionCategories] = useState<SessionCategory[]>(() => {
-    try { const saved = localStorage.getItem('aorea_session_categories'); return saved ? JSON.parse(saved) : INITIAL_SESSION_CATEGORIES; } catch { return INITIAL_SESSION_CATEGORIES; }
+    try { const saved = localStorage.getItem('miriamcampos_session_categories'); return saved ? JSON.parse(saved) : INITIAL_SESSION_CATEGORIES; } catch { return INITIAL_SESSION_CATEGORIES; }
   });
 
   const [packages, setPackages] = useState<PhotographyPackage[]>(() => {
-    try { const saved = localStorage.getItem('aorea_packages'); return saved ? JSON.parse(saved) : INITIAL_PHOTOGRAPHY_PACKAGES; } catch { return INITIAL_PHOTOGRAPHY_PACKAGES; }
+    try { const saved = localStorage.getItem('miriamcampos_packages'); return saved ? JSON.parse(saved) : INITIAL_PHOTOGRAPHY_PACKAGES; } catch { return INITIAL_PHOTOGRAPHY_PACKAGES; }
   });
 
   const [invoices, setInvoices] = useState<Invoice[]>(() => {
-    try { const saved = localStorage.getItem('aorea_invoices'); return saved ? JSON.parse(saved) : INITIAL_INVOICES; } catch { return INITIAL_INVOICES; }
+    try { const saved = localStorage.getItem('miriamcampos_invoices'); return saved ? JSON.parse(saved) : INITIAL_INVOICES; } catch { return INITIAL_INVOICES; }
   });
 
   const [clientAccounts, setClientAccounts] = useState<ClientAccount[]>(INITIAL_CLIENT_ACCOUNTS);
@@ -271,7 +295,7 @@ export default function App() {
   // UI Interactive States('galeria');
   const [selectedPhotoForLightbox, setSelectedPhotoForLightbox] = useState<Photograph | null>(null);
   const [favorites, setFavorites] = useState<string[]>(() => {
-    try { const saved = localStorage.getItem('aorea_favorites'); return saved ? JSON.parse(saved) : []; } catch { return []; }
+    try { const saved = localStorage.getItem('miriamcampos_favorites'); return saved ? JSON.parse(saved) : []; } catch { return []; }
   });
 
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -281,10 +305,11 @@ export default function App() {
   // Administrative Workspace credentials
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
-  const [adminUseráname, setAdminUseráname] = useState('');
+  const [adminUsername, setAdminUsername] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
   const [showAdminPassword, setShowAdminPassword] = useState(false);
   const [adminLoginError, setAdminLoginError] = useState('');
+  const [authInitializing, setAuthInitializing] = useState(isSupabaseConfigured);
 
   // Stripe Checkout Integrations
   const [checkoutOpen, setCheckoutOpen] = useState(false);
@@ -300,6 +325,7 @@ export default function App() {
   const [contactSubmitting, setContactSubmitting] = useState(false);
   const [contactHoneypot, setContactHoneypot] = useState('');
   const [contactEmailWarning, setContactEmailWarning] = useState('');
+  const [contactTouched, setContactTouched] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     sessionStorage.setItem('contact_draft_name', contactName);
@@ -389,28 +415,28 @@ export default function App() {
     // produces 401s on every save.
     const unsub = onAuthChange((user) => {
       setIsAdminLoggedIn(!!user);
-      // Recompute the dashboard analytics once the admin session becomes active.
-      // The mount-time loadAllData() can run before Supabase restores a persisted
-      // session, so bookings (authenticated-only read) is read as anonymous and
-      // the Revenue/Traffic charts are left empty until this re-runs as admin.
+      setAuthInitializing(false);
       if (user) {
         computeAnalytics()
           .then(setSeoAnalytics)
           .catch((err) => console.warn('[analytics] recompute after auth failed:', err));
       }
     });
-    return () => unsub();
+    // Fallback: if onAuthChange doesn't fire within 3s (slow network), unblock the UI
+    // so the admin login dialog can appear instead of hanging on the spinner forever.
+    const timeout = setTimeout(() => setAuthInitializing(false), 3000);
+    return () => { unsub(); clearTimeout(timeout); };
   }, []);
 
   useEffect(() => {
     // Remove client passcodes written by older versions of the application.
-    localStorage.removeItem('aorea_client_accounts');
+    localStorage.removeItem('miriamcampos_client_accounts');
     // Clear old table-missing cache that blocked Supabase reads after RLS fix.
-    localStorage.removeItem('aurea_missing_tables');
+    localStorage.removeItem('miriamcampos_missing_tables');
     // Clear stale bookings cache so initial render doesn't show stale data.
-    localStorage.removeItem('aorea_bookings');
+    localStorage.removeItem('miriamcampos_bookings');
     // Clear session-level table-missing cache so Supabase queries are retried.
-    sessionStorage.removeItem('aurea_missing_tables');
+    sessionStorage.removeItem('miriamcampos_missing_tables');
   }, []);
 
   const loadAllData = useCallback(async (shouldAbort?: () => boolean) => {
@@ -444,21 +470,24 @@ export default function App() {
     // Persists to Supabase when the admin is authenticated; otherwise the data is
     // shown unescaped locally and the persistence is retried on the next admin
     // sign-in (loadAllData re-runs from handleAdminAuthSubmit).
-    const MIGRATE_FLAG = 'aorea_html_entities_migrated_v2';
+    const MIGRATE_FLAG = 'miriamcampos_html_entities_migrated_v2';
     const needsMigration = !localStorage.getItem(MIGRATE_FLAG);
 
     if (needsMigration) {
-      function migrateStrings(obj: unknown): unknown {
-        if (typeof obj === 'string') return unescapeHTMLEntities(obj);
-        if (Array.isArray(obj)) return obj.map(migrateStrings);
-        if (obj && typeof obj === 'object') {
-          const result: Record<string, unknown> = {};
-          for (const [k, v] of Object.entries(obj as Record<string, unknown>)) {
-            result[k] = migrateStrings(v);
+      function migrateStrings<T>(obj: T): T {
+        const migrate = (value: unknown): unknown => {
+          if (typeof value === 'string') return unescapeHTMLEntities(value);
+          if (Array.isArray(value)) return value.map(migrate);
+          if (value && typeof value === 'object') {
+            const result: Record<string, unknown> = {};
+            for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+              result[k] = migrate(v);
+            }
+            return result;
           }
-          return result;
-        }
-        return obj;
+          return value;
+        };
+        return migrate(obj) as T;
       }
       const migratedPhotos = photosRes.map(p => migrateStrings(p));
       const migratedServices = servicesRes.map(s => migrateStrings(s));
@@ -714,69 +743,69 @@ export default function App() {
 
   const handleUpdateSessionCategories = async (newCategories: SessionCategory[]) => {
     setSessionCategories(newCategories);
-    localStorage.setItem('aorea_session_categories', JSON.stringify(newCategories));
+    localStorage.setItem('miriamcampos_session_categories', JSON.stringify(newCategories));
     await syncCollection('session_categories', sessionCategories, newCategories);
   };
 
   // Sync to LocalStorage whenever DB collections update (for offline-fallback cache layer)
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aorea_photos', JSON.stringify(photographs));
+    if (bootstrapped) localStorage.setItem('miriamcampos_photos', JSON.stringify(photographs));
   }, [photographs, bootstrapped]);
 
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aorea_services', JSON.stringify(services));
+    if (bootstrapped) localStorage.setItem('miriamcampos_services', JSON.stringify(services));
   }, [services, bootstrapped]);
 
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aorea_testimonials', JSON.stringify(testimonials));
+    if (bootstrapped) localStorage.setItem('miriamcampos_testimonials', JSON.stringify(testimonials));
   }, [testimonials, bootstrapped]);
 
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aorea_blog', JSON.stringify(blogPosts));
+    if (bootstrapped) localStorage.setItem('miriamcampos_blog', JSON.stringify(blogPosts));
   }, [blogPosts, bootstrapped]);
 
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aorea_faqs', JSON.stringify(faqs));
+    if (bootstrapped) localStorage.setItem('miriamcampos_faqs', JSON.stringify(faqs));
   }, [faqs, bootstrapped]);
 
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aorea_bookings', JSON.stringify(bookings));
+    if (bootstrapped) localStorage.setItem('miriamcampos_bookings', JSON.stringify(bookings));
   }, [bookings, bootstrapped]);
 
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aorea_invoices', JSON.stringify(invoices));
+    if (bootstrapped) localStorage.setItem('miriamcampos_invoices', JSON.stringify(invoices));
   }, [invoices, bootstrapped]);
 
   // SECURITY: messages contain client PII (name, email) — not cached in localStorage
 
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aorea_seo', JSON.stringify(seo));
+    if (bootstrapped) localStorage.setItem('miriamcampos_seo', JSON.stringify(seo));
   }, [seo, bootstrapped]);
 
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aorea_profile', JSON.stringify(profile));
+    if (bootstrapped) localStorage.setItem('miriamcampos_profile', JSON.stringify(profile));
   }, [profile, bootstrapped]);
 
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aorea_booking_config', JSON.stringify(bookingConfig));
+    if (bootstrapped) localStorage.setItem('miriamcampos_booking_config', JSON.stringify(bookingConfig));
   }, [bookingConfig, bootstrapped]);
 
   // SECURITY: email config contains receiver email — not cached in localStorage
 
   useEffect(() => {
-    localStorage.setItem('aorea_lang', lang);
+    localStorage.setItem('miriamcampos_lang', lang);
   }, [lang]);
 
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aorea_session_categories', JSON.stringify(sessionCategories));
+    if (bootstrapped) localStorage.setItem('miriamcampos_session_categories', JSON.stringify(sessionCategories));
   }, [sessionCategories, bootstrapped]);
 
   useEffect(() => {
-    if (bootstrapped) localStorage.setItem('aorea_packages', JSON.stringify(packages));
+    if (bootstrapped) localStorage.setItem('miriamcampos_packages', JSON.stringify(packages));
   }, [packages, bootstrapped]);
 
   useEffect(() => {
-    localStorage.setItem('aorea_favorites', JSON.stringify(favorites));
+    localStorage.setItem('miriamcampos_favorites', JSON.stringify(favorites));
   }, [favorites]);
 
   // Update Dynamic Document Meta tags according to active SEO settings
@@ -806,7 +835,10 @@ export default function App() {
 
     if (contactHoneypot) return;
 
-    if (!contactFormValid) return;
+    if (!contactFormValid) {
+      setContactTouched({ name: true, email: true, subject: true, msg: true });
+      return;
+    }
 
     const safeName = sanitizeString(contactName);
     const safeEmail = sanitizeEmail(contactEmail);
@@ -909,6 +941,7 @@ ${photographerName}`);
       setContactEmail('');
       setContactSubject('');
       setContactMsg('');
+      setContactTouched({});
       setTimeout(() => setContactSuccess(false), 4000);
     } catch (err) {
       console.error('Could not submit contact message:', err);
@@ -921,7 +954,7 @@ ${photographerName}`);
     e.preventDefault();
     setAdminLoginError('');
 
-    const email = sanitizeEmail(adminUseráname);
+    const email = sanitizeEmail(adminUsername);
     const password = adminPassword;
 
     if (!email || !email.includes('@')) {
@@ -968,11 +1001,21 @@ ${photographerName}`);
 
   const openAdminLogin = useCallback(() => setShowAdminLogin(true), []);
 
+  // The CMS access dialog opens automatically when /?view=admin is reached without
+  // a session (direct URL access — there is no public Admin link anymore).
+  useEffect(() => {
+    if (currentView === 'admin' && !isAdminLoggedIn && !authInitializing) {
+      setShowAdminLogin(true);
+    } else if (currentView !== 'admin') {
+      setShowAdminLogin(false);
+    }
+  }, [currentView, isAdminLoggedIn, authInitializing]);
+
   // Trigger Stripe print or service booking Checkout overlay
   const pendingPaymentRef = useRef<((result?: PaymentResult) => void) | null>(null);
   const pendingCancelRef = useRef<(() => void) | null>(null);
   const pendingPaymentBookingRef = useRef<{ clientName: string; clientEmail: string; photographerEmail: string; amount: number; packageName: string } | null>(null);
-  const paymentBookingRef = useRef<{ id: string; approvalToken?: string } | null>(null);
+  const paymentBookingRef = useRef<Booking | null>(null);
 
   const handleOpenStripeCheckout = (amount: number, description: string) => {
     setCheckoutAmount(amount);
@@ -1004,7 +1047,7 @@ ${photographerName}`);
       },
       body: JSON.stringify({ bookingId: paymentBooking.id, token: paymentBooking.approvalToken }),
     });
-    const data = await res.json().catch(() => null);
+    const data = await res.json().catch((): null => null);
     if (!res.ok) {
       throw new Error(data?.error || 'Payment could not be processed. Please try again.');
     }
@@ -1115,7 +1158,7 @@ ${photographerName}`);
                 className="w-full h-full object-cover object-center"
               />
             </motion.div>
-            <div className="absolute inset-0 bg-gradient-to-b from-overlay/5 via-overlay/40 to-overlay/70 z-10 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-b from-overlay/10 via-overlay/50 to-overlay/80 z-10 pointer-events-none" />
           </div>
 
           {/* Desktop: Left image */}
@@ -1140,7 +1183,7 @@ ${photographerName}`);
                 className="w-full h-full object-cover object-center"
               />
             </motion.div>
-            <div className="absolute inset-0 bg-gradient-to-b from-overlay/5 via-overlay/40 to-overlay/70 z-10 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-b from-overlay/10 via-overlay/50 to-overlay/80 z-10 pointer-events-none" />
           </div>
 
           {/* Desktop: Right image */}
@@ -1165,11 +1208,14 @@ ${photographerName}`);
                 className="w-full h-full object-cover object-center"
               />
             </motion.div>
-            <div className="absolute inset-0 bg-gradient-to-b from-overlay/5 via-overlay/40 to-overlay/70 z-10 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-b from-overlay/10 via-overlay/50 to-overlay/80 z-10 pointer-events-none" />
           </div>
 
           {/* Subtle divider line */}
           <div className="absolute inset-y-[15%] left-1/2 w-px bg-white/10 z-20 hidden md:block" />
+
+          {/* Radial contrast scrim behind hero copy for text legibility */}
+          <div className="absolute inset-0 z-[15] bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.5),transparent_70%)] pointer-events-none" />
 
           {/* Central content overlay */}
           <div className="absolute inset-0 z-20 flex flex-col justify-center pointer-events-none">
@@ -1214,12 +1260,6 @@ ${photographerName}`);
                 className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-4 mt-5 md:mt-12"
               >
                 <button
-                  onClick={() => navigateTo('portfolio')}
-                  className="px-4 sm:px-6 md:px-7 py-2 md:py-3 bg-white/10 hover:bg-white/15 text-white border border-white/20 font-mono text-[clamp(7px,2vw,10px)] tracking-widest uppercase font-semibold transition-all duration-300 cursor-pointer whitespace-normal sm:whitespace-nowrap"
-                >
-                  {t.ctaPortfolio}
-                </button>
-                <button
                   onClick={() => {
                     navigateTo('services');
                     setTimeout(() => {
@@ -1227,9 +1267,15 @@ ${photographerName}`);
                       if (element) element.scrollIntoView({ behavior: 'smooth' });
                     }, 200);
                   }}
-                  className="px-4 sm:px-6 md:px-7 py-2 md:py-3 border border-white/30 text-white/80 hover:border-white font-mono text-[clamp(7px,2vw,10px)] tracking-widest uppercase font-semibold transition-all duration-300 cursor-pointer bg-transparent whitespace-normal sm:whitespace-nowrap drop-shadow-sm"
+                  className="px-4 sm:px-6 md:px-8 py-2 md:py-3 bg-white text-dark hover:bg-white/80 font-mono text-[clamp(7px,2vw,10px)] tracking-widest uppercase font-bold transition-all duration-300 cursor-pointer whitespace-normal sm:whitespace-nowrap shadow-lg shadow-black/20"
                 >
                   {t.ctaBook}
+                </button>
+                <button
+                  onClick={() => navigateTo('portfolio')}
+                  className="px-4 sm:px-6 md:px-7 py-2 md:py-3 border border-white/25 text-white/85 hover:border-white/60 hover:text-white font-mono text-[clamp(7px,2vw,10px)] tracking-widest uppercase font-semibold transition-all duration-300 cursor-pointer bg-white/5 backdrop-blur-sm whitespace-normal sm:whitespace-nowrap shadow-md shadow-black/10"
+                >
+                  {t.ctaPortfolio}
                 </button>
               </motion.div>
             </div>
@@ -1291,7 +1337,7 @@ ${photographerName}`);
                     <div className="hidden md:block absolute top-[18%] bottom-[18%] left-1/3 w-px bg-gradient-to-b from-transparent via-white/[0.06] to-transparent" />
                     <div className="hidden md:block absolute top-[18%] bottom-[18%] right-1/3 w-px bg-gradient-to-b from-transparent via-white/[0.06] to-transparent" />
 
-                    {/* 15+ Years */}
+                    {/* YEARS — from METRICS */}
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       whileInView={{ opacity: 1, y: 0 }}
@@ -1301,7 +1347,7 @@ ${photographerName}`);
                     >
                       <Camera size={18} strokeWidth={1.5} className="text-white/40 mx-auto mb-4" />
                       <p className="font-serif text-3xl md:text-4xl text-white font-light leading-none group-hover:scale-[1.03] transition-transform duration-500">
-                        <CountUp end={15} suffix="+" duration={2000} />
+                        <CountUp end={METRICS.years} suffix="+" duration={2000} />
                       </p>
                       <p className="text-[10px] font-mono tracking-[0.3em] text-white/20 uppercase mt-3">
                         {t.yearsExp}
@@ -1311,7 +1357,7 @@ ${photographerName}`);
                       </p>
                     </motion.div>
 
-                    {/* 2000+ Sessions — Center hero metric, 40% larger */}
+                    {/* SESSIONS — Center hero metric, 40% larger */}
                     <motion.div
                       initial={{ opacity: 0, y: 24 }}
                       whileInView={{ opacity: 1, y: 0 }}
@@ -1321,7 +1367,7 @@ ${photographerName}`);
                     >
                       <Award size={20} strokeWidth={1.5} className="text-white/50 mx-auto mb-5" />
                       <p className="font-serif text-[clamp(2.5rem,8vw,5rem)] text-white font-light leading-none group-hover:scale-[1.03] transition-transform duration-500">
-                        <CountUp end={2000} suffix="+" duration={2500} />
+                        <CountUp end={METRICS.sessions} suffix="+" duration={2500} />
                       </p>
                       <p className="text-[11px] font-mono tracking-[0.35em] text-white/25 uppercase mt-3">
                         {t.sessions}
@@ -1331,7 +1377,7 @@ ${photographerName}`);
                       </p>
                     </motion.div>
 
-                    {/* 98% Satisfied */}
+                    {/* SATISFACTION — from METRICS */}
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       whileInView={{ opacity: 1, y: 0 }}
@@ -1341,7 +1387,7 @@ ${photographerName}`);
                     >
                       <Star size={18} strokeWidth={1.5} className="text-white/40 mx-auto mb-4" />
                       <p className="font-serif text-3xl md:text-4xl text-white font-light leading-none group-hover:scale-[1.03] transition-transform duration-500">
-                        <CountUp end={98} suffix="%" duration={2000} />
+                        <CountUp end={METRICS.satisfaction} suffix="%" duration={2000} />
                       </p>
                       <p className="text-[10px] font-mono tracking-[0.3em] text-white/20 uppercase mt-3">
                         {t.satisfied}
@@ -1383,7 +1429,7 @@ ${photographerName}`);
                             <p className="text-[11px] font-mono tracking-[0.2em] uppercase text-white/70/70">{t[pkg.category as keyof typeof t] || pkg.category}</p>
                             <h3 className="font-serif text-xl text-white mt-1">{lang === 'es' ? pkg.name_es : pkg.name_en}</h3>
                           </div>
-                          <span className="font-mono text-sm text-white/70 whitespace-nowrap">${pkg.price.toLocaleString()}</span>
+                          <span className="font-mono text-sm text-white/70 whitespace-nowrap">{formatPrice(pkg.price, lang)}</span>
                         </div>
                         <p className="text-[11px] text-white/50 leading-relaxed line-clamp-2">{lang === 'es' ? pkg.description_es : pkg.description_en}</p>
                         <button onClick={() => { setSelectedCategory(pkg.category); setSelectedPackageId(pkg.id); navigateTo('services'); }} className="w-full py-2.5 border border-white/15 hover:border-white/30 text-white/70 hover:text-white/60 rounded-lg font-mono text-[9px] tracking-widest uppercase transition-all">
@@ -1398,9 +1444,10 @@ ${photographerName}`);
               {/* Instagram Follow */}
               <section className="text-center py-8 md:py-12">
                 <a
-                  href="https://www.instagram.com/miriamtellezphotography/"
+                  href={SOCIAL.instagram}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
+                  aria-label={lang === 'es' ? 'Instagram de Miriam Campos Photography' : 'Instagram of Miriam Campos Photography'}
                   className="group inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#FCAF45] rounded-xl text-white font-mono text-sm tracking-widest uppercase font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
                 >
                   <Instagram size={22} />
@@ -1408,7 +1455,7 @@ ${photographerName}`);
                   <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
                 </a>
                 <p className="text-[10px] text-white/40 mt-3 font-mono tracking-wider">
-                  @miriamtellezphotography
+                  {SOCIAL.instagramHandle}
                 </p>
               </section>
 
@@ -1446,7 +1493,30 @@ ${photographerName}`);
           {/* ABOUT SCREEN */}
           {/* ======================================================= */}
           {currentView === 'about' && (
-            <AboutSection profile={profile} lang={lang} t={t} />
+            <div className="space-y-20 md:space-y-28">
+              <AboutSection profile={profile} lang={lang} t={t} />
+
+              <section className="relative overflow-hidden rounded-lg border border-white/10 bg-gradient-to-br from-dark-gray to-charcoal p-8 md:p-12 text-left shadow-md">
+                <div className="max-w-2xl">
+                  <span className="text-[10px] font-mono text-white/70 tracking-widest uppercase block">{lang === 'es' ? '15 años capturando luz' : '15 years of capturing light'}</span>
+                  <h2 className="font-serif text-2xl md:text-3xl text-white tracking-wide mt-2">
+                    {lang === 'es' ? '¿Listo para crear tu historia juntos?' : 'Ready to create your story together?'}
+                  </h2>
+                  <p className="text-xs text-white/50 mt-3 leading-relaxed">
+                    {lang === 'es'
+                      ? 'Cuéntame tu visión y diseñemos una sesión única, hecha a medida.'
+                      : 'Share your vision and let\'s design a unique, made-to-measure session.'}
+                  </p>
+                  <button
+                    onClick={() => navigateTo('services')}
+                    className="mt-6 inline-flex items-center gap-2 px-6 py-3 bg-white hover:bg-white/85 text-dark rounded-lg font-mono text-[10px] tracking-widest uppercase font-bold transition-all shadow-lg"
+                  >
+                    {lang === 'es' ? 'Explorar sesiones' : 'Explore sessions'}
+                    <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
+                  </button>
+                </div>
+              </section>
+            </div>
           )}
 
           {/* ======================================================= */}
@@ -1548,6 +1618,43 @@ ${photographerName}`);
                         );
                       })}
                     </div>
+
+                    {/* Custom proposal banner — tailored session CTA */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 24 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, margin: "-40px" }}
+                      transition={{ duration: 0.5 }}
+                      className="relative overflow-hidden border border-white/10 rounded-lg p-6 sm:p-8 md:p-10 bg-gradient-to-br from-dark-gray via-charcoal to-white/[0.03]"
+                    >
+                      <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-white/[0.03] pointer-events-none" />
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
+                        <div className="space-y-2 max-w-2xl">
+                          <span className="text-[10px] font-mono text-white/50 tracking-[0.25em] uppercase block">
+                            {lang === 'es'
+                              ? '¿Tienes una visión diferente en mente?'
+                              : 'Have a different vision in mind?'}
+                          </span>
+                          <h3 className="font-serif text-2xl sm:text-3xl text-white tracking-wide">
+                            {lang === 'es' ? 'Propuesta a medida' : 'Custom proposal'}
+                          </h3>
+                          <p className="text-xs sm:text-sm text-white/50 leading-relaxed">
+                            {lang === 'es'
+                              ? 'Crea una sesión totalmente personalizada — locación, estilo, producción. Cuéntame tu idea y preparo un concepto editorial único para ti.'
+                              : 'Create a fully tailored session — location, styling, production. Share your idea and I\'ll craft a one-of-a-kind editorial concept for you.'}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => navigateTo('contact')}
+                          className="shrink-0 inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-dark hover:bg-white/80 rounded-md font-mono text-[10px] tracking-widest uppercase font-bold transition-all duration-300 cursor-pointer whitespace-nowrap"
+                        >
+                          {lang === 'es'
+                            ? 'Solicitar propuesta a medida'
+                            : 'Request a custom proposal'}
+                          <ArrowRight size={12} className="transition-transform duration-300 group-hover:translate-x-0.5" />
+                        </button>
+                      </div>
+                    </motion.div>
                   </motion.section>
                 ) : (
                   /* ——— STEP 2: PACKAGES FOR SELECTED CATEGORY ——— */
@@ -1636,7 +1743,7 @@ ${photographerName}`);
                                       <span className="text-[10px] font-mono text-white/50 tracking-wide">{pDuration}</span>
                                       <div className="text-right">
                                         <span className="text-[11px] text-white/40 block font-mono tracking-wider">{pPriceFrom}</span>
-                                        <span className="text-xl sm:text-2xl lg:text-3xl font-light text-white/70 font-mono">${pkg.price.toLocaleString()}</span>
+                                        <span className="text-xl sm:text-2xl lg:text-3xl font-light text-white/70 font-mono">{formatPrice(pkg.price, lang)}</span>
                                       </div>
                                     </div>
 
@@ -1833,7 +1940,7 @@ ${photographerName}`);
                     lang={lang}
                     onConfirm={handleConfirmBooking}
                     onCheckout={(amount, desc, onDone, onCancel) => {
-                      paymentBookingRef.current = { id: booking.id, approvalToken: booking.approvalToken };
+                      paymentBookingRef.current = booking;
                       pendingPaymentBookingRef.current = {
                         clientName: booking.clientName,
                         clientEmail: booking.clientEmail,
@@ -1924,7 +2031,7 @@ ${photographerName}`);
           {currentView === 'contact' && (
             <div className="space-y-12 pt-12 md:pt-20">
               <section className="text-center max-w-md mx-auto space-y-3">
-                <span className="text-[10px] font-mono text-white/70 tracking-widest uppercase block">GET IN TOUCH</span>
+                <span className="text-[10px] font-mono text-white/70 tracking-widest uppercase block">{lang === 'es' ? 'PONTE EN CONTACTO' : 'GET IN TOUCH'}</span>
                 <h2 className="font-serif text-3xl text-white tracking-wide">{t.contactTitle}</h2>
                 <p className="text-xs text-white/55">{t.contactSubtitle}</p>
               </section>
@@ -1956,10 +2063,11 @@ ${photographerName}`);
                               maxLength={CONTACT_MAX_NAME}
                               value={contactName}
                               onChange={(e) => setContactName(e.target.value)}
-                              aria-invalid={!!contactNameError}
+                              onBlur={() => setContactTouched(prev => ({ ...prev, name: true }))}
+                              aria-invalid={!!contactTouched.name && !!contactNameError}
                               className="w-full bg-charcoal border-stone rounded p-2.5 text-xs text-white focus:outline-none focus:border-white/30 font-sans"
                             />
-                            {contactNameError && (
+                            {contactTouched.name && contactNameError && (
                               <p className="text-[10px] text-red-400 font-sans">{contactNameError}</p>
                             )}
                           </div>
@@ -1974,17 +2082,18 @@ ${photographerName}`);
                               maxLength={CONTACT_MAX_EMAIL}
                               value={contactEmail}
                               onChange={(e) => setContactEmail(e.target.value)}
-                              aria-invalid={!!contactEmailError}
+                              onBlur={() => setContactTouched(prev => ({ ...prev, email: true }))}
+                              aria-invalid={!!contactTouched.email && !!contactEmailError}
                               className="w-full bg-charcoal border-stone rounded p-2.5 text-xs text-white focus:outline-none focus:border-white/30 font-sans"
                             />
-                            {contactEmailError && (
+                            {contactTouched.email && contactEmailError && (
                               <p className="text-[10px] text-red-400 font-sans">{contactEmailError}</p>
                             )}
                           </div>
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[10px] font-mono text-white/45 uppercase tracking-wider">Subject</label>
+                          <label className="text-[10px] font-mono text-white/45 uppercase tracking-wider">{lang === 'es' ? 'Asunto' : 'Subject'}</label>
                           <input
                             id="contact-subject"
                             name="subject"
@@ -1994,16 +2103,17 @@ ${photographerName}`);
                             maxLength={CONTACT_MAX_SUBJECT}
                             value={contactSubject}
                             onChange={(e) => setContactSubject(e.target.value)}
-                            aria-invalid={!!contactSubjectError}
+                            onBlur={() => setContactTouched(prev => ({ ...prev, subject: true }))}
+                            aria-invalid={!!contactTouched.subject && !!contactSubjectError}
                             className="w-full bg-charcoal border-stone rounded p-2.5 text-xs text-white focus:outline-none focus:border-white/30 font-sans"
                           />
-                          {contactSubjectError && (
+                          {contactTouched.subject && contactSubjectError && (
                             <p className="text-[10px] text-red-400 font-sans">{contactSubjectError}</p>
                           )}
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[10px] font-mono text-white/45 uppercase tracking-wider">Message</label>
+                          <label className="text-[10px] font-mono text-white/45 uppercase tracking-wider">{lang === 'es' ? 'Mensaje' : 'Message'}</label>
                           <textarea
                             id="contact-message"
                             name="message"
@@ -2013,14 +2123,15 @@ ${photographerName}`);
                             maxLength={CONTACT_MAX_MESSAGE}
                             value={contactMsg}
                             onChange={(e) => setContactMsg(e.target.value)}
-                            aria-invalid={!!contactMsgError}
+                            onBlur={() => setContactTouched(prev => ({ ...prev, msg: true }))}
+                            aria-invalid={!!contactTouched.msg && !!contactMsgError}
                             className="w-full bg-charcoal border-stone rounded p-3 text-xs text-white focus:outline-none focus:border-white/30 font-sans resize-none"
                           />
                           <div className="flex items-start justify-between gap-2">
                             <p className="text-[10px] text-red-400 font-sans">
-                              {contactMsgError || (contactMsg && contactMsg.length < CONTACT_MIN_MESSAGE
+                              {contactTouched.msg ? (contactMsgError || (contactMsg && contactMsg.length < CONTACT_MIN_MESSAGE
                                 ? (lang === 'en' ? `Minimum ${CONTACT_MIN_MESSAGE} characters.` : `Mínimo ${CONTACT_MIN_MESSAGE} caracteres.`)
-                                : '')}
+                                : '')) : ''}
                             </p>
                             <span className="ml-auto text-[10px] font-mono text-white/45">{contactMsg.length}/{CONTACT_MAX_MESSAGE}</span>
                           </div>
@@ -2028,7 +2139,7 @@ ${photographerName}`);
 
                         <button
                           type="submit"
-                          disabled={contactSubmitting || !contactFormValid}
+                          disabled={contactSubmitting}
                           className="w-full py-3 bg-white/10 hover:bg-white/15 text-white border border-white/10 font-mono text-[10px] tracking-widest uppercase font-bold rounded-lg transition-all flex items-center justify-center space-x-1 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                         >
                           <MessageSquare size={13} />
@@ -2044,9 +2155,11 @@ ${photographerName}`);
                         <div className="inline-flex p-3 rounded-full bg-white/10/10 border border-white/10 text-white/70 mx-auto">
                           <ShieldCheck size={36} />
                         </div>
-                        <h4 className="font-serif text-lg text-white font-semibold">Message Dispatched</h4>
+                        <h4 className="font-serif text-lg text-white font-semibold">{lang === 'es' ? 'Mensaje Enviado' : 'Message Dispatched'}</h4>
                         <p className="text-xs text-white/50 max-w-sm mx-auto leading-relaxed">
-                          Your creative request has been filed directly to Helena Jenkins (Studio Manager). We will reply to your registered email in under 24 business hours.
+                          {lang === 'es'
+                            ? 'Tu solicitud ha llegado al estudio de Miriam Campos. Responderemos a tu correo en menos de 24 horas hábiles.'
+                            : 'Your request has been filed directly to the Miriam Campos studio. We will reply to your registered email within 24 business hours.'}
                         </p>
                         {contactEmailWarning && (
                           <p className="text-[10px] text-amber-400/90 max-w-sm mx-auto leading-relaxed mt-2">{contactEmailWarning}</p>
@@ -2059,30 +2172,40 @@ ${photographerName}`);
                 {/* Contact Coordinates (Cols 5) */}
                 <div className="lg:col-span-5 bg-dark-gray border border-white/10 rounded-lg p-6 md:p-8 text-left flex flex-col justify-between space-y-6 shadow-md">
                   <div className="space-y-5">
-                    <h4 className="text-xs font-mono tracking-widest text-white/70 uppercase font-semibold">Studio Coordinates</h4>
+                    <h4 className="text-xs font-mono tracking-widest text-white/70 uppercase font-semibold">{lang === 'es' ? 'Coordenadas del Estudio' : 'Studio Coordinates'}</h4>
                     
                     <div className="space-y-4">
                       <div className="flex items-start space-x-3 text-xs">
                         <MapPin size={14} className="text-white/70 mt-0.5 shrink-0" />
                         <div className="space-y-0.5">
-                          <span className="font-semibold text-white/90">Main Studio Office</span>
-                          <span className="text-white/50 block">Via della Moscova 24, Milan, Italy</span>
+                          <span className="font-semibold text-white/90">{lang === 'es' ? 'Ubicación' : 'Location'}</span>
+                          <span className="text-white/50 block">{lang === 'es' ? CONTACT.locationLine_es : CONTACT.locationLine_en}</span>
                         </div>
                       </div>
 
                       <div className="flex items-start space-x-3 text-xs">
                         <Mail size={14} className="text-white/70 mt-0.5 shrink-0" />
                         <div className="space-y-0.5">
-                          <span className="font-semibold text-white/90">E-mail Inquiries</span>
-                          <span className="text-white/50 block hover:text-white/60 transition-colors cursor-pointer">studio@áureastudio.com</span>
+                          <span className="font-semibold text-white/90">{lang === 'es' ? 'Consultas por Email' : 'E-mail Inquiries'}</span>
+                          <a href={`mailto:${CONTACT.email}`} className="text-white/50 block hover:text-white/70 transition-colors cursor-pointer break-all">{CONTACT.email}</a>
                         </div>
                       </div>
 
+                      {CONTACT.phone && (
+                        <div className="flex items-start space-x-3 text-xs">
+                          <Phone size={14} className="text-white/70 mt-0.5 shrink-0" />
+                          <div className="space-y-0.5">
+                            <span className="font-semibold text-white/90">{lang === 'es' ? 'Teléfono del Estudio' : 'Studio Telephone'}</span>
+                            <span className="text-white/50 block">{CONTACT.phone}</span>
+                          </div>
+                        </div>
+                      )}
+
                       <div className="flex items-start space-x-3 text-xs">
-                        <Phone size={14} className="text-white/70 mt-0.5 shrink-0" />
+                        <Instagram size={14} className="text-white/70 mt-0.5 shrink-0" />
                         <div className="space-y-0.5">
-                          <span className="font-semibold text-white/90">Studio Telephone</span>
-                          <span className="text-white/50 block">+39 02 1234 5678</span>
+                          <span className="font-semibold text-white/90">Instagram</span>
+                          <a href={SOCIAL.instagram} target="_blank" rel="noopener noreferrer" className="text-white/50 block hover:text-white/70 transition-colors cursor-pointer">{SOCIAL.instagramHandle}</a>
                         </div>
                       </div>
                     </div>
@@ -2097,6 +2220,14 @@ ${photographerName}`);
           {/* ======================================================= */}
           {/* ADMINISTRATIVE SUITE (CMS BACKOFFICE) */}
           {/* ======================================================= */}
+          {currentView === 'admin' && authInitializing && !isAdminLoggedIn && (
+            <div className="flex flex-col items-center justify-center gap-4 py-32 text-center">
+              <div className="w-8 h-8 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
+              <p className="text-[10px] font-mono text-white/40 uppercase tracking-widest">
+                {lang === 'es' ? 'Verificando acceso…' : 'Verifying access…'}
+              </p>
+            </div>
+          )}
           {currentView === 'admin' && isAdminLoggedIn && (
             <AdminCMS
               photographs={photographs}
@@ -2199,8 +2330,11 @@ ${photographerName}`);
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
             >
-              <button 
-                onClick={() => setShowAdminLogin(false)}
+              <button
+                onClick={() => {
+                  setShowAdminLogin(false);
+                  navigateTo('home');
+                }}
                 className="absolute top-4 right-4 text-white/50 hover:text-white"
               >
                 <X size={16} />
@@ -2211,7 +2345,7 @@ ${photographerName}`);
                   <ShieldCheck size={24} />
                 </div>
                 <h4 className="font-serif text-xl text-white font-semibold">CMS Authenticator</h4>
-                <p className="text-[10px] font-mono text-white/45 uppercase tracking-widest">AUREA SECURITY GATE</p>
+                <p className="text-[10px] font-mono text-white/45 uppercase tracking-widest">MIRIAM CAMPOS SECURITY GATE</p>
               </div>
 
               <form onSubmit={handleAdminAuthSubmit} className="space-y-4 text-left">
@@ -2220,8 +2354,8 @@ ${photographerName}`);
                   <input
                     type="text"
                     required
-                    value={adminUseráname}
-                    onChange={(e) => setAdminUseráname(e.target.value)}
+                    value={adminUsername}
+                    onChange={(e) => setAdminUsername(e.target.value)}
                     className="w-full bg-charcoal border-stone rounded p-2.5 text-xs text-white focus:outline-none focus:border-white/30"
                     placeholder="admin@tudominio.com"
                   />
@@ -2281,6 +2415,7 @@ ${photographerName}`);
           isOpen={checkoutOpen}
           amount={checkoutAmount}
           description={checkoutDesc}
+          lang={lang}
           onProcessPayment={handleProcessPayment}
           onClose={() => {
             setCheckoutOpen(false);

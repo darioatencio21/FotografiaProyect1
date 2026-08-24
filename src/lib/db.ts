@@ -1,9 +1,9 @@
 import { supabase, ensureActiveSession } from './supabase';
 
-export const SEEDED_FLAG_KEY = 'aurea_firestore_seeded';
-const MISSING_TABLES_KEY = 'aurea_missing_tables';
+export const SEEDED_FLAG_KEY = 'miriamcampos_firestore_seeded';
+const MISSING_TABLES_KEY = 'miriamcampos_missing_tables';
 
-const SAVE_ERROR_EVENT = 'aurea:save-error';
+const SAVE_ERROR_EVENT = 'miriamcampos:save-error';
 
 export function dispatchSaveError(detail: { table: string; docId: string; code: string; message: string }) {
   try {
