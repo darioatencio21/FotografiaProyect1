@@ -2294,6 +2294,8 @@ ${photographerName}`);
         <Footer
           onSetView={navigateTo}
           lang={lang}
+          isAdminLoggedIn={isAdminLoggedIn}
+          onOpenAdminLogin={openAdminLogin}
         />
       )}
 

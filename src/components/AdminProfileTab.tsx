@@ -21,7 +21,7 @@ function AdminProfileTab({ profile, onUpdateProfile, triggerAlert, lang }: Admin
 
   const handleSaveProfile = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    const safeProfile = sanitizeObject(profileForm as unknown as Record<string, unknown>) as unknown as PhotographerProfile;
+    const safeProfile = sanitizeObject(profileForm as Record<string, unknown>) as unknown as PhotographerProfile;
     try {
       await onUpdateProfile(safeProfile);
       triggerAlert('✓ Biografía y datos de perfil guíardados correctamente.');

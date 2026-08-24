@@ -1,7 +1,7 @@
 {
   "name": "miriam-campos-photography",
   "private": true,
-  "version": "1.2.1",
+  "version": "1.2.2",
   "type": "module",
   "engines": {
     "node": ">=18.0.0"
@@ -15,21 +15,19 @@
     "setup:buckets": "npx tsx scripts/setup-buckets.ts"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.111.0",
+    "@supabase/supabase-js": "^2.112.3",
     "@tailwindcss/vite": "^4.3.3",
-    "@vitejs/plugin-react": "^6.0.5",
-    "lucide-react": "^1.28.0",
-    "motion": "^12.43.0",
+    "@vitejs/plugin-react": "^6.1.0",
+    "lucide-react": "^1.33.0",
+    "motion": "^13.1.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "vite": "^8.2.0"
+    "vite": "^8.2.2"
   },
   "devDependencies": {
-    "@types/node": "^26.1.2",
-    "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.4",
+    "@types/node": "^26.2.0",
     "dotenv": "^17.4.2",
-    "pg": "^8.22.0",
+    "pg": "^8.23.0",
     "tailwindcss": "^4.3.3",
     "typescript": "~5.8.2"
   }
