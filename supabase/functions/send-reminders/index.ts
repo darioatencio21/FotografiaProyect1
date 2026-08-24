@@ -1,4 +1,4 @@
-﻿import { serve } from "https://deno.land/std@0.192.0/http/server.ts"
+import { serve } from "https://deno.land/std@0.192.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")
@@ -45,7 +45,7 @@ serve(async (req) => {
 
   for (const booking of bookings) {
     try {
-      const text = `Hola ${booking.clientName},\n\nTe recordamos que tu sesión fotográfica es HOY a las ${booking.timeSlot}.\n\nPaquete: ${booking.packageName || 'Fotografía'}\n\nSaludos,\nMiriam Campos`
+      const text = `Hola ${booking.clientName},\n\nTe recordamos que tu sesión fotográfica es HOY a las ${booking.timeSlot}.\n\nPaquete: ${booking.packageName || 'Fotografía'}\n\nSaludos,\nMiriam Tellez`
       const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {

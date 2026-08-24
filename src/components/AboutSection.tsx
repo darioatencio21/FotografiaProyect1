@@ -113,7 +113,7 @@ export default function AboutSection({ profile, lang, t }: Props) {
           <div className="aspect-[3/4] md:aspect-[4/5] relative overflow-hidden">
             <StorageImage
               src={avatarUrl}
-              alt={profile.name || 'Miriam Campos'}
+              alt={profile.name || 'Miriam Tellez'}
               className="w-full h-full object-cover"
             />
           </div>

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -219,7 +219,7 @@ export default function Lightbox({
                     style={{ width: '100%', maxWidth: 'none' }}
                   />
                   <div className="absolute top-3 right-3 bg-white/10 border border-white/10 px-2 py-1 text-[9px] font-mono tracking-widest text-white font-semibold rounded">
-                    MIRIAM CAMPOS MASTER WEB_RGB
+                    MIRIAM TELLEZ MASTER WEB_RGB
                   </div>
                 </div>
 

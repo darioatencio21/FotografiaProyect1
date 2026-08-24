@@ -55,7 +55,7 @@ export default function AdminRemindersTab({
           : booking.date;
 
       const subject = t('Recordatorio: Tu sesión fotográfica', 'Reminder: Your Photo Session');
-      const text = `Hola ${booking.clientName},\n\nTe recordamos que tu sesión fotográfica es ${dayLabel} a las ${booking.timeSlot}.\n\nPaquete: ${booking.packageName || 'Fotografía'}\n\nSaludos,\n${profile.name || 'Miriam Campos'}`;
+      const text = `Hola ${booking.clientName},\n\nTe recordamos que tu sesión fotográfica es ${dayLabel} a las ${booking.timeSlot}.\n\nPaquete: ${booking.packageName || 'Fotografía'}\n\nSaludos,\n${profile.name || 'Miriam Tellez'}`;
 
       const res = await fetch(`${supabaseUrl}/functions/v1/send-email`, {
         method: 'POST',

@@ -14,7 +14,7 @@ Secondary audience: the studio administrator who manages bookings, galleries, cl
 
 ## Product Purpose
 
-Miriam Campos Photography is a fine-art photography studio that offers editorial-quality portraiture, wedding coverage, fashion/editorial sessions, and family/graduation documentation. The website serves as both a portfolio and a booking platform: it must convince prospective clients of the studio's artistic caliber, allow them to browse galleries, learn about services, book sessions, and manage their client portal — all while embodying the warmth, craft, and elegance of the brand.
+Miriam Tellez Photography is a fine-art photography studio that offers editorial-quality portraiture, wedding coverage, fashion/editorial sessions, and family/graduation documentation. The website serves as both a portfolio and a booking platform: it must convince prospective clients of the studio's artistic caliber, allow them to browse galleries, learn about services, book sessions, and manage their client portal — all while embodying the warmth, craft, and elegance of the brand.
 
 ## Positioning
 
@@ -54,7 +54,7 @@ Technical constraints:
 
 ## Brand Commitments
 
-- Studio name: **Miriam Campos Photography** (always rendered in its established visual form)
+- Studio name: **Miriam Tellez Photography** (always rendered in its established visual form)
 - Logo: the existing SVG logo with its rose-gold-maroon gradient is a durable asset and must be preserved, not redesigned
 - Voice: warm, elegant, understated — never hype, never generic "photography template"
 - Editorial positioning: fine-art, museum-grade craft, emotional storytelling

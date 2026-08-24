@@ -1,4 +1,4 @@
-# Miriam Campos Photography
+# Miriam Tellez Photography
 
 [![CI](https://img.shields.io/github/actions/workflow/status/darioatencio21/FotografiaProyect1/ci.yml?label=build)](https://github.com/darioatencio21/FotografiaProyect1/actions/workflows/ci.yml)
 [![Licencia](https://img.shields.io/badge/Licencia-Todos%20los%20derechos%20reservados-blue)](https://github.com/darioatencio21/FotografiaProyect1)
@@ -72,4 +72,4 @@ Cada vez que se publican cambios en la rama principal:
 
 ## Licencia
 
-Todos los derechos reservados — Miriam Campos Photography
+Todos los derechos reservados — Miriam Tellez Photography

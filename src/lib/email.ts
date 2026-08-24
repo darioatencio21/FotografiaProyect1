@@ -64,8 +64,8 @@ ${approvalLink}
 Once you sign and pay, your booking will be automatically confirmed.
 
 Best regards,
-Miriam Campos
-Miriam Campos Photography`
+Miriam Tellez
+Miriam Tellez Photography`
     : `Hola ${clientName},
 
 Tu solicitud de reserva para ${packageName} el ${sessionDate} fue aprobada por Miriam.
@@ -77,8 +77,8 @@ ${approvalLink}
 Una vez que firmes y pagues, tu reserva quedará confirmada automáticamente.
 
 Saludos,
-Miriam Campos
-Miriam Campos Photography`;
+Miriam Tellez
+Miriam Tellez Photography`;
   return callSendEmail(clientEmail, subject, text);
 }
 
@@ -101,8 +101,8 @@ export async function sendRejectionEmail(
     ? 'No charges have been made. If you would like to coordinate another date, please contact us.'
     : 'No se realizó ningún cobro. Si querés coordinar otra fecha, contactanos.';
   const closing = isEn
-    ? 'Best regards,\nMiriam Campos\nMiriam Campos Photography'
-    : 'Saludos,\nMiriam Campos\nMiriam Campos Photography';
+    ? 'Best regards,\nMiriam Tellez\nMiriam Tellez Photography'
+    : 'Saludos,\nMiriam Tellez\nMiriam Tellez Photography';
 
   const text = reason
     ? `${greeting}\n\n${body}\n\n${reasonLine}\n\n${noCharge}\n\n${closing}`
@@ -122,7 +122,7 @@ export async function sendConfirmationEmail(
   lang: ActiveLanguage = 'en',
 ): Promise<boolean> {
   const isEn = lang === 'en';
-  const subject = isEn ? 'Booking Confirmed — Miriam Campos Photography' : 'Reserva confirmada — Miriam Campos Photography';
+  const subject = isEn ? 'Booking Confirmed — Miriam Tellez Photography' : 'Reserva confirmada — Miriam Tellez Photography';
 
   const clientText = isEn
     ? `Hi ${clientName},
@@ -132,8 +132,8 @@ Your booking for ${packageName} on ${sessionDate} at ${sessionTime} has been con
 You paid $${amountPaid}. We look forward to seeing you!
 
 Best regards,
-Miriam Campos
-Miriam Campos Photography`
+Miriam Tellez
+Miriam Tellez Photography`
     : `Hola ${clientName},
 
 Tu reserva para ${packageName} el ${sessionDate} a las ${sessionTime} fue confirmada.
@@ -141,8 +141,8 @@ Tu reserva para ${packageName} el ${sessionDate} a las ${sessionTime} fue confir
 Pagaste $${amountPaid}. Te esperamos!
 
 Saludos,
-Miriam Campos
-Miriam Campos Photography`;
+Miriam Tellez
+Miriam Tellez Photography`;
 
   const photographerText = isEn
     ? `New confirmed booking
@@ -186,8 +186,8 @@ The link to confirm your booking on ${sessionDate} has expired and the slot is n
 Please contact us if you would like to coordinate another date.
 
 Best regards,
-Miriam Campos
-Miriam Campos Photography`
+Miriam Tellez
+Miriam Tellez Photography`
     : `Hola ${clientName},
 
 El enlace para confirmar tu reserva del ${sessionDate} expiró y el horario ya no está reservado.
@@ -195,8 +195,8 @@ El enlace para confirmar tu reserva del ${sessionDate} expiró y el horario ya n
 Contactanos si querés coordinar otra fecha.
 
 Saludos,
-Miriam Campos
-Miriam Campos Photography`;
+Miriam Tellez
+Miriam Tellez Photography`;
   return callSendEmail(clientEmail, subject, text);
 }
 
@@ -210,7 +210,7 @@ export async function sendDepositReceivedEmail(
   lang: ActiveLanguage = 'en',
 ): Promise<boolean> {
   const isEn = lang === 'en';
-  const subject = isEn ? 'Deposit Received — Miriam Campos Photography' : 'Depósito recibido — Miriam Campos Photography';
+  const subject = isEn ? 'Deposit Received — Miriam Tellez Photography' : 'Depósito recibido — Miriam Tellez Photography';
   const text = isEn
     ? `New deposit received
 
@@ -251,8 +251,8 @@ Click your link again to complete the payment:
 ${approvalLink}
 
 Best regards,
-Miriam Campos
-Miriam Campos Photography`
+Miriam Tellez
+Miriam Tellez Photography`
     : `Hola ${clientName},
 
 Firmaste el contrato pero falta el pago para confirmar tu reserva del ${sessionDate}.
@@ -262,7 +262,7 @@ Ingresá de nuevo con tu link para completar el pago:
 ${approvalLink}
 
 Saludos,
-Miriam Campos
-Miriam Campos Photography`;
+Miriam Tellez
+Miriam Tellez Photography`;
   return callSendEmail(clientEmail, subject, text);
 }

@@ -7,7 +7,7 @@ interface Props {
   t: Record<string, string>;
 }
 
-const PIXIESET_USERNAME = 'miriamcamposphotography';
+const PIXIESET_USERNAME = 'miriamtellezphotography';
 const PIXIESET_BASE = `https://${PIXIESET_USERNAME}.pixieset.com`;
 
 type GalleryType = 'family' | 'grad' | 'wedding' | 'maternity' | 'love' | 'mini' | 'portrait';

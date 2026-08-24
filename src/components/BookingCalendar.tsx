@@ -302,8 +302,8 @@ ${safeNotes || 'Sin notas'}`;
 
         if (emailConfig.enableAutoResponse) {
           const autoSubject = isEn
-            ? (emailConfig.autoReplySubject || 'Your request has been received! - Miriam Campos Photography')
-            : (emailConfig.autoReplySubject || '¡Tu solicitud ha sido recibida con éxito! - Miriam Campos Photography');
+            ? (emailConfig.autoReplySubject || 'Your request has been received! - Miriam Tellez Photography')
+            : (emailConfig.autoReplySubject || '¡Tu solicitud ha sido recibida con éxito! - Miriam Tellez Photography');
           const autoMessage = isEn
             ? (emailConfig.autoReplyMessage || 'Thank you for your preference. We will contact you soon.')
             : (emailConfig.autoReplyMessage || 'Gracias por tu preferencia. Te contactaremos pronto.');
@@ -316,7 +316,7 @@ ${safeNotes || 'Sin notas'}`;
           const guestsLabel = isEn ? 'Guests' : 'Personas';
           const totalLabel = isEn ? 'Estimated total' : 'Total estimado';
           const totalVal = totalPrice > 0 ? formatPrice(totalPrice, lang) : (isEn ? 'To be defined' : 'A Definir');
-          const closing = isEn ? 'Best regards,\nMiriam Campos' : 'Saludos,\nMiriam Campos';
+          const closing = isEn ? 'Best regards,\nMiriam Tellez' : 'Saludos,\nMiriam Tellez';
 
           await sendFn(safeEmail, autoSubject, `${greeting} ${safeName},
 

@@ -1,4 +1,4 @@
-﻿import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { RefreshCw, UploadCloud } from 'lucide-react';
 import { SEOMetadata, ActiveLanguage } from '../types';
 import { sanitizeObject } from '../lib/sanitize';
@@ -179,7 +179,7 @@ function AdminSEOTab({ seo, onUpdateSeo, triggerAlert, lang }: AdminSEOTabProps)
               <div className="absolute top-3 left-3 bg-blue-500/95 text-white text-[9px] font-mono px-1.5 py-0.5 rounded font-semibold tracking-wider">og:image preview</div>
             </div>
             <div className="p-4 space-y-1 text-left bg-[#1C1C1E]">
-              <span className="text-[9px] font-mono text-white/40 uppercase tracking-widest block">MIRIAMCAMPOS-PHOTOGRAPHY.COM</span>
+              <span className="text-[9px] font-mono text-white/40 uppercase tracking-widest block">MIRIAMTELLEZ-PHOTOGRAPHY.COM</span>
               <h5 className="text-xs font-semibold text-white/95 truncate">{seoForm.ogTitle}</h5>
               <p className="text-[10px] text-white/50 leading-relaxed line-clamp-2">{seoForm.ogDescription}</p>
             </div>
@@ -188,7 +188,7 @@ function AdminSEOTab({ seo, onUpdateSeo, triggerAlert, lang }: AdminSEOTabProps)
           <div className="border border-white/10 bg-charcoal rounded-lg p-4 space-y-1 text-left">
             <span className="text-[9px] font-mono text-white/35 block">google.com/search</span>
             <span className="text-xs font-semibold text-[#8AB4F8] hover:underline cursor-pointer block">{seoForm.title}</span>
-            <span className="text-[10px] text-[#A6C8FF] font-mono block">miriamcampos-photography.com</span>
+            <span className="text-[10px] text-[#A6C8FF] font-mono block">miriamtellez-photography.com</span>
             <p className="text-[10px] text-white/60 leading-normal">{seoForm.description}</p>
           </div>
         </div>

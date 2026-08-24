@@ -100,7 +100,7 @@ serve(async (req) => {
     })
   }
 
-  const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "Miriam Campos <onboarding@resend.dev>"
+  const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "Miriam Tellez <onboarding@resend.dev>"
 
   let body: { to: string; subject: string; html?: string; text?: string }
   try {

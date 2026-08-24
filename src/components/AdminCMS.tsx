@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -215,7 +215,7 @@ export default function AdminCMS({
               const cName = newBooking.clientname || 'Alguien';
               triggerAlert(`📍 Nueva reserva de ${cName}!`);
               if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-                new Notification('Nueva Reserva - Miriam Campos Photography', {
+                new Notification('Nueva Reserva - Miriam Tellez Photography', {
                   body: `${cName} ha solicitado una sesión. Revisa la cola de reservas.`,
                   icon: '/favicon-32x32.png',
                 });
@@ -254,7 +254,7 @@ export default function AdminCMS({
               const cName = newMsg.name || 'Alguien';
               triggerAlert(`✉️ Nuevo mensaje de ${cName}!`);
               if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-                new Notification('Nuevo Mensaje - Miriam Campos Photography', {
+                new Notification('Nuevo Mensaje - Miriam Tellez Photography', {
                   body: `${cName} te ha escrito. Revisa la bandeja de entrada.`,
                   icon: '/favicon-32x32.png',
                 });
@@ -631,7 +631,7 @@ export default function AdminCMS({
     triggerAlert('✓ Guardado en sistema. Abriendo cliente de correo...');
     
     if (targetMsg) {
-      const subject = encodeURIComponent(`Re: ${targetMsg.subject || 'Consulta Miriam Campos Photography'}`);
+      const subject = encodeURIComponent(`Re: ${targetMsg.subject || 'Consulta Miriam Tellez Photography'}`);
       const body = encodeURIComponent(replyText.trim());
       const mailtoUrl = `mailto:${targetMsg.email}?subject=${subject}&body=${body}`;
       
@@ -809,7 +809,7 @@ export default function AdminCMS({
         <div className="space-y-6">
           <div className="flex items-center space-x-2 px-2">
             <Settings className="text-white/70" size={18} />
-            <span className="font-serif text-sm tracking-widest text-white/90 font-bold">MIRIAM CAMPOS BACKOFFICE</span>
+            <span className="font-serif text-sm tracking-widest text-white/90 font-bold">MIRIAM TELLEZ BACKOFFICE</span>
           </div>
 
           <div className="space-y-1.5">
@@ -1675,7 +1675,7 @@ export default function AdminCMS({
                                                     </button>
                                                   )}
                                                  {b.contractSignature && !b.contractPhotographerSignature && (
-                                                   <button onClick={() => onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, contractPhotographerSignature: 'Miriam Campos', contractPhotographerSignedAt: new Date().toISOString() } : book))} className="flex-1 px-3 py-2 bg-white/10 border border-white/10 text-white/70 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-white/15 transition-all">
+                                                   <button onClick={() => onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, contractPhotographerSignature: 'Miriam Tellez', contractPhotographerSignedAt: new Date().toISOString() } : book))} className="flex-1 px-3 py-2 bg-white/10 border border-white/10 text-white/70 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-white/15 transition-all">
                                                      {t('Firmar como Fotógrafa', 'Sign as Photographer', 'Assinar como Fotógrafa')}
                                                    </button>
                                                  )}
@@ -1915,7 +1915,7 @@ export default function AdminCMS({
                                 </button>
                               )}
                               {b.contractSignature && !b.contractPhotographerSignature && (
-                                <button onClick={() => onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, contractPhotographerSignature: 'Miriam Campos', contractPhotographerSignedAt: new Date().toISOString() } : book))} className="flex-1 px-3 py-2 bg-white/10 border border-white/10 text-white/70 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-white/15 transition-all">
+                                <button onClick={() => onUpdateBookings(bookings.map(book => book.id === b.id ? { ...book, contractPhotographerSignature: 'Miriam Tellez', contractPhotographerSignedAt: new Date().toISOString() } : book))} className="flex-1 px-3 py-2 bg-white/10 border border-white/10 text-white/70 rounded text-[9px] font-mono tracking-wider uppercase hover:bg-white/15 transition-all">
                                   {t('Firmar como Fotógrafa', 'Sign as Photographer', 'Assinar como Fotógrafa')}
                                 </button>
                               )}
@@ -2081,7 +2081,7 @@ export default function AdminCMS({
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setReplyText(`Estimado/a ${msg.name},\n\nMuchas gracias por contactar con Miriam Campos Photography. He recibido su consulta sobre "${msg.subject}" y estar encantada de atenderle.\n\nMe pondr en contacto con usted muy pronto para detallarle las opciones y coordinar una llamada de asesoramiento creativo.\n\nAtentamente,\nMiriam Campos\nMiriam Campos Photography`);
+                            setReplyText(`Estimado/a ${msg.name},\n\nMuchas gracias por contactar con Miriam Tellez Photography. He recibido su consulta sobre "${msg.subject}" y estar encantada de atenderle.\n\nMe pondr en contacto con usted muy pronto para detallarle las opciones y coordinar una llamada de asesoramiento creativo.\n\nAtentamente,\nMiriam Tellez\nMiriam Tellez Photography`);
                           }}
                           className="text-[9px] font-mono text-white/40 hover:text-white transition-all uppercase tracking-wider underline cursor-pointer"
                         >
@@ -2269,7 +2269,7 @@ export default function AdminCMS({
                             headers: await getAuthHeaders(),
                             body: JSON.stringify({
                               to: toEmail,
-                              subject: 'Correo de prueba — Miriam Campos Photography',
+                              subject: 'Correo de prueba — Miriam Tellez Photography',
                               html: '<p>Excelente! Tu sistema de correo está funcionando de manera impecable.</p>',
                               text: 'Excelente! Tu sistema de correo está funcionando de manera impecable.',
                             }),
@@ -2321,7 +2321,7 @@ export default function AdminCMS({
                         <label className="text-[10px] font-mono text-white/45 uppercase tracking-wider">Asunto del Correo de Respuesta</label>
                         <input
                           type="text"
-                          placeholder="Ej: Tu reserva ha sido recibida con éxito! - Miriam Campos Photography"
+                          placeholder="Ej: Tu reserva ha sido recibida con éxito! - Miriam Tellez Photography"
                           value={emailForm.autoReplySubject || ''}
                           onChange={(e) => setEmailForm({ ...emailForm, autoReplySubject: e.target.value })}
                           className="w-full bg-charcoal border border-stone rounded p-2.5 text-xs text-white placeholder-white/20 focus:outline-none focus:border-white/30"
@@ -2363,7 +2363,7 @@ export default function AdminCMS({
                             try {
                               triggerAlert('Enviando auto-respuesta de prueba a tu propio correo...');
                               const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-                              const testSubject = emailForm.autoReplySubject || 'Tu reserva ha sido recibida con éxito! - Miriam Campos Photography';
+                              const testSubject = emailForm.autoReplySubject || 'Tu reserva ha sido recibida con éxito! - Miriam Tellez Photography';
                               const testMessage = emailForm.autoReplyMessage || 'Hola, esto es un mensaje de prueba de respuesta automática.';
 
                               const res = await fetch(`${supabaseUrl}/functions/v1/send-email`, {
@@ -2947,7 +2947,7 @@ export default function AdminCMS({
                             onClick={() => {
                               setSendingToClient(account);
                               setSendEmailSubject(t('Tu galería fotográfica está lista', 'Your photo gallery is ready'));
-                              setSendEmailMessage(t('Hola {name},\n\nTu galería personal ya está disponible. Podés ver y descargar tus fotos en el siguiente enlace:\n\n{link}\n\nCualquier consulta no dudes en escribirme.\n\nSaludos,\nMiriam Campos', 'Hi {name},\n\nYour personal gallery is ready. You can view and download your photos at the following link:\n\n{link}\n\nIf you have any questions, feel free to reach out.\n\nBest regards,\nMiriam Campos'));
+                              setSendEmailMessage(t('Hola {name},\n\nTu galería personal ya está disponible. Podés ver y descargar tus fotos en el siguiente enlace:\n\n{link}\n\nCualquier consulta no dudes en escribirme.\n\nSaludos,\nMiriam Tellez', 'Hi {name},\n\nYour personal gallery is ready. You can view and download your photos at the following link:\n\n{link}\n\nIf you have any questions, feel free to reach out.\n\nBest regards,\nMiriam Tellez'));
                               setShowSendEmailModal(true);
                             }}
                             className="py-1.5 px-3 bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 rounded text-[9px] font-mono uppercase tracking-wider flex items-center space-x-1 cursor-pointer border border-blue-500/20 transition-all"
@@ -3219,7 +3219,7 @@ export default function AdminCMS({
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center space-x-2">
                   <Settings className="text-white/70" size={18} />
-                  <span className="font-serif text-sm tracking-widest text-white/90 font-bold">MIRIAM CAMPOS CMS</span>
+                  <span className="font-serif text-sm tracking-widest text-white/90 font-bold">MIRIAM TELLEZ CMS</span>
                 </div>
                 <button
                   onClick={() => setMobileSidebarOpen(false)}

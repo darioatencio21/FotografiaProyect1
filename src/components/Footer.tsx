@@ -56,17 +56,17 @@ function Footer({ onSetView, lang }: FooterProps) {
           <div className="flex items-center space-x-3">
             <Logo size="sm" />
             <span className="font-serif text-sm font-semibold tracking-[0.25em] text-white uppercase">
-              Miriam Campos
+              Miriam Tellez
             </span>
           </div>
           <p className="text-xs text-white/70 leading-relaxed max-w-sm">
             Fine-Art and high-end editorial photography commissions. Captured under golden proportions, rendering raw emotion with absolute Leica and Hasselblad precision.
           </p>
           <div className="flex space-x-4 pt-2">
-            <a href={SOCIAL.instagram} target="_blank" rel="noopener noreferrer" aria-label={`${lang === 'es' ? 'Instagram de Miriam Campos Photography' : 'Instagram of Miriam Campos Photography'}`} className="text-white/65 hover:text-white transition-colors">
+            <a href={SOCIAL.instagram} target="_blank" rel="noopener noreferrer" aria-label={`${lang === 'es' ? 'Instagram de Miriam Tellez Photography' : 'Instagram of Miriam Tellez Photography'}`} className="text-white/65 hover:text-white transition-colors">
               <Instagram size={16} />
             </a>
-            <a href={SOCIAL.facebook} target="_blank" rel="noopener noreferrer" aria-label={`${lang === 'es' ? 'Facebook de Miriam Campos Photography' : 'Facebook of Miriam Campos Photography'}`} className="text-white/65 hover:text-white transition-colors">
+            <a href={SOCIAL.facebook} target="_blank" rel="noopener noreferrer" aria-label={`${lang === 'es' ? 'Facebook de Miriam Tellez Photography' : 'Facebook of Miriam Tellez Photography'}`} className="text-white/65 hover:text-white transition-colors">
               <Facebook size={16} />
             </a>
           </div>

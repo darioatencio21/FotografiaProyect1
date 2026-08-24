@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -887,7 +887,7 @@ export default function App() {
 
         try {
           const isEn = lang === 'en';
-          const photographerName = sanitizeString(profile.name || 'Miriam Campos');
+          const photographerName = sanitizeString(profile.name || 'Miriam Tellez');
           const subject = isEn
             ? `New contact message: ${safeSubject || 'Inquiry'}`
             : `Nuevo mensaje de contacto: ${safeSubject || 'Consulta'}`;
@@ -909,8 +909,8 @@ ${safeMsg}`;
 
           if (emailConfig.enableAutoResponse) {
             const autoSubject = isEn
-              ? (emailConfig.autoReplySubject || 'Your message has been received! - Miriam Campos Photography')
-              : (emailConfig.autoReplySubject || 'Tu mensaje ha sido recibido! - Miriam Campos Photography');
+              ? (emailConfig.autoReplySubject || 'Your message has been received! - Miriam Tellez Photography')
+              : (emailConfig.autoReplySubject || 'Tu mensaje ha sido recibido! - Miriam Tellez Photography');
             const autoMessage = isEn
               ? (emailConfig.autoReplyMessage || 'Thank you for contacting us. We will get back to you shortly.')
               : (emailConfig.autoReplyMessage || 'Gracias por contactarte con nosotros. Responderemos a la brevedad.');
@@ -1447,7 +1447,7 @@ ${photographerName}`);
                   href={SOCIAL.instagram}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label={lang === 'es' ? 'Instagram de Miriam Campos Photography' : 'Instagram of Miriam Campos Photography'}
+                  aria-label={lang === 'es' ? 'Instagram de Miriam Tellez Photography' : 'Instagram of Miriam Tellez Photography'}
                   className="group inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#FCAF45] rounded-xl text-white font-mono text-sm tracking-widest uppercase font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
                 >
                   <Instagram size={22} />
@@ -2158,8 +2158,8 @@ ${photographerName}`);
                         <h4 className="font-serif text-lg text-white font-semibold">{lang === 'es' ? 'Mensaje Enviado' : 'Message Dispatched'}</h4>
                         <p className="text-xs text-white/50 max-w-sm mx-auto leading-relaxed">
                           {lang === 'es'
-                            ? 'Tu solicitud ha llegado al estudio de Miriam Campos. Responderemos a tu correo en menos de 24 horas hábiles.'
-                            : 'Your request has been filed directly to the Miriam Campos studio. We will reply to your registered email within 24 business hours.'}
+                            ? 'Tu solicitud ha llegado al estudio de Miriam Tellez. Responderemos a tu correo en menos de 24 horas hábiles.'
+                            : 'Your request has been filed directly to the Miriam Tellez studio. We will reply to your registered email within 24 business hours.'}
                         </p>
                         {contactEmailWarning && (
                           <p className="text-[10px] text-amber-400/90 max-w-sm mx-auto leading-relaxed mt-2">{contactEmailWarning}</p>
@@ -2345,7 +2345,7 @@ ${photographerName}`);
                   <ShieldCheck size={24} />
                 </div>
                 <h4 className="font-serif text-xl text-white font-semibold">CMS Authenticator</h4>
-                <p className="text-[10px] font-mono text-white/45 uppercase tracking-widest">MIRIAM CAMPOS SECURITY GATE</p>
+                <p className="text-[10px] font-mono text-white/45 uppercase tracking-widest">MIRIAM TELLEZ SECURITY GATE</p>
               </div>
 
               <form onSubmit={handleAdminAuthSubmit} className="space-y-4 text-left">

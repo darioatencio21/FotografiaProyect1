@@ -18,7 +18,7 @@ export const Logo: React.FC<LogoProps> = ({ className = '', size = 'md' }) => {
     <div className={`relative flex items-center justify-center select-none ${className}`}>
       <img
         src="/logo.png"
-        alt="Miriam Campos Photography"
+        alt="Miriam Tellez Photography"
         className={`${sizeClasses[size]} object-contain drop-shadow-[0_2px_10px_rgba(189,133,122,0.15)] transition-all duration-700 hover:scale-105`}
       />
     </div>

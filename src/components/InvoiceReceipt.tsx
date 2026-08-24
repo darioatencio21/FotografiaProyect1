@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CheckCircle2, Clock3, FileText, Printer, Download, Loader2 } from 'lucide-react';
 import { ActiveLanguage, Invoice } from '../types';
 import { TRANSLATIONS } from '../data/mockData';
@@ -96,7 +96,7 @@ const InvoiceReceipt: React.FC<InvoiceReceiptProps> = ({ invoice, lang, compact 
 <div class="header">
 <div class="header-left">
 <div class="label">${t.invoiceTitle}</div>
-<h2>Miriam Campos</h2>
+<h2>Miriam Tellez</h2>
 <p class="sub">Fine Art Photography Studio</p>
 </div>
 <div class="header-right">
@@ -166,7 +166,7 @@ ${invoice.stripeTxHash ? `<p style="font-family:monospace;font-size:8px;word-bre
                 <FileText size={12} />
                 <span className="text-[8px] font-sans font-semibold tracking-[0.3em] uppercase">{t.invoiceTitle}</span>
               </div>
-              <h2 className="font-serif text-[22px] leading-tight tracking-wide text-[#2D2A28]">Miriam Campos</h2>
+              <h2 className="font-serif text-[22px] leading-tight tracking-wide text-[#2D2A28]">Miriam Tellez</h2>
               <p className="text-[10px] text-[#8C8076] font-sans tracking-wide">Fine Art Photography Studio</p>
             </div>
             <div className="text-right shrink-0 space-y-2">

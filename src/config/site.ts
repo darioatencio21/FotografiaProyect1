@@ -8,9 +8,9 @@
 
 import type { ActiveLanguage } from '../types';
 
-export const BRAND_NAME = 'Miriam Campos Photography';
+export const BRAND_NAME = 'Miriam Tellez Photography';
 /** Short mark used in the logo / navbar wordmark (kept consistent with existing UI). */
-export const LOGO_MARK = 'Miriam Campos';
+export const LOGO_MARK = 'Miriam Tellez';
 
 /** Single visible currency for every price on the site. */
 export const CURRENCY = 'USD';
@@ -26,7 +26,7 @@ export function formatPrice(amount: number, lang: ActiveLanguage): string {
 }
 
 export const CONTACT = {
-  email: 'studio@miriamcamposphotography.com',
+  email: 'studio@miriamtellezphotography.com',
   /** Real phone / public address can be added here when provided by the owner. */
   phone: null as string | null,
   address: null as string | null,
@@ -35,12 +35,12 @@ export const CONTACT = {
 };
 
 /**
- * Social profiles point at the Miriam Campos handles.
+ * Social profiles point at the Miriam Tellez handles.
  */
 export const SOCIAL = {
-  instagram: 'https://www.instagram.com/miriamcamposphotography/',
-  instagramHandle: '@miriamcamposphotography',
-  instagramUser: 'miriamcamposphotography',
+  instagram: 'https://www.instagram.com/miriamtellezphotography/',
+  instagramHandle: '@miriamtellezphotography',
+  instagramUser: 'miriamtellezphotography',
   /** Empty until the owner confirms the official Facebook URL. */
   facebook: '',
   pinterest: '',

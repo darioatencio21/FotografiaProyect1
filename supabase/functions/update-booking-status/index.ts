@@ -85,14 +85,14 @@ serve(async (req) => {
 
     if (sendConfirmation) {
       const resendKey = Deno.env.get("RESEND_API_KEY")
-      const fromEmail = Deno.env.get("FROM_EMAIL") || "Miriam Campos <onboarding@resend.dev>"
+      const fromEmail = Deno.env.get("FROM_EMAIL") || "Miriam Tellez <onboarding@resend.dev>"
       const photographerEmail = Deno.env.get("PHOTOGRAPHER_EMAIL") || ""
 
       if (resendKey) {
         const packageName = booking.packageName || "Photography Session"
         const depositPaid = Number(booking.depositAmount) || 0
 
-        const clientSubject = "Booking Confirmed — Miriam Campos Photography"
+        const clientSubject = "Booking Confirmed — Miriam Tellez Photography"
         const clientText = `Hi ${booking.clientName},
 
 Your booking for ${packageName} on ${booking.date} at ${booking.timeSlot} has been confirmed.
@@ -100,8 +100,8 @@ Your booking for ${packageName} on ${booking.date} at ${booking.timeSlot} has be
 You paid $${depositPaid}. We look forward to seeing you!
 
 Best regards,
-Miriam Campos
-Miriam Campos Photography`
+Miriam Tellez
+Miriam Tellez Photography`
 
         try {
           await fetch("https://api.resend.com/emails", {

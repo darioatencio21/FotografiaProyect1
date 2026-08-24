@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -129,7 +129,7 @@ function Header({
       >
         <Logo size="xs" />
         <span id="header-logo" className="font-serif text-[9px] sm:text-[11px] lg:text-[13px] font-semibold tracking-[0.15em] sm:tracking-[0.2em] lg:tracking-[0.25em] text-white group-hover:text-white transition-colors duration-500 whitespace-nowrap uppercase truncate max-w-[120px] sm:max-w-none">
-          Miriam Campos
+          Miriam Tellez
         </span>
       </div>
 
@@ -353,7 +353,7 @@ function Header({
               <div className="text-center flex flex-col items-center justify-center pt-2">
                 <Logo size="xs" className="mb-2 opacity-60 [&>img]:h-10 [&>img]:w-10" />
                 <span className="font-serif text-[10px] font-bold tracking-[0.2em] text-white/30 uppercase">
-                  Miriam Campos Photography
+                  Miriam Tellez Photography
                 </span>
               </div>
             </div>

@@ -14,13 +14,13 @@ export default function LegalViews({ type, lang, onBack }: LegalViewProps) {
     privacy: {
       title: isEs ? 'Política de Privacidad' : 'Privacy Policy',
       subtitle: isEs 
-        ? 'Estándares de confidencialidad y protección de datos de Miriam Campos Studio.' 
-        : 'Confidentiality and data protection standards of Miriam Campos Studio.',
+        ? 'Estándares de confidencialidad y protección de datos de Miriam Tellez Studio.' 
+        : 'Confidentiality and data protection standards of Miriam Tellez Studio.',
       lastUpdated: isEs ? 'Última actualización: 13 de Julio, 2026' : 'Last updated: July 13, 2026',
       sections: isEs ? [
         {
           title: '1. Compromiso con la Confidencialidad',
-          text: 'En Miriam Campos Studio, entendemos que las fotografías no son solo imágenes, sino recuerdos preciados e invaluables activos artísticos. Nos comprometemos solemnemente a proteger la privacidad de cada sesión, asegurando que sus retratos, bodas y campañas comerciales sean tratados con la máxima discreción y seguridad.'
+          text: 'En Miriam Tellez Studio, entendemos que las fotografías no son solo imágenes, sino recuerdos preciados e invaluables activos artísticos. Nos comprometemos solemnemente a proteger la privacidad de cada sesión, asegurando que sus retratos, bodas y campañas comerciales sean tratados con la máxima discreción y seguridad.'
         },
         {
           title: '2. Información que Recopilamos',
@@ -45,7 +45,7 @@ export default function LegalViews({ type, lang, onBack }: LegalViewProps) {
       ] : [
         {
           title: '1. Commitment to Confidentiality',
-          text: 'At Miriam Campos Studio, we understand that captured photographs are not just images, but cherished memories and invaluable artistic assets. We solemnly commit to protecting the privacy of every session, ensuring that your portraits, weddings, and commercial campaigns are treated with the utmost discretion and security.'
+          text: 'At Miriam Tellez Studio, we understand that captured photographs are not just images, but cherished memories and invaluable artistic assets. We solemnly commit to protecting the privacy of every session, ensuring that your portraits, weddings, and commercial campaigns are treated with the utmost discretion and security.'
         },
         {
           title: '2. Information We Collect',
@@ -72,8 +72,8 @@ export default function LegalViews({ type, lang, onBack }: LegalViewProps) {
     terms: {
       title: isEs ? 'Términos de Servicio' : 'Termás of Service',
       subtitle: isEs 
-        ? 'Acuerdo legal para la contratación de servicios de bellas artes de Miriam Campos.' 
-        : 'Legal agreement for commissioning fine art photography services by Miriam Campos.',
+        ? 'Acuerdo legal para la contratación de servicios de bellas artes de Miriam Tellez.' 
+        : 'Legal agreement for commissioning fine art photography services by Miriam Tellez.',
       lastUpdated: isEs ? 'Última actualización: 13 de Julio, 2026' : 'Last updated: July 13, 2026',
       sections: isEs ? [
         {
@@ -86,11 +86,11 @@ export default function LegalViews({ type, lang, onBack }: LegalViewProps) {
         },
         {
           title: '3. Derechos de Autor y Licencia de Uso',
-          text: 'Miriam Campos conserva todos los derechos morales y de propiedad intelectual sobre todas las fotografías. Al recibir la galería final, los clientes reciben una licencia indefinida para uso personal, impresión privada y uso en redes sociales. Para campañas comerciales, se firmará un contrato de licencia específico.'
+          text: 'Miriam Tellez conserva todos los derechos morales y de propiedad intelectual sobre todas las fotografías. Al recibir la galería final, los clientes reciben una licencia indefinida para uso personal, impresión privada y uso en redes sociales. Para campañas comerciales, se firmará un contrato de licencia específico.'
         },
         {
           title: '4. Estilo Artístico y Postprocesado',
-          text: 'Al contratar el estudio, usted reconoce que las fotografías se capturan y editan bajo la firma artística y los criterios cromáticos de Miriam Campos. Los archivos RAW son etapas intermedias de producción creativa y no se entregan al cliente final, garantizando solo obras maestras bellamente terminadas.'
+          text: 'Al contratar el estudio, usted reconoce que las fotografías se capturan y editan bajo la firma artística y los criterios cromáticos de Miriam Tellez. Los archivos RAW son etapas intermedias de producción creativa y no se entregan al cliente final, garantizando solo obras maestras bellamente terminadas.'
         },
         {
           title: '5. Plazos de Entrega Premium',
@@ -111,11 +111,11 @@ export default function LegalViews({ type, lang, onBack }: LegalViewProps) {
         },
         {
           title: '3. Copyright & Usage License',
-          text: 'Miriam Campos retains full moral rights and intellectual property copyright over all photographs. Upon delivery of the final gallery, clients are granted an indefinite license for personal use, private printing, and social media sharing. For commercial brand campaigns or editorial press syndication, a specific licensing contract will be signed.'
+          text: 'Miriam Tellez retains full moral rights and intellectual property copyright over all photographs. Upon delivery of the final gallery, clients are granted an indefinite license for personal use, private printing, and social media sharing. For commercial brand campaigns or editorial press syndication, a specific licensing contract will be signed.'
         },
         {
           title: '4. Artistic Style & Post-Processing',
-          text: 'By booking the studio, you acknowledge and agree that the photographs are captured and edited under the firm artistic signature and color criteria of Miriam Campos. Raw files (RAW) are intermediate stages of creative production and are not delivered to the final client, ensuring only beautifully finished and high-resolution masterpieces are delivered.'
+          text: 'By booking the studio, you acknowledge and agree that the photographs are captured and edited under the firm artistic signature and color criteria of Miriam Tellez. Raw files (RAW) are intermediate stages of creative production and are not delivered to the final client, ensuring only beautifully finished and high-resolution masterpieces are delivered.'
         },
         {
           title: '5. Premium Delivery Times',

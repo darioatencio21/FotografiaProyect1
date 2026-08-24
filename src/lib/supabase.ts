@@ -10,7 +10,7 @@ export const isSupabaseConfigured = Boolean(
 
 if (!isSupabaseConfigured) {
   console.warn(
-    '[Miriam Campos] Supabase not configured — running in offline/demo mode. ' +
+    '[Miriam Tellez] Supabase not configured — running in offline/demo mode. ' +
     'Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your Vercel environment variables.'
   );
 }

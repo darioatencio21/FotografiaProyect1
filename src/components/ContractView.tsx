@@ -68,7 +68,7 @@ export default function ContractView({ booking, lang, t, mode = 'view', onClient
 '<div class="grid2">' +
 '<div>' +
 `<p style="font-size:9px;text-transform:uppercase;letter-spacing:0.15em;color:#B58A4A;margin:0 0 4px;font-weight:600">${pl}</p>` +
-'<p style="margin:0;font-size:13px;color:#2D2A28">Miriam Campos</p>' +
+'<p style="margin:0;font-size:13px;color:#2D2A28">Miriam Tellez</p>' +
 `<p style="margin:0;font-size:11px;color:#8C8076">${CONTACT.email}</p>` +
 '</div>' +
 '<div style="text-align:right">' +
@@ -188,7 +188,7 @@ clauses.map(c => `<div class="clause"><h4>${c.title}</h4><p>${c.text}</p></div>`
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs font-mono text-white/70">
         <div className="space-y-1">
           <p className="text-white/70 font-semibold uppercase tracking-widest text-[10px]">{lang === 'es' ? 'Fotógrafa' : 'Photographer'}</p>
-          <p>Miriam Campos</p>
+          <p>Miriam Tellez</p>
           <p>{CONTACT.email}</p>
           <p>(559) 756-1144</p>
         </div>

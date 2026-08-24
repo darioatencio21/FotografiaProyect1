@@ -553,14 +553,14 @@ export const INITIAL_MESSAGES: Message[] = [
 ];
 
 export const INITIAL_SEO: SEOMetadata = {
-  title: 'Miriam Campos Photography | Premium Luxury Fine-Art Photography & Editorial Studio',
+  title: 'Miriam Tellez Photography | Premium Luxury Fine-Art Photography & Editorial Studio',
   description: 'Museum-grade editorial, portrait, and luxury wedding photography captured on medium-format Leica & Hasselblad systemás. Crafted for high-end fashion and emotional preservation.',
-  ogTitle: 'Miriam Campos Photography Portfolio | High-End Fine-Art & Editorial Photography',
+  ogTitle: 'Miriam Tellez Photography Portfolio | High-End Fine-Art & Editorial Photography',
   ogDescription: 'Experience a cinematic digital art gallery. Booking premium portrait, fashion editorial, and international destination wedding commissions.',
   ogImage: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=90&w=1200',
   twitterCard: 'summary_large_image',
   keywords: 'luxury wedding photographer, fine art portraits, fashion editorial photography, Hasselblad portrait, Leica wedding, architectural photography, premium commercial, Awwwards portfolio',
-  robotsText: 'User-agent: *\nAllow: /\nSitemap: https://miriamcampos-photography.com/sitemap.xml',
+  robotsText: 'User-agent: *\nAllow: /\nSitemap: https://miriamtellez-photography.com/sitemap.xml',
   heroImageLeft: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=85&w=1600',
   heroImageRight: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&q=85&w=1600'
 };
@@ -582,21 +582,21 @@ export const INITIAL_BOOKING_CONFIG: BookingConfig = {
 export const INITIAL_EMAIL_CONFIG: EmailConfig = {
   receiverEmail: '',
   enableAutoResponse: false,
-  autoReplySubject: 'Tu reserva ha sido recibida con éxito! - Miriam Campos Photography',
-  autoReplyMessage: 'Hola,\n\nMuchas gracias por reservar tu sesión fotográfica con nosotros. Hemos recibido tus datos correctamente y tu espacio ha sido bloqueado en nuestro calendario.\n\nEn las próximas horas nos pondremos en contacto contigo para coordinar los detalles finales, locación y responder cualquier consulta adicional.\n\nEstamos muy emocionados de crear arte juntos!\n\nCon cariño,\nEl equipo de Miriam Campos Photography.'
+  autoReplySubject: 'Tu reserva ha sido recibida con éxito! - Miriam Tellez Photography',
+  autoReplyMessage: 'Hola,\n\nMuchas gracias por reservar tu sesión fotográfica con nosotros. Hemos recibido tus datos correctamente y tu espacio ha sido bloqueado en nuestro calendario.\n\nEn las próximas horas nos pondremos en contacto contigo para coordinar los detalles finales, locación y responder cualquier consulta adicional.\n\nEstamos muy emocionados de crear arte juntos!\n\nCon cariño,\nEl equipo de Miriam Tellez Photography.'
 };
 
 export const INITIAL_PROFILE: PhotographerProfile = {
-  name: 'Miriam Campos',
+  name: 'Miriam Tellez',
   avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=85&w=800',
-  title: 'MIRIAM CAMPOS STUDIO HEAD PHOTOGRAPHER',
+  title: 'MIRIAM TELLEZ STUDIO HEAD PHOTOGRAPHER',
   preferredCamera: 'Hasselblad X2D 100C & Leica SL3',
   preferredLens: 'XCD 90mm f/2.5 V & Noctilux-M 50 f/0.95',
   aboutTitle_es: 'LA FILOSOFÍA DETRÁS DE LA LENTE',
   aboutTitle_en: 'THE PHILOSOPHY BEHIND THE GLASS',
-  aboutText1_es: 'Soy Miriam Campos, fotógrafa y directora de arte de bellas artes, dedicada a congelar el tiempo bajo el estándar de Leica y Hasselblad. Entiendo la luz no solo como iluminación, sino como el medio supremo para esculpir emociones y narrar historias silenciosas con proporciones áureas.',
+  aboutText1_es: 'Soy Miriam Tellez, fotógrafa y directora de arte de bellas artes, dedicada a congelar el tiempo bajo el estándar de Leica y Hasselblad. Entiendo la luz no solo como iluminación, sino como el medio supremo para esculpir emociones y narrar historias silenciosas con proporciones áureas.',
   aboutText2_es: 'Con más de 15 años documentando bodas editoriales de alta costura, campañas comerciales internacionales y retratos íntimos para agencias de modelos de élite, mi trabajo busca un minimalismo elegante, abundante espacio en blanco y simetría geométrica.',
-  aboutText1_en: 'I am Miriam Campos, a fine art photographer and creative director dedicated to freezing time through the pristine optics of Leica and Hasselblad. I understand light not as simple exposure, but as the supreme medium to sculpt emotion and weave silent stories of golden ratio symmetry.',
+  aboutText1_en: 'I am Miriam Tellez, a fine art photographer and creative director dedicated to freezing time through the pristine optics of Leica and Hasselblad. I understand light not as simple exposure, but as the supreme medium to sculpt emotion and weave silent stories of golden ratio symmetry.',
   aboutText2_en: 'With over 15 years documenting haute-couture destination weddings, international commercial campaigns, and intimate editorial model books, my work strives for elegant minimalism, generous negative space, and absolute geometric structure.'
 };
 
@@ -918,7 +918,7 @@ export const TRANSLATIONS = {
     pixiesetSearchBtn: 'Ir a mi galería →',
 
     contractTitle: 'CONTRATO DE SERVICIOS FOTOGRFICOS',
-    contractSubtitle: 'Acuerdo entre Miriam Campos Photography y el Cliente',
+    contractSubtitle: 'Acuerdo entre Miriam Tellez Photography y el Cliente',
     contractBride: 'Novia',
     contractGroom: 'Novio',
     contractBrideEmail: 'Correo de la Novia',
@@ -968,7 +968,7 @@ export const TRANSLATIONS = {
     contractAdminSetAmounts: 'Definir Montos',
     contractSaveAmounts: 'Guardar Montos',
     contractSessionTitle: 'CONTRATO DE SERVICIOS FOTOGRFICOS',
-    contractSessionSubtitle: 'Acuerdo entre Miriam Campos Photography y el Cliente',
+    contractSessionSubtitle: 'Acuerdo entre Miriam Tellez Photography y el Cliente',
     contractClient: 'Cliente',
     contractClientEmail: 'Correo Electrónico',
     contractClientPhone: 'Teléfono',
@@ -1121,7 +1121,7 @@ export const TRANSLATIONS = {
     pixiesetSearchBtn: 'Go to my gallery →',
 
     contractTitle: 'PHOTOGRAPHY SERVICES CONTRACT',
-    contractSubtitle: 'Agreement between Miriam Campos Photography and the Client',
+    contractSubtitle: 'Agreement between Miriam Tellez Photography and the Client',
     contractBride: 'Bride',
     contractGroom: 'Groom',
     contractBrideEmail: 'Bride Email',
@@ -1171,7 +1171,7 @@ export const TRANSLATIONS = {
     contractAdminSetAmounts: 'Set Amounts',
     contractSaveAmounts: 'Save Amounts',
     contractSessionTitle: 'PHOTOGRAPHY SERVICES CONTRACT',
-    contractSessionSubtitle: 'Agreement between Miriam Campos Photography and the Client',
+    contractSessionSubtitle: 'Agreement between Miriam Tellez Photography and the Client',
     contractClient: 'Client',
     contractClientEmail: 'Email',
     contractClientPhone: 'Phone',
