@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.2](https://github.com/darioatencio21/FotografiaProyect1/compare/v1.2.1...v1.2.2) (2026-08-24)
+
+
+### Bug Fixes
+
+* bump transitive nanoid to 3.3.18 (Dependabot alert) ([#48](https://github.com/darioatencio21/FotografiaProyect1/issues/48)) ([c218124](https://github.com/darioatencio21/FotografiaProyect1/commit/c218124cfaca0755bd4e123aacbefb08aeff0a9a))
+
 ## [1.2.1](https://github.com/darioatencio21/FotografiaProyect1/compare/v1.2.0...v1.2.1) (2026-08-01)
 
 
