@@ -999,6 +999,8 @@ ${photographerName}`);
     navigateTo('home');
   };
 
+  const openAdminLogin = useCallback(() => setShowAdminLogin(true), []);
+
   // The CMS access dialog opens automatically when /?view=admin is reached without
   // a session (direct URL access — there is no public Admin link anymore).
   useEffect(() => {
